@@ -58,13 +58,13 @@ async function main() {
 
   await prisma.agent.upsert({
     where: { slug: "sales-assistant" },
-    update: {},
+    update: { model: "qwen/qwen3-30b-a3b-instruct-2507" },
     create: {
       slug: "sales-assistant",
       name: "Sales Assistant",
       description: "Ayuda a vender, consulta stock y procesa compras",
       systemPrompt: "Eres asistente de ventas de ACS. Usa searchProducts, checkStock y processPurchase para ayudar.",
-      model: "gpt-4o-mini",
+      model: "qwen/qwen3-30b-a3b-instruct-2507",
       isActive: true,
       storeId,
     },

@@ -25,6 +25,7 @@
         "@fullcalendar/react": "^6.1.20",
         "@fullcalendar/timegrid": "^6.1.20",
         "@internationalized/date": "^3.12.2",
+        "@openrouter/ai-sdk-provider": "^2.9.1",
         "@prisma/adapter-pg": "^7.10.0",
         "@prisma/client": "^7.10.0",
         "@tailgrids/icons": "^2.0.0",
