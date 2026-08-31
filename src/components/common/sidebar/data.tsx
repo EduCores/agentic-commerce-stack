@@ -5,10 +5,34 @@ import {
   TableIcon,
   UserIcon,
   Widget4Icon,
-  WindowIcon
+  WindowIcon,
+  ThreeDots,
 } from "./icon";
 
 export const NAV_DATA = [
+  {
+    label: "AGENTIC COMMERCE",
+    items: [
+      {
+        title: "Workflows",
+        icon: <Widget4Icon />,
+        url: "/workflows",
+        items: [],
+      },
+      {
+        title: "Agents",
+        icon: <UserIcon />,
+        url: "/agents",
+        items: [],
+      },
+      {
+        title: "Store",
+        icon: <TableIcon />,
+        url: "/store",
+        items: [],
+      },
+    ],
+  },
   {
     label: "MAIN MENU",
     items: [

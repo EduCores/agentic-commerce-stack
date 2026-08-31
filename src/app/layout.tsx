@@ -31,8 +31,8 @@ export default function RootLayout({
       lang="en"
       className={cn("h-full overflow-hidden antialiased", geistInter.className)}
     >
-      <body className="h-full overflow-hidden bg-background-gray-secondary_alt_2">
-        <ThemeProvider defaultTheme="light" enableSystem>
+      <body className="h-full overflow-hidden bg-background-gray-secondary_alt_2" suppressHydrationWarning>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <Providers>{children}</Providers>
         </ThemeProvider>
         <Toaster />

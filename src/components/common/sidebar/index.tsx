@@ -4,10 +4,9 @@ import { buttonStyles } from '@/components/tailgrids/core/button';
 import { CollapsibleGroup } from '@/components/tailgrids/core/collapsible';
 import { cn } from '@/utils/cn';
 import { Logo, LogoWithText, LogoWithTextDark } from '@/utils/icon';
-import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Key } from 'react-aria-components';
 import { NAV_DATA } from './data';
 import { CloseIcon, SidebarExpandedIcon, ThreeDots } from './icon';
@@ -26,7 +25,8 @@ export default function Sidebar({
     onItemClick?: () => void;
 }) {
     const pathname = usePathname();
-    const { theme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
 
     // Compute which group should be open based on the current route
     const activeGroupKey = useMemo(
@@ -49,15 +49,19 @@ export default function Sidebar({
                         : 'flex-col justify-center gap-4',
                 )}
             >
-                <Link href='/'>
+                <Link href='/' suppressHydrationWarning>
                     {isSidebarOpen ? (
-                        <>
-                            {theme === 'light' ? (
+                        <span suppressHydrationWarning className="flex items-center">
+                            {/* Evita hydration mismatch: renderiza ambos y alterna por CSS */}
+                            <span className="dark:hidden">
                                 <LogoWithText />
-                            ) : (
+                            </span>
+                            <span className="hidden dark:block">
                                 <LogoWithTextDark />
-                            )}
-                        </>
+                            </span>
+                            {/* Fallback SSR: si no hay mounted, muestra light */}
+                            {!mounted && <span className="sr-only">ACS</span>}
+                        </span>
                     ) : (
                         <Logo />
                     )}
@@ -129,30 +133,7 @@ export default function Sidebar({
                 </CollapsibleGroup>
             </nav>
 
-            {/* Footer — only visible when expanded */}
-            {isSidebarOpen && (
-                <div className='px-4 py-4'>
-                    <div className='rounded-2xl bg-background-gray-primary px-4 py-5 text-center'>
-                        <p className='mb-2 leading-6 font-semibold text-text-primary'>
-                            Upgrade to Pro
-                        </p>
-                        <small className='text-sm leading-5 tracking-[-0.15px] text-text-tertiary'>
-                            Get all dashboard and 200+ essential UI elements
-                        </small>
-                        <Link
-                            href='https://nextadmin.co/pricing'
-                            className={buttonStyles({
-                                size: 'lg',
-                                className: 'mt-4 h-10 w-full bg-brand-500',
-                            })}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                        >
-                            Upgrade to Pro
-                        </Link>
-                    </div>
-                </div>
-            )}
+            {/* ACS — footer promo eliminado (requisito: sin publicidad Pro) */}
         </div>
     );
 }

@@ -40,6 +40,7 @@ export default function OtpInput({
     if (value !== undefined) {
       const digits = value.split("").slice(0, digitLength);
       const paddedDigits = [...digits, ...Array(digitLength - digits.length).fill("")];
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- controlled sync from parent value
       setOtp((prev) => {
         if (prev.join("") === paddedDigits.join("")) {
           return prev;
@@ -50,9 +51,13 @@ export default function OtpInput({
   }, [value, digitLength]);
 
   // Sync local state changes back to parent onChange
+  // Note: calling onChange from effect is intentional for controlled OTP sync
+  const prevOtpRef = React.useRef(otp.join(""));
   useEffect(() => {
     if (onChange) {
       const otpValue = otp.join("");
+      if (prevOtpRef.current === otpValue) return;
+      prevOtpRef.current = otpValue;
       if (value !== undefined && otpValue === value) {
         return;
       }

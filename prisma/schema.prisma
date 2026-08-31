@@ -1,0 +1,263 @@
+// ACS — Agentic Commerce Stack
+// Prisma 7: datasource url en prisma7.config.ts via env(DATABASE_URL)
+// Genera con: npx prisma generate && npx prisma migrate dev
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────── Store & Catalog ─────────
+model StoreConnection {
+  id            String   @id @default(cuid())
+  name          String
+  provider      String   // shopify | woocommerce | magento | custom | mock
+  domain        String?
+  apiKey        String?  // encrypted at app layer
+  apiSecret     String?
+  webhookSecret String?
+  isActive      Boolean  @default(true)
+  config        Json?    // provider-specific JSON
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  products      Product[]
+  orders        Order[]
+  agents        Agent[]
+  workflows     WorkflowDefinition[]
+
+  @@index([provider])
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  storeId         String
+  store           StoreConnection @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  externalId      String?  // id en Shopify/Woo etc
+  sku             String
+  title           String
+  description     String?
+  price           Decimal  @db.Decimal(10, 2)
+  compareAtPrice  Decimal? @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  stock           Int      @default(0)
+  reservedStock   Int      @default(0)
+  isActive        Boolean  @default(true)
+  images          Json?    // string[]
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  orderItems      OrderItem[]
+
+  @@unique([storeId, sku])
+  @@index([storeId])
+  @@index([sku])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  email     String?
+  phone     String?
+  name      String?
+  externalId String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+// ───────── Orders ─────────
+model Order {
+  id              String      @id @default(cuid())
+  storeId         String
+  store           StoreConnection @relation(fields: [storeId], references: [id])
+  customerId      String?
+  customer        Customer?   @relation(fields: [customerId], references: [id])
+  externalId      String?
+  status          OrderStatus @default(PENDING)
+  currency        String      @default("USD")
+  subtotal        Decimal     @db.Decimal(10, 2)
+  tax             Decimal     @default(0) @db.Decimal(10, 2)
+  shipping        Decimal     @default(0) @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  paymentStatus   PaymentStatus @default(PENDING)
+  fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
+  source          String?     // eve | manual | api | whatsapp
+  workflowRunId   String?
+  metadata        Json?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+  stepLogs        OrderStepLog[]
+  workflowRuns    WorkflowRun[]
+
+  @@index([storeId])
+  @@index([status])
+  @@index([workflowRunId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  total     Decimal @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum OrderStatus {
+  PENDING
+  RESERVED
+  PAID
+  FULFILLED
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PARTIAL
+  FULFILLED
+  CANCELLED
+}
+
+// ───────── Agents (EVE) ─────────
+model Agent {
+  id          String   @id @default(cuid())
+  storeId     String?
+  store       StoreConnection? @relation(fields: [storeId], references: [id])
+  name        String
+  slug        String   @unique
+  description String?
+  systemPrompt String? @db.Text
+  model       String   @default("gpt-4o-mini")
+  isActive    Boolean  @default(true)
+  config      Json?    // tools, temperature, etc
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  runs        AgentRun[]
+
+  @@index([storeId])
+}
+
+model AgentRun {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  input     Json
+  output    Json?
+  status    String   @default("PENDING") // PENDING | RUNNING | COMPLETED | FAILED
+  workflowRunId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([agentId])
+  @@index([status])
+}
+
+// ───────── Workflows (Vercel Workflows + XYFlow) ─────────
+model WorkflowDefinition {
+  id          String   @id @default(cuid())
+  storeId     String?
+  store       StoreConnection? @relation(fields: [storeId], references: [id])
+  slug        String   @unique
+  name        String
+  description String?
+  version     Int      @default(1)
+  isActive    Boolean  @default(true)
+  trigger     String?  // manual | order_created | eve_tool | webhook
+  // XYFlow graph persisted as JSON: { nodes: [], edges: [] }
+  graph       Json
+  // Compiled steps for runtime
+  steps       Json?    // WorkflowStep[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  runs        WorkflowRun[]
+
+  @@index([storeId])
+  @@index([slug])
+}
+
+model WorkflowRun {
+  id           String   @id @default(cuid())
+  workflowId   String
+  workflow     WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  orderId      String?
+  order        Order?   @relation(fields: [orderId], references: [id])
+  status       WorkflowRunStatus @default(PENDING)
+  input        Json?
+  output       Json?
+  currentStep  String?
+  error        String?  @db.Text
+  startedAt    DateTime? 
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  stepLogs     OrderStepLog[]
+
+  @@index([workflowId])
+  @@index([orderId])
+  @@index([status])
+}
+
+enum WorkflowRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  WAITING_APPROVAL
+}
+
+// Step log — puente Vercel Workflows ↔ XYFlow (tiempo real)
+model OrderStepLog {
+  id          String   @id @default(cuid())
+  orderId     String?
+  order       Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  workflowRunId String?
+  workflowRun WorkflowRun? @relation(fields: [workflowRunId], references: [id], onDelete: Cascade)
+  stepName    String   // RESERVE_STOCK | PROCESS_PAYMENT | FULFILL | etc
+  nodeId      String?  // XYFlow node id
+  status      StepStatus @default(PENDING)
+  attempt     Int      @default(1)
+  input       Json?
+  output      Json?
+  error       String?  @db.Text
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+  @@index([workflowRunId])
+  @@index([stepName])
+  @@index([status])
+}
+
+enum StepStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SKIPPED
+  RETRYING
+}

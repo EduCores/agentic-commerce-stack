@@ -93,6 +93,8 @@ export default function SearchBar() {
                 onClick={() => setOpen(true)}
                 className='flex size-10 items-center justify-center rounded-lg border border-card-border bg-card-background text-icon-primary shadow-xs transition-colors outline-none hover:bg-background-gray-primary focus-visible:border-input-primary-focus-border focus-visible:ring-4 focus-visible:ring-input-primary-focus-border/20 xl:hidden'
                 aria-label='Open search modal'
+                translate="no"
+                suppressHydrationWarning
             >
                 <SearchIcon />
             </button>
@@ -113,11 +115,12 @@ export default function SearchBar() {
                         </InputGroupAddon>
                         <InputGroupInput
                             placeholder='Search pages...'
-                            className='pointer-events-none cursor-pointer pl-2 text-sm select-none'
+                            className='pointer-events-none cursor-pointer pl-2 text-sm select-none notranslate'
                             readOnly
+                            translate="no"
                         />
                         <InputGroupAddon align='inline-end'>
-                            <div className='rounded-md border border-card-border bg-background-gray-primary/50 px-2 py-0.75 text-xs text-text-tertiary'>
+                            <div className='rounded-md border border-card-border bg-background-gray-primary/50 px-2 py-0.75 text-xs text-text-tertiary notranslate' translate="no">
                                 <span className='font-medium'>⌘</span> K
                             </div>
                         </InputGroupAddon>
@@ -144,7 +147,8 @@ export default function SearchBar() {
                         </InputGroupAddon>
                         <Command.Input
                             placeholder='Search pages...'
-                            className='w-full min-w-0 flex-1 border-none bg-transparent pl-2 text-sm text-text-primary outline-none placeholder:text-text-tertiary focus:ring-0 focus:outline-none'
+                            className='w-full min-w-0 flex-1 border-none bg-transparent pl-2 text-sm text-text-primary outline-none placeholder:text-text-tertiary focus:ring-0 focus:outline-none notranslate'
+                            translate="no"
                         />
                         <InputGroupAddon align='inline-end'>
                             <div className='rounded-md border border-card-border bg-background-gray-primary/50 px-2 py-0.75 text-xs text-text-tertiary'>

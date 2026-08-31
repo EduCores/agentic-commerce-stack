@@ -35,7 +35,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts",
-    "src/app/(withLayouts)/marketing/_component/conversion-funnel/data.tsx",
     ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [

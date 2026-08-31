@@ -54,8 +54,9 @@ function useTooltip({
         padding: 5,
       }),
       shift({ padding: 5 }),
+      // eslint-disable-next-line react-hooks/refs -- arrow middleware reads ref.current internally; passing ref object is floating-ui pattern
       arrow({
-        element: arrowRef,
+        element: arrowRef as unknown as HTMLElement | null,
       }),
     ],
   });
@@ -118,6 +119,7 @@ export const TooltipTrigger = React.forwardRef<
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(
       children,
+      // eslint-disable-next-line react-hooks/refs -- getReferenceProps merges refs correctly
       context.getReferenceProps({
         ref,
         ...props,
@@ -164,7 +166,9 @@ export const TooltipContent = React.forwardRef<
         )}
       >
         <FloatingArrow
+          // eslint-disable-next-line react-hooks/refs -- FloatingArrow ref is intentionally forwarded from context
           ref={context.arrowRef}
+          // eslint-disable-next-line react-hooks/refs -- context object contains refs managed by floating-ui
           context={context.context}
           className="fill-tooltip-background [&>path:last-of-type]:stroke-border-secondary"
           width={18}

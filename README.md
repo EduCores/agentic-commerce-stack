@@ -1,5 +1,8 @@
-# NextAdmin - AI-First Next.js Admin Dashboard Template
-**NextAdmin** is a free, open-source Next.js admin dashboard with essential UI components, blocks, pages, and multiple dashboards. Version 2.0 also ships AI rules and context files, so Claude Code, Cursor, Codex, and any other agent can read your project and build features that match your patterns instead of inventing their own.
+# Agentic Commerce Stack (ACS) — NextAdmin Pro + Workflows
+
+**ACS** es el OS para commerce agéntico: **NextAdmin** (panel) + **XYFlow** (creador de flujos) + **Vercel Workflows** (ejecución durable) + **EVE** (agentes) + **Prisma** (fuente de verdad). Conecta cualquier tienda (Shopify/Woo/Magento/custom) con un solo comando y vende.
+
+> Basado en NextAdmin v2.0 — ver sección original abajo.
 
 [![nextjs admin template](nextadmin-v2.png)](https://nextadmin.co/)
 
@@ -37,28 +40,38 @@
 
 Integrations already wired up: TailGrids UI, Recharts, Leaflet, TanStack Table, Zod, and FullCalendar.
 
-## Quick start
-
-You'll need Node.js installed. Then:
-
-```bash
-git clone https://github.com/NextAdminHQ/nextjs-admin-dashboard.git
-cd nextjs-admin-dashboard
-```
-
-Install dependencies:
+## Quick start — ACS 1 comando
 
 ```bash
 npm install
+npm run acs:setup   # genera Prisma + migra + seed demo (store mock + productos + workflow process-order + agente sales-assistant)
+npm run acs:dev     # = prisma generate && next dev → http://localhost:3000
 ```
 
-Then start the dev server:
+**Vercel (1 click):**
+- Set `DATABASE_URL` (Prisma Postgres `prisma+postgres://...`) en Vercel Env
+- Build: `prisma generate && next build` (ya en `vercel.json:3`)
+- APIs: `/api/workflows`, `/api/agents`, `/api/store`, `/api/chat`
+
+**Flujo 3 puentes:**
+1. `agent/tools/process-purchase.ts:1` — EVE (`defineTool`+`zod`) → `startWorkflow(processOrderWorkflow)`
+2. `src/workflows/process-order.ts:1` — `createWorkflow/createStep` → `prisma.orderStepLog` (XYFlow lee)
+3. `src/app/(with-layouts)/workflows/page.tsx:1` — `<FlowCanvas/>` XYFlow embebido en NextAdmin
+
+**Conectar tu tienda:**
+```bash
+# Crea StoreConnection en /store o vía API
+curl -X POST /api/store -d '{"name":"Mi Shopify","provider":"shopify","domain":"...myshopify.com","apiKey":"..."}'
+# Luego src/lib/adapters/store.ts:1 hace sync — extiende mockAdapter para pull real.
+```
+
+## NextAdmin — Quick start original
 
 ```bash
+npm install
 npm run dev
+# http://localhost:3000
 ```
-
-Open [http://localhost:3000](http://localhost:3000) and you're good. **Happy coding**!
 
 ## Working with AI agents
 
@@ -83,9 +96,8 @@ Works out of the box with any provider supporting Next.js, including Vercel, Net
 
 Full docs of the project are available at [nextadmin.co/docs](https://nextadmin.co/docs). There are machine-readable context files alongside them, so your AI tools can read the docs too.
 
-## Pro
-
-The free version covers most of what you need to get a dashboard running. If you want the full set of components, extra dashboards, and the Figma file, there's a Pro version at [nextadmin.co/pricing](https://nextadmin.co/pricing).
+## ACS — Producto completo (sin upsell)
+Este repo es el producto Agentic Commerce Stack — no contiene promoción a versión Pro.
 
 ## Community
 
