@@ -4,10 +4,10 @@ import { prisma } from "@/lib/adapters/prisma";
 
 export const dynamic = "force-dynamic";
 
-export default async function WorkflowsAdminPage() {
-  // Fetch latest workflow for canvas preload (fallback to demo if none)
-  const workflow = await prisma.workflowDefinition.findFirst({ orderBy: { updatedAt: "desc" } }).catch(() => null);
-
+export default async function WorkflowsAdminPage({ searchParams }: { searchParams: Promise<{ slug?: string }> }) {
+  const params = await searchParams;
+  const all = await prisma.workflowDefinition.findMany({ orderBy: { updatedAt: "desc" } }).catch(() => []);
+  const workflow = params.slug ? all.find((w) => w.slug === params.slug) ?? all[0] : all[0];
   const graph = (workflow?.graph as { nodes: unknown[]; edges: unknown[] } | null) ?? null;
 
   return (
@@ -23,12 +23,26 @@ export default async function WorkflowsAdminPage() {
         <p className="mb-4 text-sm text-text-tertiary">
           Creador de flujos integrado — arrastra nodos, conecta y guarda. XYFlow embebido en NextAdmin. Estado en vivo desde Prisma.
         </p>
-        <FlowCanvas workflowSlug={workflow?.slug} initialData={graph as never} />
+        {all.length > 1 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {all.map((w) => (
+              <a
+                key={w.slug}
+                href={`/workflows?slug=${w.slug}`}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium border ${w.slug === workflow?.slug ? "bg-primary text-white border-primary" : "bg-white text-text-primary border-stroke hover:bg-gray-50"}`}
+              >
+                {w.name}
+              </a>
+            ))}
+          </div>
+        )}
+        <FlowCanvas key={workflow?.slug} workflowSlug={workflow?.slug} initialData={graph as never} />
         {workflow && (
           <p className="mt-3 text-xs text-text-tertiary">
             Workflow: <span className="font-medium">{workflow.name}</span> ({workflow.slug}) — v{workflow.version}
           </p>
         )}
+        {all.length === 0 && <p className="text-sm text-text-tertiary">Sin workflows en DB</p>}
       </div>
     </div>
   );
