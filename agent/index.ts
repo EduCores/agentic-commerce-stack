@@ -12,6 +12,8 @@ import checkStock from "./tools/check-stock";
 import searchProducts from "./tools/search-products";
 import cancelOrder from "./tools/cancel-order";
 import navigateTo from "./tools/navigate";
+import calculatePricing from "./tools/calculate-pricing";
+import checkout from "./tools/checkout";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -24,6 +26,8 @@ export const acsTools = {
   searchProducts,
   cancelOrder,
   navigateTo,
+  calculatePricing,
+  checkout,
 };
 
 function toAISDKTools() {
@@ -52,6 +56,16 @@ function toAISDKTools() {
       description: navigateTo.description,
       inputSchema: navigateTo.inputSchema as z.ZodTypeAny,
       execute: navigateTo.execute as never,
+    }),
+    calculatePricing: tool({
+      description: calculatePricing.description,
+      inputSchema: calculatePricing.inputSchema as z.ZodTypeAny,
+      execute: calculatePricing.execute as never,
+    }),
+    checkout: tool({
+      description: checkout.description,
+      inputSchema: checkout.inputSchema as z.ZodTypeAny,
+      execute: checkout.execute as never,
     }),
   };
 }
