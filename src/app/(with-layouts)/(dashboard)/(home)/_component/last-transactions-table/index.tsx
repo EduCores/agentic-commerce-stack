@@ -48,10 +48,15 @@ function toViewModel(raw: RawTransactionItem): TransactionViewModel {
 export default function LastTransactionsTable() {
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
 
-  const { data: rawResponse, isLoading } = useQuery({
+  const { data: rawResponse } = useQuery({
     queryKey: ["lastTransactions"],
     queryFn: getLastTransactionsData,
   });
+
+  // Gating por `data` (no `isLoading`) para evitar hydration mismatch:
+  // en SSR react-query no fetcha (isLoading=false) pero en el cliente sí,
+  // lo que haría que servidor renderice la tabla y cliente el skeleton.
+  const isPending = !rawResponse;
 
   const transactions: TransactionViewModel[] = rawResponse?.data.map(toViewModel) ?? [];
 
@@ -107,7 +112,7 @@ export default function LastTransactionsTable() {
                   <Checkbox
                     isSelected={isAllSelected}
                     onChange={handleSelectAll}
-                    isDisabled={isLoading}
+                    isDisabled={isPending}
                   />
                 </div>
               </TableHead>
@@ -133,7 +138,7 @@ export default function LastTransactionsTable() {
           </TableHeader>
 
           <TableBody>
-            {isLoading
+            {isPending
               ? Array.from({ length: SKELETON_ROW_COUNT }).map((_, i) => (
                   <TransactionSkeletonRow key={i} />
                 ))

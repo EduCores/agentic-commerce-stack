@@ -9,16 +9,18 @@ import OverviewStatsSkeleton from "./skeleton";
 import { mapOverviewStats } from "./utils";
 
 export default function ECommerceOverviewStats() {
-  const { data, isLoading } = useQuery({
+  // Gating por `data` (no `isLoading`) para evitar hydration mismatch:
+  // en SSR react-query no fetcha (isLoading=false) pero en el cliente sí.
+  const { data } = useQuery({
     queryKey: ["home-overview-stats"],
     queryFn: getHomeOverviewStats,
   });
 
-  const overviewStats = data ? mapOverviewStats(data) : [];
-
-  if (isLoading) {
+  if (!data) {
     return <OverviewStatsSkeleton />;
   }
+
+  const overviewStats = mapOverviewStats(data);
 
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">

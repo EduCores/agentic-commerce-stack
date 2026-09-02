@@ -17,16 +17,20 @@ import InventoryOverviewSkeleton from "./skeleton";
 import { mapInventoryOverviewResponse } from "./utils";
 
 export default function InventoryOverview() {
-  const { data, isLoading } = useQuery({
+  // Gating por `data` (no `isLoading`): durante SSR react-query no fetcha
+  // (fetchStatus "idle" → isLoading=false), mientras que en el cliente el primer
+  // render sí está fetching → mismatches de hidratación en el SVG de recharts.
+  // `data` es undefined en servidor y en el primer render del cliente → HTML idéntico.
+  const { data } = useQuery({
     queryKey: ["inventory-overview"],
     queryFn: getInventoryOverviewData,
   });
 
-  if (isLoading) {
+  if (!data) {
     return <InventoryOverviewSkeleton />;
   }
 
-  const inventoryOverview = data ? mapInventoryOverviewResponse(data) : undefined;
+  const inventoryOverview = mapInventoryOverviewResponse(data);
   const gaugeSegmentCount = 32;
   const inStockSegments = inventoryOverview
     ? Math.round((inventoryOverview.availablePercent / 100) * gaugeSegmentCount)
