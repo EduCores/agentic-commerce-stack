@@ -27,7 +27,7 @@ const openrouter = createOpenRouter({
 const DEFAULT_AGENT = {
   id: "builtin-default",
   slug: "sales-assistant",
-  model: "qwen/qwen3-30b-a3b-instruct-2507",
+  model: "qwen/qwen3-30b-a3b",
   systemPrompt: SALES_SYSTEM_PROMPT,
 };
 
@@ -114,7 +114,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   const agent = await getAgentConfig(params.agentSlug);
   const system = agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`;
   // Modelo estable: qwen 30b pago barato con fallback a free router si es :free
-  const modelId = agent.model ?? "qwen/qwen3-30b-a3b-instruct-2507";
+  const modelId = agent.model ?? "qwen/qwen3-30b-a3b";
   const model = openrouter.chat(modelId as never) as never;
 
   const result = await generateText({
