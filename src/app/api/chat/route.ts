@@ -14,12 +14,16 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
+  const key = process.env.OPENROUTER_API_KEY ?? "";
   return NextResponse.json({
     ok: true,
-    hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
+    hasOpenRouterKey: !!key,
+    keyPrefix: key ? key.slice(0, 17) + "..." : "(vacía)",
+    keyLength: key.length,
     openRouterModel: process.env.OPENROUTER_MODEL ?? "(no env OPENROUTER_MODEL)",
     hasDatabaseUrl: !!process.env.DATABASE_URL,
-    modelFromAgent: "qwen/qwen3-30b-a3b-instruct-2507 (default)",
+    dbUrlHost: (process.env.DATABASE_URL ?? "").replace(/postgres(ql)?:\/\/[^@]*@/, "postgresql://").replace(/:.+@/, "@"),
+    time: new Date().toISOString(),
   }, { headers: corsHeaders() });
 }
 
