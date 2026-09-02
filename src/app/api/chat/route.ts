@@ -4,13 +4,23 @@ import { runAgent } from "@/../agent";
 function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
 }
 
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders() });
+}
+
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
+    openRouterModel: process.env.OPENROUTER_MODEL ?? "(no env OPENROUTER_MODEL)",
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    modelFromAgent: "qwen/qwen3-30b-a3b-instruct-2507 (default)",
+  }, { headers: corsHeaders() });
 }
 
 export async function POST(req: Request) {
