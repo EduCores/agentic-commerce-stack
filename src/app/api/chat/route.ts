@@ -32,21 +32,35 @@ export async function POST(req: Request) {
     // agregamos /busqueda?q= automáticamente para garantizar la experiencia.
     const hasNavigate = toolCalls.some((tc) => tc.toolName === "navigateTo");
     const searchCall = toolCalls.find((tc) => tc.toolName === "searchProducts");
+    let autoQuery = "";
     if (!hasNavigate && searchCall) {
       const query = ((searchCall.args?.query as string) ?? "").trim();
       if (query) {
+        autoQuery = query;
         toolCalls.push({
           toolName: "navigateTo",
           args: { path: "/busqueda", query, fromAutoInject: true },
           output: { navigateTo: `/busqueda?q=${encodeURIComponent(query)}` },
         });
-        if (!result.text || result.text.trim() === "") {
-          result.text = `Busqueda encontrada para "${query}"! Te abri la ventana de resultados con todos los productos disponibles. Le filtro por precio o potencia?`;
+      }
+    }
+
+    // Texto de respaldo: si el LLM devolvió tool calls sin texto, igual respondemos algo útil.
+    let text = (result.text ?? "").trim();
+    if (!text) {
+      if (autoQuery) {
+        text = `Busqueda encontrada para "${autoQuery}"! Te abri la ventana de resultados con todos los productos disponibles. Le filtro por precio o potencia?`;
+      } else {
+        const nav = toolCalls.find((tc) => tc.toolName === "navigateTo");
+        if (nav) {
+          text = `Te llevo a la tienda para que veas los resultados. Si necesitas algo más especifico, pregunta por un producto o categoria.`;
+        } else {
+          text = `Claro, dejame ayudarte con eso. Tenemos una gran variedad de productos en la tienda; dime que buscas y te muestro las opciones.`;
         }
       }
     }
 
-    return NextResponse.json({ text: result.text, toolCalls }, { headers: corsHeaders() });
+    return NextResponse.json({ text, toolCalls }, { headers: corsHeaders() });
   } catch (e) {
         console.error("[API-CHAT] Error:", e);
     return NextResponse.json({
