@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { defineTool } from "@/lib/eve/defineTool";
 import { getStoreAdapterForStore } from "@/lib/adapters/store";
-import { normalize, slugify } from "../lib/search/normalize";
+import { normalize } from "../lib/search/normalize";
 import { rankProducts } from "../lib/search/rank";
 import { matchCategories, allCategories } from "../lib/search/categories";
 import type { CategorySuggestion } from "../lib/search/categories";
@@ -34,7 +34,8 @@ export default defineTool({
         stock: hit.product.stock,
         category: String(meta.categoria ?? ""),
         categorySlug: String(meta.categorySlug ?? ""),
-        url: `/producto/${slugify(hit.product.title)}`,
+        url: `/producto/${hit.product.sku}`,
+        searchUrl: `/busqueda?q=${encodeURIComponent(rawText)}`,
       };
     });
 

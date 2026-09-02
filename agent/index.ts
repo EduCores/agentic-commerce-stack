@@ -84,20 +84,24 @@ export async function runAgent(params: { agentSlug: string; input: string; store
     system,
     prompt: params.input,
     tools: toAISDKTools(),
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(10),
   });
+
+  // Agrega los tool calls de TODOS los pasos (result.toolCalls solo refleja el último)
+  const stepToolCalls = ((result as unknown as { steps?: Array<{ toolCalls?: unknown[] }> }).steps ?? [])
+    .flatMap((s) => s.toolCalls ?? []);
 
   // Log run
   await prisma.agentRun.create({
     data: {
       agentId: agent.id,
       input: { text: params.input, storeId: params.storeId } as object,
-      output: { text: result.text, toolCalls: result.toolCalls } as object,
+      output: { text: result.text, toolCalls: stepToolCalls } as object,
       status: "COMPLETED",
     },
   });
 
-  return result;
+  return { ...result, toolCalls: stepToolCalls };
 }
 
 export default { runAgent, tools: acsTools };
