@@ -7,6 +7,7 @@ import { generateText, stepCountIs, tool } from "ai";
 import { z } from "zod";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { prisma } from "@/lib/adapters/prisma";
+import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
 import searchProducts from "./tools/search-products";
@@ -18,6 +19,45 @@ import checkout from "./tools/checkout";
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
+
+// ─── Config del agente con fallback sin BD ───────────────────────────────
+// Si la base de datos no está disponible, el agente sigue funcionando con una
+// configuración por defecto (mismo prompt y modelo). La BD solo aporta
+// dashboard para editar prompts y persistir logs de conversaciones.
+const DEFAULT_AGENT = {
+  id: "builtin-default",
+  slug: "sales-assistant",
+  model: "qwen/qwen3-30b-a3b-instruct-2507",
+  systemPrompt: SALES_SYSTEM_PROMPT,
+};
+
+async function getAgentConfig(slug: string) {
+  try {
+    const agent = await prisma.agent.findUnique({ where: { slug } });
+    if (agent) return agent;
+    console.warn(`[ACS-AGENT] Agente "${slug}" no existe en BD, usando config por defecto.`);
+    return DEFAULT_AGENT;
+  } catch (e) {
+    console.warn(
+      "[ACS-AGENT] BD no disponible, usando config por defecto (el agente sigue funcionando):",
+      e instanceof Error ? e.message : e
+    );
+    return DEFAULT_AGENT;
+  }
+}
+
+async function logRunSafe(data: {
+  agentId: string;
+  input: object;
+  output: object;
+  status: string;
+}) {
+  try {
+    await prisma.agentRun.create({ data });
+  } catch (e) {
+    console.warn("[ACS-AGENT] No se pudo guardar el log del run (la BD no responde o falla):", e instanceof Error ? e.message : e);
+  }
+}
 
 // Registry para UI y para `ai` SDK
 export const acsTools = {
@@ -71,9 +111,7 @@ function toAISDKTools() {
 }
 
 export async function runAgent(params: { agentSlug: string; input: string; storeId?: string }) {
-  const agent = await prisma.agent.findUnique({ where: { slug: params.agentSlug } });
-  if (!agent) throw new Error(`Agent not found: ${params.agentSlug}`);
-
+  const agent = await getAgentConfig(params.agentSlug);
   const system = agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`;
   // Modelo estable: qwen 30b pago barato con fallback a free router si es :free
   const modelId = agent.model ?? "qwen/qwen3-30b-a3b-instruct-2507";
@@ -91,14 +129,12 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   const stepToolCalls = ((result as unknown as { steps?: Array<{ toolCalls?: unknown[] }> }).steps ?? [])
     .flatMap((s) => s.toolCalls ?? []);
 
-  // Log run
-  await prisma.agentRun.create({
-    data: {
-      agentId: agent.id,
-      input: { text: params.input, storeId: params.storeId } as object,
-      output: { text: result.text, toolCalls: stepToolCalls } as object,
-      status: "COMPLETED",
-    },
+  // Log run (no bloquea la respuesta si la BD falla)
+  await logRunSafe({
+    agentId: agent.id,
+    input: { text: params.input, storeId: params.storeId } as object,
+    output: { text: result.text, toolCalls: stepToolCalls } as object,
+    status: "COMPLETED",
   });
 
   return { ...result, toolCalls: stepToolCalls };
