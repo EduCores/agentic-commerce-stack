@@ -48,6 +48,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ text: result.text, toolCalls }, { headers: corsHeaders() });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500, headers: corsHeaders() });
+        console.error("[API-CHAT] Error:", e);
+    return NextResponse.json({
+      error: "Internal server error",
+      detail: e instanceof Error ? e.message : String(e),
+    }, { status: 500, headers: corsHeaders() });
   }
 }
