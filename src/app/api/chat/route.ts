@@ -60,7 +60,12 @@ export async function POST(req: Request) {
     }
 
     // Texto de respaldo: si el LLM devolvió tool calls sin texto, igual respondemos algo útil.
+    // (finalText ya incluye directFallback desde runAgent; texto vacío aquí significa que todo falló)
     let text = (result.text ?? "").trim();
+    if (!text && result.directFallback) {
+      // el directChat ya generó texto: no pisarlo
+      text = (result.text ?? "").trim();
+    }
     if (!text) {
       if (autoQuery) {
         text = `Busqueda encontrada para "${autoQuery}"! Te abri la ventana de resultados con todos los productos disponibles. Le filtro por precio o potencia?`;

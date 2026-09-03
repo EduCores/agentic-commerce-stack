@@ -20,6 +20,47 @@ const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
+// Llamada directa a OpenRouter como respaldo: genera respuesta conversacional real
+// (el generateText con tools a veces corta en tool calls sin texto final).
+async function directChat(
+  apiKey: string,
+  modelId: string,
+  system: string,
+  user: string
+): Promise<string> {
+  try {
+    const body = {
+      model: modelId,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+      temperature: 0.7,
+      max_tokens: 500,
+    };
+    const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://agentic-commerce-stack.vercel.app",
+        "X-Title": "ACS Sales Agent",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) {
+      const t = await r.text().catch(() => "");
+      console.warn("[ACS-AGENT] directChat HTTP", r.status, t.slice(0, 200));
+      return "";
+    }
+    const j = await r.json();
+    return (j?.choices?.[0]?.message?.content ?? "").trim();
+  } catch (e) {
+    console.warn("[ACS-AGENT] directChat error", e instanceof Error ? e.message : e);
+    return "";
+  }
+}
+
 // ─── Config del agente con fallback sin BD ───────────────────────────────
 // Si la base de datos no está disponible, el agente sigue funcionando con una
 // configuración por defecto (mismo prompt y modelo). La BD solo aporta
@@ -122,22 +163,37 @@ export async function runAgent(params: { agentSlug: string; input: string; store
     system,
     prompt: params.input,
     tools: toAISDKTools(),
-    stopWhen: stepCountIs(10),
+    stopWhen: stepCountIs(3),
   });
 
   // Agrega los tool calls de TODOS los pasos (result.toolCalls solo refleja el último)
   const stepToolCalls = ((result as unknown as { steps?: Array<{ toolCalls?: unknown[] }> }).steps ?? [])
     .flatMap((s) => s.toolCalls ?? []);
 
+  // Si el LLM cortó sin texto (solo tool calls o respuesta vacía), genera respuesta
+  // conversacional real vía llamada directa a OpenRouter.
+  let finalText = (result.text ?? "").trim();
+  let direct = false;
+  if (!finalText && stepToolCalls.length > 0) {
+    const apiKey = process.env.OPENROUTER_API_KEY ?? "";
+    if (apiKey) {
+      const directReply = await directChat(apiKey, modelId, system, params.input);
+      if (directReply) {
+        finalText = directReply;
+        direct = true;
+      }
+    }
+  }
+
   // Log run (no bloquea la respuesta si la BD falla)
   await logRunSafe({
     agentId: agent.id,
     input: { text: params.input, storeId: params.storeId } as object,
-    output: { text: result.text, toolCalls: stepToolCalls } as object,
+    output: { text: finalText || result.text, toolCalls: stepToolCalls } as object,
     status: "COMPLETED",
   });
 
-  return { ...result, toolCalls: stepToolCalls };
+  return { ...result, text: finalText, rawText: result.text, directFallback: direct, toolCalls: stepToolCalls };
 }
 
 export default { runAgent, tools: acsTools };
