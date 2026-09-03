@@ -40,3 +40,7 @@ next-env.d.ts
 
 
 /src/generated/prisma
+
+# Logs locales del dev server
+acs-dev-*.log
+
