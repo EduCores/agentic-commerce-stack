@@ -486,13 +486,13 @@
   --badge-gray-icon: #e4e4e7;
   --background-gray-quaternary: #3f3f46;
 
-  /* general color */
-  --brand-100: #e0e7ff;
-  --brand-200: #c7d2fe;
-  --brand-300: #a5b4fc;
-  --brand-400: #818cf8;
-  --brand-500: #5750f1;
-  --brand-600: #3c35d8;
+  /* general color — StarShop brand (amarillo, dark) */
+  --brand-100: #FFF9CC;
+  --brand-200: #FFEE99;
+  --brand-300: #FFE566;
+  --brand-400: #FFDC33;
+  --brand-500: #FFD814;
+  --brand-600: #E6C200;
   --base-white: #ffffff;
   --green-600: #16a34a;
   --red-600: #dc2626;
