@@ -17,7 +17,7 @@ export function BaseNode({ data, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "min-w-56 rounded-xl border bg-card-background px-4 py-3 shadow-sm transition",
+        "min-w-64 rounded-xl border bg-card-background px-4 py-3 shadow-sm transition",
         selected ? "border-brand-500 shadow-md" : "border-card-border",
         statusRing[d.status ?? "idle"]
       )}
@@ -40,8 +40,18 @@ export function BaseNode({ data, selected }: NodeProps) {
           </span>
         )}
       </div>
-      {d.description && <p className="mt-1 text-xs text-text-tertiary">{d.description}</p>}
-      {d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{d.type}</p>}
+      {d.description && <p className="mt-1.5 text-xs leading-4 text-text-tertiary line-clamp-2">{d.description}</p>}
+      {d.agent && <p className="mt-1.5 text-[11px] font-medium text-brand-600 truncate">🤖 {d.agent}</p>}
+      {d.tools && d.tools.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {d.tools.slice(0, 3).map((t) => (
+            <span key={t} className="rounded-full bg-background-gray-secondary px-2 py-0.5 text-[10px] text-text-secondary">{t}</span>
+          ))}
+          {d.tools.length > 3 && <span className="text-[10px] text-text-tertiary">+{d.tools.length - 3}</span>}
+        </div>
+      )}
+      {d.intent && <p className="mt-1 text-[10px] uppercase tracking-widest text-brand-500">{d.intent}</p>}
+      {!d.agent && d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{d.type}</p>}
       <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
     </div>
   );

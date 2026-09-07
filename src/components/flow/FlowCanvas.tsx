@@ -169,10 +169,34 @@ export default function FlowCanvas({
             </Button>
           </div>
           {selectedNode && (
-            <div className="mt-4 rounded-lg border border-card-border p-3">
-              <p className="text-xs font-bold text-text-primary">Seleccionado</p>
-              <p className="text-sm text-text-secondary">{selectedNode.data.label}</p>
-              <p className="text-xs text-text-tertiary">{selectedNode.data.type}</p>
+            <div className="mt-4 rounded-lg border border-card-border p-3 space-y-2 max-h-[42vh] overflow-auto">
+              <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Seleccionado</p>
+              <p className="text-sm font-semibold text-text-primary">{selectedNode.data.label}</p>
+              {selectedNode.data.description && <p className="text-xs leading-4 text-text-secondary">{selectedNode.data.description}</p>}
+              {selectedNode.data.detail && <p className="text-xs leading-4 text-text-tertiary bg-background-gray-secondary rounded-lg p-2">{selectedNode.data.detail}</p>}
+              <div className="flex flex-wrap gap-1">
+                <span className="rounded-full bg-background-gray-secondary px-2 py-0.5 text-[10px] uppercase tracking-widest text-text-tertiary">{selectedNode.data.type}</span>
+                {selectedNode.data.status && <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white">{selectedNode.data.status}</span>}
+                {selectedNode.data.intent && <span className="rounded-full bg-brand-100 text-brand-700 px-2 py-0.5 text-[10px]">{selectedNode.data.intent}</span>}
+              </div>
+              {selectedNode.data.agent && <p className="text-xs"><span className="font-medium">🤖 Agente:</span> {selectedNode.data.agent}</p>}
+              {selectedNode.data.model && <p className="text-xs text-text-tertiary">Modelo: {selectedNode.data.model}</p>}
+              {selectedNode.data.tools && (selectedNode.data.tools as string[]).length > 0 && (
+                <div>
+                  <p className="text-xs font-medium">Tools:</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {(selectedNode.data.tools as string[]).map((t) => (
+                      <span key={t} className="rounded-full border border-card-border bg-card-background px-2 py-0.5 text-[10px]">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {selectedNode.data.config && (
+                <details className="text-xs">
+                  <summary className="cursor-pointer font-medium">Config JSON</summary>
+                  <pre className="mt-1 max-h-32 overflow-auto rounded bg-background-gray-secondary p-2 text-[10px]">{JSON.stringify(selectedNode.data.config, null, 2)}</pre>
+                </details>
+              )}
               <Button
                 className="mt-2 w-full"
                 variant="ghost"

@@ -11,9 +11,14 @@ export type FlowNodeType =
 export type FlowNodeData = {
   label: string;
   description?: string;
+  detail?: string; // texto largo para tooltip/drawer
   type: FlowNodeType;
   config?: Record<string, unknown>;
   status?: "pending" | "running" | "completed" | "failed" | "idle";
+  agent?: string;
+  tools?: string[];
+  intent?: string;
+  model?: string;
 };
 
 export type FlowGraph = {
