@@ -28,10 +28,12 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
     setMessages((m) => [...m, userMsg, { id: assistantId, role: "assistant", text: "", streaming }]);
     setInput("");
     setLoading(true);
+    // Muestra dots 400ms antes de pedir al LLM para que parezca que piensa
+    await new Promise((r) => setTimeout(r, 280));
 
     try {
       if (streaming) {
-        // SSE streaming — efecto tipeo real IA
+        // SSE streaming — texto llega por chunks, ChatBubble lo tipeará Char-by-char
         const r = await fetch(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -61,7 +63,6 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
               else if (evt.type === "text" && evt.text) { full += evt.text; setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: full, crew, detectedIntent, streaming: true } : x))); }
               else if (evt.type === "done") {
                 if (evt.text && evt.text !== full) full = evt.text;
-                // toolCalls pueden venir en done — navega si hay navigateTo
                 const nav = (evt.toolCalls as unknown as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");
                 const path = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo ?? (nav?.args as { path?: string } | undefined)?.path;
                 if (path) {
@@ -73,7 +74,6 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
           }
         }
       } else {
-        // Fallback JSON no-streaming — el ChatBubble animará con typewriter
         const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, storeId: "seed-store" }) });
         const j = await r.json();
         const nav = (j.toolCalls as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");

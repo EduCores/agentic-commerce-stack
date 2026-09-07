@@ -12,11 +12,12 @@ type BubbleProps = {
 };
 
 export function ChatBubble({ role, text, streaming, isTyping, className }: BubbleProps) {
-  // Si es streaming real, muestra el texto tal cual llega (el SSE ya es tipeo)
-  // Si es JSON completo, anima con typewriter para parecer IA
-  const { displayed, done } = useTypewriter(text, { enabled: !streaming && role === "assistant", speedMs: 14, chunkSize: 3 });
+  // Siempre tipeo IA: incluso streaming SSE se anima Char-by-char para que se note
+  // streaming solo indica que el texto viene por chunks, pero igual pasa por typewriter
+  const isAssistant = role === "assistant";
+  const { displayed, done } = useTypewriter(text, { enabled: isAssistant, speedMs: streaming ? 12 : 16, chunkSize: streaming ? 1 : 2 });
 
-  const shown = streaming ? text : role === "assistant" ? displayed : text;
+  const shown = isAssistant ? displayed : text;
 
   if (isTyping && !text) {
     return (
@@ -36,7 +37,7 @@ export function ChatBubble({ role, text, streaming, isTyping, className }: Bubbl
       >
         <p className="whitespace-pre-wrap break-words">
           {shown}
-          {!done && role === "assistant" && !streaming && <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-text-tertiary align-middle" />}
+          {!done && isAssistant && <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-brand-500 align-middle" />}
         </p>
       </div>
     </div>
