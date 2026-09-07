@@ -72,11 +72,11 @@
 
   /* ======== Button Color =========*/
 
-  /* Primary */
-  --button-primary-background: #5750f1;
-  --button-primary-hover-background: #3c35d8;
-  --button-primary-text: #ffffff;
-  --button-primary-focus-ring: rgba(87, 80, 241, 0.2);
+  /* Primary — StarShop amarillo */
+  --button-primary-background: #FFD814;
+  --button-primary-hover-background: #E6C200;
+  --button-primary-text: #18181b;
+  --button-primary-focus-ring: rgba(255, 216, 20, 0.35);
 
   /* Outline */
   --button-outline-background: #ffffff;
