@@ -26,22 +26,11 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
     const clean = text.replace(/[*#_]/g, "").slice(0, 900);
     try {
       const r = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: clean }) });
-      if (r.ok && r.headers.get("content-type")?.includes("audio")) {
-        const blob = await r.blob();
-        const url = URL.createObjectURL(blob);
-        const a = new Audio(url);
-        await a.play().catch(() => {});
-        return;
-      }
-    } catch {}
-    try {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(clean);
-      u.lang = "es-CL"; u.rate = 1.02;
-      const vs = window.speechSynthesis.getVoices();
-      const es = vs.find((v) => v.lang.startsWith("es-CL")) || vs.find((v) => v.lang.startsWith("es"));
-      if (es) u.voice = es;
-      window.speechSynthesis.speak(u);
+      if (!r.ok || !r.headers.get("content-type")?.includes("audio")) return;
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = new Audio(url);
+      await a.play();
     } catch {}
   };
 
@@ -49,12 +38,10 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
     try {
       const v = localStorage.getItem("acs-voiceOn");
       if (v === "1") setVoiceOn(true);
-      if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
     } catch {}
   }, []);
   useEffect(() => {
     try { localStorage.setItem("acs-voiceOn", voiceOn ? "1" : "0"); } catch {}
-    if (!voiceOn) try { window.speechSynthesis.cancel(); } catch {}
   }, [voiceOn]);
 
   async function send(streaming = true) {
