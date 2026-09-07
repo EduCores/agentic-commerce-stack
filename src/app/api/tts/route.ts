@@ -36,7 +36,22 @@ export async function POST(req: Request) {
         return new NextResponse(buf, { headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" } });
       }
     }
-    return NextResponse.json({ error: "Sin ELEVEN_API_KEY ni OPENAI_API_KEY", fallback: "webspeech" }, { status: 501 });
+    // Edge TTS gratis sin key (es-CL-CatalinaNeural)
+    try {
+      const edgeVoice = process.env.EDGE_TTS_VOICE || "es-CL-CatalinaNeural";
+      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const ssml = `<speak version='1.0' xml:lang='es-CL'><voice name='${edgeVoice}'>${esc(clean)}</voice></speak>`;
+      const r = await fetch("https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AAE6D4EAFF3369FB100362022AACI", {
+        method: "POST",
+        headers: { "Content-Type": "application/ssml+xml", "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3", "User-Agent": "Mozilla/5.0" },
+        body: ssml,
+      });
+      if (r.ok) {
+        const buf = Buffer.from(await r.arrayBuffer());
+        if (buf.length > 1000) return new NextResponse(buf, { headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" } });
+      }
+    } catch {}
+    return NextResponse.json({ error: "Sin TTS cloud", fallback: "webspeech" }, { status: 501 });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
