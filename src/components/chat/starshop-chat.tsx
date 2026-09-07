@@ -16,6 +16,7 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
   const [loading, setLoading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const [voiceOn, setVoiceOn] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
@@ -23,6 +24,7 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
 
   const speak = async (text: string) => {
     if (!voiceOn) return;
+    try { audioRef.current?.pause(); audioRef.current = null; } catch {}
     const clean = text.replace(/[*#_]/g, "").slice(0, 900);
     try {
       const r = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: clean }) });
@@ -30,8 +32,14 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
       const blob = await r.blob();
       const url = URL.createObjectURL(blob);
       const a = new Audio(url);
+      audioRef.current = a;
+      a.onended = () => { audioRef.current = null; };
       await a.play();
     } catch {}
+  };
+
+  const stopSpeakACS = () => {
+    try { audioRef.current?.pause(); if (audioRef.current) audioRef.current.currentTime = 0; audioRef.current = null; } catch {}
   };
 
   useEffect(() => {
@@ -42,6 +50,7 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
   }, []);
   useEffect(() => {
     try { localStorage.setItem("acs-voiceOn", voiceOn ? "1" : "0"); } catch {}
+    if (!voiceOn) stopSpeakACS();
   }, [voiceOn]);
 
   async function send(streaming = true) {
