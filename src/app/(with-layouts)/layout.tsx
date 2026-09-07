@@ -3,6 +3,7 @@
 import Header from "@/components/common/header";
 import Sidebar from "@/components/common/sidebar";
 import { SheetContent, SheetOverlay, SheetTitle } from "@/components/tailgrids/core/sheet";
+import { StarShopWidget } from "@/components/chat/starshop-widget";
 import { cn } from "@/utils/cn";
 import { ReactNode, useState } from "react";
 
@@ -61,6 +62,8 @@ export default function WithLayout({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
+      {/* ACS — Widget StarShop IA (tipeo streaming) global en toda la tienda */}
+      <StarShopWidget />
     </div>
   );
 }
