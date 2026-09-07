@@ -28,13 +28,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { message, agentSlug, storeId, useFlow, stream } = await req.json();
+  const { message, history, agentSlug, storeId, useFlow, stream } = await req.json();
   if (!message) return NextResponse.json({ error: "message required" }, { status: 400, headers: corsHeaders() });
   // Si el frontend pide stream:true, redirige a lógica SSE sin romper compatibilidad JSON
   if (stream) {
     const url = new URL(req.url);
     url.pathname = "/api/chat/stream";
-    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, agentSlug, storeId, useFlow }), signal: (req as unknown as { signal?: AbortSignal }).signal });
+    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow }), signal: (req as unknown as { signal?: AbortSignal }).signal });
     // Proxy streaming response tal cual
     return new Response(r.body, { status: r.status, headers: { "Content-Type": "text/event-stream", ...corsHeaders() } });
   }
@@ -42,8 +42,8 @@ export async function POST(req: Request) {
     // Flujo 1→2→6+3→4 por defecto (useFlow !== false) — router StarShop. Legacy: useFlow=false → runAgent directo.
     const shouldUseFlow = useFlow !== false;
     const result = shouldUseFlow
-      ? await runStarShopFlow({ input: message, storeId })
-      : await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, storeId });
+      ? await runStarShopFlow({ input: message, history: history ?? [], storeId })
+      : await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
     const detectedIntent = (result as unknown as { detectedIntent?: string }).detectedIntent;
     const crew = (result as unknown as { crew?: string }).crew;
     const rawCalls = (result.toolCalls ?? []) as unknown as Array<Record<string, unknown>>;

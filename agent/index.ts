@@ -182,6 +182,19 @@ function getCrewConfig(intent: StarShopIntent) {
   return map[intent];
 }
 
+function formatHistory(history: unknown): string {
+  if (!Array.isArray(history) || history.length === 0) return "";
+  const lines = (history as Array<{ role?: string; text?: string; content?: string }>)
+    .slice(-8)
+    .map((m) => {
+      const role = m.role === "user" ? "Cliente" : "Star";
+      const txt = (m.text ?? m.content ?? "").toString().slice(0, 400);
+      return `${role}: ${txt}`;
+    })
+    .join("\n");
+  return `\n\nHistorial reciente:\n${lines}\n\nResponde considerando el historial. Si el cliente dice "cuánto con despacho" recuerda el producto anterior.`;
+}
+
 export type RunAgentResult = Awaited<ReturnType<typeof runAgent>>;
 
 /** Flujo 1→2→6+3→4 — detecta intent y despacha al crew correcto */
@@ -206,18 +219,20 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
     }
   })();
 
-  // Delega al runAgent del crew
+  // Delega al runAgent del crew con historial
+  const promptWithHistory = params.input + formatHistory(params.history);
   const inner = await runAgent({
     agentSlug: crew.slug,
-    input: params.input,
+    input: promptWithHistory,
     storeId: params.storeId,
+    history: params.history,
     _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools },
   } as never);
 
   return { ...inner, detectedIntent, crew: crew.slug, allowedTools };
 }
 
-export async function runAgent(params: { agentSlug: string; input: string; storeId?: string; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
+export async function runAgent(params: { agentSlug: string; input: string; storeId?: string; history?: unknown[]; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
   // _override: usado por runStarShopFlow para inyectar prompt/whitelist del crew sin tocar DB
   let agent: { id: string; slug: string; model: string | null; systemPrompt: string | null };
   let system: string;
@@ -237,10 +252,12 @@ export async function runAgent(params: { agentSlug: string; input: string; store
 
   const model = openrouter.chat(modelId as never) as never;
 
+  const promptWithHistory = params.history ? params.input + formatHistory(params.history) : params.input;
+
   const result = await generateText({
     model,
     system,
-    prompt: params.input,
+    prompt: promptWithHistory,
     tools: toAISDKTools(allowedTools),
     stopWhen: stepCountIs(4) as never,
   });
@@ -276,7 +293,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
 }
 
 // ── Streaming: mismo router pero con streamText para efecto tipeo IA ──
-export async function* streamAgent(params: { agentSlug: string; input: string; storeId?: string; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
+export async function* streamAgent(params: { agentSlug: string; input: string; storeId?: string; history?: unknown[]; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
   let agent: { id: string; slug: string; model: string | null; systemPrompt: string | null };
   let system: string;
   let modelId: string;
@@ -295,10 +312,12 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
 
   const model = openrouter.chat(modelId as never) as never;
 
+  const promptWithHistory = params.history ? params.input + formatHistory(params.history) : params.input;
+
   const result = streamText({
     model,
     system,
-    prompt: params.input,
+    prompt: promptWithHistory,
     tools: toAISDKTools(allowedTools) as never,
     stopWhen: stepCountIs(4) as never,
   });
@@ -314,7 +333,7 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
   yield { type: "done" as const, text: finalText, toolCalls, agentSlug: agent.slug };
 }
 
-export async function* streamStarShopFlow(params: { input: string; storeId?: string }) {
+export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[] }) {
   const heuristic = detectIntentHeuristic(params.input);
   const detectedIntent = heuristic;
   const crew = getCrewConfig(detectedIntent);
@@ -336,6 +355,7 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
     agentSlug: crew.slug,
     input: params.input,
     storeId: params.storeId,
+    history: params.history,
     _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools },
   } as never)) {
     yield chunk;
