@@ -229,6 +229,17 @@ enum WorkflowRunStatus {
   WAITING_APPROVAL
 }
 
+// ───────── Admin — único dueño de tienda (ACS cliente) ─────────
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hash
+  name      String?
+  role      String   @default("admin") // admin | owner (único admin del sistema)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // Step log — puente Vercel Workflows ↔ XYFlow (tiempo real)
 model OrderStepLog {
   id          String   @id @default(cuid())

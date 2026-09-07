@@ -13,9 +13,27 @@ export const NAV_DATA = [
     label: "AGENTIC COMMERCE",
     items: [
       {
-        title: "Workflows",
-        icon: <Widget4Icon />,
-        url: "/workflows",
+        title: "Dashboard",
+        icon: <HomeIcon />,
+        url: "/",
+        items: [],
+      },
+      {
+        title: "Productos",
+        icon: <TableIcon />,
+        url: "/products",
+        items: [],
+      },
+      {
+        title: "Pedidos",
+        icon: <WindowIcon />,
+        url: "/orders",
+        items: [],
+      },
+      {
+        title: "Store",
+        icon: <TableIcon />,
+        url: "/store",
         items: [],
       },
       {
@@ -25,9 +43,15 @@ export const NAV_DATA = [
         items: [],
       },
       {
-        title: "Store",
-        icon: <TableIcon />,
-        url: "/store",
+        title: "Workflows",
+        icon: <Widget4Icon />,
+        url: "/workflows",
+        items: [],
+      },
+      {
+        title: "Chat",
+        icon: <UserIcon />,
+        url: "/chat",
         items: [],
       },
     ],
