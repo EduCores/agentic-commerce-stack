@@ -51,6 +51,16 @@ export async function POST(req: Request) {
         if (buf.length > 1000) return new NextResponse(buf, { headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" } });
       }
     } catch {}
+    // Google TTS gratis (siempre funciona)
+    try {
+      const gText = clean.slice(0, 180);
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(gText)}&tl=es-CL&client=tw-ob`;
+      const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0", Referer: "https://translate.google.com/" } });
+      if (r.ok) {
+        const buf = Buffer.from(await r.arrayBuffer());
+        if (buf.length > 1000) return new NextResponse(buf, { headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" } });
+      }
+    } catch {}
     return NextResponse.json({ error: "Sin TTS cloud", fallback: "webspeech" }, { status: 501 });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
