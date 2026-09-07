@@ -1,0 +1,125 @@
+"use client";
+
+import { useRef, useState, useEffect } from "react";
+import { Button } from "@/components/tailgrids/core/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
+import { ChatBubble } from "./chat-bubble";
+
+type Msg = { id: string; role: "user" | "assistant"; text: string; streaming?: boolean; crew?: string; detectedIntent?: string };
+type ToolCall = { toolName: string; args: Record<string, unknown>; output: unknown };
+
+export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string }) {
+  const [messages, setMessages] = useState<Msg[]>([
+    { id: "welcome", role: "assistant", text: "¡Hola! Soy Star, tu asistente de StarShop 😊 ¿Qué estás buscando hoy? Herramientas, iluminación LED, medición..." },
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+
+  async function send(streaming = true) {
+    const text = input.trim();
+    if (!text || loading) return;
+    const userMsg: Msg = { id: `u-${Date.now()}`, role: "user", text };
+    const assistantId = `a-${Date.now()}`;
+    setMessages((m) => [...m, userMsg, { id: assistantId, role: "assistant", text: "", streaming }]);
+    setInput("");
+    setLoading(true);
+
+    try {
+      if (streaming) {
+        // SSE streaming — efecto tipeo real IA
+        const r = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text, storeId: "seed-store" }),
+        });
+        if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
+        const reader = r.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+        let full = "";
+        let crew: string | undefined;
+        let detectedIntent: string | undefined;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const parts = buf.split("\n\n");
+          buf = parts.pop() ?? "";
+          for (const part of parts) {
+            const line = part.trim();
+            if (!line.startsWith("data:")) continue;
+            const json = line.slice(5).trim();
+            if (!json) continue;
+            try {
+              const evt = JSON.parse(json) as { type: string; text?: string; detectedIntent?: string; crew?: string; toolCalls?: ToolCall[] };
+              if (evt.type === "meta") { crew = evt.crew; detectedIntent = evt.detectedIntent; }
+              else if (evt.type === "text" && evt.text) { full += evt.text; setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: full, crew, detectedIntent, streaming: true } : x))); }
+              else if (evt.type === "done") {
+                if (evt.text && evt.text !== full) full = evt.text;
+                // toolCalls pueden venir en done — navega si hay navigateTo
+                const nav = (evt.toolCalls as unknown as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");
+                const path = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo ?? (nav?.args as { path?: string } | undefined)?.path;
+                if (path) {
+                  setTimeout(() => { window.location.href = path; }, 900);
+                }
+                setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: full || evt.text || "", crew, detectedIntent, streaming: false } : x)));
+              }
+            } catch {}
+          }
+        }
+      } else {
+        // Fallback JSON no-streaming — el ChatBubble animará con typewriter
+        const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, storeId: "seed-store" }) });
+        const j = await r.json();
+        const nav = (j.toolCalls as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");
+        const path = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo;
+        setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: j.text ?? "", crew: j.crew, detectedIntent: j.detectedIntent, streaming: false } : x)));
+        if (path) setTimeout(() => { window.location.href = path; }, 900);
+      }
+    } catch (e) {
+      setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: `Error: ${e instanceof Error ? e.message : String(e)}`, streaming: false } : x)));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Card className="flex h-[560px] flex-col">
+      <CardHeader className="shrink-0 border-b border-card-border">
+        <CardTitle className="flex items-center gap-2">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+          Star — Asistente IA
+          <span className="ml-auto text-xs font-normal text-text-tertiary">tipeo streaming</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent ref={listRef} className="flex-1 overflow-y-auto space-y-3 p-4 bg-background-gray-secondary_alt_2">
+        {messages.map((m) => (
+          <ChatBubble key={m.id} role={m.role} text={m.text} streaming={m.streaming} isTyping={loading && m.role === "assistant" && !m.text} />
+        ))}
+        {loading && messages[messages.length - 1]?.role === "user" && (
+          <div className="flex justify-start">
+            <span className="text-xs text-text-tertiary">Star está escribiendo...</span>
+          </div>
+        )}
+      </CardContent>
+      <div className="shrink-0 border-t border-card-border p-3 flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(true); } }}
+          placeholder="Escribe: quiero ver taladros, compara precios..."
+          className="flex-1 rounded-xl border border-card-border bg-card-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-500/30"
+          disabled={loading}
+        />
+        <Button onClick={() => send(true)} isDisabled={loading || !input.trim()} appearance="fill" className="shrink-0">
+          {loading ? "..." : "Enviar"}
+        </Button>
+      </div>
+    </Card>
+  );
+}
