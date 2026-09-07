@@ -15,10 +15,47 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const [voiceOn, setVoiceOn] = useState(false);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  const speak = async (text: string) => {
+    if (!voiceOn) return;
+    const clean = text.replace(/[*#_]/g, "").slice(0, 900);
+    try {
+      const r = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: clean }) });
+      if (r.ok && r.headers.get("content-type")?.includes("audio")) {
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = new Audio(url);
+        await a.play().catch(() => {});
+        return;
+      }
+    } catch {}
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = "es-CL"; u.rate = 1.02;
+      const vs = window.speechSynthesis.getVoices();
+      const es = vs.find((v) => v.lang.startsWith("es-CL")) || vs.find((v) => v.lang.startsWith("es"));
+      if (es) u.voice = es;
+      window.speechSynthesis.speak(u);
+    } catch {}
+  };
+
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem("acs-voiceOn");
+      if (v === "1") setVoiceOn(true);
+      if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("acs-voiceOn", voiceOn ? "1" : "0"); } catch {}
+    if (!voiceOn) try { window.speechSynthesis.cancel(); } catch {}
+  }, [voiceOn]);
 
   async function send(streaming = true) {
     const text = input.trim();
@@ -68,7 +105,9 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
                 if (path) {
                   setTimeout(() => { window.location.href = path; }, 900);
                 }
-                setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: full || evt.text || "", crew, detectedIntent, streaming: false } : x)));
+                const final = full || evt.text || "";
+                setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: final, crew, detectedIntent, streaming: false } : x)));
+                if (final) speak(final);
               }
             } catch {}
           }
@@ -78,7 +117,9 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
         const j = await r.json();
         const nav = (j.toolCalls as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");
         const path = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo;
-        setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: j.text ?? "", crew: j.crew, detectedIntent: j.detectedIntent, streaming: false } : x)));
+        const finalJ = j.text ?? "";
+        setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: finalJ, crew: j.crew, detectedIntent: j.detectedIntent, streaming: false } : x)));
+        if (finalJ) speak(finalJ);
         if (path) setTimeout(() => { window.location.href = path; }, 900);
       }
     } catch (e) {
@@ -94,7 +135,10 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
         <CardTitle className="flex items-center gap-2">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
           Star — Asistente IA
-          <span className="ml-auto text-xs font-normal text-text-tertiary">tipeo streaming</span>
+          <span className="ml-auto flex items-center gap-2">
+            <button onClick={() => setVoiceOn((v) => !v)} title={voiceOn ? "Voz ON" : "Voz OFF"} className={`rounded-full px-2 py-1 text-xs ${voiceOn ? "bg-black text-white" : "bg-zinc-100 text-zinc-600"}`}>{voiceOn ? "🔊 Voz" : "🔇 Voz"}</button>
+            <span className="text-xs font-normal text-text-tertiary">tipeo</span>
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent ref={listRef} className="flex-1 overflow-y-auto space-y-3 p-4 bg-background-gray-secondary_alt_2">
