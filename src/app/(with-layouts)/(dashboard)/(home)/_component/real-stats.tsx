@@ -27,6 +27,7 @@ export function RealStats() {
 
   if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando métricas reales...</CardContent></Card>;
   if (!data) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Sin datos</CardContent></Card>;
+  const alerts = data.recentOrders.filter((o) => o.status === "FAILED" || o.status === "PENDING").length;
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
@@ -71,6 +72,14 @@ export function RealStats() {
           </div>
         </CardContent>
       </Card>
+      {alerts > 0 && (
+        <Card className="md:col-span-4 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+          <CardContent className="p-4 flex items-center justify-between">
+            <p className="text-sm"><span className="font-bold text-amber-700">⚠️ {alerts} pedido(s) con alerta</span> <span className="text-text-tertiary">— falló validación, derivado a humano (se salvó la venta, revisa en /orders)</span></p>
+            <a href="/orders?status=FAILED" className="text-sm font-medium text-amber-700 underline">Ver pedidos</a>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="md:col-span-2">
         <CardHeader><CardTitle className="text-sm">Top productos por demanda</CardTitle></CardHeader>

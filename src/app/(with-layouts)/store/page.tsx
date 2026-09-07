@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { Button } from "@/components/tailgrids/core/button";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
+import { SyncButton } from "./_components/sync-button";
 
 export const dynamic = "force-dynamic";
 
@@ -28,10 +29,11 @@ export default async function StorePage() {
             {stores.length === 0 ? (
               <p className="text-sm text-text-tertiary">Sin tiendas. Crea una con provider `mock` para demo, o `shopify` con dominio/apiKey.</p>
             ) : stores.map((s) => (
-              <div key={s.id} className="rounded-lg border border-card-border p-3">
+              <div key={s.id} className="rounded-lg border border-card-border p-3 space-y-2">
                 <p className="font-medium">{s.name} <Badge color="gray">{s.provider}</Badge></p>
                 <p className="text-xs text-text-tertiary">{s.domain ?? "—"}</p>
-                <Badge className="mt-1" color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activa" : "Inactiva"}</Badge>
+                <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activa" : "Inactiva"}</Badge>
+                <SyncButton storeId={s.id} storeName={s.name} />
               </div>
             ))}
           </CardContent>
