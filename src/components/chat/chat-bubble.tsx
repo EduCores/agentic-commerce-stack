@@ -15,7 +15,7 @@ export function ChatBubble({ role, text, streaming, isTyping, className }: Bubbl
   // Siempre tipeo IA: incluso streaming SSE se anima Char-by-char para que se note
   // streaming solo indica que el texto viene por chunks, pero igual pasa por typewriter
   const isAssistant = role === "assistant";
-  const { displayed, done } = useTypewriter(text, { enabled: isAssistant, speedMs: streaming ? 12 : 16, chunkSize: streaming ? 1 : 2 });
+  const { displayed, done } = useTypewriter(text, { enabled: isAssistant, speedMs: 35, chunkSize: 1 });
 
   const shown = isAssistant ? displayed : text;
 

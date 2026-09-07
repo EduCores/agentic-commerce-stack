@@ -1,8 +1,8 @@
 ﻿"use client";
 import { useEffect, useState } from "react";
 export function useTypewriter(fullText: string, opts?: { speedMs?: number; chunkSize?: number; enabled?: boolean }) {
-  const speedMs = opts?.speedMs ?? 18;
-  const chunkSize = opts?.chunkSize ?? 2;
+  const speedMs = opts?.speedMs ?? 35;
+  const chunkSize = opts?.chunkSize ?? 1;
   const enabled = opts?.enabled ?? true;
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);

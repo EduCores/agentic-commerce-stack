@@ -17,14 +17,19 @@ export function StarShopWidget() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Cerrar chat" : "Abrir chat Star"}
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg shadow-brand-500/30 transition hover:scale-105 hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
+        className="fixed bottom-5 right-5 z-[9999] flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-xl shadow-brand-500/30 transition hover:scale-105 hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
       >
         {open ? (
           <span className="text-xl">×</span>
         ) : (
           <span className="text-xl">💬</span>
         )}
-        {!open && <span className="absolute -right-1 -top-1 h-3 w-3 animate-pulse rounded-full bg-emerald-500 ring-2 ring-white" />}
+        {!open && (
+          <>
+            <span className="absolute -right-1 -top-1 h-3 w-3 animate-pulse rounded-full bg-emerald-500 ring-2 ring-white" />
+            <span className="absolute bottom-1 right-14 whitespace-nowrap rounded-full bg-black px-2 py-1 text-xs text-white">Star IA — tipeando...</span>
+          </>
+        )}
       </button>
 
       {/* Panel */}
