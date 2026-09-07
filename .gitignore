@@ -14,6 +14,9 @@
 # next.js
 /.next/
 /out/
+# Turbopack dev cache (puede crecer a >1GB si no se limpia)
+/.next/dev/
+/.next/cache/
 
 # production
 /build
@@ -30,6 +33,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel

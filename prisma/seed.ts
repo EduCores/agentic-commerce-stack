@@ -1,5 +1,7 @@
 import { prisma } from "../src/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "./sales-system-prompt";
+import { STARSHOP_CREWS, STARSHOP_WELCOME_PROMPT } from "./starshop-prompts";
+import { starShopRouterGraph, starShopRouterSteps } from "../src/workflows/starshop-router";
 import { normalize, tokenize } from "../agent/lib/search/normalize";
 import { STARSHOP_CATEGORIES } from "../agent/lib/search/categories";
 
@@ -256,7 +258,37 @@ async function main() {
     },
   });
 
-  console.log("Seed done", { storeId, products: existing.length || fallbackProducts.length, agent: agent.slug });
+  // 5) Workflow StarShop Router 1→2→6+3→4 (grafo XYFlow)
+  await prisma.workflowDefinition.upsert({
+    where: { slug: "starshop-intent-router" },
+    update: { graph: starShopRouterGraph, steps: starShopRouterSteps, name: "StarShop Intent Router", description: "1 Welcome → 2 Route By Intent → 3.x Crews (6+3) → 4 Confirm Order", isActive: true, trigger: "eve_tool" },
+    create: {
+      slug: "starshop-intent-router",
+      name: "StarShop Intent Router",
+      description: "1 Welcome → 2 Route By Intent → 3.x Crews (6+3) → 4 Confirm Order",
+      trigger: "eve_tool",
+      graph: starShopRouterGraph,
+      steps: starShopRouterSteps,
+    },
+  });
+
+  // 6) Crews StarShop — 8 agents (Welcome + 6 + OrderTracking + Escalate) + Confirm
+  const welcomeAgent = await prisma.agent.upsert({
+    where: { slug: "starshop-welcome" },
+    update: { systemPrompt: STARSHOP_WELCOME_PROMPT, storeId, isActive: true },
+    create: { slug: "starshop-welcome", name: "StarShop Welcome Agent", description: "Greet y detecta intent (paso 1)", systemPrompt: STARSHOP_WELCOME_PROMPT, model: "qwen/qwen3-30b-a3b-instruct-2507", isActive: true, storeId },
+  });
+
+  const crews = Object.values(STARSHOP_CREWS);
+  for (const crew of crews) {
+    await prisma.agent.upsert({
+      where: { slug: crew.slug },
+      update: { systemPrompt: crew.prompt, name: crew.name, description: crew.description, isActive: true, storeId },
+      create: { slug: crew.slug, name: crew.name, description: crew.description, systemPrompt: crew.prompt, model: crew.model, isActive: true, storeId },
+    });
+  }
+
+  console.log("Seed done", { storeId, products: existing.length || fallbackProducts.length, agent: agent.slug, welcome: welcomeAgent.slug, crews: crews.length, router: "starshop-intent-router" });
 }
 
 main()

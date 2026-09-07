@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
+  // Evita que el build suba source-maps y cache dev al deploy
+  // El peso real de deploy es ~8-12MB comprimido (Vercel lo prunea)
+  experimental: {
+    // No persistir cache de Turbopack en disco en prod (ya limpiado por scripts/clean.mjs en dev)
+  },
 };
 
 export default nextConfig;

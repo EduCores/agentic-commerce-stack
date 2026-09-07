@@ -20,7 +20,6 @@ export default defineTool({
   async execute({ sku, qty, region }) {
     const product = await prisma.product.findFirst({ where: { sku, storeId: "seed-store" } });
     if (!product) throw new Error(`Producto no encontrado: ${sku}`);
-    const tiers = (product as any).metadata as any;
     // Precio por volumen simple: si qty>=10 15% off, >=5 8% off
     let unitPrice = Number(product.price);
     if (qty >= 10) unitPrice = Math.round(unitPrice * 0.85);

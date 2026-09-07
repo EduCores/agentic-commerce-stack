@@ -7,6 +7,8 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
+        "clean": "node scripts/clean.mjs",
+        "clean:cache": "node scripts/clean.mjs --cache-only",
         "acs:dev": "prisma generate && next dev",
         "acs:setup": "prisma generate && prisma migrate dev --name init && tsx prisma/seed.ts",
         "acs:seed": "tsx prisma/seed.ts",

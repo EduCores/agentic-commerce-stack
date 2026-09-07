@@ -6,7 +6,6 @@ import {
   UserIcon,
   Widget4Icon,
   WindowIcon,
-  ThreeDots,
 } from "./icon";
 
 export const NAV_DATA = [

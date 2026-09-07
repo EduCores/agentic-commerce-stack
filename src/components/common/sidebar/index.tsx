@@ -1,6 +1,5 @@
 'use client';
 
-import { buttonStyles } from '@/components/tailgrids/core/button';
 import { CollapsibleGroup } from '@/components/tailgrids/core/collapsible';
 import { cn } from '@/utils/cn';
 import { Logo, LogoWithText, LogoWithTextDark } from '@/utils/icon';
@@ -26,7 +25,10 @@ export default function Sidebar({
 }) {
     const pathname = usePathname();
     const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
+    useEffect(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration guard: needed once on mount to toggle dark/light logo
+      setMounted(true);
+    }, []);
 
     // Compute which group should be open based on the current route
     const activeGroupKey = useMemo(

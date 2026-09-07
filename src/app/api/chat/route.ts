@@ -1,5 +1,5 @@
 ﻿import { NextResponse } from "next/server";
-import { runAgent } from "@/../agent";
+import { runAgent, runStarShopFlow } from "@/../agent";
 
 function corsHeaders() {
   return {
@@ -28,10 +28,16 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { message, agentSlug, storeId } = await req.json();
+  const { message, agentSlug, storeId, useFlow } = await req.json();
   if (!message) return NextResponse.json({ error: "message required" }, { status: 400, headers: corsHeaders() });
   try {
-    const result = await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, storeId });
+    // Flujo 1→2→6+3→4 por defecto (useFlow !== false) — router StarShop. Legacy: useFlow=false → runAgent directo.
+    const shouldUseFlow = useFlow !== false;
+    const result = shouldUseFlow
+      ? await runStarShopFlow({ input: message, storeId })
+      : await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, storeId });
+    const detectedIntent = (result as unknown as { detectedIntent?: string }).detectedIntent;
+    const crew = (result as unknown as { crew?: string }).crew;
     const rawCalls = (result.toolCalls ?? []) as unknown as Array<Record<string, unknown>>;
     const toolCalls = rawCalls.map((tc) => {
       const toolName = (tc.toolName ?? tc.name) as string | undefined;
@@ -79,7 +85,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ text, toolCalls }, { headers: corsHeaders() });
+    return NextResponse.json({ text, toolCalls, detectedIntent, crew }, { headers: corsHeaders() });
   } catch (e) {
         console.error("[API-CHAT] Error:", e);
     return NextResponse.json({
