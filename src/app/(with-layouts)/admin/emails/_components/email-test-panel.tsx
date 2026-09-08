@@ -45,7 +45,7 @@ export function EmailTestPanel() {
         </label>
         <label className="flex flex-col gap-1 text-xs">
           Template
-          <select value={template} onChange={(e) => setTemplate(e.target.value as typeof template)} className="rounded-lg border border-card-border px-3 py-2 text-sm">
+          <select value={template} onChange={(e) => setTemplate(e.target.value as typeof template)} className="rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]">
             {KINDS.map((k) => (
               <option key={k} value={k}>{k}</option>
             ))}

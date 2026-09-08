@@ -62,7 +62,7 @@ export function TeamTable() {
           <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Nombre<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
           <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Teléfono WhatsApp<input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="569XXXXXXXX" className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
           <label className="flex flex-col gap-1 text-xs">Rol
-            <select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-lg border border-card-border px-3 py-2 text-sm">
+            <select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]">
               <option value="member">member</option>
               <option value="admin">admin</option>
               <option value="owner">owner</option>
@@ -91,7 +91,7 @@ export function TeamTable() {
                         <input defaultValue={m.phone ?? ""} key={`${m.id}-${m.phone ?? "none"}`} onBlur={(e) => { if (e.target.value !== (m.phone ?? "")) changePhone(m.id, e.target.value); }} placeholder="569XXXXXXXX" className="w-32 rounded-lg border border-card-border px-2 py-1 text-xs" />
                       </td>
                       <td className="p-2">
-                        <select value={m.role} onChange={(e) => changeRole(m.id, e.target.value)} className="rounded-lg border border-card-border px-2 py-1 text-xs">
+                        <select value={m.role} onChange={(e) => changeRole(m.id, e.target.value)} className="rounded-lg border border-card-border bg-input-background px-2 py-1 text-xs text-text-primary [color-scheme:light] dark:[color-scheme:dark]">
                           <option value="member">member</option>
                           <option value="admin">admin</option>
                           <option value="owner">owner</option>
