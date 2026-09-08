@@ -47,16 +47,19 @@ export default function Sidebar({
             >
                 <Link href='/' suppressHydrationWarning aria-label="Ir al panel principal">
                     {isSidebarOpen ? (
-                        <span suppressHydrationWarning className="flex items-baseline text-[22px] leading-none font-black tracking-tight select-none">
-                            <span className="text-black dark:text-white">ST</span>
-                            <span className="text-[#fdd817]" aria-hidden>★</span>
-                            <span className="text-black dark:text-white">R</span>
+                        <span suppressHydrationWarning translate="no" className="starshop-logo relative inline-flex items-baseline text-[26px] leading-none font-black tracking-tight select-none">
+                            <span className="text-black dark:text-[#fbffff]">ST</span>
+                            <span className="star-slot" aria-hidden="true">
+                                <span className="star-ghost">A</span>
+                                <span className="star-float">
+                                    <img src="/star2.svg" alt="" className="star-logo star-anim-show" />
+                                </span>
+                            </span>
+                            <span className="text-black dark:text-[#fbffff]">R</span>
                             <span className="text-[#fdd817]">SHOP</span>
                         </span>
                     ) : (
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-[#fdd817] text-xl font-black text-black select-none" aria-hidden>
-                            ★
-                        </span>
+                        <img src="/star2.svg" alt="StarShop" className="size-9 select-none" />
                     )}
                 </Link>
 
