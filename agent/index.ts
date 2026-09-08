@@ -258,13 +258,31 @@ export async function runAgent(params: { agentSlug: string; input: string; store
 
   const promptWithHistory = params.history ? params.input + formatHistory(params.history) : params.input;
 
-  const result = await generateText({
-    model,
-    system,
-    prompt: promptWithHistory,
-    tools: toAISDKTools(allowedTools),
-    stopWhen: stepCountIs(4) as never,
-  });
+  let result: Awaited<ReturnType<typeof generateText>>;
+  try {
+    result = await generateText({
+      model,
+      system,
+      prompt: promptWithHistory,
+      tools: toAISDKTools(allowedTools),
+      stopWhen: stepCountIs(4) as never,
+      maxOutputTokens: 700,
+    } as never);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    // Fallback amigable si es límite de créditos OpenRouter
+    if (msg.includes("credits") || msg.includes("max_tokens") || msg.includes("402")) {
+      console.warn("[ACS-AGENT] LLM credit/max_tokens fallback", msg.slice(0, 200));
+      return {
+        text: "Estoy con límite de créditos del LLM en este momento. Puedo seguir ayudándote con datos reales: revisa /products, /orders o /workflows, o dime qué buscas y te muestro resultados del catálogo.",
+        toolCalls: [],
+        directFallback: false,
+        rawText: "",
+        agentSlug: agent.slug,
+      } as unknown as typeof result & { text: string; toolCalls: unknown[]; directFallback: boolean; rawText: string; agentSlug: string };
+    }
+    throw e;
+  }
 
   // Agrega los tool calls de TODOS los pasos (result.toolCalls solo refleja el último)
   const stepToolCalls = ((result as unknown as { steps?: Array<{ toolCalls?: unknown[] }> }).steps ?? [])
@@ -324,7 +342,8 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
     prompt: promptWithHistory,
     tools: toAISDKTools(allowedTools) as never,
     stopWhen: stepCountIs(4) as never,
-  });
+    maxOutputTokens: 700,
+  } as never);
 
   // Stream text chunks como IA que escribe
   for await (const chunk of result.textStream) {
