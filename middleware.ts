@@ -22,14 +22,14 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get(COOKIE_NAME)?.value;
   if (!token) {
     if (pathname.startsWith("/api/")) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/auth/sign-in", req.url));
   }
   try {
     await jwtVerify(token, JWT_SECRET);
     return NextResponse.next();
   } catch {
     if (pathname.startsWith("/api/")) return NextResponse.json({ error: "Sesión expirada" }, { status: 401 });
-    const res = NextResponse.redirect(new URL("/login", req.url));
+    const res = NextResponse.redirect(new URL("/auth/sign-in", req.url));
     res.cookies.delete(COOKIE_NAME);
     return res;
   }

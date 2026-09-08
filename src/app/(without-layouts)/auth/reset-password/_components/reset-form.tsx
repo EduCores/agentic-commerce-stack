@@ -38,18 +38,18 @@ export function ResetForm() {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Email *</Label>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@starshop.cl" />
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@starshop.cl" className="w-full" />
         <Button onClick={request} appearance="outline" className="w-full" isDisabled={loading || !email}>Enviar instrucciones</Button>
       </div>
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Token recibido</Label>
-        <Input value={token} onChange={(e) => setToken(e.target.value)} placeholder="Pega el token del correo" />
+        <Input value={token} onChange={(e) => setToken(e.target.value)} placeholder="Pega el token del correo" className="w-full" />
       </div>
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Nueva contraseña (mín. 8)</Label>
-        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full" />
         <Button onClick={confirm} appearance="fill" className="w-full" isDisabled={loading || !token || !password}>Actualizar contraseña</Button>
       </div>
       {msg && <p className="rounded-lg border border-card-border bg-background-gray-secondary_alt_2 break-all p-2 text-xs">{msg}</p>}

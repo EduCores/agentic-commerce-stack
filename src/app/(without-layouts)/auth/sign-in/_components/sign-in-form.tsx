@@ -37,13 +37,13 @@ export function SignInForm() {
         <Button type="button" appearance="outline" className="w-full">Continue with Github</Button>
       </div>
       <div className="flex items-center gap-3 text-xs text-text-tertiary"><span className="h-px flex-1 bg-card-border" />OR<span className="h-px flex-1 bg-card-border" /></div>
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Email Address *</Label>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full" />
       </div>
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Password *</Label>
-        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full" />
       </div>
       <div className="flex items-center justify-between text-xs">
         <label className="flex items-center gap-2 text-text-secondary"><input type="checkbox" className="rounded" />Keep me logged in</label>

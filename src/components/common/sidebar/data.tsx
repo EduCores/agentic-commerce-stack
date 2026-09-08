@@ -1,6 +1,5 @@
 import {
   AlphabetIcon,
-  AuthIcon,
   ChatIcon,
   HomeIcon,
   LetterIcon,
@@ -94,28 +93,6 @@ export const NAV_DATA = [
         icon: <LetterIcon />,
         url: "/admin/emails",
         items: [],
-      },
-      {
-        title: "Auth",
-        icon: <AuthIcon />,
-        items: [
-          {
-            title: "Sign In",
-            url: "/auth/sign-in",
-          },
-          {
-            title: "Sign Up",
-            url: "/auth/sign-up",
-          },
-          {
-            title: "Reset Password",
-            url: "/auth/reset-password",
-          },
-          {
-            title: "Two Step",
-            url: "/auth/two-step-verification",
-          },
-        ],
       },
     ],
   },

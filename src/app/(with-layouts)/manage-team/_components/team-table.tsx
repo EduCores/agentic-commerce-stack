@@ -49,8 +49,8 @@ export function TeamTable() {
       <Card>
         <CardHeader><CardTitle className="text-sm">Add Member</CardTitle></CardHeader>
         <CardContent className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1 text-xs">Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="miembro@starshop.cl" className="rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
-          <label className="flex flex-col gap-1 text-xs">Nombre<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
+          <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="miembro@starshop.cl" className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
+          <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Nombre<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
           <label className="flex flex-col gap-1 text-xs">Rol
             <select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-lg border border-card-border px-3 py-2 text-sm">
               <option value="member">member</option>
@@ -58,7 +58,7 @@ export function TeamTable() {
               <option value="owner">owner</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-xs">Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="mín. 8" className="rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
+          <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="mín. 8" className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
           <Button onClick={add} appearance="fill">Agregar</Button>
           {msg && <Badge color="gray">{msg}</Badge>}
         </CardContent>

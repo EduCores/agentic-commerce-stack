@@ -39,9 +39,9 @@ export function EmailTestPanel() {
         <CardTitle className="text-sm">Probar envío mock</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-xs">
+        <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">
           Para
-          <input value={to} onChange={(e) => setTo(e.target.value)} className="rounded-lg border border-card-border px-3 py-2 text-sm" />
+          <input value={to} onChange={(e) => setTo(e.target.value)} className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" />
         </label>
         <label className="flex flex-col gap-1 text-xs">
           Template
@@ -51,9 +51,9 @@ export function EmailTestPanel() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs">
+        <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">
           OrderId
-          <input value={orderId} onChange={(e) => setOrderId(e.target.value)} className="rounded-lg border border-card-border px-3 py-2 text-sm" />
+          <input value={orderId} onChange={(e) => setOrderId(e.target.value)} className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" />
         </label>
         <Button onClick={send} isDisabled={loading || !to} appearance="fill">
           {loading ? "..." : "Enviar mock"}

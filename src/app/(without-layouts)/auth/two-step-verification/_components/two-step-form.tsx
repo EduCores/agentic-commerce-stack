@@ -42,9 +42,9 @@ export function TwoStepForm() {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Email *</Label>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full" />
         <Button onClick={request} appearance="outline" className="w-full" isDisabled={loading || !email}>Enviar código</Button>
       </div>
       <div className="space-y-1.5">

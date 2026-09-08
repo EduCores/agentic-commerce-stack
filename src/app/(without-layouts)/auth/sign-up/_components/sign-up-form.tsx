@@ -33,17 +33,17 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Nombre</Label>
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Dueño StarShop" />
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Dueño StarShop" className="w-full" />
       </div>
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Email Address *</Label>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full" />
       </div>
-      <div className="space-y-1.5">
+      <div className="w-full space-y-1.5">
         <Label>Password * (mín. 8)</Label>
-        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full" />
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-600">{error}</p>}
       <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Creando..." : "Create account"}</Button>
