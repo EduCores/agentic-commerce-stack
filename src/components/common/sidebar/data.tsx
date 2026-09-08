@@ -21,14 +21,8 @@ export const NAV_DATA: NavSection[] = [
     label: "PANEL",
     items: [
       {
-        title: "Panel principal",
-        icon: <HomeIcon />,
-        url: "/",
-        items: [],
-      },
-      {
         title: "Almacenar",
-        icon: <TableIcon />,
+        icon: <HomeIcon />,
         url: "/store",
         items: [],
       },
