@@ -21,7 +21,7 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
       <div className="rounded-sm border border-card-border bg-card-background p-6 shadow-sm">
         <h2 className="mb-1 text-xl font-bold text-text-primary">Monitoreo de agentes y flujos de trabajo en tiempo real</h2>
         <p className="mb-4 text-sm text-text-tertiary">
-          Creador de flujos de trabajo integrado — arrastra los nodos, conéctalos y guarda. XYFlow integrado en NextAdmin. Estado en vivo desde Prisma.
+          Creador de flujos de trabajo integrado — arrastra los nodos, conéctalos y guarda. Estado en vivo desde Prisma.
         </p>
         {all.length > 1 && (
           <div className="mb-4 flex flex-wrap gap-2">

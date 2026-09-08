@@ -13,11 +13,11 @@ const geistInter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | NextAdmin - Next.js Dashboard Kit",
-    default: "NextAdmin - Next.js Dashboard Kit",
+    template: "%s | StarShop ACS",
+    default: "StarShop ACS — Panel del dueño",
   },
   description:
-    "Next.js admin dashboard toolkit with 200+ templates, UI components, and integrations for fast dashboard development.",
+    "Panel de administración StarShop: tienda híbrida, agente IA, flujos de trabajo y equipo.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       suppressHydrationWarning
-      lang="en"
+      lang="es-CL"
       className={cn("h-full overflow-hidden antialiased", geistInter.className)}
     >
       <body className="h-full overflow-hidden bg-background-gray-secondary_alt_2" suppressHydrationWarning>

@@ -12,7 +12,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <SignInForm />
-          <p className="mt-4 text-center text-[11px] text-text-tertiary">NextAdmin · Hecho para desarrolladores, pensado para ser eficiente</p>
+          <p className="mt-4 text-center text-[11px] text-text-tertiary">StarShop ACS · Panel del dueño</p>
         </CardContent>
       </Card>
     </div>

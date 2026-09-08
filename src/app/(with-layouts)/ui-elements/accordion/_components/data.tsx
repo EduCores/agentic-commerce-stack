@@ -1,13 +1,13 @@
 export const accordionData = [
   {
     id: 1,
-    title: "¿Qué es NextAdmin?",
-    content: "NextAdmin es un panel de administración potente hecho con Next.js y Tailwind CSS.",
+    title: "¿Qué es StarShop ACS?",
+    content: "StarShop ACS es el panel del dueño: tienda híbrida, agente IA y flujos en un solo lugar.",
   },
   {
     id: 2,
-    title: "¿Cómo instalo NextAdmin?",
-    content: "Puedes instalar NextAdmin siguiendo la guía de instalación de la documentación.",
+    title: "¿Cómo conecto mi tienda?",
+    content: "Desde Almacenar agregas tu conexión y sincronizas el catálogo con un clic.",
   },
   {
     id: 3,
@@ -17,13 +17,13 @@ export const accordionData = [
   },
   {
     id: 4,
-    title: "¿NextAdmin tiene modo oscuro?",
+    title: "¿El panel tiene modo oscuro?",
     content:
-      "Sí, NextAdmin tiene modo oscuro. Puedes cambiar entre tema claro y oscuro desde el encabezado y los ajustes.",
+      "Sí. Cambias entre tema claro y oscuro desde el interruptor del encabezado.",
   },
   {
     id: 5,
-    title: "¿Qué necesito para usar NextAdmin?",
-    content: "NextAdmin necesita Node.js 14 o superior y un navegador moderno.",
+    title: "¿Qué necesito para usar el panel?",
+    content: "Solo tu cuenta de dueño y un navegador moderno.",
   },
 ];
