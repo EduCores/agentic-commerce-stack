@@ -100,7 +100,7 @@ export default function Sidebar({
                         <div key={section.label}>
                             {/* Expanded: show section label | Collapsed: show divider between sections */}
                             {isSidebarOpen ? (
-                                <p className='mt-6 mb-4 text-xs text-text-tertiary uppercase'>
+                                <p className="mt-3 mb-2 text-xs text-text-tertiary uppercase">
                                     {section.label}
                                 </p>
                             ) : (
