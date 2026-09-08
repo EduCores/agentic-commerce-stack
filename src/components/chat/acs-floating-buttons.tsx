@@ -74,8 +74,20 @@ export function ACSFloatingButtons() {
     if (!voiceOn) stopSpeak();
   }, [voiceOn]);
 
+  // Scroll instantáneo solo al fondo (smooth cada 28ms = tiriteo)
+  const stickRef = useRef(true);
   useEffect(() => {
-    agentScrollRef.current?.scrollTo({ top: agentScrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = agentScrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => {
+    const el = agentScrollRef.current;
+    if (el && stickRef.current) el.scrollTop = el.scrollHeight;
   }, [agentMessages, agentTyping]);
 
   const getAgentReply = async (input: string, history: { role: string; text: string }[] = []): Promise<{ text: string; navigateTo?: string }> => {

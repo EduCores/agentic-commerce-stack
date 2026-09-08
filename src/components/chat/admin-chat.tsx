@@ -17,9 +17,32 @@ export function AdminChat() {
   const [voiceOn, setVoiceOn] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Sigue el tipeo sin tiriteo: scroll instantáneo solo si el usuario está al fondo.
+  // (smooth en cada letra encadena animaciones que pelean entre sí y hacen temblar el chat)
+  const stickRef = useRef(true);
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+    const el = listRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => {
+    const el = listRef.current;
+    if (el && stickRef.current) el.scrollTop = el.scrollHeight;
   }, [messages]);
+  // Sigue también el crecimiento letra a letra del typewriter (los messages no cambian por letra)
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      if (stickRef.current) el.scrollTop = el.scrollHeight;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const speak = async (text: string) => {
     if (!voiceOn) return;

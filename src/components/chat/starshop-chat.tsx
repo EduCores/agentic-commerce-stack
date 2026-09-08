@@ -12,7 +12,20 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
   const listRef = useRef<HTMLDivElement>(null);
   const [voiceOn, setVoiceOn] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
+  const stickRef = useRef(true);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => {
+    const el = listRef.current;
+    if (el && stickRef.current) el.scrollTop = el.scrollHeight;
+  }, [messages]);
   const speak = async (text: string) => {
     if (!voiceOn) return;
     try { audioRef.current?.pause(); audioRef.current = null; } catch {}

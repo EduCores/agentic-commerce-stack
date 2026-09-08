@@ -4,22 +4,22 @@ export function useTypewriter(fullText: string, opts?: { speedMs?: number; chunk
   const speedMs = opts?.speedMs ?? 35;
   const chunkSize = opts?.chunkSize ?? 1;
   const enabled = opts?.enabled ?? true;
-  const [displayed, setDisplayed] = useState("");
-  const [done, setDone] = useState(false);
+  const [displayed, setDisplayed] = useState(enabled ? "" : fullText);
+  const [done, setDone] = useState(!enabled);
+  // Un solo intervalo por texto: sin displayed.length en deps (evita recrear el timer en cada letra = tiriteo)
   useEffect(() => {
     if (!enabled) { setDisplayed(fullText); setDone(true); return; }
     if (!fullText) { setDisplayed(""); setDone(false); return; }
-    if (fullText.length < displayed.length) { setDisplayed(""); }
-    let idx = displayed.length;
-    if (idx >= fullText.length) { setDone(true); return; }
+    setDisplayed("");
     setDone(false);
+    let idx = 0;
     const t = setInterval(() => {
       idx = Math.min(idx + chunkSize, fullText.length);
       setDisplayed(fullText.slice(0, idx));
       if (idx >= fullText.length) { setDone(true); clearInterval(t); }
     }, speedMs);
     return () => clearInterval(t);
-  }, [fullText, speedMs, chunkSize, enabled, displayed.length]);
+  }, [fullText, speedMs, chunkSize, enabled]);
   return { displayed, done };
 }
 export function TypingIndicator() {
