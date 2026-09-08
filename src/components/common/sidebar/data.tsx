@@ -49,12 +49,6 @@ export const NAV_DATA = [
         items: [],
       },
       {
-        title: "Chat",
-        icon: <UserIcon />,
-        url: "/chat",
-        items: [],
-      },
-      {
         title: "Admin",
         icon: <UserIcon />,
         url: "/admin",
