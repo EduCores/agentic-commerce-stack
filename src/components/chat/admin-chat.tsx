@@ -9,7 +9,7 @@ type Msg = { id: string; role: "user" | "assistant"; text: string; streaming?: b
 
 export function AdminChat() {
   const [messages, setMessages] = useState<Msg[]>([
-    { id: "welcome", role: "assistant", text: "¡Hola Dueño! Soy Star Admin Ops — mismo estilo StarShop pero para operar. Pregúntame: ¿cuánto vendí hoy? | stock bajo | pedidos con alerta | crea producto" },
+    { id: "welcome", role: "assistant", text: "¡Hola Dueño! 👋 Soy Star Admin Ops. ¿Qué necesitas hoy?\n\n• ¿Cuánto vendí hoy?\n• Stock bajo\n• Pedidos con alerta\n• Crea producto\n\nTe llevo a /products | /orders | /workflows" },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
