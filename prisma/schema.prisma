@@ -241,6 +241,20 @@ model AdminUser {
   updatedAt DateTime @updatedAt
 }
 
+// Códigos de verificación (2FA login) — persistidos porque serverless no tiene memoria
+model VerificationCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  purpose   String   @default("2fa")
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
 // Step log — puente Vercel Workflows ↔ XYFlow (tiempo real)
 model OrderStepLog {
   id          String   @id @default(cuid())

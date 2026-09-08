@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { createSessionToken, AUTH_COOKIE, getAdminByEmail } from "@/lib/auth";
+import { prisma } from "@/lib/adapters/prisma";
 
 export async function POST(req: Request) {
   const { email, code } = await req.json().catch(() => ({}));
   if (!email || !code) return NextResponse.json({ error: "Email y código requeridos" }, { status: 400 });
   const normalized = String(email).toLowerCase().trim();
-  const store = (globalThis as unknown as { __acs2fa?: Map<string, { code: string; exp: number }> }).__acs2fa;
-  const entry = store?.get(normalized);
-  if (!entry || entry.exp < Date.now()) return NextResponse.json({ error: "Código expirado. Pide uno nuevo." }, { status: 400 });
+  const entry = await prisma.verificationCode.findFirst({
+    where: { email: normalized, purpose: "2fa", consumedAt: null },
+    orderBy: { createdAt: "desc" },
+  }).catch(() => null);
+  if (!entry || entry.expiresAt < new Date()) return NextResponse.json({ error: "Código expirado. Pide uno nuevo." }, { status: 400 });
   if (entry.code !== String(code).trim()) return NextResponse.json({ error: "Código incorrecto" }, { status: 400 });
-  store?.delete(normalized);
+  await prisma.verificationCode.update({ where: { id: entry.id }, data: { consumedAt: new Date() } }).catch(() => {});
   const admin = await getAdminByEmail(normalized);
   if (!admin) return NextResponse.json({ error: "Cuenta no encontrada" }, { status: 404 });
   const token = await createSessionToken(admin);
