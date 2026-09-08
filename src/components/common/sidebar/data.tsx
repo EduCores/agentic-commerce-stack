@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   ChatIcon,
   HomeIcon,
@@ -11,7 +12,11 @@ import {
   WindowIcon,
 } from "./icon";
 
-export const NAV_DATA = [
+export type NavChild = { title: string; url: string };
+export type NavItem = { title: string; icon?: ReactNode; url?: string; items: NavChild[] };
+export type NavSection = { label: string; items: NavItem[] };
+
+export const NAV_DATA: NavSection[] = [
   {
     label: "AGENTIC COMMERCE",
     items: [
