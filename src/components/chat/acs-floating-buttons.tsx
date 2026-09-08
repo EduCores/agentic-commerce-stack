@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowUp, Bot, X, Send, Sparkles, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getTeamWhatsAppLink } from "@/lib/whatsapp";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -26,6 +27,8 @@ export function ACSFloatingButtons() {
   const [voiceOn, setVoiceOn] = useState(false);
   const [speakingId, setSpeakingId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // WhatsApp del EQUIPO (admin). El de clientes vive en la tienda (NEXT_PUBLIC_WHATSAPP_STORE).
+  const teamWa = getTeamWhatsAppLink();
 
   const typeAgentMessage = (full: string) => {
     setAgentMessages((m) => [...(m as any), { role: "agent", text: "" }]);
@@ -208,10 +211,12 @@ export function ACSFloatingButtons() {
           </motion.div>
         )}
       </AnimatePresence>
-      <motion.a href="https://wa.me/56993301557?text=Hola%20Starshop,%20quiero%20hacer%20una%20consulta" target="_blank" rel="noopener noreferrer" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, type: "spring", stiffness: 260, damping: 18 }} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="relative h-[67px] w-[67px] md:h-16 md:w-16 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center hover:bg-[#128C7E] transition-colors" aria-label="Contactar por WhatsApp">
-        <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" aria-hidden />
-        <WhatsAppIcon className="h-8 w-8 md:h-8 md:w-8 relative" />
-      </motion.a>
+      {teamWa && (
+        <motion.a href={teamWa} target="_blank" rel="noopener noreferrer" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, type: "spring", stiffness: 260, damping: 18 }} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="relative h-[67px] w-[67px] md:h-16 md:w-16 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center hover:bg-[#128C7E] transition-colors" aria-label="WhatsApp del equipo de tienda">
+          <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" aria-hidden />
+          <WhatsAppIcon className="h-8 w-8 md:h-8 md:w-8 relative" />
+        </motion.a>
+      )}
     </div>
   );
 }
