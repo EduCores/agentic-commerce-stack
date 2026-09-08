@@ -106,9 +106,10 @@ async function logRunSafe(data: {
 
 // ── Intent detection (Welcome → Route) ─────────────────────────────────────
 // Heurística rápida (sin LLM) para el router. El LLM del Welcome refina después.
-function detectIntentHeuristic(message: string): StarShopIntent {
+function detectIntentHeuristic(message: string, isAdmin?: boolean): StarShopIntent {
   const t = message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  if (/(cuanto vendi|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow)/.test(t)) return "admin_ops";
+  if (isAdmin && /^(hola|hola!|hey|buenas|buenos dias|buenas tardes)\b/.test(t.trim())) return "admin_ops";
+  if (/(cuanto vendi|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow|cuanto se vendio|vendimos)/.test(t)) return "admin_ops";
   if (/(devol|devoluci|cambio.*producto|garant.*falla|no me sirve.*devolver)/.test(t)) return "return_request";
   if (/(carrito abandon|dejé.*carrito|deje.*carrito|carrito.*abandon|retomar compr|abandon.*cart|carrito.*no pude pagar|quedó.*carrito|quedo.*carrito)/.test(t)) return "abandoned_cart";
   if (/(dónde está|donde esta|seguimiento|estado.*pedido|track.*order|rastrear|wismo|dónde va.*pedido)/.test(t)) return "order_tracking";
@@ -201,8 +202,8 @@ function formatHistory(history: unknown): string {
 export type RunAgentResult = Awaited<ReturnType<typeof runAgent>>;
 
 /** Flujo 1→2→6+3→4 — detecta intent y despacha al crew correcto */
-export async function runStarShopFlow(params: { input: string; storeId?: string; history?: unknown[] }) {
-  const heuristic = detectIntentHeuristic(params.input);
+export async function runStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
+  const heuristic = detectIntentHeuristic(params.input, params.isAdmin);
   // Intenta refinar con LLM Welcome si hay key, pero no bloquea si falla
   const detectedIntent: StarShopIntent = heuristic;
   // Heurística ya es robusta; el refinement LLM se hace implícito en el crew prompt.
@@ -336,8 +337,8 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
   yield { type: "done" as const, text: finalText, toolCalls, agentSlug: agent.slug };
 }
 
-export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[] }) {
-  const heuristic = detectIntentHeuristic(params.input);
+export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
+  const heuristic = detectIntentHeuristic(params.input, params.isAdmin);
   const detectedIntent = heuristic;
   const crew = getCrewConfig(detectedIntent);
   const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);

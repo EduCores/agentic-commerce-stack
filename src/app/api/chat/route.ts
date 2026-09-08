@@ -28,21 +28,21 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { message, history, agentSlug, storeId, useFlow, stream } = await req.json();
+  const { message, history, agentSlug, storeId, useFlow, stream, isAdmin } = await req.json();
   if (!message) return NextResponse.json({ error: "message required" }, { status: 400, headers: corsHeaders() });
   // Si el frontend pide stream:true, redirige a lógica SSE sin romper compatibilidad JSON
   if (stream) {
     const url = new URL(req.url);
     url.pathname = "/api/chat/stream";
-    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow }), signal: (req as unknown as { signal?: AbortSignal }).signal });
+    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
     // Proxy streaming response tal cual
     return new Response(r.body, { status: r.status, headers: { "Content-Type": "text/event-stream", ...corsHeaders() } });
   }
   try {
-    // Flujo 1→2→6+3→4 por defecto (useFlow !== false) — router StarShop. Legacy: useFlow=false → runAgent directo.
+    // Flujo 1→2→9 por defecto — router StarShop. isAdmin fuerza admin_ops para el admin.
     const shouldUseFlow = useFlow !== false;
     const result = shouldUseFlow
-      ? await runStarShopFlow({ input: message, history: history ?? [], storeId })
+      ? await runStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin: !!isAdmin })
       : await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
     const detectedIntent = (result as unknown as { detectedIntent?: string }).detectedIntent;
     const crew = (result as unknown as { crew?: string }).crew;

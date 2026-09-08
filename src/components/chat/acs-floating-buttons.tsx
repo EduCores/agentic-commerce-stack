@@ -16,7 +16,7 @@ export function ACSFloatingButtons() {
   const [agentOpen, setAgentOpen] = useState(false);
   const [agentInput, setAgentInput] = useState("");
   const [agentMessages, setAgentMessages] = useState<{ role: "user" | "agent"; text: string }[]>([
-    { role: "agent", text: "Hola! Soy Star, tu asistente de Starshop. ¿En qué te ayudo hoy?" },
+    { role: "agent", text: "¡Hola Dueño! Soy Star Admin Ops — opero tu tienda. Pregúntame: ¿cuánto vendí hoy? | stock bajo | pedidos con alerta" },
   ]);
   const [agentTyping, setAgentTyping] = useState(false);
   const [agentPulse, setAgentPulse] = useState(0);
@@ -83,7 +83,7 @@ export function ACSFloatingButtons() {
       const r = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input, history: history.slice(-8), storeId: "seed-store" }),
+        body: JSON.stringify({ message: input, history: history.slice(-8), storeId: "seed-store", isAdmin: true }),
       });
       const data = await r.json();
       const calls = data.toolCalls ?? [];

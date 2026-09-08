@@ -20,7 +20,7 @@ export async function OPTIONS() {
  *        data: {"type":"done","text":"final","toolCalls":[...],"agentSlug":"..."}
  */
 export async function POST(req: Request) {
-  const { message, history, storeId, agentSlug, useFlow } = await req.json();
+  const { message, history, storeId, agentSlug, useFlow, isAdmin } = await req.json();
   if (!message) {
     return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders() } });
   }
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       };
       try {
         const gen = shouldUseFlow
-          ? streamStarShopFlow({ input: message, history: history ?? [], storeId })
+          ? streamStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin: !!isAdmin })
           : streamAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
 
         for await (const chunk of gen) {
