@@ -18,8 +18,8 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
           { label: "Workflows", href: "/workflows" },
         ]}
       />
-      <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-        <h2 className="mb-1 text-xl font-bold text-black dark:text-white">Monitoreo de Agentes y Flujos en Tiempo Real</h2>
+      <div className="rounded-sm border border-card-border bg-card-background p-6 shadow-sm">
+        <h2 className="mb-1 text-xl font-bold text-text-primary">Monitoreo de Agentes y Flujos en Tiempo Real</h2>
         <p className="mb-4 text-sm text-text-tertiary">
           Creador de flujos integrado — arrastra nodos, conecta y guarda. XYFlow embebido en NextAdmin. Estado en vivo desde Prisma.
         </p>
@@ -29,7 +29,7 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
               <a
                 key={w.slug}
                 href={`/workflows?slug=${w.slug}`}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium border ${w.slug === workflow?.slug ? "bg-primary text-white border-primary" : "bg-white text-text-primary border-stroke hover:bg-gray-50"}`}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium border ${w.slug === workflow?.slug ? "bg-brand-500 text-white border-brand-500" : "bg-card-background text-text-primary border-card-border hover:bg-background-gray-secondary"}`}
               >
                 {w.name}
               </a>
