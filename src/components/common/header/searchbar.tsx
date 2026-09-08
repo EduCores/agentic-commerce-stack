@@ -9,7 +9,7 @@ import {
 } from '@/components/tailgrids/core/input-group';
 import { Command } from 'cmdk';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface SearchItem {
     id: string;
@@ -23,19 +23,6 @@ interface SearchItem {
 export default function SearchBar() {
     const [open, setOpen] = useState(false);
     const router = useRouter();
-
-    // Keyboard shortcut listener (Cmd+K / Ctrl+K)
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-                e.preventDefault();
-                setOpen((prev) => !prev);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
 
     // Parse NAV_DATA into searchable items grouped by section
     const { itemsBySection } = useMemo(() => {
@@ -119,11 +106,6 @@ export default function SearchBar() {
                             readOnly
                             translate="no"
                         />
-                        <InputGroupAddon align='inline-end'>
-                            <div className='rounded-md border border-card-border bg-background-gray-primary/50 px-2 py-0.75 text-xs text-text-tertiary notranslate' translate="no">
-                                <span className='font-medium'>⌘</span> K
-                            </div>
-                        </InputGroupAddon>
                     </InputGroup>
                 </button>
             </div>
@@ -211,33 +193,6 @@ export default function SearchBar() {
                         },
                     )}
                 </Command.List>
-
-                {/* Modal Footer with navigation shortcuts */}
-                <div className='flex items-center justify-between border-t border-card-border bg-background-gray-primary/40 px-4 py-2.5 text-xs text-text-tertiary'>
-                    <div className='flex items-center gap-4'>
-                        <span className='flex items-center gap-1'>
-                            <kbd className='rounded border border-card-border bg-card-background px-1 py-0.5 font-mono text-[10px] shadow-xs'>
-                                ↑
-                            </kbd>
-                            <kbd className='rounded border border-card-border bg-card-background px-1 py-0.5 font-mono text-[10px] shadow-xs'>
-                                ↓
-                            </kbd>
-                            <span>Navegar</span>
-                        </span>
-                        <span className='flex items-center gap-1'>
-                            <kbd className='rounded border border-card-border bg-card-background px-1.5 py-0.5 font-mono text-[10px] shadow-xs'>
-                                ↵
-                            </kbd>
-                            <span>Seleccionar</span>
-                        </span>
-                    </div>
-                    <div className='flex items-center gap-1'>
-                        <kbd className='rounded border border-card-border bg-card-background px-1.5 py-0.5 font-mono text-[10px] shadow-xs'>
-                            ESC
-                        </kbd>
-                        <span>Cerrar</span>
-                    </div>
-                </div>
             </Command.Dialog>
         </>
     );
