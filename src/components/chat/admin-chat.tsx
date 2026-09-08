@@ -108,32 +108,29 @@ export function AdminChat() {
   }
 
   return (
-    <Card className="flex h-[620px] flex-col border-brand-200">
-      <CardHeader className="shrink-0 border-b border-card-border bg-brand-500/10">
-        <CardTitle className="flex items-center gap-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-brand-500" />
+    <Card className="flex h-[620px] flex-col overflow-hidden border-0 shadow-none">
+      <CardHeader className="shrink-0 bg-[rgb(255_216_20)] text-black px-4 py-3 flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="flex items-center gap-2 text-sm font-bold text-black">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-black" />
           Star Admin Ops — Dueño
-          <span className="ml-auto flex items-center gap-2">
-            <button onClick={() => setVoiceOn((v) => !v)} title={voiceOn ? "Voz ON" : "Voz OFF"} className={`rounded-full px-2 py-1 text-xs ${voiceOn ? "bg-black text-white" : "bg-zinc-100 text-zinc-600"}`}>{voiceOn ? "🔊 Voz" : "🔇 Voz"}</button>
-            <span className="hidden sm:inline text-xs font-normal text-text-tertiary">mismo estilo StarShop</span>
-          </span>
         </CardTitle>
+        <button onClick={() => setVoiceOn((v) => !v)} title={voiceOn ? "Voz ON (toca para silenciar)" : "Voz OFF"} className={`rounded-full px-2 py-1 text-xs ${voiceOn ? "bg-black text-white" : "bg-white/70 text-black"}`}>{voiceOn ? "🔊 Voz" : "🔇 Voz"}</button>
       </CardHeader>
-      <CardContent ref={listRef} className="flex-1 overflow-y-auto space-y-3 p-4 bg-background-gray-secondary_alt_2">
+      <CardContent ref={listRef} className="flex-1 overflow-y-auto space-y-3 p-3 bg-white">
         {messages.map((m) => (
           <ChatBubble key={m.id} role={m.role} text={m.text} streaming={m.streaming} isTyping={loading && m.role === "assistant" && !m.text} />
         ))}
       </CardContent>
-      <div className="shrink-0 border-t border-card-border p-3 flex gap-2">
+      <div className="shrink-0 border-t p-3 flex gap-2 bg-white">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
           placeholder="¿cuánto vendí hoy?  ·  stock bajo  ·  pedidos con alerta"
-          className="flex-1 rounded-xl border border-card-border bg-card-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-500/30"
+          className="flex-1 rounded-full border px-4 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(255_216_20)]"
           disabled={loading}
         />
-        <Button onClick={send} isDisabled={loading || !input.trim()} appearance="fill" className="shrink-0">
+        <Button onClick={send} isDisabled={loading || !input.trim()} appearance="fill" className="shrink-0 bg-[rgb(255_216_20)] text-black hover:bg-[rgb(247_202_0)] border-0">
           {loading ? "..." : "Enviar"}
         </Button>
       </div>

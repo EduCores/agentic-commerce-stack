@@ -31,13 +31,13 @@ export function ChatBubble({ role, text, streaming, isTyping, className }: Bubbl
     <div className={cn("flex", role === "user" ? "justify-end" : "justify-start", className)}>
       <div
         className={cn(
-          "max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
-          role === "user" ? "bg-brand-500 text-white rounded-br-md" : "bg-card-background border border-card-border text-text-primary rounded-bl-md"
+          "max-w-[80%] rounded-2xl px-3 py-2 text-sm",
+          role === "user" ? "bg-[rgb(255_216_20)] text-black rounded-br-md" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-bl-md"
         )}
       >
         <p className="whitespace-pre-wrap break-words">
           {shown}
-          {!done && isAssistant && <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-brand-500 align-middle" />}
+          {!done && isAssistant && <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-[rgb(255_216_20)] align-middle" />}
         </p>
       </div>
     </div>

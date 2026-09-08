@@ -1,27 +1,18 @@
 "use client";
-
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { ChatBubble } from "./chat-bubble";
-
 type Msg = { id: string; role: "user" | "assistant"; text: string; streaming?: boolean; crew?: string; detectedIntent?: string };
 type ToolCall = { toolName: string; args: Record<string, unknown>; output: unknown };
-
 export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string }) {
-  const [messages, setMessages] = useState<Msg[]>([
-    { id: "welcome", role: "assistant", text: "¡Hola! Soy Star, tu asistente de StarShop 😊 ¿Qué estás buscando hoy? Herramientas, iluminación LED, medición..." },
-  ]);
+  const [messages, setMessages] = useState<Msg[]>([{ id: "welcome", role: "assistant", text: "¡Hola! Soy Star, tu asistente de StarShop 😊 ¿Qué estás buscando hoy? Herramientas, iluminación LED, medición..." }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const [voiceOn, setVoiceOn] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
-
+  useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
   const speak = async (text: string) => {
     if (!voiceOn) return;
     try { audioRef.current?.pause(); audioRef.current = null; } catch {}
@@ -37,22 +28,8 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
       await a.play();
     } catch {}
   };
-
-  const stopSpeakACS = () => {
-    try { audioRef.current?.pause(); if (audioRef.current) audioRef.current.currentTime = 0; audioRef.current = null; } catch {}
-  };
-
-  useEffect(() => {
-    try {
-      const v = localStorage.getItem("acs-voiceOn");
-      if (v === "1") setVoiceOn(true);
-    } catch {}
-  }, []);
-  useEffect(() => {
-    try { localStorage.setItem("acs-voiceOn", voiceOn ? "1" : "0"); } catch {}
-    if (!voiceOn) stopSpeakACS();
-  }, [voiceOn]);
-
+  useEffect(() => { try { const v = localStorage.getItem("acs-voiceOn"); if (v === "1") setVoiceOn(true); } catch {} }, []);
+  useEffect(() => { try { localStorage.setItem("acs-voiceOn", voiceOn ? "1" : "0"); } catch {} if (!voiceOn) try { audioRef.current?.pause(); } catch {} }, [voiceOn]);
   async function send(streaming = true) {
     const text = input.trim();
     if (!text || loading) return;
@@ -61,17 +38,10 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
     setMessages((m) => [...m, userMsg, { id: assistantId, role: "assistant", text: "", streaming }]);
     setInput("");
     setLoading(true);
-    // Muestra dots 400ms antes de pedir al LLM para que parezca que piensa
     await new Promise((r) => setTimeout(r, 280));
-
     try {
       if (streaming) {
-        // SSE streaming — texto llega por chunks, ChatBubble lo tipeará Char-by-char
-        const r = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, storeId: "seed-store" }),
-        });
+        const r = await fetch(apiUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, storeId: "seed-store" }) });
         if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
         const reader = r.body.getReader();
         const decoder = new TextDecoder();
@@ -98,9 +68,7 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
                 if (evt.text && evt.text !== full) full = evt.text;
                 const nav = (evt.toolCalls as unknown as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");
                 const path = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo ?? (nav?.args as { path?: string } | undefined)?.path;
-                if (path) {
-                  setTimeout(() => { window.location.href = path; }, 900);
-                }
+                if (path) { setTimeout(() => { window.location.href = path; }, 900); }
                 const final = full || evt.text || "";
                 setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: final, crew, detectedIntent, streaming: false } : x)));
                 if (final) speak(final);
@@ -120,45 +88,20 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
       }
     } catch (e) {
       setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: `Error: ${e instanceof Error ? e.message : String(e)}`, streaming: false } : x)));
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
-
   return (
-    <Card className="flex h-[560px] flex-col">
-      <CardHeader className="shrink-0 border-b border-card-border">
-        <CardTitle className="flex items-center gap-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-          Star — Asistente IA
-          <span className="ml-auto flex items-center gap-2">
-            <button onClick={() => setVoiceOn((v) => !v)} title={voiceOn ? "Voz ON" : "Voz OFF"} className={`rounded-full px-2 py-1 text-xs ${voiceOn ? "bg-black text-white" : "bg-zinc-100 text-zinc-600"}`}>{voiceOn ? "🔊 Voz" : "🔇 Voz"}</button>
-            <span className="text-xs font-normal text-text-tertiary">tipeo</span>
-          </span>
-        </CardTitle>
+    <Card className="flex h-[560px] flex-col overflow-hidden border-0 shadow-none">
+      <CardHeader className="shrink-0 bg-[rgb(255_216_20)] text-black px-4 py-3 flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="flex items-center gap-2 text-sm font-bold text-black"><span className="h-2 w-2 animate-pulse rounded-full bg-black" /> Star — Asistente IA</CardTitle>
+        <button onClick={() => setVoiceOn((v) => !v)} title={voiceOn ? "Voz ON (toca para silenciar)" : "Voz OFF"} className={`rounded-full px-2 py-1 text-xs ${voiceOn ? "bg-black text-white" : "bg-white/70 text-black"}`}>{voiceOn ? "🔊 Voz" : "🔇 Voz"}</button>
       </CardHeader>
-      <CardContent ref={listRef} className="flex-1 overflow-y-auto space-y-3 p-4 bg-background-gray-secondary_alt_2">
-        {messages.map((m) => (
-          <ChatBubble key={m.id} role={m.role} text={m.text} streaming={m.streaming} isTyping={loading && m.role === "assistant" && !m.text} />
-        ))}
-        {loading && messages[messages.length - 1]?.role === "user" && (
-          <div className="flex justify-start">
-            <span className="text-xs text-text-tertiary">Star está escribiendo...</span>
-          </div>
-        )}
+      <CardContent ref={listRef} className="flex-1 overflow-y-auto space-y-3 p-3 bg-white">
+        {messages.map((m) => (<ChatBubble key={m.id} role={m.role} text={m.text} streaming={m.streaming} isTyping={loading && m.role === "assistant" && !m.text} />))}
       </CardContent>
-      <div className="shrink-0 border-t border-card-border p-3 flex gap-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(true); } }}
-          placeholder="Escribe: quiero ver taladros, compara precios..."
-          className="flex-1 rounded-xl border border-card-border bg-card-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-500/30"
-          disabled={loading}
-        />
-        <Button onClick={() => send(true)} isDisabled={loading || !input.trim()} appearance="fill" className="shrink-0">
-          {loading ? "..." : "Enviar"}
-        </Button>
+      <div className="shrink-0 border-t p-3 flex gap-2 bg-white">
+        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(true); } }} placeholder="Escribe: quiero ver taladros, compara precios..." className="flex-1 rounded-full border px-4 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(255_216_20)]" disabled={loading} />
+        <Button onClick={() => send(true)} isDisabled={loading || !input.trim()} appearance="fill" className="shrink-0 bg-[rgb(255_216_20)] text-black hover:bg-[rgb(247_202_0)] border-0">{loading ? "..." : "Enviar"}</Button>
       </div>
     </Card>
   );
