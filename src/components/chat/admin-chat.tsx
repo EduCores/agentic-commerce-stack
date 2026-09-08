@@ -55,49 +55,19 @@ export function AdminChat() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 280));
     try {
-      // Fuerza admin_ops: manda history y el backend detectará admin_ops, pero si no, forzamos via prompt
+      // Endpoint dedicado admin: siempre admin_ops, sin heurística ni flag
       const history = messages.slice(-6).map((m) => ({ role: m.role, text: m.text }));
-      const r = await fetch("/api/chat", {
+      const r = await fetch("/api/admin/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, history, storeId: "seed-store" }),
       });
-      const j = await r.json();
-      const final = j.text ?? "";
-      // Si no fue admin_ops, reintenta forzando el crew admin via direct call
-      let displayText = final;
-      let isAdmin = j.crew === "starshop-admin-ops" || j.detectedIntent === "admin_ops";
-      if (!isAdmin && /vendí|ventas|stock bajo|pedidos con alerta|crea producto/i.test(text)) {
-        // Fallback: llama directo al crew admin via stream
-        const r2 = await fetch("/api/chat/stream", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, history, storeId: "seed-store", useFlow: true }),
-        });
-        if (r2.ok && r2.body) {
-          const reader = r2.body.getReader();
-          const dec = new TextDecoder();
-          let buf = "";
-          let full = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buf += dec.decode(value, { stream: true });
-            const parts = buf.split("\n\n");
-            buf = parts.pop() ?? "";
-            for (const p of parts) {
-              if (!p.startsWith("data:")) continue;
-              const e = JSON.parse(p.slice(5).trim());
-              if (e.type === "text" && e.text) { full += e.text; setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: full } : x))); }
-              if (e.type === "done" && e.text) full = e.text;
-            }
-          }
-          displayText = full || final;
-          setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: displayText, streaming: false } : x)));
-          if (displayText) speak(displayText);
-          return;
-        }
+      if (r.status === 401) {
+        setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: "Sesión expirada. Recarga e inicia sesión de nuevo.", streaming: false } : x)));
+        return;
       }
+      const j = await r.json();
+      const displayText = j.text ?? j.error ?? "Sin respuesta.";
       setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: displayText, streaming: false } : x)));
       if (displayText) speak(displayText);
     } catch (e) {

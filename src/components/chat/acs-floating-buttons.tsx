@@ -80,11 +80,12 @@ export function ACSFloatingButtons() {
 
   const getAgentReply = async (input: string, history: { role: string; text: string }[] = []): Promise<{ text: string; navigateTo?: string }> => {
     try {
-      const r = await fetch("/api/chat", {
+      const r = await fetch("/api/admin/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input, history: history.slice(-8), storeId: "seed-store", isAdmin: true }),
+        body: JSON.stringify({ message: input, history: history.slice(-8), storeId: "seed-store" }),
       });
+      if (r.status === 401) return { text: "Sesión expirada. Recarga e inicia sesión de nuevo." };
       const data = await r.json();
       const calls = data.toolCalls ?? [];
       const nav = calls.find((t: any) => t.toolName === "navigateTo");

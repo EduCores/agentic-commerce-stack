@@ -14,9 +14,8 @@ function isPublic(pathname: string) {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (isPublic(pathname) || pathname.startsWith("/api/")) {
-    // APIs protegidas individualmente si hace falta; chat es público para el widget de tienda
-    // Protege solo /api/store, /api/orders, /api/products, /api/dashboard si no hay token
-    const isAdminApi = pathname.startsWith("/api/store") || pathname.startsWith("/api/orders") || pathname.startsWith("/api/products") || pathname.startsWith("/api/dashboard") || pathname.startsWith("/api/agents") || pathname.startsWith("/api/workflows");
+    // /api/chat es público para el widget de tienda. /api/admin/* siempre protegido.
+    const isAdminApi = pathname.startsWith("/api/admin") || pathname.startsWith("/api/store") || pathname.startsWith("/api/orders") || pathname.startsWith("/api/products") || pathname.startsWith("/api/dashboard") || pathname.startsWith("/api/agents") || pathname.startsWith("/api/workflows");
     if (!isAdminApi) return NextResponse.next();
   }
 

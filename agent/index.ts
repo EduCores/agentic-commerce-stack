@@ -24,6 +24,15 @@ const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
+// Cliente separado para admin (créditos/límite independientes de tienda).
+// Si no hay OPENROUTER_ADMIN_KEY, cae a la key general.
+function getOpenRouter(isAdmin?: boolean) {
+  if (isAdmin && process.env.OPENROUTER_ADMIN_KEY) {
+    return createOpenRouter({ apiKey: process.env.OPENROUTER_ADMIN_KEY });
+  }
+  return openrouter;
+}
+
 // Llamada directa a OpenRouter como respaldo: genera respuesta conversacional real
 // (el generateText con tools a veces corta en tool calls sin texto final).
 async function directChat(
@@ -108,8 +117,12 @@ async function logRunSafe(data: {
 // Heurística rápida (sin LLM) para el router. El LLM del Welcome refina después.
 function detectIntentHeuristic(message: string, isAdmin?: boolean): StarShopIntent {
   const t = message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  if (isAdmin && /^(hola|hola!|hey|buenas|buenos dias|buenas tardes)\b/.test(t.trim())) return "admin_ops";
-  if (/(cuanto vendi|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow|cuanto se vendio|vendimos)/.test(t)) return "admin_ops";
+  // admin_ops SOLO existe en contexto admin. En tienda nunca se devuelve
+  // (evita que un cliente vea datos de dueño por keywords coincidentes).
+  if (isAdmin) {
+    if (/^(hola|hola!|hey|buenas|buenos dias|buenas tardes)\b/.test(t.trim())) return "admin_ops";
+    if (/(cuanto vendi|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow|cuanto se vendio|vendimos)/.test(t)) return "admin_ops";
+  }
   if (/(devol|devoluci|cambio.*producto|garant.*falla|no me sirve.*devolver)/.test(t)) return "return_request";
   if (/(carrito abandon|dejé.*carrito|deje.*carrito|carrito.*abandon|retomar compr|abandon.*cart|carrito.*no pude pagar|quedó.*carrito|quedo.*carrito)/.test(t)) return "abandoned_cart";
   if (/(dónde está|donde esta|seguimiento|estado.*pedido|track.*order|rastrear|wismo|dónde va.*pedido)/.test(t)) return "order_tracking";
@@ -236,8 +249,42 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
   return { ...inner, detectedIntent, crew: crew.slug, allowedTools };
 }
 
-export async function runAgent(params: { agentSlug: string; input: string; storeId?: string; history?: unknown[]; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
+/**
+ * Admin Ops dedicado — NO usa heurística, siempre crew admin_ops.
+ * Endpoint separado /api/admin/chat: sin flag que olvidar, sin tildes que fallar,
+ * sin fuga a tienda, con key propia (OPENROUTER_ADMIN_KEY).
+ */
+export async function runAdminOps(params: { input: string; storeId?: string; history?: unknown[] }) {
+  const detectedIntent: StarShopIntent = "admin_ops";
+  const crew = getCrewConfig(detectedIntent);
+  const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
+
+  void (async () => {
+    try {
+      const { starShopRouterWorkflow } = await import("@/workflows/starshop-router");
+      const { startWorkflow } = await import("@/lib/workflows/engine");
+      await startWorkflow(starShopRouterWorkflow, { message: params.input, detectedIntent, orderId: undefined });
+    } catch (e) {
+      console.warn("[ACS-ADMIN] workflow log failed", e instanceof Error ? e.message : e);
+    }
+  })();
+
+  const promptWithHistory = params.input + formatHistory(params.history);
+  const inner = await runAgent({
+    agentSlug: crew.slug,
+    input: promptWithHistory,
+    storeId: params.storeId,
+    history: params.history,
+    useAdminKey: true,
+    _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools },
+  } as never);
+
+  return { ...inner, detectedIntent, crew: crew.slug, allowedTools };
+}
+
+export async function runAgent(params: { agentSlug: string; input: string; storeId?: string; history?: unknown[]; useAdminKey?: boolean; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
   // _override: usado por runStarShopFlow para inyectar prompt/whitelist del crew sin tocar DB
+  // useAdminKey: usa OPENROUTER_ADMIN_KEY (créditos separados de tienda)
   let agent: { id: string; slug: string; model: string | null; systemPrompt: string | null };
   let system: string;
   let modelId: string;
@@ -254,7 +301,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
     modelId = agent.model ?? "qwen/qwen3-30b-a3b";
   }
 
-  const model = openrouter.chat(modelId as never) as never;
+  const model = getOpenRouter(params.useAdminKey).chat(modelId as never) as never;
 
   const promptWithHistory = params.history ? params.input + formatHistory(params.history) : params.input;
 
@@ -293,7 +340,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   let finalText = (result.text ?? "").trim();
   let direct = false;
   if (!finalText && stepToolCalls.length > 0) {
-    const apiKey = process.env.OPENROUTER_API_KEY ?? "";
+    const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
     if (apiKey) {
       const directReply = await directChat(apiKey, modelId, system, params.input);
       if (directReply) {
@@ -385,4 +432,4 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
   }
 }
 
-export default { runAgent, streamAgent, runStarShopFlow, streamStarShopFlow, tools: acsTools };
+export default { runAgent, runAdminOps, streamAgent, runStarShopFlow, streamStarShopFlow, tools: acsTools };
