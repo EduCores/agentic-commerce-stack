@@ -184,7 +184,7 @@ export function ACSFloatingButtons() {
       </motion.button>
       <AnimatePresence>
         {agentOpen && (
-          <motion.div initial={{ opacity: 0, y: 12, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.95 }} className="w-[320px] md:w-[360px] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border overflow-hidden flex flex-col">
+          <motion.div initial={{ opacity: 0, y: 12, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.95 }} className="w-[320px] md:w-[360px] h-[440px] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border overflow-hidden flex flex-col">
             <div className="bg-[rgb(255_216_20)] text-black px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2 font-bold text-sm"><Bot className="h-5 w-5" /> Agente Starshop</div>
               <div className="flex items-center gap-1">
@@ -193,7 +193,7 @@ export function ACSFloatingButtons() {
               </div>
             </div>
             <div className="text-[11px] bg-emerald-50 border-b border-emerald-200 text-emerald-800 px-3 py-2 flex items-center gap-2"><span className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" /> ACS activo</div>
-            <div ref={agentScrollRef} className="flex-1 max-h-[320px] overflow-auto p-3 space-y-2 scroll-smooth">
+            <div ref={agentScrollRef} className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2">
               {agentMessages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm flex items-end gap-1 ${m.role === "user" ? "bg-[rgb(255_216_20)] text-black" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100"}`}>
