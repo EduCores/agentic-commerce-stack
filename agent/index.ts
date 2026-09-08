@@ -108,6 +108,7 @@ async function logRunSafe(data: {
 // Heurística rápida (sin LLM) para el router. El LLM del Welcome refina después.
 function detectIntentHeuristic(message: string): StarShopIntent {
   const t = message.toLowerCase();
+  if (/(cuánto vendí|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow)/.test(t)) return "admin_ops";
   if (/(devol|devoluci|cambio.*producto|garant.*falla|no me sirve.*devolver)/.test(t)) return "return_request";
   if (/(carrito abandon|dejé.*carrito|deje.*carrito|carrito.*abandon|retomar compr|abandon.*cart|carrito.*no pude pagar|quedó.*carrito|quedo.*carrito)/.test(t)) return "abandoned_cart";
   if (/(dónde está|donde esta|seguimiento|estado.*pedido|track.*order|rastrear|wismo|dónde va.*pedido)/.test(t)) return "order_tracking";
@@ -128,6 +129,7 @@ const CREW_TOOL_MAP: Record<StarShopIntent, string[]> = {
   return_request: ["scrapeWebsite", "sendEmail", "searchProducts", "orderTracking"],
   order_tracking: ["orderTracking", "sendEmail", "scrapeWebsite"],
   escalate_human: ["sendEmail"],
+  admin_ops: ["searchProducts", "checkStock", "orderTracking", "scrapeWebsite", "sendEmail"],
 };
 
 // Registry para UI y para `ai` SDK (todos los tools)
@@ -178,6 +180,7 @@ function getCrewConfig(intent: StarShopIntent) {
     return_request: { slug: STARSHOP_CREWS.handle_return.slug, prompt: STARSHOP_CREWS.handle_return.prompt, model: STARSHOP_CREWS.handle_return.model },
     order_tracking: { slug: STARSHOP_CREWS.order_tracking.slug, prompt: STARSHOP_CREWS.order_tracking.prompt, model: STARSHOP_CREWS.order_tracking.model },
     escalate_human: { slug: STARSHOP_CREWS.escalate_human.slug, prompt: STARSHOP_CREWS.escalate_human.prompt, model: STARSHOP_CREWS.escalate_human.model },
+    admin_ops: { slug: STARSHOP_CREWS.admin_ops.slug, prompt: STARSHOP_CREWS.admin_ops.prompt, model: STARSHOP_CREWS.admin_ops.model },
   };
   return map[intent];
 }

@@ -42,6 +42,7 @@ export const routeByIntentStep = createStep<
       return_request: "handle_return",
       order_tracking: "order_tracking",
       escalate_human: "escalate_human",
+      admin_ops: "admin_ops",
     };
     const crew = crewMap[intent] ?? "search_and_recommend";
     await logStep({ stepName: "ROUTE_BY_INTENT", workflowRunId, orderId, status: "COMPLETED", input: { intent }, output: { crew } });
@@ -96,8 +97,8 @@ export const starShopRouterWorkflow = createWorkflow<{
 // ── Graph XYFlow para /workflows (persistido en WorkflowDefinition.graph) ──
 export const starShopRouterGraph = {
   nodes: [
-    { id: "welcome-1", type: "base", position: { x: 350, y: 20 }, data: { label: "1 Welcome And Detect Intent", description: "Saluda cálido y detecta intención (8 intents) sin llamar tools. Guarda state.detected_intent.", detail: "Entrada del flujo. Clasifica: product_search, price_comparison, checkout_support, general_inquiry, abandoned_cart, return_request, order_tracking, escalate_human. Si saludo vago, califica con 2 preguntas.", type: "trigger", status: "idle", agent: "StarShop Welcome Agent", tools: [], intent: "all", model: "qwen/qwen3-30b-a3b" } },
-    { id: "route-1", type: "base", position: { x: 350, y: 140 }, data: { label: "2 Route By Intent", description: "Enruta al crew según detected_intent (state). Si confianza baja → escalate_human.", detail: "Switch 8 ramas. Mapea intent→crew: product_search→search_and_recommend, price_comparison→compare_prices, checkout_support→checkout_guide, general_inquiry→general_support, abandoned_cart→recover_cart, return_request→handle_return, order_tracking→order_tracking, escalate→human. Log en ROUTE_BY_INTENT.", type: "condition", status: "idle", tools: [] } },
+    { id: "welcome-1", type: "base", position: { x: 350, y: 20 }, data: { label: "1 Welcome And Detect Intent", description: "Saluda cálido y detecta intención (9 intents) sin llamar tools. Guarda state.detected_intent.", detail: "Entrada del flujo. Clasifica: product_search, price_comparison, checkout_support, general_inquiry, abandoned_cart, return_request, order_tracking, escalate_human, admin_ops. Si saludo vago, califica con 2 preguntas.", type: "trigger", status: "idle", agent: "StarShop Welcome Agent", tools: [], intent: "all", model: "qwen/qwen3-30b-a3b" } },
+    { id: "route-1", type: "base", position: { x: 350, y: 140 }, data: { label: "2 Route By Intent", description: "Enruta al crew según detected_intent (state). Si confianza baja → escalate_human.", detail: "Switch 9 ramas. Mapea intent→crew: product_search→search_and_recommend, price_comparison→compare_prices, checkout_support→checkout_guide, general_inquiry→general_support, abandoned_cart→recover_cart, return_request→handle_return, order_tracking→order_tracking, escalate→human, admin_ops→admin_ops. Log en ROUTE_BY_INTENT.", type: "condition", status: "idle", tools: [] } },
     // 6 crews base + 3 extra — cada uno con prompt, whitelist y modelo aislado
     { id: "crew-checkout", type: "base", position: { x: 0, y: 280 }, data: { label: "3 Checkout Guide", description: "Acompaña pago paso a paso: valida stock + precio con flete y cierra con checkout/processPurchase.", detail: "Tools: checkStock, calculatePricing, checkout, processPurchase, navigateTo, sendEmail. Valida antes de confirmar; si falla stock ofrece alternativas. Converge a Confirm Order.", type: "fulfill", status: "idle", agent: "StarShop Checkout Guide", tools: ["checkStock", "calculatePricing", "checkout", "processPurchase", "navigateTo"], intent: "checkout_support", model: "qwen/qwen3-30b-a3b" } },
     { id: "crew-compare", type: "base", position: { x: 150, y: 280 }, data: { label: "3 Compare Prices Crew", description: "Compara precio StarShop vs externo scrapeando URLs (Jina) y presenta tabla.", detail: "2 agents/2 tasks. Tools: searchProducts (precio base), scrapeWebsite (Jina Reader), calculatePricing. Si no puede scrapear, muestra precio StarShop y explica.", type: "agent_decision", status: "idle", agent: "StarShop Price Analyst", tools: ["searchProducts", "scrapeWebsite", "calculatePricing"], intent: "price_comparison", model: "qwen/qwen3-30b-a3b" } },
@@ -108,6 +109,7 @@ export const starShopRouterGraph = {
     { id: "crew-tracking", type: "base", position: { x: 150, y: 400 }, data: { label: "3 Order Tracking (WISMO)", description: "Informa estado pedido: Order.status + WorkflowRun.currentStep + StepLogs.", detail: "Tools: orderTracking (lee Order/WorkflowRun/StepLog), sendEmail (notificación), scrapeWebsite (política envíos). Pide orderId/email si falta.", type: "webhook", status: "idle", agent: "Order Tracker", tools: ["orderTracking", "sendEmail"], intent: "order_tracking", model: "qwen/qwen3-30b-a3b" } },
     { id: "crew-validate", type: "base", position: { x: 450, y: 400 }, data: { label: "3 Validate Stock & Pricing", description: "Nodo transversal: valida stock y calcula total con despacho por región.", detail: "Invocado por Search y Checkout. Tools: checkStock (SKU exacto), calculatePricing (sku, qty, región). Evita alucinar stock/precio. Usa tier pricing (5/10 uds).", type: "reserve_stock", status: "idle", tools: ["checkStock", "calculatePricing"], intent: "product_search/checkout" } },
     { id: "crew-escalate", type: "base", position: { x: 650, y: 400 }, data: { label: "3 Escalate To Human", description: "Deriva a ventas@starshop.cl cuando confianza baja o cliente pide humano.", detail: "Tools: sendEmail (general). Notifica al equipo y ofrece dejar mensaje/horario. No inventa respuestas.", type: "cancel", status: "idle", agent: "Human Handoff", tools: ["sendEmail"], intent: "escalate_human", model: "qwen/qwen3-30b-a3b" } },
+    { id: "crew-admin", type: "base", position: { x: 350, y: 400 }, data: { label: "3 Admin Ops (Dueño)", description: "Asistente del dueño: métricas, stock bajo, pedidos con alerta, crear producto.", detail: "Mismo estilo StarShop. Tools: searchProducts, checkStock, orderTracking, scrapeWebsite, sendEmail. Responde con números reales y links /products /orders /workflows.", type: "agent_decision", status: "idle", agent: "StarShop Admin Ops", tools: ["searchProducts", "orderTracking"], intent: "admin_ops", model: "qwen/qwen3-30b-a3b" } },
     { id: "confirm-1", type: "base", position: { x: 350, y: 540 }, data: { label: "4 Confirm Order", description: "Registra pedido completado y envía email confirmación con resumen.", detail: "Solo si hay orderId. Tools: sendEmail (order_confirmation) + logStep CONFIRM_ORDER. Cierra flujo y dispara fulfillment.", type: "fulfill", status: "idle", tools: ["sendEmail"] } },
   ],
   edges: [
@@ -120,6 +122,7 @@ export const starShopRouterGraph = {
     { id: "e-route-cart", source: "route-1", target: "crew-cart", label: "abandoned_cart" },
     { id: "e-route-tracking", source: "route-1", target: "crew-tracking", label: "order_tracking" },
     { id: "e-route-escalate", source: "route-1", target: "crew-escalate", label: "escalate_human" },
+    { id: "e-route-admin", source: "route-1", target: "crew-admin", label: "admin_ops" },
     // Validate es transversal (no ruteado, se invoca desde search/checkout)
     { id: "e-search-validate", source: "crew-search", target: "crew-validate" },
     { id: "e-checkout-validate", source: "crew-checkout", target: "crew-validate" },
@@ -142,5 +145,6 @@ export const starShopRouterSteps = [
   "ORDER_TRACKING",
   "VALIDATE_STOCK_PRICING",
   "ESCALATE_HUMAN",
+  "ADMIN_OPS",
   "CONFIRM_ORDER",
 ];
