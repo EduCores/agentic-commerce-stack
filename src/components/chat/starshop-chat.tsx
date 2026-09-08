@@ -113,7 +113,7 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
         {messages.map((m) => (<ChatBubble key={m.id} role={m.role} text={m.text} streaming={m.streaming} isTyping={loading && m.role === "assistant" && !m.text} />))}
       </CardContent>
       <div className="shrink-0 border-t p-3 flex gap-2 bg-white">
-        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(true); } }} placeholder="Escribe: quiero ver taladros, compara precios..." className="flex-1 rounded-full border px-4 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(255_216_20)]" disabled={loading} />
+        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(true); } }} placeholder="Escribe: quiero ver taladros, compara precios..." className="flex-1 rounded-full border border-card-border bg-input-background px-4 py-2 text-sm text-text-primary [color-scheme:light] focus:outline-none focus:ring-2 focus:ring-[rgb(255_216_20)] dark:[color-scheme:dark]" disabled={loading} />
         <Button onClick={() => send(true)} isDisabled={loading || !input.trim()} appearance="fill" className="shrink-0 bg-[rgb(255_216_20)] text-black hover:bg-[rgb(247_202_0)] border-0">{loading ? "..." : "Enviar"}</Button>
       </div>
     </Card>

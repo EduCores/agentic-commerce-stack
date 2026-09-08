@@ -46,7 +46,7 @@ export function SignInForm() {
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full" />
       </div>
       <div className="flex items-center justify-between text-xs">
-        <label className="flex items-center gap-2 text-text-secondary"><input type="checkbox" className="rounded" />Keep me logged in</label>
+        <label className="flex items-center gap-2 text-text-secondary"><input type="checkbox" className="rounded [color-scheme:light] dark:[color-scheme:dark]" />Keep me logged in</label>
         <a href="/auth/reset-password" className="font-medium text-brand-600 underline">Forget Password?</a>
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-600">{error}</p>}

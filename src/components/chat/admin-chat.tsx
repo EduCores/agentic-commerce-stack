@@ -120,7 +120,7 @@ export function AdminChat() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
           placeholder="¿cuánto vendí hoy?  ·  stock bajo  ·  pedidos con alerta"
-          className="flex-1 rounded-full border px-4 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[rgb(255_216_20)]"
+          className="flex-1 rounded-full border border-card-border bg-input-background px-4 py-2 text-sm text-text-primary [color-scheme:light] focus:outline-none focus:ring-2 focus:ring-[rgb(255_216_20)] dark:[color-scheme:dark]"
           disabled={loading}
         />
         <Button onClick={send} isDisabled={loading || !input.trim()} appearance="fill" className="shrink-0 bg-[rgb(255_216_20)] text-black hover:bg-[rgb(247_202_0)] border-0">
