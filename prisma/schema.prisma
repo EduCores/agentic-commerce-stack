@@ -235,6 +235,7 @@ model AdminUser {
   email     String   @unique
   password  String   // bcrypt hash
   name      String?
+  phone     String?  // WhatsApp equipo (dígitos, ej 56937479835) — sincroniza botón flotante
   role      String   @default("admin") // admin | owner (único admin del sistema)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

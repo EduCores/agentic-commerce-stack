@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowUp, Bot, X, Send, Sparkles, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getTeamWhatsAppLink } from "@/lib/whatsapp";
+import { getTeamWhatsAppLink, memberWaLink } from "@/lib/whatsapp";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -29,6 +29,15 @@ export function ACSFloatingButtons() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   // WhatsApp del EQUIPO (admin). El de clientes vive en la tienda (NEXT_PUBLIC_WHATSAPP_STORE).
   const teamWa = getTeamWhatsAppLink();
+  // Roster sincronizado con /manage-team: agregar teléfono lo activa, borrarlo o eliminar miembro lo saca.
+  const [waOpen, setWaOpen] = useState(false);
+  const [teamPhones, setTeamPhones] = useState<{ name: string | null; phone: string }[]>([]);
+  useEffect(() => {
+    fetch("/api/admin/team")
+      .then((r) => (r.ok ? r.json() : { members: [] }))
+      .then((j) => setTeamPhones((j.members ?? []).filter((m: { phone?: string | null }) => m.phone).map((m: { name: string | null; phone: string }) => ({ name: m.name, phone: m.phone }))))
+      .catch(() => {});
+  }, [agentOpen, waOpen]);
 
   const typeAgentMessage = (full: string) => {
     setAgentMessages((m) => [...(m as any), { role: "agent", text: "" }]);
@@ -211,11 +220,39 @@ export function ACSFloatingButtons() {
           </motion.div>
         )}
       </AnimatePresence>
-      {teamWa && (
-        <motion.a href={teamWa} target="_blank" rel="noopener noreferrer" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, type: "spring", stiffness: 260, damping: 18 }} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="relative h-[67px] w-[67px] md:h-16 md:w-16 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center hover:bg-[#128C7E] transition-colors" aria-label="WhatsApp del equipo de tienda">
-          <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" aria-hidden />
-          <WhatsAppIcon className="h-8 w-8 md:h-8 md:w-8 relative" />
-        </motion.a>
+      <AnimatePresence>
+        {waOpen && teamPhones.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 12, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.95 }} className="w-[280px] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border overflow-hidden">
+            <div className="bg-[#25D366] text-white px-4 py-2.5 text-sm font-bold">WhatsApp equipo ({teamPhones.length})</div>
+            <div className="max-h-64 overflow-auto p-2 space-y-1">
+              {teamWa && (
+                <a href={teamWa} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                  <span className="font-medium">Equipo general</span>
+                </a>
+              )}
+              {teamPhones.map((t) => (
+                <a key={t.phone} href={memberWaLink(t.phone, t.name)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                  <span className="font-medium">{t.name ?? "Miembro"}</span>
+                  <span className="font-mono text-xs text-zinc-500">+{t.phone}</span>
+                </a>
+              ))}
+            </div>
+            <p className="px-4 py-2 text-[11px] text-zinc-500 border-t">Se sincroniza con <a href="/manage-team" className="underline">Gestionar el equipo</a></p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {(teamPhones.length > 0 || teamWa) && (
+        teamPhones.length > 0 ? (
+          <motion.button onClick={() => setWaOpen((v) => !v)} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, type: "spring", stiffness: 260, damping: 18 }} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="relative h-[67px] w-[67px] md:h-16 md:w-16 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center hover:bg-[#128C7E] transition-colors" aria-label="WhatsApp del equipo de tienda">
+            <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" aria-hidden />
+            <WhatsAppIcon className="h-8 w-8 md:h-8 md:w-8 relative" />
+          </motion.button>
+        ) : (
+          <motion.a href={teamWa as string} target="_blank" rel="noopener noreferrer" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, type: "spring", stiffness: 260, damping: 18 }} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="relative h-[67px] w-[67px] md:h-16 md:w-16 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center hover:bg-[#128C7E] transition-colors" aria-label="WhatsApp del equipo de tienda">
+            <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" aria-hidden />
+            <WhatsAppIcon className="h-8 w-8 md:h-8 md:w-8 relative" />
+          </motion.a>
+        )
       )}
     </div>
   );

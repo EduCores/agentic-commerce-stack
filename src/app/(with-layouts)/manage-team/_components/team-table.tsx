@@ -15,6 +15,7 @@ export function TeamTable() {
   });
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState("member");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
@@ -22,10 +23,10 @@ export function TeamTable() {
   async function add() {
     if (!email || !password) return;
     setMsg("");
-    const r = await fetch("/api/admin/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, name, role, password }) });
+    const r = await fetch("/api/admin/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, name, phone, role, password }) });
     const j = await r.json();
     if (!r.ok) { setMsg(j.error ?? "Error"); return; }
-    setEmail(""); setName(""); setPassword(""); setMsg(`Miembro ${j.email} agregado`);
+    setEmail(""); setName(""); setPhone(""); setPassword(""); setMsg(`Miembro ${j.email} agregado${j.phone ? " → WhatsApp activo" : ""}`);
     qc.invalidateQueries({ queryKey: ["team"] });
   }
 
@@ -42,6 +43,14 @@ export function TeamTable() {
     qc.invalidateQueries({ queryKey: ["team"] });
   }
 
+  async function changePhone(id: string, next: string) {
+    const r = await fetch("/api/admin/team", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, phone: next }) });
+    const j = await r.json();
+    if (!r.ok) setMsg(j.error ?? "Error");
+    else setMsg(next ? "Teléfono guardado → WhatsApp activo" : "Teléfono borrado → salió de WhatsApp");
+    qc.invalidateQueries({ queryKey: ["team"] });
+  }
+
   const members = data?.members ?? [];
 
   return (
@@ -51,6 +60,7 @@ export function TeamTable() {
         <CardContent className="flex flex-wrap items-end gap-3">
           <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="miembro@starshop.cl" className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
           <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Nombre<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
+          <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Teléfono WhatsApp<input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="569XXXXXXXX" className="w-full rounded-lg border border-card-border px-3 py-2 text-sm" /></label>
           <label className="flex flex-col gap-1 text-xs">Rol
             <select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-lg border border-card-border px-3 py-2 text-sm">
               <option value="member">member</option>
@@ -70,13 +80,16 @@ export function TeamTable() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="border-b border-card-border text-xs text-text-tertiary">
-                  <tr><th className="p-2 text-left">Name</th><th className="p-2 text-left">Email</th><th className="p-2 text-left">Role</th><th className="p-2 text-left">Joined</th><th className="p-2 text-right">Action</th></tr>
+                  <tr><th className="p-2 text-left">Name</th><th className="p-2 text-left">Email</th><th className="p-2 text-left">WhatsApp</th><th className="p-2 text-left">Role</th><th className="p-2 text-left">Joined</th><th className="p-2 text-right">Action</th></tr>
                 </thead>
                 <tbody>
                   {members.map((m) => (
                     <tr key={m.id} className="border-b border-card-border/60">
                       <td className="p-2">{m.name ?? "—"}</td>
                       <td className="p-2">{m.email}</td>
+                      <td className="p-2">
+                        <input defaultValue={m.phone ?? ""} key={`${m.id}-${m.phone ?? "none"}`} onBlur={(e) => { if (e.target.value !== (m.phone ?? "")) changePhone(m.id, e.target.value); }} placeholder="569XXXXXXXX" className="w-32 rounded-lg border border-card-border px-2 py-1 text-xs" />
+                      </td>
                       <td className="p-2">
                         <select value={m.role} onChange={(e) => changeRole(m.id, e.target.value)} className="rounded-lg border border-card-border px-2 py-1 text-xs">
                           <option value="member">member</option>
