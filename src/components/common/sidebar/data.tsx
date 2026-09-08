@@ -57,12 +57,6 @@ export const NAV_DATA: NavSection[] = [
         items: [],
       },
       {
-        title: "Admin",
-        icon: <UserIcon />,
-        url: "/admin",
-        items: [],
-      },
-      {
         title: "Analytics",
         icon: <PieChartIcon />,
         url: "/analytics",
