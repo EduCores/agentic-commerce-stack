@@ -32,9 +32,8 @@ interface UserProfile {
 }
 
 const user: UserProfile = {
-  name: "Jhon Smith",
-  email: "jhonsmith@example.com",
-  avatarUrl: "/images/user/jhon-smith.png",
+  name: "Eduardo Navarro Cores",
+  email: "eduardonavarrocores@gmail.com",
 };
 
 export function UserProfileButton() {
@@ -60,9 +59,11 @@ export function UserProfileButton() {
     <DropdownMenu>
       <DropdownMenuTrigger className="group flex items-center gap-2.5 rounded-lg border-0 p-0 transition-all outline-none focus-visible:ring-4 focus-visible:ring-input-primary-focus-border/20 focus-visible:ring-offset-1">
         <Avatar>
-          <AvatarImage src={user.avatarUrl!} alt={user.name} className="size-10 rounded-lg" />
+          {user.avatarUrl ? (
+            <AvatarImage src={user.avatarUrl} alt={user.name} className="size-10 rounded-lg" />
+          ) : null}
           <AvatarFallback className="rounded-lg border border-border-secondary-alt bg-background-gray-secondary_alt">
-            {user.name.charAt(0)}
+            EN
           </AvatarFallback>
         </Avatar>
 
@@ -74,9 +75,9 @@ export function UserProfileButton() {
       <DropdownMenuContent placement="bottom end" className="w-70 overflow-hidden p-0 shadow-3xl">
         <DropdownMenuHeader className="flex w-full items-center justify-start gap-2 border-b border-border-secondary-alt px-4 py-3">
           <Avatar size="md">
-            <AvatarImage src={user.avatarUrl!} alt={user.name} />
+            {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={user.name} /> : null}
             <AvatarFallback className="border border-border-secondary-alt bg-background-gray-secondary_alt">
-              {user.name.charAt(0)}
+              EN
             </AvatarFallback>
           </Avatar>
           <span className="flex flex-col">

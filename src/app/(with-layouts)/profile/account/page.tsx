@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/tailgrids/core/avatar";
+import { Avatar, AvatarFallback } from "@/components/tailgrids/core/avatar";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card } from "@/components/tailgrids/core/card";
 import { Input } from "@/components/tailgrids/core/input";
@@ -21,17 +21,16 @@ import {
 } from "@/components/tailgrids/core/select";
 import { TextArea } from "@/components/tailgrids/core/text-area";
 import { TextField } from "@/components/tailgrids/core/text-field";
-import Image from "next/image";
 import { FieldError, Form } from "react-aria-components";
 import { LogoutIcon, TrashIcon } from "./icons";
 
 const countryOptions = [
-  { value: "us", label: "Estados Unidos", flag: "/images/flag/US.svg" },
-  { value: "ca", label: "Canadá", flag: "/images/flag/CA.svg" },
-  { value: "fr", label: "Francia", flag: "/images/flag/FR.svg" },
-  { value: "au", label: "Australia", flag: "/images/flag/AU.svg" },
-  { value: "it", label: "Italia", flag: "/images/flag/IT.svg" },
-  { value: "in", label: "India", flag: "/images/flag/IN.svg" },
+  { value: "cl", label: "Chile" },
+  { value: "ar", label: "Argentina" },
+  { value: "pe", label: "Perú" },
+  { value: "co", label: "Colombia" },
+  { value: "mx", label: "México" },
+  { value: "us", label: "Estados Unidos" },
 ];
 
 export default function AccountPage() {
@@ -49,8 +48,7 @@ export default function AccountPage() {
         >
           <div className="flex items-center gap-4">
             <Avatar size="xxl">
-              <AvatarImage src="/images/user/jhon-smith.png" alt="Jhon Smith" />
-              <AvatarFallback>JS</AvatarFallback>
+              <AvatarFallback>EN</AvatarFallback>
             </Avatar>
 
             <div className="flex flex-col gap-2.5">
@@ -71,7 +69,7 @@ export default function AccountPage() {
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <TextField className="w-full gap-2.5">
               <Label>Nombre completo</Label>
-              <Input name="fullName" placeholder="Jhon Smith" className="w-full" required />
+              <Input name="fullName" placeholder="Eduardo Navarro Cores" className="w-full" required />
               <FieldError />
             </TextField>
 
@@ -80,7 +78,7 @@ export default function AccountPage() {
               <Input
                 name="email"
                 type="email"
-                placeholder="jhon@example.com"
+                placeholder="eduardonavarrocores@gmail.com"
                 className="w-full"
                 required
               />
@@ -89,7 +87,7 @@ export default function AccountPage() {
 
             <TextField className="w-full gap-2.5">
               <Label>Número de teléfono</Label>
-              <Input name="phone" placeholder="+1 604 555 1234" className="w-full" />
+              <Input name="phone" placeholder="+56 9 3747 9835" className="w-full" />
             </TextField>
 
             <TextField className="w-full gap-2.5">
@@ -98,7 +96,7 @@ export default function AccountPage() {
                 <InputGroupAddon className="after h-full border-r border-card-border text-input-placeholder-text-color">
                   https://
                 </InputGroupAddon>
-                <InputGroupInput name="website" placeholder="www.nextadmin.co" className="pl-2" />
+                <InputGroupInput name="website" placeholder="www.starshop.cl" className="pl-2" />
               </InputGroup>
             </TextField>
 
@@ -106,13 +104,13 @@ export default function AccountPage() {
               <Label>Dirección</Label>
               <Input
                 name="address"
-                placeholder="1901 Thornridge Cir. Shiloh, Hawaii 81063"
+                placeholder="Av. Providencia 1208, Providencia, Santiago"
                 className="w-full"
               />
             </TextField>
 
             <div>
-              <Select name="country" defaultSelectedKey="us" className="h-full">
+              <Select name="country" defaultSelectedKey="cl" className="h-full">
                 <SelectLabel>País</SelectLabel>
                 <SelectTrigger className="h-full w-full border-input-border">
                   <SelectValue className="flex items-center gap-2" />
@@ -121,16 +119,7 @@ export default function AccountPage() {
                 <SelectContent>
                   {countryOptions.map((option) => (
                     <SelectItem key={option.value} id={option.value} textValue={option.label}>
-                      <span className="flex items-center gap-2">
-                        <Image
-                          src={option.flag}
-                          alt={option.label}
-                          width={20}
-                          height={20}
-                          className="size-5 rounded-full object-cover"
-                        />
-                        <span>{option.label}</span>
-                      </span>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -142,7 +131,7 @@ export default function AccountPage() {
               <TextArea
                 name="bio"
                 className="h-25 shadow-xs"
-                placeholder="Apasionado por crear aplicaciones web escalables y explorar tecnologías nuevas. Siempre dispuesto a resolver problemas complejos e innovar."
+                placeholder="Dueño de StarShop en Santiago. Venta mayorista de herramientas e iluminación LED a lo largo de Chile."
               />
             </TextField>
 
