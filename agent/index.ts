@@ -107,8 +107,8 @@ async function logRunSafe(data: {
 // ── Intent detection (Welcome → Route) ─────────────────────────────────────
 // Heurística rápida (sin LLM) para el router. El LLM del Welcome refina después.
 function detectIntentHeuristic(message: string): StarShopIntent {
-  const t = message.toLowerCase();
-  if (/(cuánto vendí|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow)/.test(t)) return "admin_ops";
+  const t = message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (/(cuanto vendi|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow)/.test(t)) return "admin_ops";
   if (/(devol|devoluci|cambio.*producto|garant.*falla|no me sirve.*devolver)/.test(t)) return "return_request";
   if (/(carrito abandon|dejé.*carrito|deje.*carrito|carrito.*abandon|retomar compr|abandon.*cart|carrito.*no pude pagar|quedó.*carrito|quedo.*carrito)/.test(t)) return "abandoned_cart";
   if (/(dónde está|donde esta|seguimiento|estado.*pedido|track.*order|rastrear|wismo|dónde va.*pedido)/.test(t)) return "order_tracking";
