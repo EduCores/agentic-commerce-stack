@@ -1,6 +1,7 @@
 'use client';
 
 import { CollapsibleGroup } from '@/components/tailgrids/core/collapsible';
+import { StarShopLogo } from '@/components/common/starshop-logo';
 import { cn } from '@/utils/cn';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -46,21 +47,7 @@ export default function Sidebar({
                 )}
             >
                 <Link href='/' suppressHydrationWarning aria-label="Ir al panel principal">
-                    {isSidebarOpen ? (
-                        <span suppressHydrationWarning translate="no" className="starshop-logo notranslate relative inline-flex items-baseline text-[26px] leading-none font-black tracking-tight select-none">
-                            <span className="text-black dark:text-[#fbffff]">ST</span>
-                            <span className="star-slot" aria-hidden="true">
-                                <span className="star-ghost">A</span>
-                                <span className="star-float">
-                                    <img src="/star2.svg" alt="" className="star-logo star-anim-show" />
-                                </span>
-                            </span>
-                            <span className="text-black dark:text-[#fbffff]">R</span>
-                            <span className="text-[#fdd817]">SHOP</span>
-                        </span>
-                    ) : (
-                        <img src="/star2.svg" alt="StarShop" className="size-9 select-none" />
-                    )}
+                    <StarShopLogo compact={!isSidebarOpen} />
                 </Link>
 
                 <button
