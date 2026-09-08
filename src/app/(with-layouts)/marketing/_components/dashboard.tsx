@@ -19,7 +19,7 @@ export function MarketingDashboard() {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <Card>
-        <CardHeader><CardTitle className="text-sm">Campaign Performance</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Rendimiento de campañas</CardTitle></CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">{data.totals.impressions.toLocaleString("es-CL")}</p>
           <p className="text-xs text-text-tertiary">Impresiones estimadas · Ingresos ${data.totals.revenue.toLocaleString("es-CL")}</p>
@@ -32,8 +32,8 @@ export function MarketingDashboard() {
             <div key={c.id} className="flex items-center justify-between rounded-lg border border-card-border p-3 text-sm">
               <span>{c.name}</span>
               <span className="flex items-center gap-2">
-                <Badge color="gray">{c.products} prod</Badge>
-                <Badge color="gray">{c.orders} ped</Badge>
+                <Badge color="gray">{c.products} productos</Badge>
+                <Badge color="gray">{c.orders} pedidos</Badge>
                 <Badge color={c.active ? "success" : "gray"}>{c.active ? "Activa" : "Pausada"}</Badge>
               </span>
             </div>
@@ -42,11 +42,11 @@ export function MarketingDashboard() {
       </Card>
       <MarketingFunnel data={data} />
       <Card>
-        <CardHeader><CardTitle className="text-sm">Audience Insights</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
         <CardContent className="text-sm text-text-secondary">
           <p>Tus compradores llegan por: {data.channels.slice(0, 3).map((c) => c.channel).join(", ") || "—"}.</p>
           <p className="mt-2 text-xs text-text-tertiary">Refuerza el canal con mejor conversión y recupera carritos desde /admin/emails.</p>
-          <a href="/admin/emails" className="text-xs font-medium text-brand-600 underline">Ir a emails</a>
+          <a href="/admin/emails" className="text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</a>
         </CardContent>
       </Card>
       <MarketingChannelTable data={data} />

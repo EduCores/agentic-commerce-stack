@@ -19,16 +19,16 @@ export function AiDashboard() {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <Card>
-        <CardHeader><CardTitle className="text-sm">AI Cost Analytics</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Analítica de costos de AI</CardTitle></CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">${data.totals.cost.toLocaleString("es-CL")}</p>
-          <p className="text-xs text-text-tertiary">{data.totals.requests} requests · {data.totals.successRate}% éxito · {data.totals.activeAgents} agentes activos</p>
+          <p className="text-xs text-text-tertiary">{data.totals.requests} solicitudes · {data.totals.successRate}% éxito · {data.totals.activeAgents} agentes activos</p>
         </CardContent>
       </Card>
       <AiActivityChart data={data} />
       <AiAgentsTable data={data} />
       <Card>
-        <CardHeader><CardTitle className="text-sm">AI Provider Distribution</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Distribución de proveedores de AI</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {data.providers.map((p) => (
             <div key={p.name} className="flex items-center justify-between text-sm">
@@ -40,7 +40,7 @@ export function AiDashboard() {
         </CardContent>
       </Card>
       <Card className="md:col-span-3">
-        <CardHeader><CardTitle className="text-sm">Recent Activities</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Actividad reciente</CardTitle></CardHeader>
         <CardContent className="space-y-1.5">
           {data.recent.length === 0 ? <p className="text-sm text-text-tertiary">Sin ejecuciones aún.</p> : data.recent.map((r) => (
             <div key={r.id} className="flex items-center justify-between text-sm">

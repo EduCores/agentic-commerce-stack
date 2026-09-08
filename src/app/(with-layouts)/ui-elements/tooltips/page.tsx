@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import TooltipsPositions from './_components/tooltips-positions';
 
 export const metadata: Metadata = {
-    title: 'Tooltips',
+    title: 'Ayudas emergentes',
 };
 
 export default function DropdownsPage() {
@@ -13,22 +13,22 @@ export default function DropdownsPage() {
             {/* Header Section */}
             <div className='flex flex-col-reverse justify-between gap-3 px-2 md:flex-row md:items-center lg:px-6'>
                 <h1 className='mb-1 text-[28px] leading-8 font-medium text-text-primary'>
-                    Tooltips
+                    Ayudas emergentes
                 </h1>
 
                 <Breadcrumbs
                     className='gap-1 md:gap-2'
                     dividerType='chevron'
                     items={[
-                        { href: '/', label: 'Home' },
-                        { href: '#', label: 'UI Elements' },
-                        { href: '/ui-elements/tooltips', label: 'Tooltips' },
+                        { href: '/', label: 'Inicio' },
+                        { href: '#', label: 'Elementos de interfaz' },
+                        { href: '/ui-elements/tooltips', label: 'Ayudas emergentes' },
                     ]}
                 />
             </div>
 
             <section className='px-2 md:px-6'>
-                <ComponentPreview title='Tooltip Positions'>
+                <ComponentPreview title='Posiciones de tooltip'>
                     <TooltipsPositions />
                 </ComponentPreview>
             </section>

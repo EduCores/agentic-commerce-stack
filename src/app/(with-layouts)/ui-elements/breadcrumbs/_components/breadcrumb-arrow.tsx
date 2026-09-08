@@ -6,39 +6,39 @@ export default function BreadcrumbArrow() {
       <Breadcrumbs
         dividerType="chevron"
         items={[
-          { href: "#", label: "Docs" },
-          { href: "#", label: "Settings" },
+          { href: "#", label: "Documentos" },
+          { href: "#", label: "Ajustes" },
         ]}
       />
 
       <Breadcrumbs
         dividerType="chevron"
         items={[
-          { href: "#", label: "Dashboard" },
-          { href: "#", label: "Profile" },
-          { href: "#", label: "Messages" },
+          { href: "#", label: "Panel" },
+          { href: "#", label: "Perfil" },
+          { href: "#", label: "Mensajes" },
         ]}
       />
 
       <Breadcrumbs
         dividerType="chevron"
         items={[
-          { href: "#", label: "Dashboard" },
-          { href: "#", label: "Account" },
-          { href: "#", label: "Reports" },
-          { href: "#", label: "Analytics" },
-          { href: "#", label: "Support" },
+          { href: "#", label: "Panel" },
+          { href: "#", label: "Cuenta" },
+          { href: "#", label: "Informes" },
+          { href: "#", label: "Analíticas" },
+          { href: "#", label: "Soporte" },
         ]}
       />
 
       <Breadcrumbs
         dividerType="chevron"
         items={[
-          { href: "#", label: "Dashboard" },
+          { href: "#", label: "Panel" },
           { href: "#", label: "..." },
-          { href: "#", label: "Users" },
-          { href: "#", label: "Billing" },
-          { href: "#", label: "Logout" },
+          { href: "#", label: "Usuarios" },
+          { href: "#", label: "Facturación" },
+          { href: "#", label: "Cerrar sesión" },
         ]}
       />
     </div>

@@ -24,7 +24,7 @@ export default function UploadZone() {
             variant="ghost"
             className="cursor-pointer rounded-none border-r border-card-border bg-background-gray-secondary_alt px-4 py-2.5 text-sm font-medium text-text-primary transition outline-none select-none focus:ring-0"
           >
-            Choose File
+            Elegir archivo
           </Button>
         </FileTrigger>
         <span
@@ -33,7 +33,7 @@ export default function UploadZone() {
             file1 ? "text-title-50" : "text-input-placeholder-text",
           )}
         >
-          {file1 ? file1.name : "No file chosen"}
+          {file1 ? file1.name : "Ningún archivo elegido"}
         </span>
       </div>
 
@@ -59,7 +59,7 @@ export default function UploadZone() {
           }
         >
           <Text slot="label" className="sr-only">
-            File upload zone
+            Zona para subir archivos
           </Text>
 
           {file2 ? (
@@ -83,7 +83,7 @@ export default function UploadZone() {
                   setFile2(null);
                 }}
               >
-                Remove File
+                Eliminar archivo
               </Button>
             </div>
           ) : (
@@ -108,9 +108,9 @@ export default function UploadZone() {
 
               {/* Instruction Texts */}
               <div className="space-y-1">
-                <p className="text-sm font-medium text-title-50">Drag & drop or click to upload</p>
+                <p className="text-sm font-medium text-title-50">Arrastra y suelta o haz clic para subir</p>
                 <p className="text-xs text-input-placeholder-text">
-                  JPEG, PNG, PDG, and MP4 formats, up to 50MB
+                  Formatos JPEG, PNG, PDF y MP4, hasta 50 MB
                 </p>
               </div>
 
@@ -122,7 +122,7 @@ export default function UploadZone() {
                 }}
               >
                 <Button variant="primary" appearance="outline" size="sm" className="mt-1">
-                  Browse File
+                  Buscar archivo
                 </Button>
               </FileTrigger>
             </div>

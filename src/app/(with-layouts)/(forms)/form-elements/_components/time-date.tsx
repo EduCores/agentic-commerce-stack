@@ -32,7 +32,7 @@ export default function TimeAndDate() {
       {/* Time Field */}
       <TimeField value={timeValue} onChange={setTimeValue}>
         <FieldLabel className="mb-1.5 block text-sm font-medium text-text-secondary">
-          Select time
+          Elige la hora
         </FieldLabel>
         <div className="relative w-full">
           <DateInput className="w-full pr-11">
@@ -47,7 +47,7 @@ export default function TimeAndDate() {
       {/* Date Field */}
       <DatePicker value={dateValue} onChange={setDateValue}>
         <FieldLabel className="mb-1.5 block text-sm font-medium text-text-secondary">
-          Select Date
+          Elige la fecha
         </FieldLabel>
         <DatePickerGroup className="relative w-full">
           <DateInput className="w-full pr-4 pl-11">

@@ -6,20 +6,20 @@ export default function TextAreaInput() {
   return (
     <div className="flex flex-col gap-5 p-6">
       <TextField className="w-full gap-2">
-        <FieldLabel>Message</FieldLabel>
-        <TextArea placeholder="Enter your message here..." />
-        <FieldError>Bio must be between 5 and 280 characters.</FieldError>
+        <FieldLabel>Mensaje</FieldLabel>
+        <TextArea placeholder="Escribe tu mensaje aquí..." />
+        <FieldError>La biografía debe tener entre 5 y 280 caracteres.</FieldError>
       </TextField>
 
       <TextField className="w-full gap-2" invalid>
-        <FieldLabel>Message</FieldLabel>
-        <TextArea placeholder="Enter your message here..." />
-        <FieldError>Message must be between 5 and 280 characters.</FieldError>
+        <FieldLabel>Mensaje</FieldLabel>
+        <TextArea placeholder="Escribe tu mensaje aquí..." />
+        <FieldError>El mensaje debe tener entre 5 y 280 caracteres.</FieldError>
       </TextField>
 
       <TextField className="w-full gap-2" disabled>
-        <FieldLabel>Message</FieldLabel>
-        <TextArea placeholder="Enter your message here..." />
+        <FieldLabel>Mensaje</FieldLabel>
+        <TextArea placeholder="Escribe tu mensaje aquí..." />
       </TextField>
     </div>
   );

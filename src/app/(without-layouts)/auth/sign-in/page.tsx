@@ -6,13 +6,13 @@ export default function SignInPage() {
     <div className="flex min-h-screen items-center justify-center bg-background-gray-secondary_alt_2 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <a href="/login" className="text-xs font-medium text-brand-600 underline">← Back</a>
-          <CardTitle className="text-xl">Sign In</CardTitle>
-          <p className="text-sm text-text-tertiary">Welcome back! Please sign in to access your account.</p>
+          <a href="/login" className="text-xs font-medium text-brand-600 underline">← Volver</a>
+          <CardTitle className="text-xl">Iniciar sesión</CardTitle>
+          <p className="text-sm text-text-tertiary">¡Qué bueno verte de nuevo! Inicia sesión para entrar a tu cuenta.</p>
         </CardHeader>
         <CardContent>
           <SignInForm />
-          <p className="mt-4 text-center text-[11px] text-text-tertiary">NextAdmin · Built for Developers, Designed for Efficiency</p>
+          <p className="mt-4 text-center text-[11px] text-text-tertiary">NextAdmin · Hecho para desarrolladores, pensado para ser eficiente</p>
         </CardContent>
       </Card>
     </div>

@@ -17,19 +17,19 @@ export default function UserTable() {
           <TableHeader>
             <TableRow className="bg-background-gray-secondary_alt">
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Name
+                Nombre
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Position
+                Cargo
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Email
+                Correo
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Role
+                Rol
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Action
+                Acción
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -51,7 +51,7 @@ export default function UserTable() {
                 </TableCell>
                 <TableCell className="h-16 px-6 py-3">
                   <button className="cursor-pointer text-sm leading-5 font-medium tracking-[-0.15px] whitespace-nowrap text-neutral-brand-color">
-                    Edit
+                    Editar
                   </button>
                 </TableCell>
               </TableRow>

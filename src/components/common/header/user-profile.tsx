@@ -42,17 +42,17 @@ export function UserProfileButton() {
     {
       href: "/profile",
       icon: <UserCircleIcon />,
-      label: "View profile",
+      label: "Ver perfil",
     },
     {
       href: "#",
       icon: <GearIcon />,
-      label: "Account Settings",
+      label: "Ajustes de cuenta",
     },
     {
       href: "#",
       icon: <BillingIcon />,
-      label: "Billing and Plan",
+      label: "Facturación y plan",
     },
   ];
 
@@ -114,7 +114,7 @@ export function UserProfileButton() {
           <span className="text-icon-secondary group-hover:text-text-primary">
             <LogoutIcon />
           </span>
-          <span className="leading-5">Logout</span>
+          <span className="leading-5">Cerrar sesión</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -15,7 +15,7 @@ export function EmailPreviewCard({ kind, subject, html, mocked }: Props) {
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-sm">
           <span>{kind}</span>
-          <Badge color={mocked ? "gray" : "success"}>{mocked ? "mock" : "resend"}</Badge>
+          <Badge color={mocked ? "gray" : "success"}>{mocked ? "prueba" : "resend"}</Badge>
         </CardTitle>
         <p className="text-xs text-text-tertiary">{subject}</p>
       </CardHeader>

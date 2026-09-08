@@ -9,7 +9,7 @@ export function AnalyticsSalesChart({ data }: { data: AnalyticsData | null }) {
   const rows = data?.salesByDay ?? [];
   return (
     <Card className="md:col-span-2">
-      <CardHeader><CardTitle className="text-sm">Visitors Analytics — ventas 7 días</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-sm">Analítica de visitas — ventas de los últimos 7 días</CardTitle></CardHeader>
       <CardContent className="h-72 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
           <AreaChart data={rows} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>

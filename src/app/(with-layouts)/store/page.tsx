@@ -13,11 +13,11 @@ export default async function StorePage() {
 
   return (
     <div className="space-y-6 p-6">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Store", href: "/store" }]} />
+      <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Almacenar", href: "/store" }]} />
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-black dark:text-white">Store Connections</h2>
-          <p className="text-sm text-text-tertiary">Conecta cualquier tienda — Shopify, WooCommerce, Magento o custom. Un solo software para vender.</p>
+          <h2 className="text-xl font-bold text-black dark:text-white">Conexiones de tienda</h2>
+          <p className="text-sm text-text-tertiary">Conecta tu tienda — Shopify, WooCommerce, Magento o personalizada. Un solo sistema para vender.</p>
         </div>
         <Button appearance="fill">Conectar tienda</Button>
       </div>
@@ -27,12 +27,12 @@ export default async function StorePage() {
           <CardHeader><CardTitle>Conexiones ({stores.length})</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {stores.length === 0 ? (
-              <p className="text-sm text-text-tertiary">Sin tiendas. Crea una con provider `mock` para demo, o `shopify` con dominio/apiKey.</p>
+              <p className="text-sm text-text-tertiary">Sin conexiones. Crea una con provider `mock` para la demo, o `shopify` con dominio/apiKey.</p>
             ) : stores.map((s) => (
               <div key={s.id} className="rounded-lg border border-card-border p-3 space-y-2">
                 <p className="font-medium">{s.name} <Badge color="gray">{s.provider}</Badge></p>
                 <p className="text-xs text-text-tertiary">{s.domain ?? "—"}</p>
-                <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activa" : "Inactiva"}</Badge>
+                <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activo" : "Inactivo"}</Badge>
                 <SyncButton storeId={s.id} storeName={s.name} />
               </div>
             ))}
@@ -42,7 +42,7 @@ export default async function StorePage() {
           <CardHeader><CardTitle>Catálogo universal ({products.length})</CardTitle></CardHeader>
           <CardContent>
             {products.length === 0 ? (
-              <p className="text-sm text-text-tertiary">Sin productos. Corre <code>prisma/seed.ts</code> o conecta tu tienda y haz sync.</p>
+              <p className="text-sm text-text-tertiary">Sin productos. Ejecuta <code>prisma/seed.ts</code> o conecta tu tienda y sincroniza.</p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {products.map((p) => (

@@ -11,7 +11,7 @@ export default function PieChartOneTooltip({
       <div className="rounded-xl border border-card-border bg-card-background p-3 shadow-md">
         <p className="mb-1 text-xs font-semibold text-text-primary">{data.name}</p>
         <p className="text-xs text-text-secondary">
-          Percentage: <span className="font-semibold text-text-primary">{data.value}%</span>
+          Porcentaje: <span className="font-semibold text-text-primary">{data.value}%</span>
         </p>
       </div>
     );

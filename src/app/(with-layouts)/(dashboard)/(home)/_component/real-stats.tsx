@@ -19,14 +19,14 @@ export function RealStats() {
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
       const r = await fetch("/api/dashboard/stats");
-      if (!r.ok) throw new Error("No se pudo cargar stats");
+      if (!r.ok) throw new Error("No se pudieron cargar las métricas");
       return r.json();
     },
     refetchInterval: 30000,
   });
 
-  if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando métricas reales...</CardContent></Card>;
-  if (!data) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Sin datos</CardContent></Card>;
+  if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando tus métricas reales...</CardContent></Card>;
+  if (!data) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Sin datos por ahora</CardContent></Card>;
   const alerts = data.recentOrders.filter((o) => o.status === "FAILED" || o.status === "PENDING").length;
 
   return (
@@ -49,19 +49,19 @@ export function RealStats() {
         <CardHeader><CardTitle className="text-sm">Clientes</CardTitle></CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">{data.counts.customers}</p>
-          <p className="text-xs text-text-tertiary">Agentes {data.counts.agents} · Runs {data.counts.agentRuns}</p>
+          <p className="text-xs text-text-tertiary">Agentes {data.counts.agents} · Ejecuciones {data.counts.agentRuns}</p>
         </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle className="text-sm">Workflows</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Flujos de trabajo</CardTitle></CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">{data.counts.workflows}</p>
-          <p className="text-xs text-text-tertiary">Runs {data.counts.workflowRuns}</p>
+          <p className="text-xs text-text-tertiary">Ejecuciones {data.counts.workflowRuns}</p>
         </CardContent>
       </Card>
 
       <Card className="md:col-span-2">
-        <CardHeader><CardTitle className="text-sm">Ventas últimos 7 días</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Ventas de los últimos 7 días</CardTitle></CardHeader>
         <CardContent>
           <div className="flex items-end gap-1 h-20">
             {data.salesByDay.map((d) => {
@@ -75,16 +75,16 @@ export function RealStats() {
       {alerts > 0 && (
         <Card className="md:col-span-4 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
           <CardContent className="p-4 flex items-center justify-between">
-            <p className="text-sm"><span className="font-bold text-amber-700">⚠️ {alerts} pedido(s) con alerta</span> <span className="text-text-tertiary">— falló validación, derivado a humano (se salvó la venta, revisa en /orders)</span></p>
+            <p className="text-sm"><span className="font-bold text-amber-700">⚠️ {alerts} pedido(s) con alerta</span> <span className="text-text-tertiary">— falló la validación, lo derivamos a una persona (salvamos la venta, revísalo en /orders)</span></p>
             <a href="/orders?status=FAILED" className="text-sm font-medium text-amber-700 underline">Ver pedidos</a>
           </CardContent>
         </Card>
       )}
 
       <Card className="md:col-span-2">
-        <CardHeader><CardTitle className="text-sm">Top productos por demanda</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Productos con más demanda</CardTitle></CardHeader>
         <CardContent className="space-y-2">
-          {data.topProducts.length === 0 ? <p className="text-xs text-text-tertiary">Sin ventas aún</p> : data.topProducts.map((tp, i) => (
+          {data.topProducts.length === 0 ? <p className="text-xs text-text-tertiary">Sin ventas todavía</p> : data.topProducts.map((tp, i) => (
             <div key={i} className="flex justify-between text-sm"><span>{tp.product?.title ?? "—"} <span className="text-xs text-text-tertiary">{tp.product?.sku}</span></span><Badge color="gray">{tp.quantity} uds</Badge></div>
           ))}
         </CardContent>

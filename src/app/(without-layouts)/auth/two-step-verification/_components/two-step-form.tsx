@@ -20,7 +20,7 @@ export function TwoStepForm() {
       const r = await fetch("/api/auth/2fa/request", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
-      setMsg(j.debugCode ? `Código demo: ${j.debugCode}` : j.message ?? "Código enviado");
+      setMsg(j.debugCode ? `Código de prueba: ${j.debugCode}` : j.message ?? "Código enviado");
       if (j.debugCode) setCode(j.debugCode);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Error");
@@ -43,7 +43,7 @@ export function TwoStepForm() {
   return (
     <div className="space-y-4">
       <div className="w-full space-y-1.5">
-        <Label>Email *</Label>
+        <Label>Correo *</Label>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full" />
         <Button onClick={request} appearance="outline" className="w-full" isDisabled={loading || !email}>Enviar código</Button>
       </div>

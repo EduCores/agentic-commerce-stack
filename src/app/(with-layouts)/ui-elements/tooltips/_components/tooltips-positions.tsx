@@ -10,7 +10,7 @@ export default function TooltipsPositions() {
           <TooltipTrigger>{item.title}</TooltipTrigger>
 
           <TooltipContent>
-            <p className="text-sm">This is a tooltip</p>
+            <p className="text-sm">Esto es un tooltip</p>
           </TooltipContent>
         </Tooltip>
       ))}

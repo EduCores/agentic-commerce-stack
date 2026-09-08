@@ -38,16 +38,16 @@ export function SignUpForm() {
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Dueño StarShop" className="w-full" />
       </div>
       <div className="w-full space-y-1.5">
-        <Label>Email Address *</Label>
+        <Label>Correo electrónico *</Label>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full" />
       </div>
       <div className="w-full space-y-1.5">
-        <Label>Password * (mín. 8)</Label>
+        <Label>Contraseña * (mín. 8)</Label>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full" />
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-600">{error}</p>}
-      <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Creando..." : "Create account"}</Button>
-      <p className="text-center text-xs text-text-tertiary">¿Ya tienes cuenta? <a href="/auth/sign-in" className="font-medium text-brand-600 underline">Sign In</a></p>
+      <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Creando..." : "Crear cuenta"}</Button>
+      <p className="text-center text-xs text-text-tertiary">¿Ya tienes cuenta? <a href="/auth/sign-in" className="font-medium text-brand-600 underline">Iniciar sesión</a></p>
     </form>
   );
 }

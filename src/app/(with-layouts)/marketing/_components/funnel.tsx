@@ -11,7 +11,7 @@ export function MarketingFunnel({ data }: { data: MarketingData | null }) {
   const rows = data?.funnel ?? [];
   return (
     <Card className="md:col-span-2">
-      <CardHeader><CardTitle className="text-sm">Conversion funnel</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-sm">Embudo de conversión</CardTitle></CardHeader>
       <CardContent className="h-72 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
           <BarChart data={rows} layout="vertical" margin={{ top: 8, right: 16, left: 40, bottom: 0 }}>

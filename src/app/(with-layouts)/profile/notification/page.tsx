@@ -4,28 +4,28 @@ import { Metadata } from 'next';
 const notificationSettings = [
     {
         id: 'email-notification',
-        label: 'Email notification',
+        label: 'Notificación por correo',
         defaultChecked: true,
     },
     {
         id: 'push-notification',
-        label: 'Push Notification',
+        label: 'Notificación push',
         defaultChecked: false,
     },
-    { id: 'product-update', label: 'Product Update', defaultChecked: true },
-    { id: 'marketing-email', label: 'Marketing Email', defaultChecked: false },
-    { id: 'security-alert', label: 'Security Alert', defaultChecked: true },
+    { id: 'product-update', label: 'Actualización de productos', defaultChecked: true },
+    { id: 'marketing-email', label: 'Correo de marketing', defaultChecked: false },
+    { id: 'security-alert', label: 'Alerta de seguridad', defaultChecked: true },
 ] as const;
 
 export const metadata: Metadata = {
-    title: 'Notification Page',
+    title: 'Página de notificaciones',
 };
 
 export default function NotificationPage() {
     return (
         <div>
             <h2 className='mb-6 text-xl leading-7 font-semibold text-text-primary'>
-                Notification
+                Notificaciones
             </h2>
 
             <div className='divide-y divide-border-secondary-alt'>

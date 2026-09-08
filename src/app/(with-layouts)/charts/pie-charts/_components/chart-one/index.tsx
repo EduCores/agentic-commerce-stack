@@ -11,7 +11,7 @@ export default function PieChartOne() {
     <Card className="p-0">
       {/* Header Container */}
       <div className="border-b border-card-border px-6 py-4">
-        <h3 className="text-base font-medium text-text-primary">Pie Chart 1</h3>
+        <h3 className="text-base font-medium text-text-primary">Gráfico de torta 1</h3>
       </div>
 
       {/* Body Container */}
@@ -56,7 +56,7 @@ export default function PieChartOne() {
                               dy="1.4em"
                               className="fill-text-tertiary text-sm font-normal tracking-[-0.15px]"
                             >
-                              Visitors
+                              Visitas
                             </tspan>
                           </text>
                         );
@@ -86,7 +86,7 @@ export default function PieChartOne() {
 
 function CustomPieCell(props: PieSectorShapeProps) {
   const payload = props.payload as { name: string; value: number; color: string } | undefined;
-  const isGroupA = payload?.name === "Group A";
+  const isGroupA = payload?.name === "Grupo A" || payload?.name === "Group A";
   return (
     <Sector
       {...props}

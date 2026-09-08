@@ -15,14 +15,14 @@ export default function BarChartTwoTooltip({
         <div className="flex items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-1.5 text-text-secondary">
             <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
-            <span>Group A:</span>
+            <span>Grupo A:</span>
           </div>
           <span className="font-semibold text-text-primary">{data.groupA.toLocaleString()}</span>
         </div>
         <div className="flex items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-1.5 text-text-secondary">
             <span className="h-1.5 w-1.5 rounded-full bg-brand-300" />
-            <span>Group B:</span>
+            <span>Grupo B:</span>
           </div>
           <span className="font-semibold text-text-primary">{data.groupB.toLocaleString()}</span>
         </div>

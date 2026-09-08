@@ -26,11 +26,11 @@ import { FieldError, Form } from "react-aria-components";
 import { LogoutIcon, TrashIcon } from "./icons";
 
 const countryOptions = [
-  { value: "us", label: "United States", flag: "/images/flag/US.svg" },
-  { value: "ca", label: "Canada", flag: "/images/flag/CA.svg" },
-  { value: "fr", label: "France", flag: "/images/flag/FR.svg" },
+  { value: "us", label: "Estados Unidos", flag: "/images/flag/US.svg" },
+  { value: "ca", label: "Canadá", flag: "/images/flag/CA.svg" },
+  { value: "fr", label: "Francia", flag: "/images/flag/FR.svg" },
   { value: "au", label: "Australia", flag: "/images/flag/AU.svg" },
-  { value: "it", label: "Italy", flag: "/images/flag/IT.svg" },
+  { value: "it", label: "Italia", flag: "/images/flag/IT.svg" },
   { value: "in", label: "India", flag: "/images/flag/IN.svg" },
 ];
 
@@ -39,7 +39,7 @@ export default function AccountPage() {
     <div className="space-y-6">
       {/* Account Details Card */}
       <Card className="bg-transparent p-5">
-        <h2 className="mb-6 text-xl leading-7 font-semibold text-text-primary">Account Details</h2>
+        <h2 className="mb-6 text-xl leading-7 font-semibold text-text-primary">Detalles de la cuenta</h2>
 
         <Form
           className="space-y-6"
@@ -56,27 +56,27 @@ export default function AccountPage() {
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-3">
                 <Button appearance="outline" size="sm">
-                  Change Avatar
+                  Cambiar avatar
                 </Button>
                 <Button appearance="outline" variant="danger" size="sm">
-                  Remove
+                  Eliminar
                 </Button>
               </div>
               <p className="text-xs leading-4 text-text-tertiary">
-                Accepts PNG, JPEG, GIF; max size 2MB.
+                Acepta PNG, JPEG, GIF; tamaño máximo 2 MB.
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <TextField className="w-full gap-2.5">
-              <Label>Full Name</Label>
+              <Label>Nombre completo</Label>
               <Input name="fullName" placeholder="Jhon Smith" className="w-full" required />
               <FieldError />
             </TextField>
 
             <TextField className="w-full gap-2.5">
-              <Label>Email address</Label>
+              <Label>Correo electrónico</Label>
               <Input
                 name="email"
                 type="email"
@@ -88,12 +88,12 @@ export default function AccountPage() {
             </TextField>
 
             <TextField className="w-full gap-2.5">
-              <Label>Phone Number</Label>
+              <Label>Número de teléfono</Label>
               <Input name="phone" placeholder="+1 604 555 1234" className="w-full" />
             </TextField>
 
             <TextField className="w-full gap-2.5">
-              <Label>Website</Label>
+              <Label>Sitio web</Label>
               <InputGroup>
                 <InputGroupAddon className="after h-full border-r border-card-border text-input-placeholder-text-color">
                   https://
@@ -103,7 +103,7 @@ export default function AccountPage() {
             </TextField>
 
             <TextField className="w-full gap-2.5">
-              <Label>Address</Label>
+              <Label>Dirección</Label>
               <Input
                 name="address"
                 placeholder="1901 Thornridge Cir. Shiloh, Hawaii 81063"
@@ -113,7 +113,7 @@ export default function AccountPage() {
 
             <div>
               <Select name="country" defaultSelectedKey="us" className="h-full">
-                <SelectLabel>Country</SelectLabel>
+                <SelectLabel>País</SelectLabel>
                 <SelectTrigger className="h-full w-full border-input-border">
                   <SelectValue className="flex items-center gap-2" />
                   <SelectIndicator />
@@ -138,11 +138,11 @@ export default function AccountPage() {
             </div>
 
             <TextField className="col-span-1 w-full gap-2.5 md:col-span-2">
-              <Label>Bio</Label>
+              <Label>Biografía</Label>
               <TextArea
                 name="bio"
                 className="h-25 shadow-xs"
-                placeholder="Passionate software engineer with a knack for crafting scalable web applications and exploring cutting-edge technologies. Always eager to solve complex problems and innovate."
+                placeholder="Apasionado por crear aplicaciones web escalables y explorar tecnologías nuevas. Siempre dispuesto a resolver problemas complejos e innovar."
               />
             </TextField>
 
@@ -154,10 +154,10 @@ export default function AccountPage() {
                 type="button"
                 className="px-3.5 text-sm"
               >
-                Cancel
+                Cancelar
               </Button>
               <Button variant="primary" size="lg" type="submit" className="px-3.5 text-sm">
-                Save Changes
+                Guardar cambios
               </Button>
             </div>
           </div>
@@ -169,10 +169,10 @@ export default function AccountPage() {
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <p className="mb-1 text-sm leading-5 font-medium text-text-primary">
-              Sign out from all devices
+              Cerrar sesión en todos los dispositivos
             </p>
             <p className="text-xs leading-4 text-text-tertiary">
-              End all active sessions across your devices.
+              Termina todas las sesiones activas en tus dispositivos.
             </p>
           </div>
 
@@ -183,16 +183,16 @@ export default function AccountPage() {
             className="gap-2 px-3.5 py-2 text-sm [&>svg]:size-5"
           >
             <LogoutIcon />
-            Sign Out
+            Cerrar sesión
           </Button>
         </div>
         <hr className="my-4 border-border-secondary-alt" />
         {/* Delete Account */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <p className="mb-1 text-sm leading-5 font-medium text-text-primary">Delete Account</p>
+            <p className="mb-1 text-sm leading-5 font-medium text-text-primary">Eliminar cuenta</p>
             <p className="text-xs leading-4 text-text-tertiary">
-              Delete your account permanently along with all associated data.
+              Elimina tu cuenta de forma permanente junto con todos los datos asociados.
             </p>
           </div>
 
@@ -203,7 +203,7 @@ export default function AccountPage() {
             className="gap-2 px-3.5 text-sm [&>svg]:size-5"
           >
             <TrashIcon />
-            Delete Account
+            Eliminar cuenta
           </Button>
         </div>
       </Card>

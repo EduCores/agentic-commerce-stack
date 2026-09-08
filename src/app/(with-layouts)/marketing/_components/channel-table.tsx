@@ -5,7 +5,7 @@ import type { MarketingData } from "./types";
 export function MarketingChannelTable({ data }: { data: MarketingData }) {
   return (
     <Card className="md:col-span-3">
-      <CardHeader><CardTitle className="text-sm">Channel Performance</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-sm">Rendimiento por canal</CardTitle></CardHeader>
       <CardContent>
         {data.channels.length === 0 ? (
           <p className="text-sm text-text-tertiary">Sin canales aún. Los pedidos con <code>source</code> alimentan esta tabla.</p>
@@ -13,7 +13,7 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-card-border text-xs text-text-tertiary">
-                <tr><th className="p-2 text-left">Channel</th><th className="p-2 text-right">Spend</th><th className="p-2 text-right">Clicks</th><th className="p-2 text-right">Conv. %</th><th className="p-2 text-right">Revenue</th></tr>
+                <tr><th className="p-2 text-left">Canal</th><th className="p-2 text-right">Inversión</th><th className="p-2 text-right">Clics</th><th className="p-2 text-right">Conversión %</th><th className="p-2 text-right">Ingresos</th></tr>
               </thead>
               <tbody>
                 {data.channels.map((c) => (

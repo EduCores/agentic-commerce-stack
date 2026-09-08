@@ -24,7 +24,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             <button
               id="mobile-menu-toggle"
               onClick={onMenuClick}
-              aria-label="Open sidebar menu"
+              aria-label="Abrir menú lateral"
               className="rounded-md px-1.5 py-1 text-icon-tertiary transition-colors hover:text-text-primary"
             >
               <MenuIcon />
@@ -41,7 +41,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             <button
               id="mobile-info-toggle"
               onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-              aria-label="Open quick access"
+              aria-label="Abrir acceso rápido"
               className={cn(
                 "rounded-md px-1.5 py-3 transition-colors",
                 isDrawerOpen

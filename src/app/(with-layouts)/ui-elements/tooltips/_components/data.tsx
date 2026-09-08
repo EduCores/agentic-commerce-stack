@@ -2,21 +2,21 @@ export const tooltipPositionsData = [
   {
     id: 1,
     position: "top",
-    title: "Top Tooltip",
+    title: "Tooltip superior",
   },
   {
     id: 2,
     position: "left",
-    title: "Left Tooltip",
+    title: "Tooltip izquierdo",
   },
   {
     id: 3,
     position: "bottom",
-    title: "Bottom Tooltip",
+    title: "Tooltip inferior",
   },
   {
     id: 4,
     position: "right",
-    title: "Right Tooltip",
+    title: "Tooltip derecho",
   },
 ];

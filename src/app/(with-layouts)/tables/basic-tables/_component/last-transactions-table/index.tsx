@@ -50,13 +50,13 @@ export default function LastTransactionsTable() {
     <Card>
       {/* Header */}
       <CardHeader className="mb-6">
-        <CardTitle>Last Transaction</CardTitle>
+        <CardTitle>Últimas transacciones</CardTitle>
         <div className="flex items-center gap-1">
           <InputGroup className="h-9">
             <InputGroupAddon align="inline-start" className="pr-0 text-icon-tertiary">
               <SearchIcon className="size-4" />
             </InputGroupAddon>
-            <InputGroupInput placeholder="Search" className="pl-2 text-sm" />
+            <InputGroupInput placeholder="Buscar" className="pl-2 text-sm" />
           </InputGroup>
           <Button appearance="outline" className="h-8 w-8 p-1.5 text-icon-tertiary">
             <FilterIcon />
@@ -77,22 +77,22 @@ export default function LastTransactionsTable() {
                 </div>
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Order
+                Pedido
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold whitespace-nowrap text-text-secondary">
-                Date
+                Fecha
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Customer
+                Cliente
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Amount
+                Monto
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Status
+                Estado
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                <div className="flex items-center justify-center">Action</div>
+                <div className="flex items-center justify-center">Acción</div>
               </TableHead>
             </TableRow>
           </TableHeader>

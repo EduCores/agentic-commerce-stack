@@ -9,7 +9,7 @@ import TimeAndDate from './_components/time-date';
 import UploadZone from './_components/upload-zone';
 
 export const metadata: Metadata = {
-    title: 'Form Elements Page',
+    title: 'Página de elementos de formulario',
 };
 
 export default function FormElementsPage() {
@@ -18,16 +18,16 @@ export default function FormElementsPage() {
             {/* Header Section */}
             <div className='flex flex-col-reverse items-start justify-between gap-3 px-2 sm:flex-row sm:items-center lg:px-6'>
                 <h1 className='mb-1 text-[28px] leading-8 font-medium text-text-primary'>
-                    Form Elements
+                    Elementos de formulario
                 </h1>
 
                 <div>
                     <Breadcrumbs
                         dividerType='chevron'
                         items={[
-                            { href: '/', label: 'Home' },
-                            { href: '/form-elements', label: 'Forms' },
-                            { href: '/form-elements', label: 'Form Elements' },
+                            { href: '/', label: 'Inicio' },
+                            { href: '/form-elements', label: 'Formularios' },
+                            { href: '/form-elements', label: 'Elementos de formulario' },
                         ]}
                     />
                 </div>
@@ -36,25 +36,25 @@ export default function FormElementsPage() {
             {/* Main Content */}
             <section className='grid grid-cols-1 gap-5 px-2 lg:grid-cols-2 lg:px-6'>
                 <div className='flex flex-col gap-5'>
-                    <ComponentPreview title='Input Field'>
+                    <ComponentPreview title='Campo de texto'>
                         <InputField />
                     </ComponentPreview>
-                    <ComponentPreview title='Text Area'>
+                    <ComponentPreview title='Área de texto'>
                         <TextAreaInput />
                     </ComponentPreview>
-                    <ComponentPreview title='Upload Zone'>
+                    <ComponentPreview title='Zona de subida'>
                         <UploadZone />
                     </ComponentPreview>
                 </div>
 
                 <div className='flex flex-col gap-5'>
-                    <ComponentPreview title='Input Group'>
+                    <ComponentPreview title='Grupo de campos'>
                         <InputGroupComponents />
                     </ComponentPreview>
-                    <ComponentPreview title='Selects'>
+                    <ComponentPreview title='Selectores'>
                         <Selects />
                     </ComponentPreview>
-                    <ComponentPreview title='Time and Date'>
+                    <ComponentPreview title='Hora y fecha'>
                         <TimeAndDate />
                     </ComponentPreview>
                 </div>

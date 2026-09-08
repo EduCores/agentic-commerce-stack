@@ -22,7 +22,7 @@ export default function InputField() {
       {/*  Text Input */}
       <TextField className="w-full flex-col gap-1.5">
         <Label className="flex items-center gap-0.5 text-sm font-medium text-input-label-text">
-          Text Input
+          Texto
         </Label>
         <Input placeholder="Jhon Smith" type="text" className="w-full px-3 py-2.5 text-sm" />
         <FieldError />
@@ -31,7 +31,7 @@ export default function InputField() {
       {/* Email */}
       <TextField className="w-full flex-col gap-1.5">
         <Label className="flex items-center gap-0.5 text-sm font-medium text-input-label-text">
-          Email
+          Correo
         </Label>
         <Input placeholder="info@gmail.com" type="email" className="w-full px-3 py-2.5 text-sm" />
         <FieldError />
@@ -40,13 +40,13 @@ export default function InputField() {
       {/*  Password */}
       <TextField className="w-full gap-2.5">
         <Label>
-          Password <span className="text-sm font-medium text-error-500">*</span>
+          Contraseña <span className="text-sm font-medium text-error-500">*</span>
         </Label>
         <InputGroup>
           <InputGroupInput
             name="password"
             type={showPassword ? "text" : "password"}
-            placeholder="Choose a password"
+            placeholder="Elige una contraseña"
             minLength={8}
             className="w-full px-3 py-2.5 text-sm"
           />
@@ -54,7 +54,7 @@ export default function InputField() {
             size="icon-sm"
             className="mr-1 text-text-secondary hover:text-text-primary"
             onPress={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
           >
             {showPassword ? <EyeClose className="size-5" /> : <Eye className="size-5" />}
           </InputGroupButton>
@@ -65,13 +65,13 @@ export default function InputField() {
       {/* 4. Search */}
       <TextField className="w-full flex-col gap-1.5">
         <Label className="flex items-center gap-0.5 text-sm font-medium text-input-label-text">
-          Search
+          Buscar
         </Label>
         <InputGroup className="w-full">
           <InputGroupAddon align="inline-start" className="pr-1 text-text-secondary">
             <Search1 />
           </InputGroupAddon>
-          <InputGroupInput placeholder="Search anything..." type="text" className="text-sm" />
+          <InputGroupInput placeholder="Busca lo que sea..." type="text" className="text-sm" />
           <InputGroupAddon align="inline-end" className="pl-1">
             <div className="bg-base-100 flex items-center gap-0.5 rounded border border-card-border px-1.5 py-0.5 text-[10px] font-medium text-text-secondary select-none">
               <span>⌘</span>
@@ -85,10 +85,10 @@ export default function InputField() {
       {/* 5. Placeholder */}
       <TextField className="w-full flex-col gap-1.5">
         <Label className="flex items-center gap-0.5 text-sm font-medium text-input-label-text">
-          Placeholder
+          Texto de ejemplo
         </Label>
         <Input
-          placeholder="Type somethings..."
+          placeholder="Escribe algo..."
           type="text"
           className="w-full px-3 py-2.5 text-sm"
         />

@@ -14,14 +14,14 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
     <div className="space-y-6 p-6">
       <Breadcrumbs
         items={[
-          { label: "Home", href: "/" },
-          { label: "Workflows", href: "/workflows" },
+          { label: "Inicio", href: "/" },
+          { label: "Flujos de trabajo", href: "/workflows" },
         ]}
       />
       <div className="rounded-sm border border-card-border bg-card-background p-6 shadow-sm">
-        <h2 className="mb-1 text-xl font-bold text-text-primary">Monitoreo de Agentes y Flujos en Tiempo Real</h2>
+        <h2 className="mb-1 text-xl font-bold text-text-primary">Monitoreo de agentes y flujos de trabajo en tiempo real</h2>
         <p className="mb-4 text-sm text-text-tertiary">
-          Creador de flujos integrado — arrastra nodos, conecta y guarda. XYFlow embebido en NextAdmin. Estado en vivo desde Prisma.
+          Creador de flujos de trabajo integrado — arrastra los nodos, conéctalos y guarda. XYFlow integrado en NextAdmin. Estado en vivo desde Prisma.
         </p>
         {all.length > 1 && (
           <div className="mb-4 flex flex-wrap gap-2">
@@ -39,10 +39,10 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
         <FlowCanvas key={workflow?.slug} workflowSlug={workflow?.slug} initialData={graph as never} />
         {workflow && (
           <p className="mt-3 text-xs text-text-tertiary">
-            Workflow: <span className="font-medium">{workflow.name}</span> ({workflow.slug}) — v{workflow.version}
+            Flujo de trabajo: <span className="font-medium">{workflow.name}</span> ({workflow.slug}) — v{workflow.version}
           </p>
         )}
-        {all.length === 0 && <p className="text-sm text-text-tertiary">Sin workflows en DB</p>}
+        {all.length === 0 && <p className="text-sm text-text-tertiary">Sin flujos de trabajo en la base de datos</p>}
       </div>
     </div>
   );

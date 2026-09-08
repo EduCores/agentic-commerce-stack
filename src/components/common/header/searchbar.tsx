@@ -92,7 +92,7 @@ export default function SearchBar() {
             <button
                 onClick={() => setOpen(true)}
                 className='flex size-10 items-center justify-center rounded-lg border border-card-border bg-card-background text-icon-primary shadow-xs transition-colors outline-none hover:bg-background-gray-primary focus-visible:border-input-primary-focus-border focus-visible:ring-4 focus-visible:ring-input-primary-focus-border/20 xl:hidden'
-                aria-label='Open search modal'
+                aria-label='Abrir búsqueda'
                 translate="no"
                 suppressHydrationWarning
             >
@@ -114,7 +114,7 @@ export default function SearchBar() {
                             <SearchIcon />
                         </InputGroupAddon>
                         <InputGroupInput
-                            placeholder='Search pages...'
+                            placeholder='Buscar páginas...'
                             className='pointer-events-none cursor-pointer pl-2 text-sm select-none notranslate'
                             readOnly
                             translate="no"
@@ -132,7 +132,7 @@ export default function SearchBar() {
             <Command.Dialog
                 open={open}
                 onOpenChange={setOpen}
-                label='Global Search'
+                label='Búsqueda global'
                 overlayClassName='fixed inset-0 z-50 bg-black/50 backdrop-blur-xs transition-opacity duration-200'
                 contentClassName='fixed top-1/2 left-1/2 z-50 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 rounded-xl border border-card-border bg-card-background text-text-primary shadow-2xl overflow-hidden outline-none max-sm:max-w-[calc(100%-2rem)]'
             >
@@ -146,7 +146,7 @@ export default function SearchBar() {
                             <SearchIcon />
                         </InputGroupAddon>
                         <Command.Input
-                            placeholder='Search pages...'
+                            placeholder='Buscar páginas...'
                             className='w-full min-w-0 flex-1 border-none bg-transparent pl-2 text-sm text-text-primary outline-none placeholder:text-text-tertiary focus:ring-0 focus:outline-none notranslate'
                             translate="no"
                         />
@@ -161,7 +161,7 @@ export default function SearchBar() {
                 {/* Results List */}
                 <Command.List className='scrollbar-thin max-h-96 overflow-y-auto p-2'>
                     <Command.Empty className='py-8 text-center text-sm text-text-tertiary'>
-                        No pages found matching your search.
+                        No se encontraron páginas para tu búsqueda.
                     </Command.Empty>
 
                     {Object.entries(itemsBySection).map(
@@ -222,20 +222,20 @@ export default function SearchBar() {
                             <kbd className='rounded border border-card-border bg-card-background px-1 py-0.5 font-mono text-[10px] shadow-xs'>
                                 ↓
                             </kbd>
-                            <span>Navigate</span>
+                            <span>Navegar</span>
                         </span>
                         <span className='flex items-center gap-1'>
                             <kbd className='rounded border border-card-border bg-card-background px-1.5 py-0.5 font-mono text-[10px] shadow-xs'>
                                 ↵
                             </kbd>
-                            <span>Select</span>
+                            <span>Seleccionar</span>
                         </span>
                     </div>
                     <div className='flex items-center gap-1'>
                         <kbd className='rounded border border-card-border bg-card-background px-1.5 py-0.5 font-mono text-[10px] shadow-xs'>
                             ESC
                         </kbd>
-                        <span>Close</span>
+                        <span>Cerrar</span>
                     </div>
                 </div>
             </Command.Dialog>

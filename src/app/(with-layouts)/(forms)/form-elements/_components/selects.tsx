@@ -13,19 +13,19 @@ import { Close } from "@tailgrids/icons";
 import { useState } from "react";
 
 const countries = [
-  { code: "US", name: "United State", flag: "/images/flag/US.svg" },
+  { code: "US", name: "Estados Unidos", flag: "/images/flag/US.svg" },
   { code: "AU", name: "Australia", flag: "/images/flag/AU.svg" },
-  { code: "CA", name: "Canada", flag: "/images/flag/CA.svg" },
-  { code: "FR", name: "France", flag: "/images/flag/FR.svg" },
+  { code: "CA", name: "Canadá", flag: "/images/flag/CA.svg" },
+  { code: "FR", name: "Francia", flag: "/images/flag/FR.svg" },
   { code: "IN", name: "India", flag: "/images/flag/IN.svg" },
-  { code: "IT", name: "Italy", flag: "/images/flag/IT.svg" },
+  { code: "IT", name: "Italia", flag: "/images/flag/IT.svg" },
 ];
 
-const optionList = ["Bangladesh", "Singapore", "Malaysia", "Thailand"];
+const optionList = ["Bangladés", "Singapur", "Malasia", "Tailandia"];
 
 export default function Selects() {
   const [singleValue, setSingleValue] = useState<string>("");
-  const [selectedCountries, setSelectedCountries] = useState<string[]>(["Bangladesh", "Singapore"]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>(["Bangladés", "Singapur"]);
   const [selectedCountry, setSelectedCountry] = useState<string>("US");
 
   const currentCountry = countries.find((c) => c.code === selectedCountry);
@@ -38,10 +38,10 @@ export default function Selects() {
           value={singleValue}
           onChange={(val) => setSingleValue(val as string)}
           className="w-full"
-          aria-label="Select option"
-          placeholder="Select option"
+          aria-label="Seleccionar opción"
+          placeholder="Seleccionar opción"
         >
-          <SelectLabel>Select option</SelectLabel>
+          <SelectLabel>Seleccionar opción</SelectLabel>
           <SelectTrigger className="w-full border-border-secondary bg-input-background py-2.5">
             <SelectValue />
             <SelectIndicator />
@@ -64,13 +64,13 @@ export default function Selects() {
           value={selectedCountries}
           onChange={(val) => setSelectedCountries(val as string[])}
           className="w-full"
-          aria-label="Select options"
+          aria-label="Seleccionar opciones"
         >
-          <SelectLabel>Select options</SelectLabel>
+          <SelectLabel>Seleccionar opciones</SelectLabel>
           <SelectTrigger className="h-auto min-h-11 w-full flex-wrap justify-between gap-1.5 border-border-secondary bg-input-background py-1.5 pr-2.5 pl-3 text-sm">
             <div className="flex flex-1 flex-wrap items-center gap-1.5">
               {selectedCountries.length === 0 ? (
-                <span className="text-input-placeholder-text">Select option</span>
+                <span className="text-input-placeholder-text">Seleccionar opción</span>
               ) : (
                 selectedCountries.map((opt) => (
                   <span
@@ -93,7 +93,7 @@ export default function Selects() {
                         }
                       }}
                       className="cursor-pointer rounded-sm p-0.5 text-text-secondary hover:text-text-primary"
-                      aria-label={`Remove ${opt}`}
+                      aria-label={`Eliminar ${opt}`}
                     >
                       <Close className="size-3" />
                     </span>
@@ -119,9 +119,9 @@ export default function Selects() {
           value={selectedCountry}
           onChange={(val) => setSelectedCountry(val as string)}
           className="w-full"
-          aria-label="Select Country"
+          aria-label="Seleccionar país"
         >
-          <SelectLabel>Select Country</SelectLabel>
+          <SelectLabel>Seleccionar país</SelectLabel>
           <SelectTrigger className="w-full border-border-secondary bg-input-background py-2.5">
             <div className="flex items-center gap-2">
               {currentCountry && (
@@ -132,7 +132,7 @@ export default function Selects() {
                 />
               )}
               <span className="text-sm text-text-primary">
-                {currentCountry ? currentCountry.name : "Select Country"}
+                {currentCountry ? currentCountry.name : "Seleccionar país"}
               </span>
             </div>
             <SelectIndicator />

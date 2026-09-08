@@ -1,7 +1,7 @@
 export const topProducts = [
   {
     name: "Keyboard H32",
-    category: "Electronics",
+    category: "Electrónica",
     price: "$269",
     sold: "1,284",
     profit: "$2442",
@@ -9,7 +9,7 @@ export const topProducts = [
   },
   {
     name: "Mouse M12 Pro",
-    category: "Electronics",
+    category: "Electrónica",
     price: "$54",
     sold: "934",
     profit: "$1752",
@@ -17,7 +17,7 @@ export const topProducts = [
   },
   {
     name: "Gaming Chair X5",
-    category: "Electronics",
+    category: "Electrónica",
     price: "$140",
     sold: "732",
     profit: "$1471",
@@ -25,7 +25,7 @@ export const topProducts = [
   },
   {
     name: "Wireless Headset V7",
-    category: "Electronics",
+    category: "Electrónica",
     price: "$45",
     sold: "1120",
     profit: "$1400",
@@ -33,7 +33,7 @@ export const topProducts = [
   },
   {
     name: "4K Monitor S24",
-    category: "Electronics",
+    category: "Electrónica",
     price: "$350",
     sold: "64",
     profit: "$590",

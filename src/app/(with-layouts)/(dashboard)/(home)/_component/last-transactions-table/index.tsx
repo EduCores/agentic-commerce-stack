@@ -22,7 +22,7 @@ import { getLastTransactionsData } from "@/services/api/home";
 import { MenuDotsIcon } from "@/utils/icon";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { SKELETON_ROW_COUNT, STATUS_COLOR_MAP } from "./data";
+import { SKELETON_ROW_COUNT, STATUS_COLOR_MAP, STATUS_LABEL_MAP } from "./data";
 import { DownloadIcon, FilterIcon } from "./icon";
 import { TransactionSkeletonRow } from "./skeleton";
 import type { RawTransactionItem } from "@/services/api/home";
@@ -40,7 +40,7 @@ function toViewModel(raw: RawTransactionItem): TransactionViewModel {
     time,
     customer: raw.customer.full_name,
     amount: formatAmount(raw.amount.value, raw.amount.currency_code),
-    status: raw.status.charAt(0).toUpperCase() + raw.status.slice(1),
+    status: STATUS_LABEL_MAP[statusKey] ?? raw.status,
     statusColor: STATUS_COLOR_MAP[statusKey] ?? "gray",
   };
 }
@@ -83,14 +83,14 @@ export default function LastTransactionsTable() {
     <Card>
       {/* Header */}
       <CardHeader className="mb-6">
-        <CardTitle>Last Transaction</CardTitle>
+        <CardTitle>Transacciones recientes</CardTitle>
 
         <div className="flex items-center gap-1.5">
           <InputGroup className="py-1.5">
             <InputGroupAddon align="inline-start" className="pr-0 text-icon-tertiary">
               <SearchIcon className="size-4" />
             </InputGroupAddon>
-            <InputGroupInput placeholder="Search" className="py-0 pl-2 text-sm" />
+            <InputGroupInput placeholder="Buscar" className="py-0 pl-2 text-sm" />
           </InputGroup>
 
           <Button appearance="outline" className="h-8 w-8 p-1.5 text-icon-tertiary">
@@ -117,22 +117,22 @@ export default function LastTransactionsTable() {
                 </div>
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Order
+                Pedido
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold whitespace-nowrap text-text-secondary">
-                Date
+                Fecha
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Customer
+                Cliente
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Amount
+                Monto
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                Status
+                Estado
               </TableHead>
               <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                <div className="flex items-center justify-center">Action</div>
+                <div className="flex items-center justify-center">Acción</div>
               </TableHead>
             </TableRow>
           </TableHeader>

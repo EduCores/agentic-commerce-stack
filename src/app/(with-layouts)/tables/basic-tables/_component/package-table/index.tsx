@@ -18,16 +18,16 @@ export default function PackageTable() {
         <TableHeader className="bg-background-gray-secondary_alt">
           <TableRow className="[&_th]:border-t">
             <TableHead className="px-6 py-2 text-xs leading-4 font-semibold text-text-secondary">
-              Package
+              Paquete
             </TableHead>
             <TableHead className="px-6 py-2 text-xs leading-4 font-semibold text-text-secondary">
-              Invoice Date
+              Fecha de factura
             </TableHead>
             <TableHead className="px-6 py-2 text-xs leading-4 font-semibold text-text-secondary">
-              Status
+              Estado
             </TableHead>
             <TableHead className="w-34.25 px-6 py-2 text-xs leading-4 font-semibold text-text-secondary">
-              Action
+              Acción
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -50,11 +50,11 @@ export default function PackageTable() {
               <TableCell className="px-6 py-3">
                 <Badge
                   color={
-                    pkg.status === "Paid"
+                    pkg.status === "Pagado"
                       ? "success"
-                      : pkg.status === "Unpaid"
+                      : pkg.status === "No pagado"
                         ? "error"
-                        : pkg.status === "Pending"
+                        : pkg.status === "Pendiente"
                           ? "warning"
                           : "primary"
                   }

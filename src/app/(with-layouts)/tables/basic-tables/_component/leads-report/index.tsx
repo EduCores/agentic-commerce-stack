@@ -22,7 +22,7 @@ export default function LeadsReport() {
   return (
     <Card>
       <CardHeader className="mb-6">
-        <CardTitle>Leads Report</CardTitle>
+        <CardTitle>Reporte de prospectos</CardTitle>
 
         <Button iconOnly size="xs" variant="ghost">
           <MenuDotsIcon />
@@ -34,16 +34,16 @@ export default function LeadsReport() {
           <TableHeader className="bg-background-gray-secondary_alt">
             <TableRow>
               <TableHead className="px-6 py-2 text-xs leading-4 font-semibold text-text-secondary">
-                Rep Name
+                Nombre
               </TableHead>
               <TableHead className="px-6 py-2 text-xs leading-4 font-semibold text-text-secondary">
-                Deals Closed
+                Tratos cerrados
               </TableHead>
               <TableHead className="px-6 py-2 text-xs leading-4 font-semibold text-text-secondary">
-                Revenue
+                Ingresos
               </TableHead>
               <TableHead className="w-34.25 px-6 py-2 text-xs leading-4 font-semibold text-text-secondary">
-                Performance
+                Rendimiento
               </TableHead>
             </TableRow>
           </TableHeader>

@@ -5,7 +5,7 @@ import AvatarSizesPreview from './_components/avatar-sizes';
 import AvatarStatusPreview from './_components/avatar-status-indicator';
 
 export const metadata: Metadata = {
-    title: 'Avatars',
+    title: 'Avatares',
 };
 
 export default function AvatarsPage() {
@@ -14,25 +14,25 @@ export default function AvatarsPage() {
             {/* Header Section */}
             <div className='flex flex-col-reverse justify-between gap-3 px-2 md:flex-row md:items-center lg:px-6'>
                 <h1 className='mb-1 text-[28px] leading-8 font-medium text-text-primary'>
-                    Avatars
+                    Avatares
                 </h1>
 
                 <Breadcrumbs
                     className='gap-1 md:gap-2'
                     dividerType='chevron'
                     items={[
-                        { href: '/', label: 'Home' },
-                        { href: '#', label: 'UI Elements' },
-                        { href: '/ui-elements/avatars', label: 'Avatars' },
+                        { href: '/', label: 'Inicio' },
+                        { href: '#', label: 'Elementos de interfaz' },
+                        { href: '/ui-elements/avatars', label: 'Avatares' },
                     ]}
                 />
             </div>
 
             <section className='grid gap-5 px-2 md:grid-cols-2 md:px-6'>
-                <ComponentPreview title='Avatars with Status Indicator'>
+                <ComponentPreview title='Avatares con indicador de estado'>
                     <AvatarStatusPreview />
                 </ComponentPreview>
-                <ComponentPreview title='Avatars Sizes'>
+                <ComponentPreview title='Tamaños de avatares'>
                     <AvatarSizesPreview />
                 </ComponentPreview>
             </section>

@@ -3,10 +3,10 @@ import { Button } from "@/components/tailgrids/core/button";
 export default function ButtonTypesPreview() {
   return (
     <div className="flex flex-wrap gap-4">
-      <Button variant="primary">Primary</Button>
-      <Button variant="danger">Danger</Button>
-      <Button variant="success">Success</Button>
-      <Button variant="ghost">Ghost</Button>
+      <Button variant="primary">Primario</Button>
+      <Button variant="danger">Peligro</Button>
+      <Button variant="success">Éxito</Button>
+      <Button variant="ghost">Fantasma</Button>
     </div>
   );
 }

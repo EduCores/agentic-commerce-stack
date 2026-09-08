@@ -4,16 +4,16 @@ export default function ButtonOutlinedPreview() {
   return (
     <div className="flex flex-wrap gap-4">
       <Button variant="primary" appearance="outline">
-        Primary
+        Primario
       </Button>
       <Button variant="danger" appearance="outline">
-        Danger
+        Peligro
       </Button>
       <Button variant="success" appearance="outline">
-        Success
+        Éxito
       </Button>
       <Button variant="ghost" appearance="outline">
-        Ghost
+        Fantasma
       </Button>
     </div>
   );

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { SentIcon } from './icons';
 
 export const metadata: Metadata = {
-    title: 'Mail Success Page',
+    title: 'Página de correo enviado',
 };
 
 export default function MailSuccessPage() {
@@ -16,17 +16,17 @@ export default function MailSuccessPage() {
             <div className='px-2 lg:px-6'>
                 <div className='flex flex-col-reverse items-start justify-between gap-3 sm:flex-row sm:items-center'>
                     <h1 className='mb-1 text-[28px] leading-8 font-medium text-text-primary'>
-                        Mail Success
+                        Correo enviado
                     </h1>
                     <div>
                         <Breadcrumbs
                             dividerType='chevron'
                             items={[
-                                { href: '/', label: 'Home' },
-                                { href: '#', label: 'Pages' },
+                                { href: '/', label: 'Inicio' },
+                                { href: '#', label: 'Páginas' },
                                 {
                                     href: '/mail-success',
-                                    label: 'Mail Success',
+                                    label: 'Correo enviado',
                                 },
                             ]}
                         />
@@ -45,13 +45,13 @@ export default function MailSuccessPage() {
                             {/* Text Info */}
                             <div className='mt-20 flex max-w-140 flex-col items-center gap-3 text-center'>
                                 <h2 className='text-4xl leading-10 font-semibold text-text-primary'>
-                                    Message Sent Successfully
+                                    Mensaje enviado con éxito
                                 </h2>
                                 <div className='text-sm leading-5 font-normal tracking-[-0.15px] text-balance text-text-tertiary'>
                                     <p>
-                                        Thank you so much for your message. We
-                                        check e-mail frequently and will try our
-                                        best to respond to your inquiry.
+                                        Muchas gracias por tu mensaje. Revisamos
+                                        el correo a cada rato y haremos lo posible
+                                        por responder tu consulta pronto.
                                     </p>
                                 </div>
                             </div>
@@ -63,7 +63,7 @@ export default function MailSuccessPage() {
                             >
                                 <ArrowLeft className='size-5' />
                                 <span className='px-0.5 text-sm leading-5 font-medium tracking-[-0.15px] whitespace-nowrap'>
-                                    Back To Home
+                                    Volver al inicio
                                 </span>
                             </Link>
                         </div>

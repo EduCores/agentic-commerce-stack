@@ -4,7 +4,7 @@ export const leadsReportData = [
     representative: {
       id: "user-101",
       fullName: "John Smith",
-      roleTitle: "Sales Manager",
+      roleTitle: "Jefe de ventas",
       avatarUrl: "/images/user/jhon-smith.png",
       emailAddress: "john.smith@company.com",
     },
@@ -21,7 +21,7 @@ export const leadsReportData = [
     representative: {
       id: "user-102",
       fullName: "Alex Rodriguez",
-      roleTitle: "Senior Account Executive",
+      roleTitle: "Ejecutivo de cuentas senior",
       avatarUrl: "/images/user/alex-rodriguez.png",
       emailAddress: "alex.rodriguez@company.com",
     },
@@ -38,7 +38,7 @@ export const leadsReportData = [
     representative: {
       id: "user-103",
       fullName: "Emily Johnson",
-      roleTitle: "Account Executive",
+      roleTitle: "Ejecutiva de cuentas",
       avatarUrl: "/images/user/emily-johnson.png",
       emailAddress: "emily.johnson@company.com",
     },
@@ -55,7 +55,7 @@ export const leadsReportData = [
     representative: {
       id: "user-104",
       fullName: "Michael Brown",
-      roleTitle: "Business Development Rep",
+      roleTitle: "Representante de desarrollo de negocios",
       avatarUrl: "/images/user/michael-brown.png",
       emailAddress: "michael.brown@company.com",
     },
@@ -72,7 +72,7 @@ export const leadsReportData = [
     representative: {
       id: "user-105",
       fullName: "Sarah Wilson",
-      roleTitle: "Account Executive",
+      roleTitle: "Ejecutiva de cuentas",
       avatarUrl: "/images/user/sarah-wilson.png",
       emailAddress: "sarah.wilson@company.com",
     },

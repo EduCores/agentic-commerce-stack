@@ -14,11 +14,11 @@ export default function AdminEmailsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Admin", href: "/admin" }, { label: "Emails", href: "/admin/emails" }]} />
+      <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Admin", href: "/admin" }, { label: "Correos electrónicos", href: "/admin/emails" }]} />
       <div>
-        <h2 className="text-xl font-bold text-black dark:text-white">Emails — templates mock/prod</h2>
+        <h2 className="text-xl font-bold text-black dark:text-white">Correos electrónicos — plantillas de prueba y producción</h2>
         <p className="text-sm text-text-tertiary">
-          Mismo HTML en mock y prod. Sin RESEND_API_KEY se loguea; con key se envía por Resend.
+          Mismo HTML en prueba y producción. Sin RESEND_API_KEY se registra en el log; con la key se envía por Resend.
         </p>
       </div>
       <EmailTestPanel />

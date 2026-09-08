@@ -27,59 +27,59 @@ interface Notification {
 
 const defaultNotifications: { title: string; items: Notification[] }[] = [
   {
-    title: "Today",
+    title: "Hoy",
     items: [
       {
         id: "1",
         icon: <LetterIcon />,
-        title: "New Message Arrived",
-        description: "Elsie McElroy sent you new message",
-        timestamp: "5h ago",
+        title: "Nuevo mensaje recibido",
+        description: "Elsie McElroy te envió un mensaje nuevo",
+        timestamp: "hace 5 h",
         isUnread: true,
       },
       {
         id: "2",
         icon: <CreditCardIcon />,
-        title: "Transaction Approved",
-        description: "Your payment of $75.00 to Chad Hurley was successful.",
-        timestamp: "10h ago",
+        title: "Transacción aprobada",
+        description: "Tu pago de $75.00 a Chad Hurley fue exitoso.",
+        timestamp: "hace 10 h",
         isUnread: true,
       },
       {
         id: "3",
         icon: <PrinterIcon />,
-        title: "Upcoming Bill",
-        description: "Reminder: Invoice EST-INV012 is due in 3 days. Please submit payment.",
-        timestamp: "12h ago",
+        title: "Cuenta próxima a vencer",
+        description: "Recordatorio: la factura EST-INV012 vence en 3 días. Por favor realiza el pago.",
+        timestamp: "hace 12 h",
         isUnread: false,
       },
     ],
   },
   {
-    title: "Yesterday",
+    title: "Ayer",
     items: [
       {
         id: "4",
         icon: <CreditCardIcon />,
-        title: "Transaction Approved",
-        description: "Your payment of $75.00 to Chad Hurley was successful.",
-        timestamp: "10h ago",
+        title: "Transacción aprobada",
+        description: "Tu pago de $75.00 a Chad Hurley fue exitoso.",
+        timestamp: "hace 10 h",
         isUnread: true,
       },
       {
         id: "5",
         icon: <LetterIcon />,
-        title: "New Message Arrived",
-        description: "Elsie McElroy sent you new message",
-        timestamp: "5h ago",
+        title: "Nuevo mensaje recibido",
+        description: "Elsie McElroy te envió un mensaje nuevo",
+        timestamp: "hace 5 h",
         isUnread: true,
       },
       {
         id: "6",
         icon: <PrinterIcon />,
-        title: "Upcoming Bill",
-        description: "Reminder: Invoice EST-INV012 is due in 3 days. Please submit payment.",
-        timestamp: "12h ago",
+        title: "Cuenta próxima a vencer",
+        description: "Recordatorio: la factura EST-INV012 vence en 3 días. Por favor realiza el pago.",
+        timestamp: "hace 12 h",
         isUnread: false,
       },
     ],
@@ -131,7 +131,7 @@ export function NotificationsButton() {
         {/* Header */}
         <Header className="flex items-center justify-between border-b border-border-secondary-alt px-5 pt-5 pb-4">
           <Heading level={4} className="leading-6 font-semibold text-text-primary">
-            Notifications
+            Notificaciones
           </Heading>
 
           <Link
@@ -199,10 +199,10 @@ export function NotificationsButton() {
             onClick={handleMarkAllAsRead}
             className="text-xs font-medium text-text-secondary underline transition-colors hover:text-text-primary"
           >
-            Mark all as read
+            Marcar todas como leídas
           </button>
           <Button variant="primary" size="sm" className="bg-brand-500 py-1.5">
-            View All
+            Ver todas
           </Button>
         </div>
       </Popover>

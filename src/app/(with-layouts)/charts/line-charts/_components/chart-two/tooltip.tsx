@@ -15,14 +15,14 @@ export default function LineChartTwoTooltip({
         <div className="flex items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-1.5 text-text-secondary">
             <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
-            <span>Group A:</span>
+            <span>Grupo A:</span>
           </div>
           <span className="font-semibold text-text-primary">{data.groupA}</span>
         </div>
         <div className="flex items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-1.5 text-text-secondary">
             <span className="h-1.5 w-1.5 rounded-full bg-purple-300" />
-            <span>Group B:</span>
+            <span>Grupo B:</span>
           </div>
           <span className="font-semibold text-text-primary">{data.groupB}</span>
         </div>

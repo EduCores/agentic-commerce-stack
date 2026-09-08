@@ -5,7 +5,7 @@ import type { AiStats } from "./types";
 export function AiAgentsTable({ data }: { data: AiStats }) {
   return (
     <Card className="md:col-span-2">
-      <CardHeader><CardTitle className="text-sm">AI Agents — StarShop crews</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-sm">Agentes AI — equipos StarShop</CardTitle></CardHeader>
       <CardContent>
         {data.table.length === 0 ? (
           <p className="text-sm text-text-tertiary">Sin agentes. Ejecuta el seed.</p>
@@ -13,7 +13,7 @@ export function AiAgentsTable({ data }: { data: AiStats }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-card-border text-xs text-text-tertiary">
-                <tr><th className="p-2 text-left">Name</th><th className="p-2 text-left">Status</th><th className="p-2 text-right">Requests</th><th className="p-2 text-right">Success</th></tr>
+                <tr><th className="p-2 text-left">Nombre</th><th className="p-2 text-left">Estado</th><th className="p-2 text-right">Solicitudes</th><th className="p-2 text-right">Éxito</th></tr>
               </thead>
               <tbody>
                 {data.table.slice(0, 9).map((a) => (

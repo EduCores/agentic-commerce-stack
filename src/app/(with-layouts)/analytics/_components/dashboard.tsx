@@ -16,7 +16,7 @@ export function AnalyticsDashboard() {
     },
   });
 
-  if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando analytics reales...</CardContent></Card>;
+  if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando analítica...</CardContent></Card>;
   if (!data) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Sin datos</CardContent></Card>;
 
   return (

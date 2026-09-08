@@ -11,7 +11,7 @@ export default function BarChartTwo() {
     <Card className="p-0">
       {/* Header Container */}
       <div className="border-b border-card-border px-6 py-4">
-        <h3 className="text-base font-medium text-text-primary">Bar Chart 2</h3>
+        <h3 className="text-base font-medium text-text-primary">Gráfico de barras 2</h3>
       </div>
 
       {/* Body Container */}
@@ -20,11 +20,11 @@ export default function BarChartTwo() {
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-1.5">
             <div className="size-2 shrink-0 rounded-xs bg-brand-500" />
-            <p className="text-sm font-medium text-text-secondary">Group A</p>
+            <p className="text-sm font-medium text-text-secondary">Grupo A</p>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="size-2 shrink-0 rounded-xs bg-brand-300" />
-            <p className="text-sm font-medium text-text-secondary">Group B</p>
+            <p className="text-sm font-medium text-text-secondary">Grupo B</p>
           </div>
         </div>
 

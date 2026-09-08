@@ -4,19 +4,19 @@ export const tabsItems = [
   {
     href: "/profile/account",
     icon: <UserIcon />,
-    title: "Account",
-    description: "Manage your personal data",
+    title: "Cuenta",
+    description: "Gestiona tus datos personales",
   },
   {
     href: "/profile/security",
     icon: <ShieldCheckIcon />,
-    title: "Security",
-    description: "Set your password, authentication & etc",
+    title: "Seguridad",
+    description: "Configura tu contraseña, autenticación, etc.",
   },
   {
     href: "/profile/notification",
     icon: <BellIcon />,
-    title: "Notification",
-    description: "Customize your notification preferences",
+    title: "Notificaciones",
+    description: "Personaliza tus preferencias de avisos",
   },
 ];

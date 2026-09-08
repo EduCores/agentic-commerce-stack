@@ -6,7 +6,7 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
   return (
     <>
       <Card className="md:col-span-2">
-        <CardHeader><CardTitle className="text-sm">Top Content — productos más vistos</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Contenido top — productos más vistos</CardTitle></CardHeader>
         <CardContent>
           {data.topContent.length === 0 ? (
             <p className="text-sm text-text-tertiary">Sin movimientos aún. Vende desde /store o el chat.</p>
@@ -14,7 +14,7 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="border-b border-card-border text-xs text-text-tertiary">
-                  <tr><th className="p-2 text-left">URL / Producto</th><th className="p-2 text-right">Views</th><th className="p-2 text-right">Uniques</th></tr>
+                  <tr><th className="p-2 text-left">URL / Producto</th><th className="p-2 text-right">Visitas</th><th className="p-2 text-right">Únicos</th></tr>
                 </thead>
                 <tbody>
                   {data.topContent.map((t) => (

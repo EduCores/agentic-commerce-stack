@@ -17,7 +17,7 @@ export function ResetForm() {
     try {
       const r = await fetch("/api/auth/reset-request", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
       const j = await r.json();
-      setMsg(j.debugToken ? `Revisa tu correo. Token demo: ${j.debugToken.slice(0, 24)}… (pegado abajo)` : j.message ?? "Listo");
+      setMsg(j.debugToken ? `Revisa tu correo. Token de prueba: ${j.debugToken.slice(0, 24)}… (pegado abajo)` : j.message ?? "Listo");
       if (j.debugToken) setToken(j.debugToken);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Error");
@@ -30,7 +30,7 @@ export function ResetForm() {
       const r = await fetch("/api/auth/reset-confirm", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, password }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Error");
-      setMsg("Contraseña actualizada. Ve a Sign In.");
+      setMsg("Contraseña actualizada. Ve a Iniciar sesión.");
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Error");
     } finally { setLoading(false); }
@@ -39,7 +39,7 @@ export function ResetForm() {
   return (
     <div className="space-y-4">
       <div className="w-full space-y-1.5">
-        <Label>Email *</Label>
+        <Label>Correo *</Label>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@starshop.cl" className="w-full" />
         <Button onClick={request} appearance="outline" className="w-full" isDisabled={loading || !email}>Enviar instrucciones</Button>
       </div>
@@ -53,7 +53,7 @@ export function ResetForm() {
         <Button onClick={confirm} appearance="fill" className="w-full" isDisabled={loading || !token || !password}>Actualizar contraseña</Button>
       </div>
       {msg && <p className="rounded-lg border border-card-border bg-background-gray-secondary_alt_2 break-all p-2 text-xs">{msg}</p>}
-      <p className="text-center text-xs text-text-tertiary"><a href="/auth/sign-in" className="font-medium text-brand-600 underline">Volver a Sign In</a></p>
+      <p className="text-center text-xs text-text-tertiary"><a href="/auth/sign-in" className="font-medium text-brand-600 underline">Volver a Iniciar sesión</a></p>
     </div>
   );
 }

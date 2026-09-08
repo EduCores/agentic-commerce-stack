@@ -9,7 +9,7 @@ export function CrmGrowthChart({ data }: { data: CrmData | null }) {
   const rows = data?.growth ?? [];
   return (
     <Card className="md:col-span-2">
-      <CardHeader><CardTitle className="text-sm">Lead growth & Conversion</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-sm">Crecimiento de clientes potenciales y conversión</CardTitle></CardHeader>
       <CardContent className="h-64 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
           <AreaChart data={rows} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
@@ -23,7 +23,7 @@ export function CrmGrowthChart({ data }: { data: CrmData | null }) {
             <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} allowDecimals={false} />
             <Tooltip />
-            <Area type="monotone" dataKey="leads" name="Leads" stroke="#22C55E" strokeWidth={2} fill="url(#crm-growth-bg)" dot={false} />
+            <Area type="monotone" dataKey="leads" name="Clientes potenciales" stroke="#22C55E" strokeWidth={2} fill="url(#crm-growth-bg)" dot={false} />
           </AreaChart>
         </ChartContainer>
       </CardContent>

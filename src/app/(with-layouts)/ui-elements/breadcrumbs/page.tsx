@@ -5,7 +5,7 @@ import BreadcrumbArrow from './_components/breadcrumb-arrow';
 import BreadcrumbSlash from './_components/breadcrumb-slash';
 
 export const metadata: Metadata = {
-    title: 'Breadcrumbs',
+    title: 'Migas de pan',
 };
 
 export default function BreadcrumbsPage() {
@@ -14,28 +14,28 @@ export default function BreadcrumbsPage() {
             {/* Header Section */}
             <div className='flex flex-col-reverse justify-between gap-3 px-2 md:flex-row md:items-center lg:px-6'>
                 <h1 className='mb-1 text-[28px] leading-8 font-medium text-text-primary'>
-                    Breadcrumbs
+                    Migas de pan
                 </h1>
 
                 <Breadcrumbs
                     className='gap-1 md:gap-2'
                     dividerType='chevron'
                     items={[
-                        { href: '/', label: 'Home' },
-                        { href: '#', label: 'UI Elements' },
+                        { href: '/', label: 'Inicio' },
+                        { href: '#', label: 'Elementos de interfaz' },
                         {
                             href: '/ui-elements/breadcrumbs',
-                            label: 'Breadcrumbs',
+                            label: 'Migas de pan',
                         },
                     ]}
                 />
             </div>
 
             <section className='grid gap-5 px-2 md:grid-cols-2 md:px-6'>
-                <ComponentPreview title='Breadcrumbs With Arrow Divider'>
+                <ComponentPreview title='Migas de pan con flecha'>
                     <BreadcrumbArrow />
                 </ComponentPreview>
-                <ComponentPreview title='Breadcrumbs With Slash Divider'>
+                <ComponentPreview title='Migas de pan con slash'>
                     <BreadcrumbSlash />
                 </ComponentPreview>
             </section>

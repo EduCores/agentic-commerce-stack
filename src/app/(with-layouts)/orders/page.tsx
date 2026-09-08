@@ -29,17 +29,17 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-6 p-6">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Pedidos", href: "/orders" }]} />
+      <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Pedidos", href: "/orders" }]} />
       {alertCount > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:bg-amber-950/20">
-          <p className="text-sm font-bold text-amber-700">⚠️ {alertCount} con alerta — se derivó a humano y se salvó la venta</p>
-          <p className="text-xs text-text-tertiary">El bot no perdió la venta: revisa el detalle y contacta al cliente. Logs en /workflows.</p>
+          <p className="text-sm font-bold text-amber-700">⚠️ {alertCount} con alerta — lo derivamos a una persona y salvamos la venta</p>
+          <p className="text-xs text-text-tertiary">El bot no perdió la venta: revisa el detalle y contacta a tu cliente. Los registros están en /workflows.</p>
         </div>
       )}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-black dark:text-white">Pedidos</h2>
-          <p className="text-sm text-text-tertiary">Híbrido: {orders.length} pedidos · Filtra por estado · Fuente Prisma (mismo para mock/Shopify).</p>
+          <p className="text-sm text-text-tertiary">Híbrido: {orders.length} pedidos · Filtra por estado · Fuente Prisma (igual para mock/Shopify).</p>
         </div>
         <div className="flex gap-2">
           <a href="/orders" className={`rounded-lg px-3 py-1.5 text-sm ${!status ? "bg-brand-500 text-white" : "border border-card-border"}`}>Todos</a>
@@ -53,7 +53,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         <CardHeader><CardTitle>Pedidos recientes</CardTitle></CardHeader>
         <CardContent>
           {orders.length === 0 ? (
-            <p className="text-sm text-text-tertiary">Sin pedidos aún. Crea uno vía <code>POST /api/orders</code> o desde el checkout del agente.</p>
+            <p className="text-sm text-text-tertiary">Sin pedidos todavía. Crea uno vía <code>POST /api/orders</code> o desde el checkout del agente.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -80,11 +80,11 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
       {orders[0] && (
         <Card>
-          <CardHeader><CardTitle>Pedido detalle (más reciente)</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Detalle del pedido (más reciente)</CardTitle></CardHeader>
           <CardContent className="text-sm space-y-2">
             <p><span className="font-medium">ID:</span> {orders[0].id}</p>
-            <p><span className="font-medium">Items:</span> {orders[0].items.map((it) => `${it.product.title} x${it.quantity}`).join(", ") || "—"}</p>
-            <p className="text-xs text-text-tertiary">Logs de workflow se ven en <code>/workflows</code> → <code>OrderStepLog</code> (tiempo real XYFlow).</p>
+            <p><span className="font-medium">Productos:</span> {orders[0].items.map((it) => `${it.product.title} x${it.quantity}`).join(", ") || "—"}</p>
+            <p className="text-xs text-text-tertiary">Los registros del flujo de trabajo se ven en <code>/workflows</code> → <code>OrderStepLog</code> (tiempo real XYFlow).</p>
           </CardContent>
         </Card>
       )}

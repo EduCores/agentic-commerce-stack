@@ -33,25 +33,25 @@ export function SignInForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-2">
-        <Button type="button" appearance="outline" className="w-full">Continue with Google</Button>
-        <Button type="button" appearance="outline" className="w-full">Continue with Github</Button>
+        <Button type="button" appearance="outline" className="w-full">Continuar con Google</Button>
+        <Button type="button" appearance="outline" className="w-full">Continuar con Github</Button>
       </div>
-      <div className="flex items-center gap-3 text-xs text-text-tertiary"><span className="h-px flex-1 bg-card-border" />OR<span className="h-px flex-1 bg-card-border" /></div>
+      <div className="flex items-center gap-3 text-xs text-text-tertiary"><span className="h-px flex-1 bg-card-border" />O<span className="h-px flex-1 bg-card-border" /></div>
       <div className="w-full space-y-1.5">
-        <Label>Email Address *</Label>
+        <Label>Correo electrónico *</Label>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full" />
       </div>
       <div className="w-full space-y-1.5">
-        <Label>Password *</Label>
+        <Label>Contraseña *</Label>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full" />
       </div>
       <div className="flex items-center justify-between text-xs">
-        <label className="flex items-center gap-2 text-text-secondary"><input type="checkbox" className="rounded [color-scheme:light] dark:[color-scheme:dark]" />Keep me logged in</label>
-        <a href="/auth/reset-password" className="font-medium text-brand-600 underline">Forget Password?</a>
+        <label className="flex items-center gap-2 text-text-secondary"><input type="checkbox" className="rounded [color-scheme:light] dark:[color-scheme:dark]" />Mantener mi sesión iniciada</label>
+        <a href="/auth/reset-password" className="font-medium text-brand-600 underline">¿Olvidaste tu contraseña?</a>
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-600">{error}</p>}
-      <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Entrando..." : "Login"}</Button>
-      <p className="text-center text-xs text-text-tertiary">New here? <a href="/auth/sign-up" className="font-medium text-brand-600 underline">Create an account</a></p>
+      <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Entrando..." : "Iniciar sesión"}</Button>
+      <p className="text-center text-xs text-text-tertiary">¿Eres nuevo por acá? <a href="/auth/sign-up" className="font-medium text-brand-600 underline">Crear cuenta</a></p>
     </form>
   );
 }

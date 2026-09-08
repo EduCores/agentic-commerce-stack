@@ -3,7 +3,7 @@ import { Card } from '@/components/tailgrids/core/card';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Terms and Conditions Page',
+    title: 'Página de términos y condiciones',
 };
 
 export default function TermsAndConditionsPage() {
@@ -13,17 +13,17 @@ export default function TermsAndConditionsPage() {
             <div className='px-2 lg:px-6'>
                 <div className='flex flex-col-reverse items-start justify-between gap-3 sm:flex-row sm:items-center'>
                     <h1 className='mb-1 text-[28px] leading-8 font-medium text-text-primary'>
-                        Terms and Conditions
+                        Términos y condiciones
                     </h1>
                     <div>
                         <Breadcrumbs
                             dividerType='chevron'
                             items={[
-                                { href: '/', label: 'Home' },
-                                { href: '#', label: 'Pages' },
+                                { href: '/', label: 'Inicio' },
+                                { href: '#', label: 'Páginas' },
                                 {
                                     href: '/terms-and-conditions',
-                                    label: 'Terms and Conditions',
+                                    label: 'Términos y condiciones',
                                 },
                             ]}
                         />
@@ -36,18 +36,15 @@ export default function TermsAndConditionsPage() {
                             {/* Intellectual Property */}
                             <div className='flex flex-col gap-4'>
                                 <h2 className='text-2xl leading-8 font-semibold tracking-[-0.2px] text-text-primary'>
-                                    Intellectual Property
+                                    Propiedad intelectual
                                 </h2>
                                 <p className='text-base leading-6 font-normal tracking-[-0.2px] text-text-secondary'>
-                                    Our digital landscape is constantly
-                                    expanding, creating a continuous need for
-                                    innovative websites, and thus, skilled web
-                                    designers and developers. As of early 2024,
-                                    there are over 20 billion websites, and the
-                                    demand for web developers is projected to
-                                    keep growing. Web designers who possess
-                                    strong coding skills are highly sought after
-                                    and often command higher salaries.
+                                    Nuestro entorno digital crece sin parar y siempre
+                                    se necesitan sitios web innovadores, por eso
+                                    hacen falta diseñadores y desarrolladores buenos.
+                                    Con más de 20 mil millones de sitios, la demanda
+                                    seguirá subiendo. Quienes programan bien son los
+                                    más buscados y ganan más.
                                 </p>
                             </div>
 
@@ -55,52 +52,43 @@ export default function TermsAndConditionsPage() {
                             <div className='flex flex-col gap-6'>
                                 <div className='flex flex-col gap-4'>
                                     <h2 className='text-2xl leading-8 font-semibold tracking-[-0.2px] text-text-primary'>
-                                        User Accounts
+                                        Cuentas de usuario
                                     </h2>
                                     <p className='text-base leading-6 font-normal tracking-[-0.2px] text-text-secondary'>
-                                        The ever-growing digital world requires
-                                        more websites, increasing the need for
-                                        web designers and developers. With over
-                                        20 billion websites online in 2024, the
-                                        demand for web developers is expected to
-                                        increase. Web designers who are skilled
-                                        in coding are in high demand and are
-                                        often better compensated.
+                                        El mundo digital no para de crecer y necesita
+                                        más sitios, así que la demanda por diseñadores
+                                        y desarrolladores seguirá al alza. Quienes
+                                        manejan código tienen alta demanda y mejores
+                                        sueldos.
                                     </p>
                                 </div>
                                 <p className='text-base leading-6 font-normal tracking-[-0.2px] text-text-secondary'>
-                                    A career in web design includes designing,
-                                    building, and coding different kinds of
-                                    websites. Typical tasks involve talking with
-                                    clients about website needs, adding
-                                    feedback, working on graphics and images,
-                                    and using multimedia like audio and video.
+                                    Trabajar en diseño web es diseñar, construir y
+                                    programar sitios de todo tipo. Incluye conversar
+                                    con clientes, usar su feedback, trabajar gráficos
+                                    e imágenes y usar multimedia como audio y video.
                                 </p>
                             </div>
 
                             {/* Governing Law */}
                             <div className='flex flex-col gap-6'>
                                 <h2 className='text-2xl leading-8 font-semibold tracking-[-0.2px] text-text-primary'>
-                                    Governing Law
+                                    Ley aplicable
                                 </h2>
                                 <ul className='flex list-disc flex-col gap-6 pl-5 text-base leading-6 font-normal tracking-[-0.2px] text-text-secondary'>
                                     <li>
-                                        The digital world keeps expanding, so
-                                        there&apos;s a constant need for
-                                        websites, and therefore for web
-                                        designers and developers. With over 20
-                                        billion websites as of 2028, the demand
-                                        for web developers is only expected to
-                                        increase.
+                                        El mundo digital sigue expandiéndose, así que
+                                        siempre se necesitan sitios y, por lo tanto,
+                                        diseñadores y desarrolladores. Con más de 20
+                                        mil millones de sitios, la demanda solo va a
+                                        aumentar.
                                     </li>
                                     <li>
-                                        A job in web design means designing,
-                                        creating, and coding various websites.
-                                        You&apos;ll also talk to clients about
-                                        what they want, use their feedback,
-                                        handle graphic design and image editing,
-                                        and work with multimedia like sound and
-                                        video.
+                                        Trabajar en diseño web es diseñar, crear y
+                                        programar sitios. También conversarás con
+                                        clientes, usarás su feedback, harás diseño
+                                        gráfico y edición de imágenes, y trabajarás
+                                        con multimedia como sonido y video.
                                     </li>
                                 </ul>
                             </div>
@@ -109,27 +97,23 @@ export default function TermsAndConditionsPage() {
                             <div className='flex flex-col gap-6'>
                                 <div className='flex flex-col gap-4'>
                                     <h2 className='text-2xl leading-8 font-semibold tracking-[-0.2px] text-text-primary'>
-                                        Termination
+                                        Término
                                     </h2>
                                     <p className='text-base leading-6 font-normal tracking-[-0.2px] text-text-secondary'>
-                                        Because our world is increasingly
-                                        digital, there&apos;s a never-ending
-                                        need for websites, which means web
-                                        designers and developers are always in
-                                        demand. With the number of websites
-                                        exceeding 20 billion in 2028, the need
-                                        for web developers is only going to
-                                        increase. Web designers who can code
-                                        well are especially valuable and usually
-                                        earn more.
+                                        Como todo es cada vez más digital, siempre se
+                                        necesitan sitios y los diseñadores y
+                                        desarrolladores son muy demandados. Con más
+                                        de 20 mil millones de sitios, la necesidad
+                                        seguirá creciendo. Quienes programan bien son
+                                        muy valiosos y ganan más.
                                     </p>
                                 </div>
                                 <p className='text-base leading-6 font-normal tracking-[-0.2px] text-text-secondary'>
-                                    Working in website design means designing,
-                                    building, and coding all sorts of websites.
-                                    You&apos;ll also talk to clients, get their
-                                    feedback, do graphic design and image
-                                    editing, and add multimedia like audio and
+                                    Trabajar en diseño de sitios es diseñar,
+                                    construir y programar todo tipo de páginas.
+                                    También hablarás con clientes, recibirás su
+                                    feedback, harás diseño gráfico y edición de
+                                    imágenes, y sumarás multimedia como audio y
                                     video.
                                 </p>
                             </div>

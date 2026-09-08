@@ -4,7 +4,7 @@ import ChartOne from "./_components/chart-one";
 import ChartTwo from "./_components/chart-two";
 
 export const metadata: Metadata = {
-  title: "Bar Charts",
+  title: "Gráficos de barras",
 };
 
 export default function BarChartsPage() {
@@ -12,14 +12,14 @@ export default function BarChartsPage() {
     <div className="mt-6 space-y-5">
       {/* Header Section */}
       <div className="flex flex-col-reverse items-start justify-between gap-3 px-2 sm:flex-row sm:items-center lg:px-6">
-        <h1 className="mb-1 text-[28px] leading-8 font-medium text-text-primary">Bar Charts</h1>
+        <h1 className="mb-1 text-[28px] leading-8 font-medium text-text-primary">Gráficos de barras</h1>
 
         <Breadcrumbs
           dividerType="chevron"
           items={[
-            { href: "/", label: "Home" },
-            { href: "/charts/bar-charts", label: "Charts" },
-            { href: "/charts/bar-charts", label: "Bar Charts" },
+            { href: "/", label: "Inicio" },
+            { href: "/charts/bar-charts", label: "Gráficos" },
+            { href: "/charts/bar-charts", label: "Gráficos de barras" },
           ]}
         />
       </div>

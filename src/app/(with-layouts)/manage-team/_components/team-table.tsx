@@ -57,15 +57,15 @@ export function TeamTable() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader><CardTitle className="text-sm">Add Member</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Agregar miembro</CardTitle></CardHeader>
         <CardContent className="flex flex-wrap items-end gap-3">
-          <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="miembro@starshop.cl" className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" /></label>
+          <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Correo<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="miembro@starshop.cl" className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" /></label>
           <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Nombre<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" /></label>
           <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Teléfono WhatsApp<input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="569XXXXXXXX" className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" /></label>
           <div className="flex flex-col gap-1 text-xs">Rol
             <RoleSelect value={role} onChange={setRole} label="Rol del miembro" />
           </div>
-          <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="mín. 8" className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" /></label>
+          <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">Contraseña<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="mín. 8" className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" /></label>
           <Button onClick={add} appearance="fill">Agregar</Button>
           {msg && <Badge color="gray">{msg}</Badge>}
         </CardContent>
@@ -77,7 +77,7 @@ export function TeamTable() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="border-b border-card-border text-xs text-text-tertiary">
-                  <tr><th className="p-2 text-left">Name</th><th className="p-2 text-left">Email</th><th className="p-2 text-left">WhatsApp</th><th className="p-2 text-left">Role</th><th className="p-2 text-left">Joined</th><th className="p-2 text-right">Action</th></tr>
+                  <tr><th className="p-2 text-left">Nombre</th><th className="p-2 text-left">Correo</th><th className="p-2 text-left">WhatsApp</th><th className="p-2 text-left">Rol</th><th className="p-2 text-left">Ingreso</th><th className="p-2 text-right">Acción</th></tr>
                 </thead>
                 <tbody>
                   {members.map((m) => (

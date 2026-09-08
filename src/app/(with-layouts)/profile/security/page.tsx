@@ -32,7 +32,7 @@ export default function SecurityTabContent() {
 
   return (
     <div>
-      <h2 className="text-xl leading-7 font-semibold text-text-primary">Security</h2>
+      <h2 className="text-xl leading-7 font-semibold text-text-primary">Seguridad</h2>
 
       <div className="mt-6 space-y-2 divide-y divide-card-border">
         {securityItems.map(({ icon: Icon, title, description, actionLabel }) => (
@@ -56,7 +56,10 @@ export default function SecurityTabContent() {
               variant="ghost"
               size="sm"
               className="h-auto shrink-0 rounded-none py-2 pr-0 text-base text-brand-500 hover:bg-transparent hover:text-brand-600 focus:ring-0"
-              onClick={() => actionLabel.toLowerCase() === "change" && setOpenPasswordDialog(true)}
+              onClick={() => {
+                const label = actionLabel.toLowerCase();
+                if (label === "change" || label === "cambiar") setOpenPasswordDialog(true);
+              }}
             >
               {actionLabel}
             </Button>
@@ -74,20 +77,20 @@ export default function SecurityTabContent() {
               }}
             >
               <DialogHeader className="gap-1 border-b border-card-border py-4 pr-14 pl-5">
-                <DialogTitle className="text-xl leading-7">Update Password</DialogTitle>
+                <DialogTitle className="text-xl leading-7">Actualizar contraseña</DialogTitle>
                 <DialogDescription className="text-text-tertiary">
-                  Create a secure password to keep your account safe
+                  Crea una contraseña segura para mantener tu cuenta protegida
                 </DialogDescription>
               </DialogHeader>
 
               <DialogBody className="space-y-4 px-5 py-4">
                 <TextField className="gap-1.5">
-                  <Label htmlFor="current-password">Current Password</Label>
+                  <Label htmlFor="current-password">Contraseña actual</Label>
                   <InputGroup>
                     <InputGroupInput
                       id="current-password"
                       type={showCurrentPassword ? "text" : "password"}
-                      placeholder="Enter your current password"
+                      placeholder="Ingresa tu contraseña actual"
                       autoComplete="current-password"
                       required
                     />
@@ -95,7 +98,7 @@ export default function SecurityTabContent() {
                       size="icon-sm"
                       className="mr-1"
                       onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                      aria-label={showCurrentPassword ? "Hide password" : "Show password"}
+                      aria-label={showCurrentPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
                       {showCurrentPassword ? (
                         <EyeDisabled className="size-5" />
@@ -107,12 +110,12 @@ export default function SecurityTabContent() {
                 </TextField>
 
                 <TextField className="gap-1.5">
-                  <Label htmlFor="new-password">New Password</Label>
+                  <Label htmlFor="new-password">Nueva contraseña</Label>
                   <InputGroup>
                     <InputGroupInput
                       id="new-password"
                       type={showNewPassword ? "text" : "password"}
-                      placeholder="Choose a new password"
+                      placeholder="Elige una contraseña nueva"
                       minLength={8}
                       autoComplete="new-password"
                       required
@@ -121,7 +124,7 @@ export default function SecurityTabContent() {
                       size="icon-sm"
                       className="mr-1"
                       onPress={() => setShowNewPassword(!showNewPassword)}
-                      aria-label={showNewPassword ? "Hide password" : "Show password"}
+                      aria-label={showNewPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
                       {showNewPassword ? (
                         <EyeDisabled className="size-5" />
@@ -134,12 +137,12 @@ export default function SecurityTabContent() {
                 </TextField>
 
                 <TextField className="gap-1.5">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <Label htmlFor="confirm-password">Confirmar contraseña nueva</Label>
                   <InputGroup>
                     <InputGroupInput
                       id="confirm-password"
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Re-enter your new password"
+                      placeholder="Reingresa tu contraseña nueva"
                       minLength={8}
                       autoComplete="new-password"
                       required
@@ -148,7 +151,7 @@ export default function SecurityTabContent() {
                       size="icon-sm"
                       className="mr-1"
                       onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
                       {showConfirmPassword ? (
                         <EyeDisabled className="size-5" />
@@ -171,10 +174,10 @@ export default function SecurityTabContent() {
                     }),
                   )}
                 >
-                  Cancel
+                  Cancelar
                 </DialogClose>
                 <Button type="submit" size="lg" className="px-3.5 text-sm">
-                  Apply Changes
+                  Aplicar cambios
                 </Button>
               </DialogFooter>
             </Form>

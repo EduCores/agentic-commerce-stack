@@ -8,7 +8,7 @@ import TopChannels from './_component/top-channels';
 import TopProductsTable from './_component/top-products-table';
 
 export const metadata: Metadata = {
-    title: 'Tables',
+    title: 'Tablas',
 };
 
 export default function BasicTablesPage() {
@@ -17,15 +17,15 @@ export default function BasicTablesPage() {
             {/* Header Section */}
             <div className='flex flex-col-reverse items-start justify-between gap-3 px-2 sm:flex-row sm:items-center lg:px-6'>
                 <h1 className='mb-1 text-[28px] leading-8 font-medium text-text-primary'>
-                    Basic Tables
+                    Tablas básicas
                 </h1>
 
                 <Breadcrumbs
                     dividerType='chevron'
                     items={[
-                        { href: '/', label: 'Home' },
-                        { href: '/tables/basic-tables', label: 'Tables' },
-                        { href: '/tables/basic-tables', label: 'Basic Tables' },
+                        { href: '/', label: 'Inicio' },
+                        { href: '/tables/basic-tables', label: 'Tablas' },
+                        { href: '/tables/basic-tables', label: 'Tablas básicas' },
                     ]}
                 />
             </div>

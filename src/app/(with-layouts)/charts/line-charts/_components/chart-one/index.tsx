@@ -11,7 +11,7 @@ export default function LineChartOne() {
     <Card className="p-0">
       {/* Header Container */}
       <div className="border-b border-card-border px-6 py-4">
-        <h3 className="text-base font-medium text-text-primary">Line Chart 1</h3>
+        <h3 className="text-base font-medium text-text-primary">Gráfico de líneas 1</h3>
       </div>
 
       {/* Body Container */}

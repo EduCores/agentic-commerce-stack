@@ -22,14 +22,14 @@ export function CrmDashboard() {
         <CardHeader><CardTitle className="text-sm">Clientes</CardTitle></CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">{data.totals.customers}</p>
-          <p className="text-xs text-text-tertiary">Leads reales desde pedidos</p>
+          <p className="text-xs text-text-tertiary">Clientes potenciales reales desde tus pedidos</p>
           <a href="/orders" className="text-xs font-medium text-brand-600 underline">Ver /orders</a>
         </CardContent>
       </Card>
       <CrmGrowthChart data={data} />
       <CrmLeadsReport data={data} />
       <Card>
-        <CardHeader><CardTitle className="text-sm">Upcoming Tasks & Meetings</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Próximas tareas y reuniones</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {data.tasks.length === 0 ? <p className="text-sm text-text-tertiary">Sin pendientes. Todo al día.</p> : data.tasks.map((t) => (
             <div key={t.id} className="flex items-center justify-between rounded-lg border border-card-border p-2.5 text-sm">
@@ -40,7 +40,7 @@ export function CrmDashboard() {
         </CardContent>
       </Card>
       <Card className="md:col-span-3">
-        <CardHeader><CardTitle className="text-sm">Recent Activities</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Actividad reciente</CardTitle></CardHeader>
         <CardContent className="space-y-1.5">
           {data.recentActivities.map((a) => (
             <div key={a.id} className="flex items-center justify-between text-sm">

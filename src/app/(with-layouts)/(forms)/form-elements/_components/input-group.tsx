@@ -28,11 +28,11 @@ import Image from "next/image";
 import { useState } from "react";
 
 export const countryOptions = [
-  { value: "us", label: "United States", flag: "/images/flag/US.svg", code: "+1" },
-  { value: "ca", label: "Canada", flag: "/images/flag/CA.svg", code: "+1" },
-  { value: "fr", label: "France", flag: "/images/flag/FR.svg", code: "+33" },
+  { value: "us", label: "Estados Unidos", flag: "/images/flag/US.svg", code: "+1" },
+  { value: "ca", label: "Canadá", flag: "/images/flag/CA.svg", code: "+1" },
+  { value: "fr", label: "Francia", flag: "/images/flag/FR.svg", code: "+33" },
   { value: "au", label: "Australia", flag: "/images/flag/AU.svg", code: "+61" },
-  { value: "it", label: "Italy", flag: "/images/flag/IT.svg", code: "+39" },
+  { value: "it", label: "Italia", flag: "/images/flag/IT.svg", code: "+39" },
   { value: "in", label: "India", flag: "/images/flag/IN.svg", code: "+91" },
 ];
 
@@ -68,7 +68,7 @@ export default function InputGroupComponents() {
         validationBehavior="native"
       >
         <Label>
-          Phone Number <span className="text-sm font-medium text-error-500">*</span>
+          Número de teléfono <span className="text-sm font-medium text-error-500">*</span>
         </Label>
         <InputGroup className="w-full has-user-invalid:border-input-error-focus-border focus-within:has-user-invalid:ring-4 focus-within:has-user-invalid:ring-input-error-focus-border/20">
           <Select
@@ -114,7 +114,7 @@ export default function InputGroupComponents() {
       {/* Website URL */}
       <TextField className="w-full flex-col gap-1.5" defaultValue="www.nextadmin.co">
         <Label className="flex items-center gap-0.5 text-sm font-medium text-input-label-text">
-          Website URL
+          URL del sitio web
         </Label>
 
         <InputGroup className="h-full w-full">
@@ -131,7 +131,7 @@ export default function InputGroupComponents() {
           <InputGroupButton
             size="icon-sm"
             onPress={handleCopy}
-            aria-label="Copy URL"
+            aria-label="Copiar URL"
             className="mr-1 text-text-secondary hover:text-text-primary"
           >
             {copied ? (
@@ -147,7 +147,7 @@ export default function InputGroupComponents() {
       {/* Amount */}
       <NumberField className="flex w-full flex-col gap-1.5">
         <Label className="flex items-center gap-0.5 text-sm font-medium text-input-label-text">
-          Amount
+          Monto
         </Label>
         <InputGroup className="w-full overflow-hidden">
           <InputGroupAddon
@@ -167,7 +167,7 @@ export default function InputGroupComponents() {
               const currency = currencies.find((c) => c.code === key);
               if (currency) setSelectedCurrency(currency);
             }}
-            aria-label="Currency"
+            aria-label="Moneda"
             className="w-24 shrink-0"
           >
             <SelectTrigger className="h-full w-24 rounded-none border-0 border-l border-base-300 bg-transparent pr-2 pl-3 shadow-none hover:bg-transparent focus:ring-0">
@@ -201,7 +201,7 @@ export default function InputGroupComponents() {
       {/* Card Number */}
       <NumberField className="flex w-full flex-col gap-1.5">
         <Label className="flex items-center gap-0.5 text-sm font-medium text-input-label-text">
-          Card Number
+          Número de tarjeta
         </Label>
         <InputGroup className="w-full">
           <InputGroupAddon align="inline-start" className="pr-1 pl-3">
@@ -222,7 +222,7 @@ export default function InputGroupComponents() {
 
       {/* Counter */}
       <NumberField defaultValue={1000} className="flex flex-col gap-1.5">
-        <Label>Quantity</Label>
+        <Label>Cantidad</Label>
 
         <NumberFieldGroup className="w-full">
           <Input placeholder="0" className="w-full px-13" />

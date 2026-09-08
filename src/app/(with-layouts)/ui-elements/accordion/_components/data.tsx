@@ -1,29 +1,29 @@
 export const accordionData = [
   {
     id: 1,
-    title: "What is NextAdmin?",
-    content: "NextAdmin is a powerful admin panel built with Next.js and Tailwind CSS.",
+    title: "¿Qué es NextAdmin?",
+    content: "NextAdmin es un panel de administración potente hecho con Next.js y Tailwind CSS.",
   },
   {
     id: 2,
-    title: "How do I install NextAdmin?",
-    content: "You can install NextAdmin by following the installation guide in the documentation.",
+    title: "¿Cómo instalo NextAdmin?",
+    content: "Puedes instalar NextAdmin siguiendo la guía de instalación de la documentación.",
   },
   {
     id: 3,
-    title: "Can I customize the dashboard widgets?",
+    title: "¿Puedo personalizar los widgets del panel?",
     content:
-      "Yes, you can customize the dashboard widgets as you want to suit your needs. The code is completely yours.",
+      "Sí, puedes personalizar los widgets como quieras. El código es todo tuyo.",
   },
   {
     id: 4,
-    title: "Does NextAdmin support dark mode?",
+    title: "¿NextAdmin tiene modo oscuro?",
     content:
-      "Yes, NextAdmin supports dark mode. You can toggle between light and dark themes from the header and settings panel.",
+      "Sí, NextAdmin tiene modo oscuro. Puedes cambiar entre tema claro y oscuro desde el encabezado y los ajustes.",
   },
   {
     id: 5,
-    title: "What are the system requirements for NextAdmin?",
-    content: "NextAdmin requires Node.js 14 or higher and a modern browser.",
+    title: "¿Qué necesito para usar NextAdmin?",
+    content: "NextAdmin necesita Node.js 14 o superior y un navegador moderno.",
   },
 ];
