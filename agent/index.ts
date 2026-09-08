@@ -8,7 +8,7 @@ import { z } from "zod";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
-import { STARSHOP_CREWS, type StarShopIntent } from "../prisma/starshop-prompts";
+import { STARSHOP_CREWS, STARSHOP_LANGUAGE_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
 import searchProducts from "./tools/search-products";
@@ -271,12 +271,12 @@ export async function runAgent(params: { agentSlug: string; input: string; store
 
   if (params._override) {
     agent = { id: `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt };
-    system = params._override.systemPrompt;
+    system = `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}`;
     modelId = params._override.model;
     allowedTools = params._override.allowedTools;
   } else {
     agent = await getAgentConfig(params.agentSlug) as never;
-    system = agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`;
+    system = `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}`;
     modelId = agent.model ?? "qwen/qwen3-30b-a3b";
   }
 
@@ -349,12 +349,12 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
 
   if (params._override) {
     agent = { id: `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt };
-    system = params._override.systemPrompt;
+    system = `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}`;
     modelId = params._override.model;
     allowedTools = params._override.allowedTools;
   } else {
     agent = (await getAgentConfig(params.agentSlug)) as never;
-    system = agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`;
+    system = `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}`;
     modelId = agent.model ?? "qwen/qwen3-30b-a3b";
   }
 

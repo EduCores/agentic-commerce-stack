@@ -170,6 +170,15 @@ Tools: searchProducts, checkStock, orderTracking, scrapeWebsite, sendEmail.`,
 
 export const STARSHOP_CONFIRM_ORDER_PROMPT = `Eres Confirm Order de StarShop. Registras el pedido completado y envías email de confirmación con resumen. Usa sendEmail template=order_confirmation y cierra con número de pedido.`;
 
+/**
+ * Regla de idioma global — se anexa a TODO system prompt del agente.
+ * El modelo tiende al voseo rioplatense; esto lo fija en neutro chileno B2B.
+ */
+export const STARSHOP_LANGUAGE_RULE = `IDIOMA OBLIGATORIO: español latinoamericano neutro de Chile (B2B).
+PROHIBIDO el voseo y los argentinismos: nunca uses "vos", "che", "boludo", "posta", "mirá", "querés", "tenés", "podés", "decime", "fijate" ni "dale" como muletilla.
+Usa siempre tuteo neutro: "tú quieres", "tú puedes", "mira", "dime", "fíjate", "vale" o "de acuerdo".
+Si dudas entre una palabra chilena muy local y una neutra, elige la neutra (ej: "computador" no "ordenador", "celular" no "móvil", "despacho" no "envío" solo si hablas de flete).`;
+
 /** Lista de intents válidos para el router */
 export const STARSHOP_INTENTS = [
   "product_search",
