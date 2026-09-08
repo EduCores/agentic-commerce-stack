@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import {
   ChatIcon,
+  HomeIcon,
   LetterIcon,
   PieChartIcon,
   TableIcon,
@@ -17,12 +18,12 @@ export type NavSection = { label: string; items: NavItem[] };
 
 export const NAV_DATA: NavSection[] = [
   {
-    label: "PANEL",
+    label: "AGENTIC COMMERCE",
     items: [
       {
-        title: "Almacenar",
-        icon: <TableIcon />,
-        url: "/store",
+        title: "Dashboard",
+        icon: <HomeIcon />,
+        url: "/",
         items: [],
       },
       {
@@ -38,41 +39,25 @@ export const NAV_DATA: NavSection[] = [
         items: [],
       },
       {
-        title: "Correos electrónicos",
-        icon: <LetterIcon />,
-        url: "/admin/emails",
+        title: "Store",
+        icon: <TableIcon />,
+        url: "/store",
         items: [],
       },
-    ],
-  },
-  {
-    label: "AI",
-    items: [
       {
-        title: "Agentes",
+        title: "Agents",
         icon: <UserIcon />,
         url: "/agents",
         items: [],
       },
       {
-        title: "Flujos de trabajo",
+        title: "Workflows",
         icon: <Widget4Icon />,
         url: "/workflows",
         items: [],
       },
-    ],
-  },
-  {
-    label: "GESTIÓN",
-    items: [
       {
-        title: "Gestionar el equipo",
-        icon: <TaskIcon />,
-        url: "/manage-team",
-        items: [],
-      },
-      {
-        title: "Analítica",
+        title: "Analytics",
         icon: <PieChartIcon />,
         url: "/analytics",
         items: [],
@@ -87,6 +72,24 @@ export const NAV_DATA: NavSection[] = [
         title: "CRM",
         icon: <UserGroupIcon />,
         url: "/crm",
+        items: [],
+      },
+      {
+        title: "AI",
+        icon: <Widget4Icon />,
+        url: "/ai",
+        items: [],
+      },
+      {
+        title: "Manage Team",
+        icon: <TaskIcon />,
+        url: "/manage-team",
+        items: [],
+      },
+      {
+        title: "Emails",
+        icon: <LetterIcon />,
+        url: "/admin/emails",
         items: [],
       },
     ],
