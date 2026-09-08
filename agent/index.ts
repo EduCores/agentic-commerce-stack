@@ -113,26 +113,7 @@ async function logRunSafe(data: {
   }
 }
 
-// ── Intent detection (Welcome → Route) ─────────────────────────────────────
-// Heurística rápida (sin LLM) para el router. El LLM del Welcome refina después.
-function detectIntentHeuristic(message: string, isAdmin?: boolean): StarShopIntent {
-  const t = message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  // admin_ops SOLO existe en contexto admin. En tienda nunca se devuelve
-  // (evita que un cliente vea datos de dueño por keywords coincidentes).
-  if (isAdmin) {
-    if (/^(hola|hola!|hey|buenas|buenos dias|buenas tardes)\b/.test(t.trim())) return "admin_ops";
-    if (/(cuanto vendi|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow|cuanto se vendio|vendimos)/.test(t)) return "admin_ops";
-  }
-  if (/(devol|devoluci|cambio.*producto|garant.*falla|no me sirve.*devolver)/.test(t)) return "return_request";
-  if (/(carrito abandon|dejé.*carrito|deje.*carrito|carrito.*abandon|retomar compr|abandon.*cart|carrito.*no pude pagar|quedó.*carrito|quedo.*carrito)/.test(t)) return "abandoned_cart";
-  if (/(dónde está|donde esta|seguimiento|estado.*pedido|track.*order|rastrear|wismo|dónde va.*pedido)/.test(t)) return "order_tracking";
-  if (/(compara.*precio|precio.*competencia|cotiz.*otro|más barato|mejor precio|precio.*otro lado)/.test(t)) return "price_comparison";
-  if (/(pagar|checkout|carrito.*pago|despacho.*pago|método de pago|confirmar.*pedido|finalizar.*compra|quiero comprar|procesar.*compra)/.test(t)) return "checkout_support";
-  if (/(política|politica|envío|envio|garantía|garantia|horario|contacto|quiénes son|quienes son|tienda.*info|cómo compr|como compr)/.test(t)) return "general_inquiry";
-  if (/(hablar con|ejecutivo|humano|asesor|ventas@|llamar.*vendedor|persona real)/.test(t)) return "escalate_human";
-  return "product_search";
-}
-
+// Intent detection vive en @/lib/eve/detect-intent (LLM con fallback heurístico mock).
 // Whitelist de tools por crew (cada crew solo ve sus tools)
 const CREW_TOOL_MAP: Record<StarShopIntent, string[]> = {
   product_search: ["searchProducts", "checkStock", "calculatePricing", "navigateTo", "scrapeWebsite"],
@@ -214,13 +195,11 @@ function formatHistory(history: unknown): string {
 
 export type RunAgentResult = Awaited<ReturnType<typeof runAgent>>;
 
-/** Flujo 1→2→6+3→4 — detecta intent y despacha al crew correcto */
+/** Flujo 1→2→6+3→4 — detecta intent (LLM con fallback heurístico) y despacha al crew */
 export async function runStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
-  const heuristic = detectIntentHeuristic(params.input, params.isAdmin);
-  // Intenta refinar con LLM Welcome si hay key, pero no bloquea si falla
-  const detectedIntent: StarShopIntent = heuristic;
-  // Heurística ya es robusta; el refinement LLM se hace implícito en el crew prompt.
-  // Si algún día quieres LLM intent, descomenta generateText con STARSHOP_WELCOME_PROMPT.
+  const { detectIntent } = await import("@/lib/eve/detect-intent");
+  const detected = await detectIntent(params.input, { isAdmin: params.isAdmin });
+  const detectedIntent: StarShopIntent = detected.intent;
 
   const crew = getCrewConfig(detectedIntent);
   const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
@@ -246,7 +225,7 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
     _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools },
   } as never);
 
-  return { ...inner, detectedIntent, crew: crew.slug, allowedTools };
+  return { ...inner, detectedIntent, crew: crew.slug, allowedTools, intentConfidence: detected.confidence, intentSource: detected.source };
 }
 
 /**
@@ -404,8 +383,9 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
 }
 
 export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
-  const heuristic = detectIntentHeuristic(params.input, params.isAdmin);
-  const detectedIntent = heuristic;
+  const { detectIntent } = await import("@/lib/eve/detect-intent");
+  const detected = await detectIntent(params.input, { isAdmin: params.isAdmin });
+  const detectedIntent = detected.intent;
   const crew = getCrewConfig(detectedIntent);
   const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
 
@@ -419,7 +399,7 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
     }
   })();
 
-  yield { type: "meta" as const, detectedIntent, crew: crew.slug };
+  yield { type: "meta" as const, detectedIntent, crew: crew.slug, intentConfidence: detected.confidence, intentSource: detected.source };
 
   for await (const chunk of streamAgent({
     agentSlug: crew.slug,

@@ -12,18 +12,11 @@ import type { StarShopIntent } from "../../prisma/starshop-prompts";
 export const detectIntentStep = createStep<{ message: string; history?: unknown[] }, { intent: StarShopIntent; confidence: number }>(
   "detect-intent",
   async ({ message }) => {
-    // Fallback determinístico si el LLM no está disponible (heurística por keywords)
-    const t = message.toLowerCase();
-    let intent: StarShopIntent = "product_search";
-    if (/devol|devoluci|cambio|garant/.test(t)) intent = "return_request";
-    else if (/carrito abandon|dejé en el carrito|retomar compr/.test(t)) intent = "abandoned_cart";
-    else if (/dónde está|donde esta|seguimiento|estado.*pedido|track/.test(t)) intent = "order_tracking";
-    else if (/compara|precio.*competencia|cotiz.*otro/.test(t)) intent = "price_comparison";
-    else if (/pagar|checkout|carrito.*pago|despacho.*pago|método de pago/.test(t)) intent = "checkout_support";
-    else if (/política|envío|garantía|horario|contacto|quiénes son/.test(t)) intent = "general_inquiry";
-    else if (/hablar con|ejecutivo|humano|ventas@/.test(t)) intent = "escalate_human";
-    await logStep({ stepName: "DETECT_INTENT", status: "COMPLETED", input: { message }, output: { intent } });
-    return { intent, confidence: 0.85 };
+    // LLM primero, heurística como fallback mock (sin DB ni key igual funciona)
+    const { detectIntent } = await import("@/lib/eve/detect-intent");
+    const detected = await detectIntent(message);
+    await logStep({ stepName: "DETECT_INTENT", status: "COMPLETED", input: { message }, output: { intent: detected.intent, confidence: detected.confidence, source: detected.source } });
+    return { intent: detected.intent, confidence: detected.confidence };
   }
 );
 

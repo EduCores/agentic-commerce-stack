@@ -46,6 +46,8 @@ export async function POST(req: Request) {
       : await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
     const detectedIntent = (result as unknown as { detectedIntent?: string }).detectedIntent;
     const crew = (result as unknown as { crew?: string }).crew;
+    const intentConfidence = (result as unknown as { intentConfidence?: number }).intentConfidence ?? null;
+    const intentSource = (result as unknown as { intentSource?: string }).intentSource ?? "heuristic";
     const rawCalls = (result.toolCalls ?? []) as unknown as Array<Record<string, unknown>>;
     const toolCalls = rawCalls.map((tc) => {
       const toolName = (tc.toolName ?? tc.name) as string | undefined;
@@ -93,7 +95,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ text, toolCalls, detectedIntent, crew }, { headers: corsHeaders() });
+    return NextResponse.json({ text, toolCalls, detectedIntent, crew, intentConfidence, intentSource }, { headers: corsHeaders() });
   } catch (e) {
         console.error("[API-CHAT] Error:", e);
     return NextResponse.json({

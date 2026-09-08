@@ -21,20 +21,25 @@ export default defineTool({
   async execute({ to, subject, html, text, orderId, template }) {
     const apiKey = process.env.RESEND_API_KEY;
     const from = process.env.EMAIL_FROM ?? "StarShop <noreply@starshop.cl>";
-    const bodyHtml = html ?? `<p>${(text ?? subject).replace(/\n/g, "<br/>")}</p>`;
-    const bodyText = text ?? html?.replace(/<[^>]+>/g, " ") ?? subject;
+    // Templates visuales compartidos con /admin/emails (mock y prod usan el mismo HTML)
+    const { buildTemplate } = await import("@/lib/eve/email-templates");
+    const built = buildTemplate(template, { subject, text, orderId, to });
+    const bodyHtml = html ?? built.html;
+    const bodyText = text ?? built.text;
+    const finalSubject = subject || built.subject;
 
     // Mock mode: sin API key, no falla — loguea
     if (!apiKey) {
-      console.log(`[AgentMail MOCK] to=${to} subject="${subject}" template=${template} orderId=${orderId ?? "-"}`);
+      console.log(`[AgentMail MOCK] to=${to} subject="${finalSubject}" template=${template} orderId=${orderId ?? "-"}`);
       console.log(`[AgentMail MOCK] html snippet: ${bodyHtml.slice(0, 200)}`);
       return {
         ok: true,
         mocked: true,
         to,
-        subject,
+        subject: finalSubject,
         template,
         orderId: orderId ?? null,
+        previewHtml: bodyHtml,
         message: "Email mockeado (sin RESEND_API_KEY). En prod configura RESEND_API_KEY y EMAIL_FROM.",
       };
     }
@@ -50,7 +55,7 @@ export default defineTool({
         body: JSON.stringify({
           from,
           to: [to],
-          subject,
+          subject: finalSubject,
           html: bodyHtml,
           text: bodyText,
           tags: [

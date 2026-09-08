@@ -1,8 +1,13 @@
 import {
   AlphabetIcon,
+  AuthIcon,
+  ChatIcon,
   HomeIcon,
+  LetterIcon,
   PieChartIcon,
   TableIcon,
+  TaskIcon,
+  UserGroupIcon,
   UserIcon,
   Widget4Icon,
   WindowIcon,
@@ -53,6 +58,64 @@ export const NAV_DATA = [
         icon: <UserIcon />,
         url: "/admin",
         items: [],
+      },
+      {
+        title: "Analytics",
+        icon: <PieChartIcon />,
+        url: "/analytics",
+        items: [],
+      },
+      {
+        title: "Marketing",
+        icon: <ChatIcon />,
+        url: "/marketing",
+        items: [],
+      },
+      {
+        title: "CRM",
+        icon: <UserGroupIcon />,
+        url: "/crm",
+        items: [],
+      },
+      {
+        title: "AI",
+        icon: <Widget4Icon />,
+        url: "/ai",
+        items: [],
+      },
+      {
+        title: "Manage Team",
+        icon: <TaskIcon />,
+        url: "/manage-team",
+        items: [],
+      },
+      {
+        title: "Emails",
+        icon: <LetterIcon />,
+        url: "/admin/emails",
+        items: [],
+      },
+      {
+        title: "Auth",
+        icon: <AuthIcon />,
+        items: [
+          {
+            title: "Sign In",
+            url: "/auth/sign-in",
+          },
+          {
+            title: "Sign Up",
+            url: "/auth/sign-up",
+          },
+          {
+            title: "Reset Password",
+            url: "/auth/reset-password",
+          },
+          {
+            title: "Two Step",
+            url: "/auth/two-step-verification",
+          },
+        ],
       },
     ],
   },
