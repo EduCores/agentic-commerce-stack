@@ -2,10 +2,9 @@
 
 import { CollapsibleGroup } from '@/components/tailgrids/core/collapsible';
 import { cn } from '@/utils/cn';
-import { Logo, LogoWithText, LogoWithTextDark } from '@/utils/icon';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Key } from 'react-aria-components';
 import { NAV_DATA } from './data';
 import { CloseIcon, SidebarExpandedIcon, ThreeDots } from './icon';
@@ -24,11 +23,6 @@ export default function Sidebar({
     onItemClick?: () => void;
 }) {
     const pathname = usePathname();
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration guard: needed once on mount to toggle dark/light logo
-      setMounted(true);
-    }, []);
 
     // Compute which group should be open based on the current route
     const activeGroupKey = useMemo(
@@ -51,21 +45,18 @@ export default function Sidebar({
                         : 'flex-col justify-center gap-4',
                 )}
             >
-                <Link href='/' suppressHydrationWarning>
+                <Link href='/' suppressHydrationWarning aria-label="Ir al panel principal">
                     {isSidebarOpen ? (
-                        <span suppressHydrationWarning className="flex items-center">
-                            {/* Evita hydration mismatch: renderiza ambos y alterna por CSS */}
-                            <span className="dark:hidden">
-                                <LogoWithText />
-                            </span>
-                            <span className="hidden dark:block">
-                                <LogoWithTextDark />
-                            </span>
-                            {/* Fallback SSR: si no hay mounted, muestra light */}
-                            {!mounted && <span className="sr-only">ACS</span>}
+                        <span suppressHydrationWarning className="flex items-baseline text-[22px] leading-none font-black tracking-tight select-none">
+                            <span className="text-black dark:text-white">ST</span>
+                            <span className="text-[#fdd817]" aria-hidden>★</span>
+                            <span className="text-black dark:text-white">R</span>
+                            <span className="text-[#fdd817]">SHOP</span>
                         </span>
                     ) : (
-                        <Logo />
+                        <span className="flex size-9 items-center justify-center rounded-lg bg-[#fdd817] text-xl font-black text-black select-none" aria-hidden>
+                            ★
+                        </span>
                     )}
                 </Link>
 
@@ -78,7 +69,7 @@ export default function Sidebar({
                             : 'text-icon-tertiary hover:text-text-secondary',
                     )}
                     aria-label={
-                        isMobileSheet ? 'Close sidebar' : 'Toggle sidebar'
+                        isMobileSheet ? 'Cerrar menú' : 'Alternar menú'
                     }
                 >
                     {isMobileSheet ? <CloseIcon /> : <SidebarExpandedIcon />}
