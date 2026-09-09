@@ -13,6 +13,20 @@ const BRAND = "#FFD814";
 const INK = "#111111";
 const MUTED = "#6b7280";
 
+const DARK_ROOT = "background:#111111!important;border-color:#333333!important;color:#fafafa!important;";
+const DARK_BODY = "color:#fafafa!important;";
+const DARK_FOOTER = "color:#9ca3af!important;border-color:#333333!important;";
+
+function darkCss(scope: string): string {
+  const s = scope ? `${scope} ` : "";
+  return `${s}.dark-invert{${DARK_ROOT}}`
+    + `${s}.dark-invert-body,${s}.dark-invert-body p,${s}.dark-invert-body td,${s}.dark-invert-body li,${s}.dark-invert-body b{${DARK_BODY}}`
+    + `${s}.dark-invert-footer{${DARK_FOOTER}}`;
+}
+
+/** Reglas oscuras con alcance .email-dark: el preview en la app sigue el tema (no el SO). */
+export const EMAIL_DARK_SCOPED_CSS = darkCss(".email-dark");
+
 function shell(title: string, preheader: string, body: string): string {
   return `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #eee;border-radius:12px;overflow:hidden" class="dark-invert">`
     + `<div style="background:${BRAND};padding:16px 20px;font-weight:bold;color:${INK};font-size:16px">${title}</div>`
@@ -20,7 +34,7 @@ function shell(title: string, preheader: string, body: string): string {
     + `<div style="padding:20px;color:${INK};font-size:14px;line-height:1.6" class="dark-invert-body">${body}</div>`
     + `<div style="padding:12px 20px;font-size:12px;color:${MUTED};border-top:1px solid #eee" class="dark-invert-footer">StarShop · B2B Chile · ventas@starshop.cl</div>`
     + `</div>`
-    + `<style>@media (prefers-color-scheme: dark) { .dark-invert { background:#111111!important;border-color:#333333!important;color:#fafafa!important; } .dark-invert-body, .dark-invert-body p, .dark-invert-body td, .dark-invert-body li, .dark-invert-body b { color:#fafafa!important; } .dark-invert-footer { color:#9ca3af!important;border-color:#333333!important; } }</style>`;
+    + `<style>@media (prefers-color-scheme: dark){${darkCss("")}}</style>`;
 }
 
 function rows(items: Item[], currency: string): string {
