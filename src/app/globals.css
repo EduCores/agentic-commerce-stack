@@ -557,6 +557,18 @@
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Texto base más grande solo en móvil: escala todo lo medido en rem (+12.5%). */
+  @media (max-width: 640px) {
+    html {
+      font-size: 112.5%;
+    }
+  }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;

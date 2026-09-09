@@ -20,7 +20,7 @@ export function EmailPreviewCard({ kind, subject, html, mocked }: Props) {
         <p className="text-xs text-text-tertiary">{subject}</p>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg border border-card-border bg-white p-2" dangerouslySetInnerHTML={{ __html: html }} />
+        <div className="rounded-lg border border-card-border bg-white dark:bg-zinc-900 p-2" dangerouslySetInnerHTML={{ __html: html }} />
       </CardContent>
     </Card>
   );
