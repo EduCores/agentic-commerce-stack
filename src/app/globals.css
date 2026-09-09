@@ -554,6 +554,20 @@
       transform: translateX(-50%);
     }
   }
+
+  --animate-swipe-hint: swipe-hint 1.4s ease-in-out infinite;
+
+  @keyframes swipe-hint {
+    0%,
+    100% {
+      transform: translateX(-3px);
+      opacity: 1;
+    }
+    50% {
+      transform: translateX(3px);
+      opacity: 0.6;
+    }
+  }
 }
 
 @layer base {

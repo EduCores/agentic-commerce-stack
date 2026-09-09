@@ -1,7 +1,7 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
-import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
+import { CatalogTable, type CatalogRow } from "./_components/catalog-table";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +10,17 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const where = q ? { OR: [{ sku: { contains: q, mode: "insensitive" as const } }, { title: { contains: q, mode: "insensitive" as const } }] } : {};
   const products = await prisma.product.findMany({ where: where as never, take: 50, orderBy: { updatedAt: "desc" }, include: { store: { select: { name: true, provider: true } } } }).catch(() => []);
   const providers = [...new Set(products.map((p) => p.store.provider))];
+  const rows: CatalogRow[] = products.map((p) => ({
+    id: String(p.id),
+    sku: p.sku,
+    title: p.title,
+    description: p.description ?? "",
+    provider: p.store.provider,
+    price: Number(p.price),
+    stock: p.stock,
+    reservedStock: p.reservedStock,
+    isActive: p.isActive,
+  }));
 
   return (
     <div className="space-y-6 p-3 sm:p-6">
@@ -31,25 +42,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           {products.length === 0 ? (
             <p className="text-sm text-text-tertiary">Sin productos. Ejecuta <code>npx tsx prisma/seed.ts</code> o sincroniza tu tienda híbrida.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-xs text-text-tertiary border-b border-card-border">
-                  <tr><th className="text-left p-2">SKU</th><th className="text-left p-2">Producto</th><th className="text-left p-2">Proveedor</th><th className="text-right p-2">Precio</th><th className="text-right p-2">Stock</th><th className="text-center p-2">Estado</th></tr>
-                </thead>
-                <tbody>
-                  {products.map((p) => (
-                    <tr key={p.id} className="border-b border-card-border/60 hover:bg-background-gray-secondary">
-                      <td className="p-2 font-mono text-xs">{p.sku}</td>
-                      <td className="p-2"><p className="font-medium">{p.title}</p><p className="text-xs text-text-tertiary truncate max-w-[320px]">{p.description ?? ""}</p></td>
-                      <td className="p-2"><Badge color="gray">{p.store.provider}</Badge></td>
-                      <td className="p-2 text-right">${Number(p.price).toLocaleString("es-CL")}</td>
-                      <td className="p-2 text-right">{p.stock} <span className="text-xs text-text-tertiary">({p.reservedStock} reservados)</span></td>
-                      <td className="p-2 text-center"><Badge color={p.isActive ? "success" : "gray"}>{p.isActive ? "Activo" : "Inactivo"}</Badge></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <CatalogTable rows={rows} />
           )}
         </CardContent>
       </Card>
