@@ -12,14 +12,14 @@ export function StarShopLogo({ compact = false }: { compact?: boolean }) {
       translate="no"
       className="starshop-logo notranslate relative inline-flex items-baseline text-[26px] leading-none font-black tracking-tight select-none md:text-[32px]"
     >
-      <span className="text-black dark:text-[#fbffff]">ST</span>
+      <span className="text-black dark:text-white">ST</span>
       <span className="star-slot" aria-hidden="true">
         <span className="star-ghost">A</span>
         <span className="star-float">
           <img src="/star2.svg" alt="" className="star-logo star-anim-show" />
         </span>
       </span>
-      <span className="text-black dark:text-[#fbffff]">R</span>
+      <span className="text-black dark:text-white">R</span>
       <span className="text-[#fdd817]">SHOP</span>
     </span>
   );

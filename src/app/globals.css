@@ -2,6 +2,8 @@
 @plugin "@tailwindcss/forms";
 @plugin "tailwind-scrollbar";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @import "./css/default.css";
 @import "./css/dark.css";
 @import "./css/star-logo.css";
