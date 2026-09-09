@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function ChatPage() {
   return (
-    <div className="space-y-6 p-6 max-w-3xl mx-auto">
+    <div className="space-y-6 p-3 sm:p-6 max-w-3xl mx-auto">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Chat IA", href: "/chat" }]} />
       <div>
         <h2 className="text-xl font-bold text-black dark:text-white">Chat Star — Agente IA con tipeo</h2>

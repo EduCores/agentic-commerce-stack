@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function CrmPage() {
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "CRM", href: "/crm" }]} />
       <div>
         <h2 className="text-xl font-bold text-black dark:text-white">CRM</h2>

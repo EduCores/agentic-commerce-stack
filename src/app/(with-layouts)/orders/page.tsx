@@ -28,7 +28,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
   const alertCount = orders.filter((o) => o.status === "FAILED" || o.status === "PENDING").length;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Pedidos", href: "/orders" }]} />
       {alertCount > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:bg-amber-950/20">

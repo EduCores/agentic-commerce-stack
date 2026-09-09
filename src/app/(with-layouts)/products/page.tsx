@@ -12,7 +12,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const providers = [...new Set(products.map((p) => p.store.provider))];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Productos", href: "/products" }]} />
       <div>
         <h2 className="text-xl font-bold text-black dark:text-white">Productos — Catálogo híbrido</h2>

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default function AdminAgentPage() {
   return (
-    <div className="space-y-6 p-6 max-w-3xl mx-auto">
+    <div className="space-y-6 p-3 sm:p-6 max-w-3xl mx-auto">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Admin", href: "/admin" }]} />
       <div>
         <h2 className="text-xl font-bold text-black dark:text-white">Admin Ops — Dueño StarShop</h2>

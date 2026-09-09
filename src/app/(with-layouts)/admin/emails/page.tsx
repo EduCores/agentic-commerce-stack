@@ -13,7 +13,7 @@ export default function AdminEmailsPage() {
   }));
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Admin", href: "/admin" }, { label: "Correos electrónicos", href: "/admin/emails" }]} />
       <div>
         <h2 className="text-xl font-bold text-black dark:text-white">Correos electrónicos — plantillas de prueba y producción</h2>
