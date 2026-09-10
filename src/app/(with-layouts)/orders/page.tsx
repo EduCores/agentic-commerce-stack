@@ -15,6 +15,16 @@ const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
   REFUNDED: "gray",
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: "Pendiente",
+  RESERVED: "Reservado",
+  PAID: "Pagado",
+  FULFILLED: "Completado",
+  CANCELLED: "Cancelado",
+  FAILED: "Fallido",
+  REFUNDED: "Reembolsado",
+};
+
 export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const { status } = await searchParams;
   const where = status ? { status: status as never } : {};
@@ -44,7 +54,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         <div className="flex flex-wrap gap-2">
           <a href="/orders" className={`rounded-lg px-3 py-1.5 text-sm ${!status ? "bg-brand-500 text-white" : "border border-card-border"}`}>Todos</a>
           {["PENDING", "PAID", "FULFILLED", "CANCELLED"].map((s) => (
-            <a key={s} href={`/orders?status=${s}`} className={`rounded-lg px-3 py-1.5 text-sm ${status === s ? "bg-brand-500 text-white" : "border border-card-border"}`}>{s}</a>
+            <a key={s} href={`/orders?status=${s}`} className={`rounded-lg px-3 py-1.5 text-sm ${status === s ? "bg-brand-500 text-white" : "border border-card-border"}`}>{STATUS_LABEL[s] ?? s}</a>
           ))}
         </div>
       </div>
@@ -67,8 +77,8 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                       <td className="p-2">{o.customer?.name ?? "—"}<p className="text-xs text-text-tertiary">{o.customer?.email ?? ""}</p></td>
                       <td className="p-2">{o.store.name} <Badge color="gray">{o.store.provider}</Badge></td>
                       <td className="p-2 text-right">${Number(o.total).toLocaleString("es-CL")}</td>
-                      <td className="p-2 text-center"><Badge color={STATUS_COLOR[o.status] ?? "gray"}>{o.status}</Badge></td>
-                      <td className="p-2 text-center"><Badge color={o.paymentStatus === "PAID" ? "success" : "gray"}>{o.paymentStatus}</Badge></td>
+                      <td className="p-2 text-center"><Badge color={STATUS_COLOR[o.status] ?? "gray"}>{STATUS_LABEL[o.status] ?? o.status}</Badge></td>
+                      <td className="p-2 text-center"><Badge color={o.paymentStatus === "PAID" ? "success" : "gray"}>{STATUS_LABEL[o.paymentStatus] ?? o.paymentStatus}</Badge></td>
                     </tr>
                   ))}
                 </tbody>

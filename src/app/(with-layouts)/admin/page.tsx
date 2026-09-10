@@ -17,7 +17,7 @@ export default function AdminAgentPage() {
         <CardContent className="text-xs text-text-tertiary space-y-1">
           <p>• <code>¿cuánto vendí hoy?</code> → ingresos + productos más vendidos + enlaces /orders</p>
           <p>• <code>stock bajo</code> → lista &lt;10 con SKU y stock</p>
-          <p>• <code>pedidos con alerta</code> → FAILED/PENDING (salvamos la venta)</p>
+          <p>• <code>pedidos con alerta</code> → fallidos/pendientes (salvamos la venta)</p>
           <p>• <code>crea producto SKU TEST</code> → guía POST /api/products</p>
         </CardContent>
       </Card>
