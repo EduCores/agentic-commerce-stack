@@ -53,9 +53,9 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
           <p className="text-sm text-text-tertiary">Híbrido: {orders.length} pedidos · Filtra por estado · Fuente Prisma (igual para mock/Shopify).</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/orders" className={`rounded-lg px-3 py-1.5 text-sm ${!status ? "bg-brand-500 text-white" : "border border-card-border"}`}>Todos</Link>
+          <Link href="/orders" className={`rounded-lg px-3 py-1.5 text-sm ${!status ? "bg-brand-500 text-button-primary-text" : "border border-card-border"}`}>Todos</Link>
           {["PENDING", "PAID", "FULFILLED", "CANCELLED"].map((s) => (
-            <Link key={s} href={`/orders?status=${s}`} className={`rounded-lg px-3 py-1.5 text-sm ${status === s ? "bg-brand-500 text-white" : "border border-card-border"}`}>{STATUS_LABEL[s] ?? s}</Link>
+            <Link key={s} href={`/orders?status=${s}`} className={`rounded-lg px-3 py-1.5 text-sm ${status === s ? "bg-brand-500 text-button-primary-text" : "border border-card-border"}`}>{STATUS_LABEL[s] ?? s}</Link>
           ))}
         </div>
       </div>

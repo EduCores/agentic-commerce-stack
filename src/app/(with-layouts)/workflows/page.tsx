@@ -29,7 +29,7 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
               <a
                 key={w.slug}
                 href={`/workflows?slug=${w.slug}`}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium border ${w.slug === workflow?.slug ? "bg-brand-500 text-white border-brand-500" : "bg-card-background text-text-primary border-card-border hover:bg-background-gray-secondary"}`}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium border ${w.slug === workflow?.slug ? "bg-brand-500 text-button-primary-text border-brand-500" : "bg-card-background text-text-primary border-card-border hover:bg-background-gray-secondary"}`}
               >
                 {w.name}
               </a>

@@ -176,7 +176,7 @@ export default function FlowCanvas({
               {selectedNode.data.detail && <p className="text-xs leading-4 text-text-tertiary bg-background-gray-secondary rounded-lg p-2">{selectedNode.data.detail}</p>}
               <div className="flex flex-wrap gap-1">
                 <span className="rounded-full bg-background-gray-secondary px-2 py-0.5 text-[10px] uppercase tracking-widest text-text-tertiary">{selectedNode.data.type}</span>
-                {selectedNode.data.status && <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white">{selectedNode.data.status}</span>}
+                {selectedNode.data.status && <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-button-primary-text">{selectedNode.data.status}</span>}
                 {selectedNode.data.intent && <span className="rounded-full bg-brand-100 text-brand-700 px-2 py-0.5 text-[10px]">{selectedNode.data.intent}</span>}
               </div>
               {selectedNode.data.agent && <p className="text-xs"><span className="font-medium">🤖 Agente:</span> {selectedNode.data.agent}</p>}

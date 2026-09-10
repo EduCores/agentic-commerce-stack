@@ -160,7 +160,7 @@ export function NotificationsButton() {
                         onClick={() => handleMarkAsRead(notification.id)}
                       >
                         {/* Icon */}
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border-secondary bg-background-gray-primary text-icon-secondary transition-all duration-300 group-hover:bg-brand-500 group-hover:text-base-white group-hover:shadow-[0_1px_3px_0.5px_rgba(13,13,18,0.08)]">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border-secondary bg-background-gray-primary text-icon-secondary transition-all duration-300 group-hover:bg-brand-500 group-hover:text-button-primary-text group-hover:shadow-[0_1px_3px_0.5px_rgba(13,13,18,0.08)]">
                           {notification.icon}
                         </span>
 
