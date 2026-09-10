@@ -67,12 +67,12 @@ export default defineTool({
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
-        console.warn("[AgentMail] Resend HTTP", r.status, j);
+        console.log("[AgentMail] Resend HTTP", r.status, j);
         return { ok: false, error: j?.message ?? `HTTP ${r.status}`, to, subject, template };
       }
       return { ok: true, mocked: false, id: j.id, to, subject, template, orderId: orderId ?? null };
     } catch (e) {
-      console.warn("[AgentMail] error", e instanceof Error ? e.message : e);
+      console.log("[AgentMail] error", e instanceof Error ? e.message : e);
       return { ok: false, error: e instanceof Error ? e.message : String(e), to, subject, template, mocked: false };
     }
   },

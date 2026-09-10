@@ -35,18 +35,19 @@ function getOpenRouter(isAdmin?: boolean) {
 
 // Llamada directa a OpenRouter como respaldo: genera respuesta conversacional real
 // (el generateText con tools a veces corta en tool calls sin texto final).
+// Recibe los mensajes ya construidos (historial + input) para NO perder el contexto.
 async function directChat(
   apiKey: string,
   modelId: string,
   system: string,
-  user: string
+  messages: Array<{ role: "user" | "assistant"; content: string }>
 ): Promise<string> {
   try {
     const body = {
       model: modelId,
       messages: [
         { role: "system", content: system },
-        { role: "user", content: user },
+        ...messages,
       ],
       temperature: 0.7,
       max_tokens: 500,
@@ -63,25 +64,51 @@ async function directChat(
     });
     if (!r.ok) {
       const t = await r.text().catch(() => "");
-      console.warn("[ACS-AGENT] directChat HTTP", r.status, t.slice(0, 200));
+      console.log("[ACS-AGENT] directChat HTTP", r.status, t.slice(0, 200));
       return "";
     }
     const j = await r.json();
     return (j?.choices?.[0]?.message?.content ?? "").trim();
   } catch (e) {
-    console.warn("[ACS-AGENT] directChat error", e instanceof Error ? e.message : e);
+    console.log("[ACS-AGENT] directChat error", e instanceof Error ? e.message : e);
     return "";
   }
+}
+
+/**
+ * Construye los mensajes de conversación con roles reales para el SDK `ai`.
+ * El historial se envía como turnos previos <user>/<assistant> y el input actual
+ * como último mensaje. Esto evita que el modelo confunda quién dijo qué
+ * (el formato anterior inyectaba "Cliente:/Star:" como texto plano dentro del
+ * mensaje de usuario, lo que producía respuestas erráticas con historial activo).
+ */
+type ChatTurn = { role?: string; text?: string; content?: string };
+
+function toModelMessages(input: string, history?: unknown[]): Array<{ role: "user" | "assistant"; content: string }> {
+  const out: Array<{ role: "user" | "assistant"; content: string }> = [];
+  if (Array.isArray(history)) {
+    for (const m of history.slice(-6) as ChatTurn[]) {
+      if (!m || typeof m !== "object") continue;
+      const text = ((m.text ?? m.content) ?? "").toString().trim();
+      if (!text) continue;
+      out.push({ role: m.role === "user" ? "user" : "assistant", content: text.slice(0, 600) });
+    }
+  }
+  const current = input.trim();
+  if (current) out.push({ role: "user", content: current });
+  return out;
 }
 
 // ─── Config del agente con fallback sin BD ───────────────────────────────
 // Si la base de datos no está disponible, el agente sigue funcionando con una
 // configuración por defecto (mismo prompt y modelo). La BD solo aporta
 // dashboard para editar prompts y persistir logs de conversaciones.
+const DEFAULT_MODEL = "qwen/qwen3-30b-a3b-instruct-2507";
+
 const DEFAULT_AGENT = {
   id: "builtin-default",
   slug: "sales-assistant",
-  model: "qwen/qwen3-30b-a3b",
+  model: DEFAULT_MODEL,
   systemPrompt: SALES_SYSTEM_PROMPT,
 };
 
@@ -89,10 +116,10 @@ async function getAgentConfig(slug: string) {
   try {
     const agent = await prisma.agent.findUnique({ where: { slug } });
     if (agent) return agent;
-    console.warn(`[ACS-AGENT] Agente "${slug}" no existe en BD, usando config por defecto.`);
+    console.log(`[ACS-AGENT] Agente "${slug}" no existe en BD, usando config por defecto.`);
     return DEFAULT_AGENT;
   } catch (e) {
-    console.warn(
+    console.log(
       "[ACS-AGENT] BD no disponible, usando config por defecto (el agente sigue funcionando):",
       e instanceof Error ? e.message : e
     );
@@ -109,7 +136,7 @@ async function logRunSafe(data: {
   try {
     await prisma.agentRun.create({ data });
   } catch (e) {
-    console.warn("[ACS-AGENT] No se pudo guardar el log del run (la BD no responde o falla):", e instanceof Error ? e.message : e);
+    console.log("[ACS-AGENT] No se pudo guardar el log del run (la BD no responde o falla):", e instanceof Error ? e.message : e);
   }
 }
 
@@ -180,25 +207,13 @@ function getCrewConfig(intent: StarShopIntent) {
   return map[intent];
 }
 
-function formatHistory(history: unknown): string {
-  if (!Array.isArray(history) || history.length === 0) return "";
-  const lines = (history as Array<{ role?: string; text?: string; content?: string }>)
-    .slice(-8)
-    .map((m) => {
-      const role = m.role === "user" ? "Cliente" : "Star";
-      const txt = (m.text ?? m.content ?? "").toString().slice(0, 400);
-      return `${role}: ${txt}`;
-    })
-    .join("\n");
-  return `\n\nHistorial reciente:\n${lines}\n\nResponde considerando el historial. Si el cliente dice "cuánto con despacho" recuerda el producto anterior.`;
-}
-
 export type RunAgentResult = Awaited<ReturnType<typeof runAgent>>;
 
 /** Flujo 1→2→6+3→4 — detecta intent (LLM con fallback heurístico) y despacha al crew */
 export async function runStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
   const { detectIntent } = await import("@/lib/eve/detect-intent");
-  const detected = await detectIntent(params.input, { isAdmin: params.isAdmin });
+  // La clasificación considera el historial para no cambiar de crew a mitad de conversación.
+  const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
   const detectedIntent: StarShopIntent = detected.intent;
 
   const crew = getCrewConfig(detectedIntent);
@@ -211,15 +226,14 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
       const { startWorkflow } = await import("@/lib/workflows/engine");
       await startWorkflow(starShopRouterWorkflow, { message: params.input, detectedIntent, orderId: undefined });
     } catch (e) {
-      console.warn("[ACS-ROUTER] workflow log failed", e instanceof Error ? e.message : e);
+      console.log("[ACS-ROUTER] workflow log failed", e instanceof Error ? e.message : e);
     }
   })();
 
-  // Delega al runAgent del crew con historial
-  const promptWithHistory = params.input + formatHistory(params.history);
+  // Delega al runAgent del crew con historial (runAgent arma los mensajes UNA sola vez)
   const inner = await runAgent({
     agentSlug: crew.slug,
-    input: promptWithHistory,
+    input: params.input,
     storeId: params.storeId,
     history: params.history,
     _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools },
@@ -244,14 +258,13 @@ export async function runAdminOps(params: { input: string; storeId?: string; his
       const { startWorkflow } = await import("@/lib/workflows/engine");
       await startWorkflow(starShopRouterWorkflow, { message: params.input, detectedIntent, orderId: undefined });
     } catch (e) {
-      console.warn("[ACS-ADMIN] workflow log failed", e instanceof Error ? e.message : e);
+      console.log("[ACS-ADMIN] workflow log failed", e instanceof Error ? e.message : e);
     }
   })();
 
-  const promptWithHistory = params.input + formatHistory(params.history);
   const inner = await runAgent({
     agentSlug: crew.slug,
-    input: promptWithHistory,
+    input: params.input,
     storeId: params.storeId,
     history: params.history,
     useAdminKey: true,
@@ -277,19 +290,21 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   } else {
     agent = await getAgentConfig(params.agentSlug) as never;
     system = `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}`;
-    modelId = agent.model ?? "qwen/qwen3-30b-a3b";
+    modelId = agent.model ?? DEFAULT_MODEL;
   }
 
   const model = getOpenRouter(params.useAdminKey).chat(modelId as never) as never;
 
-  const promptWithHistory = params.history ? params.input + formatHistory(params.history) : params.input;
+  // El historial se envía como mensajes previos con roles (user/assistant) para
+  // que el modelo sepa exactamente quién dijo qué. El input actual siempre va al final.
+  const messages = toModelMessages(params.input, params.history);
 
   let result: Awaited<ReturnType<typeof generateText>>;
   try {
     result = await generateText({
       model,
       system,
-      prompt: promptWithHistory,
+      messages,
       tools: toAISDKTools(allowedTools),
       stopWhen: stepCountIs(4) as never,
       maxOutputTokens: 700,
@@ -298,7 +313,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
     const msg = e instanceof Error ? e.message : String(e);
     // Fallback amigable si es límite de créditos OpenRouter
     if (msg.includes("credits") || msg.includes("max_tokens") || msg.includes("402")) {
-      console.warn("[ACS-AGENT] LLM credit/max_tokens fallback", msg.slice(0, 200));
+      console.log("[ACS-AGENT] LLM credit/max_tokens fallback", msg.slice(0, 200));
       return {
         text: "Estoy con límite de créditos del LLM en este momento. Puedo seguir ayudándote con datos reales: revisa /products, /orders o /workflows, o dime qué buscas y te muestro resultados del catálogo.",
         toolCalls: [],
@@ -321,7 +336,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   if (!finalText && stepToolCalls.length > 0) {
     const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
     if (apiKey) {
-      const directReply = await directChat(apiKey, modelId, system, params.input);
+      const directReply = await directChat(apiKey, modelId, system, messages);
       if (directReply) {
         finalText = directReply;
         direct = true;
@@ -355,17 +370,18 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
   } else {
     agent = (await getAgentConfig(params.agentSlug)) as never;
     system = `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}`;
-    modelId = agent.model ?? "qwen/qwen3-30b-a3b";
+    modelId = agent.model ?? DEFAULT_MODEL;
   }
 
   const model = openrouter.chat(modelId as never) as never;
 
-  const promptWithHistory = params.history ? params.input + formatHistory(params.history) : params.input;
+  // Historial como mensajes con roles nativos (igual que en runAgent)
+  const messages = toModelMessages(params.input, params.history);
 
   const result = streamText({
     model,
     system,
-    prompt: promptWithHistory,
+    messages,
     tools: toAISDKTools(allowedTools) as never,
     stopWhen: stepCountIs(4) as never,
     maxOutputTokens: 700,
@@ -378,13 +394,22 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
 
   // Al final, emite toolCalls + meta (para que el frontend sepa navegar)
   const toolCalls = ((await result.toolCalls) ?? []) as unknown as Array<Record<string, unknown>>;
-  const finalText = await result.text;
+  let finalText = (await result.text) ?? "";
+  // Si el LLM cortó sin texto (solo tool calls), genera respuesta conversacional
+  // real vía llamada directa (misma lógica que runAgent, con contexto completo).
+  if (!finalText.trim() && toolCalls.length > 0) {
+    const apiKey = process.env.OPENROUTER_API_KEY || "";
+    if (apiKey) {
+      const directReply = await directChat(apiKey, modelId, system, messages);
+      if (directReply) finalText = directReply;
+    }
+  }
   yield { type: "done" as const, text: finalText, toolCalls, agentSlug: agent.slug };
 }
 
 export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
   const { detectIntent } = await import("@/lib/eve/detect-intent");
-  const detected = await detectIntent(params.input, { isAdmin: params.isAdmin });
+  const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
   const detectedIntent = detected.intent;
   const crew = getCrewConfig(detectedIntent);
   const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
@@ -395,7 +420,7 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
       const { startWorkflow } = await import("@/lib/workflows/engine");
       await startWorkflow(starShopRouterWorkflow, { message: params.input, detectedIntent, orderId: undefined });
     } catch (e) {
-      console.warn("[ACS-ROUTER-STREAM] workflow log failed", e instanceof Error ? e.message : e);
+      console.log("[ACS-ROUTER-STREAM] workflow log failed", e instanceof Error ? e.message : e);
     }
   })();
 

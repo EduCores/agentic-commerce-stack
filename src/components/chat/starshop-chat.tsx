@@ -54,7 +54,9 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
     await new Promise((r) => setTimeout(r, 280));
     try {
       if (streaming) {
-        const r = await fetch(apiUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, storeId: "seed-store" }) });
+        // Envía el historial reciente como turnos con role para que Star recuerde la conversación
+        const history = messages.slice(-6).map((m) => ({ role: m.role, text: m.text }));
+        const r = await fetch(apiUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, history, storeId: "seed-store" }) });
         if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
         const reader = r.body.getReader();
         const decoder = new TextDecoder();
@@ -90,7 +92,8 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
           }
         }
       } else {
-        const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, storeId: "seed-store" }) });
+        const history = messages.slice(-6).map((m) => ({ role: m.role, text: m.text }));
+        const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, history, storeId: "seed-store" }) });
         const j = await r.json();
         const nav = (j.toolCalls as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");
         const path = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo;

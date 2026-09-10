@@ -13,7 +13,27 @@ export type DetectIntentResult = {
 };
 
 function normalize(s: string): string {
-  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
+ * Contexto de conversación previa para la clasificación: resumen comprimido de los
+ * últimos turnos para que detectIntent no cambie de crew a mitad de conversación
+ * (ej: "¿cuánto con despacho?" tras hablar de un proyector debe seguir checkout/product_search).
+ */
+function historyContext(history?: unknown[], max = 4): string {
+  if (!Array.isArray(history) || history.length === 0) return "";
+  const lines = (history as Array<{ role?: string; text?: string; content?: string }>)
+    .slice(-max)
+    .map((m) => {
+      if (!m || typeof m !== "object") return "";
+      const t = ((m.text ?? m.content) ?? "").toString().trim().slice(0, 300);
+      if (!t) return "";
+      return `${m.role === "user" ? "Cliente" : "Star"}: ${t}`;
+    })
+    .filter(Boolean)
+    .join("\n");
+  return lines ? `\n\nConversación previa (contexto):\n${lines}` : "";
 }
 
 export function detectIntentHeuristic(message: string, isAdmin?: boolean): StarShopIntent {
@@ -36,7 +56,7 @@ function isValidIntent(v: unknown): v is StarShopIntent {
   return typeof v === "string" && (STARSHOP_INTENTS as readonly string[]).includes(v);
 }
 
-async function detectIntentLLM(message: string): Promise<DetectIntentResult | null> {
+async function detectIntentLLM(message: string, history?: unknown[]): Promise<DetectIntentResult | null> {
   const apiKey = process.env.OPENROUTER_API_KEY || "";
   if (!apiKey) return null;
   const model = process.env.OPENROUTER_MODEL || "qwen/qwen3-30b-a3b-instruct-2507";
@@ -52,10 +72,10 @@ async function detectIntentLLM(message: string): Promise<DetectIntentResult | nu
       body: JSON.stringify({
         model,
         temperature: 0,
-        max_tokens: 120,
+        max_tokens: 160,
         messages: [
-          { role: "system", content: `${STARSHOP_WELCOME_PROMPT}\n\nResponde SOLO JSON: {"intent":"<una de ${STARSHOP_INTENTS.join("|")}>","confidence":0.0-1.0}` },
-          { role: "user", content: message.slice(0, 500) },
+          { role: "system", content: `${STARSHOP_WELCOME_PROMPT}\n\nSi la consulta continúa una conversación previa, usa la conversación como contexto para clasificar (ej: después de preguntar por un producto, "¿cuánto con despacho?" es checkout_support; "¿y ese taladro qué tal?" es product_search).\n\nResponde SOLO JSON: {"intent":"<una de ${STARSHOP_INTENTS.join("|")}>","confidence":0.0-1.0}` },
+          { role: "user", content: message.slice(0, 500) + historyContext(history) },
         ],
       }),
       signal: AbortSignal.timeout(8000),
@@ -77,8 +97,8 @@ async function detectIntentLLM(message: string): Promise<DetectIntentResult | nu
   }
 }
 
-export async function detectIntent(message: string, opts?: { isAdmin?: boolean }): Promise<DetectIntentResult> {
-  const viaLLM = await detectIntentLLM(message);
+export async function detectIntent(message: string, opts?: { isAdmin?: boolean; history?: unknown[] }): Promise<DetectIntentResult> {
+  const viaLLM = await detectIntentLLM(message, opts?.history);
   if (viaLLM) {
     // admin_ops solo en contexto admin: si el LLM lo devuelve en tienda, corrige a heurística
     if (viaLLM.intent === "admin_ops" && !opts?.isAdmin) {
