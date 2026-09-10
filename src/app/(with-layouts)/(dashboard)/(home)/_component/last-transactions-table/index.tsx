@@ -21,6 +21,7 @@ import {
 import { getLastTransactionsData } from "@/services/api/home";
 import { MenuDotsIcon } from "@/utils/icon";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 import { SKELETON_ROW_COUNT, STATUS_COLOR_MAP, STATUS_LABEL_MAP } from "./data";
 import { DownloadIcon, FilterIcon } from "./icon";
@@ -171,13 +172,14 @@ export default function LastTransactionsTable() {
                     </TableCell>
                     <TableCell className="px-6 py-3.5">
                       <div className="flex items-center justify-center">
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          className="h-7.5 w-8 rounded-lg border-none p-1.5 text-icon-secondary shadow-xs"
+                        <Link
+                          href="/orders"
+                          aria-label={`Ver pedido ${tx.orderId} en Pedidos`}
+                          title="Ver en Pedidos"
+                          className="flex h-7.5 w-8 items-center justify-center rounded-lg p-1.5 text-icon-secondary shadow-xs transition-colors hover:bg-background-gray-secondary hover:text-text-primary"
                         >
                           <MenuDotsIcon />
-                        </Button>
+                        </Link>
                       </div>
                     </TableCell>
                   </TableRow>
