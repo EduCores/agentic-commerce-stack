@@ -2,6 +2,7 @@ import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -52,9 +53,9 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
           <p className="text-sm text-text-tertiary">Híbrido: {orders.length} pedidos · Filtra por estado · Fuente Prisma (igual para mock/Shopify).</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <a href="/orders" className={`rounded-lg px-3 py-1.5 text-sm ${!status ? "bg-brand-500 text-white" : "border border-card-border"}`}>Todos</a>
+          <Link href="/orders" className={`rounded-lg px-3 py-1.5 text-sm ${!status ? "bg-brand-500 text-white" : "border border-card-border"}`}>Todos</Link>
           {["PENDING", "PAID", "FULFILLED", "CANCELLED"].map((s) => (
-            <a key={s} href={`/orders?status=${s}`} className={`rounded-lg px-3 py-1.5 text-sm ${status === s ? "bg-brand-500 text-white" : "border border-card-border"}`}>{STATUS_LABEL[s] ?? s}</a>
+            <Link key={s} href={`/orders?status=${s}`} className={`rounded-lg px-3 py-1.5 text-sm ${status === s ? "bg-brand-500 text-white" : "border border-card-border"}`}>{STATUS_LABEL[s] ?? s}</Link>
           ))}
         </div>
       </div>

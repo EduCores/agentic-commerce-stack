@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { prisma } from "@/lib/adapters/prisma";
+import Link from "next/link";
 import { CatalogTable, type CatalogRow } from "./_components/catalog-table";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +37,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           <form className="mb-4 flex flex-col gap-2 sm:flex-row">
             <input name="q" defaultValue={q} placeholder="Buscar SKU o título..." className="flex-1 rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
             <button type="submit" className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white">Buscar</button>
-            <a href="/products" className="rounded-lg border border-card-border px-4 py-2 text-center text-sm">Limpiar</a>
+            <Link href="/products" className="rounded-lg border border-card-border px-4 py-2 text-center text-sm">Limpiar</Link>
           </form>
 
           {products.length === 0 ? (
