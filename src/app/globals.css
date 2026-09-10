@@ -594,6 +594,13 @@
   }
 }
 
+/* En móvil y tablet (bajo lg) el padding p-6 se compacta a spacing*1 para ganar ancho útil. */
+@media (max-width: 1023.98px) {
+  .p-6 {
+    padding: calc(var(--spacing) * 1);
+  }
+}
+
 @keyframes pulse {
   0%,
   100% {
