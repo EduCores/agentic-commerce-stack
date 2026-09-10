@@ -24,11 +24,11 @@ export default async function AgentsPage() {
     <div className="space-y-6 p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Agentes", href: "/agents" }]} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-xl font-bold text-black dark:text-white">Agentes — StarShop 1→2→6+3→4</h2>
           <p className="text-sm text-text-tertiary">Híbrido: {agents.length} agentes (Bienvenida + 8 equipos). Cada equipo ve solo sus herramientas. Puedes editarlos en <code>prisma/starshop-prompts.ts</code> + <code>/api/agents</code>.</p>
         </div>
-        <Button appearance="fill" className="w-full shrink-0 sm:w-auto">Crear agente</Button>
+        <Button appearance="fill" className="w-full shrink-0 whitespace-nowrap sm:w-auto">Crear agente</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

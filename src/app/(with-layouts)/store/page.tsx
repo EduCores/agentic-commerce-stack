@@ -15,11 +15,11 @@ export default async function StorePage() {
     <div className="space-y-6 p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Almacenar", href: "/store" }]} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-xl font-bold text-black dark:text-white">Conexiones de tienda</h2>
           <p className="text-sm text-text-tertiary">Conecta tu tienda — Shopify, WooCommerce, Magento o personalizada. Un solo sistema para vender.</p>
         </div>
-        <Button appearance="fill">Conectar tienda</Button>
+        <Button appearance="fill" className="w-full shrink-0 whitespace-nowrap sm:w-auto">Conectar tienda</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
