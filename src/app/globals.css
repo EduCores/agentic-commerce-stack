@@ -581,10 +581,10 @@
     text-size-adjust: 100%;
   }
 
-  /* Texto base más grande solo en móvil: escala todo lo medido en rem (+12.5%). */
+  /* Texto base más grande solo en móvil: escala todo lo medido en rem (+25%). */
   @media (max-width: 640px) {
     html {
-      font-size: 112.5%;
+      font-size: 125%;
     }
   }
 
