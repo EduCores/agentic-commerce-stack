@@ -9,6 +9,9 @@
 @import "./css/star-logo.css";
 
 @theme {
+  /* Radius global: rounded-lg / rounded-l-lg / rounded-r-lg -> 0.2rem */
+  --radius-lg: 0.2rem;
+
   --color-primary-50: var(--primary-50);
   --color-primary-100: var(--primary-100);
   --color-primary-200: var(--primary-200);
@@ -622,5 +625,13 @@
     animation: none !important;
     flex-wrap: wrap !important;
     width: auto !important;
+  }
+}
+
+/* Móvil + tablet (<lg = 1024px): .p-5 compacto -> calc(var(--spacing) * 1) = 0.25rem.
+   Cubre Card (p-5 base) y cualquier uso de p-5 sin tocar desktop. */
+@media (max-width: 1023.98px) {
+  .p-5 {
+    padding: calc(var(--spacing) * 1);
   }
 }

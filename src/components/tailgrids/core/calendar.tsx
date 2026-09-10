@@ -86,7 +86,7 @@ export function NavButton({ slot, className, ...props }: NavButtonProps) {
           iconOnly: true,
           size: "sm",
         }),
-        "size-9 shrink-0 rounded-full text-text-50",
+        "size-9 shrink-0 rounded-lg text-text-50",
         className,
       )}
       aria-label={slot === "previous" ? "Previous month" : "Next month"}
@@ -186,7 +186,7 @@ export function CalendarYearPicker({ className }: YearPickerProps) {
             iconOnly: false,
             size: "sm",
           }),
-          "h-10 min-w-24 justify-between rounded-full border border-base-100 bg-white-100 px-3 text-sm font-medium text-title-50 hover:bg-white-100 hover:text-title-50 focus:ring-button-primary-focus-ring sm:h-11",
+          "h-10 min-w-24 justify-between rounded-lg border border-base-100 bg-white-100 px-3 text-sm font-medium text-title-50 hover:bg-white-100 hover:text-title-50 focus:ring-button-primary-focus-ring sm:h-11",
           className,
         )}
       >

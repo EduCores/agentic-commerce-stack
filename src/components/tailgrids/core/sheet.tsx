@@ -121,7 +121,7 @@ export function SheetContent({
                 onPress={close}
                 aria-label="Close"
                 className={cn(
-                  "absolute top-4 right-4 flex size-7 items-center justify-center rounded-md text-text-100 opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none [&>svg]:size-5",
+                  "absolute top-4 right-4 flex size-7 items-center justify-center rounded-lg text-text-100 opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none [&>svg]:size-5",
                   side === "right" && "sm:right-0",
                 )}
               >

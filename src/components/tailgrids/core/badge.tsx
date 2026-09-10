@@ -2,7 +2,7 @@ import { cn } from "@/utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
 
-const badgeStyles = cva("inline-flex items-center gap-2 rounded-full font-medium [&>svg]:size-3", {
+const badgeStyles = cva("inline-flex items-center gap-2 rounded-lg font-medium [&>svg]:size-3", {
   variants: {
     size: {
       sm: "py-0.5 text-xs",

@@ -73,7 +73,7 @@ function InputGroupAddon({ className, align, ...props }: InputGroupAddonProps) {
 InputGroupAddon.displayName = "InputGroupAddon";
 
 const inputGroupButtonStyles = cva(
-  "inline-flex items-center justify-center rounded-md font-medium text-title-50 transition-colors focus-visible:ring-2 focus-visible:ring-input-primary-focus-border focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center rounded-lg font-medium text-title-50 transition-colors focus-visible:ring-2 focus-visible:ring-input-primary-focus-border focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       size: {
