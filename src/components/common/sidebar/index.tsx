@@ -40,10 +40,11 @@ export default function Sidebar({
             {/* Header */}
             <div
                 className={cn(
-                    'flex items-center px-4 pt-7 text-text-primary',
+                    'flex items-center text-text-primary',
                     isSidebarOpen
                         ? 'justify-between'
                         : 'flex-col justify-center gap-4',
+                    isMobileSheet ? 'gap-2 px-3 pt-7' : 'px-4 pt-7',
                 )}
             >
                 <Link href='/' suppressHydrationWarning aria-label="Ir al panel principal">
@@ -53,10 +54,10 @@ export default function Sidebar({
                 <button
                     onClick={() => toggleSidebar()}
                     className={cn(
-                        'p-1.5 transition-colors',
+                        'transition-colors',
                         isMobileSheet
-                            ? 'rounded-lg text-icon-tertiary hover:bg-background-gray-primary hover:text-text-primary'
-                            : 'text-icon-tertiary hover:text-text-secondary',
+                            ? 'shrink-0 rounded-lg p-2.5 text-icon-tertiary hover:bg-background-gray-primary hover:text-text-primary [&_svg]:size-6'
+                            : 'p-1.5 text-icon-tertiary hover:text-text-secondary',
                     )}
                     aria-label={
                         isMobileSheet ? 'Cerrar menú' : 'Alternar menú'
