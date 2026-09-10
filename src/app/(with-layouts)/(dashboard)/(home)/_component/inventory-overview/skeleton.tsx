@@ -13,7 +13,7 @@ export default function InventoryOverviewSkeleton() {
     <Card className="flex flex-col p-2 pt-5">
       <CardHeader className="mb-6 px-3">
         <CardTitle className="leading-6 font-semibold text-text-primary">
-          Inventory Overview
+          Resumen de inventario
         </CardTitle>
         <button className="rounded-lg bg-button-primary-outline-background p-1.5 transition-colors hover:bg-button-primary-outline-hover-background">
           <MenuDotsIcon />

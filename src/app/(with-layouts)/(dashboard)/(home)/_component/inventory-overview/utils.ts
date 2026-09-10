@@ -9,15 +9,15 @@ export function mapInventoryOverviewResponse(
     availablePercent: Math.round(response.stock_summary.availability_rate),
     summary: [
       {
-        label: "Total Stock",
+        label: "Stock total",
         value: response.stock_summary.total_units,
       },
       {
-        label: "Low stock",
+        label: "Stock bajo",
         value: response.stock_summary.low_stock_units,
       },
       {
-        label: "Out of stock",
+        label: "Sin stock",
         value: response.stock_summary.out_of_stock_units,
       },
     ],

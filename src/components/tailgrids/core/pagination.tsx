@@ -53,7 +53,7 @@ export function Pagination({
   return (
     <nav
       role="navigation"
-      aria-label="Pagination"
+      aria-label="Paginación"
       className="w-full text-sm font-medium text-text-50"
     >
       <ul className={cn(wrapperStyles({ variant }), className)}>
@@ -62,7 +62,7 @@ export function Pagination({
             appearance="outline"
             size="sm"
             isDisabled={currentPage === 1}
-            aria-label="Previous page"
+            aria-label="Página anterior"
             onClick={() => onPageChange?.(currentPage - 1)}
             className={cn(sideButtonStyles({ sideLayout, variant }), {
               "sm:rounded-r-none sm:border-r-0": variant === "compact",
@@ -70,13 +70,13 @@ export function Pagination({
           >
             <ArrowLeft className={cn("shrink-0", sideLayout === "label" && "sm:hidden")} />
 
-            {sideLayout !== "icon" && <span className="max-sm:hidden">Previous</span>}
+            {sideLayout !== "icon" && <span className="max-sm:hidden">Anterior</span>}
           </Button>
         </li>
 
         {/* Only for mobile view */}
         <li className="sm:hidden">
-          Page {currentPage} of {totalPages}
+          Página {currentPage} de {totalPages}
         </li>
 
         {Array.from({ length: totalPages }, (_, index) => {
@@ -144,13 +144,13 @@ export function Pagination({
             size="sm"
             appearance="outline"
             isDisabled={currentPage === totalPages}
-            aria-label="Next page"
+            aria-label="Página siguiente"
             onClick={() => onPageChange?.(currentPage + 1)}
             className={cn(sideButtonStyles({ sideLayout, variant }), {
               "sm:rounded-l-none sm:border-l-0": variant === "compact",
             })}
           >
-            {sideLayout !== "icon" && <span className="max-sm:hidden">Next</span>}
+            {sideLayout !== "icon" && <span className="max-sm:hidden">Siguiente</span>}
 
             <ArrowRight className={cn("shrink-0", sideLayout === "label" && "sm:hidden")} />
           </Button>
@@ -173,7 +173,7 @@ function PaginationButton({
 }) {
   return (
     <button
-      aria-label={`Go to page ${page}`}
+      aria-label={`Ir a la página ${page}`}
       aria-current={isActive ? "page" : undefined}
       className={cn(
         "size-10 shrink-0 rounded-lg hover:bg-background-gray-secondary_alt aria-[current=page]:bg-background-gray-secondary_alt",

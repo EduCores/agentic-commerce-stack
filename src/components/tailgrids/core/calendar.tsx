@@ -89,7 +89,7 @@ export function NavButton({ slot, className, ...props }: NavButtonProps) {
         "size-9 shrink-0 rounded-lg text-text-50",
         className,
       )}
-      aria-label={slot === "previous" ? "Previous month" : "Next month"}
+      aria-label={slot === "previous" ? "Mes anterior" : "Mes siguiente"}
       {...props}
     >
       {slot === "previous" ? (
@@ -174,7 +174,7 @@ export function CalendarYearPicker({ className }: YearPickerProps) {
       <button
         ref={triggerRef}
         type="button"
-        aria-label="Select year"
+        aria-label="Seleccionar año"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         onClick={() => {
@@ -206,7 +206,7 @@ export function CalendarYearPicker({ className }: YearPickerProps) {
       >
         <ListBox
           ref={listboxRef}
-          aria-label="Select year"
+          aria-label="Seleccionar año"
           autoFocus
           selectionMode="single"
           selectedKeys={[String(currentYear)]}

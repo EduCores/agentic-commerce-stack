@@ -190,7 +190,7 @@ function CarouselPrevious({
       {...props}
     >
       <ChevronLeft />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">Diapositiva anterior</span>
     </Button>
   );
 }
@@ -223,7 +223,7 @@ function CarouselNext({
       {...props}
     >
       <ChevronRight />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">Diapositiva siguiente</span>
     </Button>
   );
 }
@@ -265,7 +265,7 @@ function CarouselDots({ className, ...props }: React.ComponentProps<"div">) {
           <button
             key={index}
             type="button"
-            aria-label={`Go to slide ${index + 1}`}
+            aria-label={`Ir a la diapositiva ${index + 1}`}
             aria-current={isActive || undefined}
             onClick={() => api?.scrollTo(index)}
             className={cn(

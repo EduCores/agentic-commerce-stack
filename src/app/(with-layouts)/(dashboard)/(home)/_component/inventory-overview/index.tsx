@@ -51,7 +51,7 @@ export default function InventoryOverview() {
       {/* Header */}
       <CardHeader className="mb-6 px-3">
         <CardTitle className="leading-6 font-semibold text-text-primary">
-          Inventory Overview
+          Resumen de inventario
         </CardTitle>
 
         <Button iconOnly size="xs" variant="ghost">
@@ -88,7 +88,7 @@ export default function InventoryOverview() {
                 <p className="text-xl leading-6 font-semibold text-text-primary">
                   {inventoryOverview?.availablePercent}%
                 </p>
-                <p className="text-sm leading-5 text-text-tertiary">Available</p>
+                <p className="text-sm leading-5 text-text-tertiary">Disponible</p>
               </div>
             </ChartContainer>
           </div>

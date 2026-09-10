@@ -9,7 +9,7 @@ export function getSalesChartStats(summary: SalesChartSummary) {
   return [
     {
       id: "sales",
-      label: "Sales Amount",
+      label: "Monto de ventas",
       value: formatCurrency(summary.totalSales),
       delta: formatDelta(summary.salesDeltaPercent),
       isPositive: summary.salesDeltaPercent >= 0,
@@ -17,7 +17,7 @@ export function getSalesChartStats(summary: SalesChartSummary) {
     },
     {
       id: "revenue",
-      label: "Revenue Amount",
+      label: "Monto de ingresos",
       value: formatCurrency(summary.totalRevenue),
       delta: formatDelta(summary.revenueDeltaPercent),
       isPositive: summary.revenueDeltaPercent >= 0,

@@ -71,7 +71,7 @@ export default function HeaderSection({
                   >
                     {stat.isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
                   </span>
-                  <span>last month</span>
+                  <span>mes anterior</span>
                 </p>
               </div>
             </div>
@@ -85,7 +85,7 @@ export default function HeaderSection({
           onChange={(value) => setTimeRange(value as Granularity)}
           value={timeRange}
           defaultValue="monthly"
-          aria-label="Select time range"
+          aria-label="Seleccionar rango de tiempo"
         >
           <SelectTrigger size="sm">
             <SelectValue />
@@ -93,10 +93,10 @@ export default function HeaderSection({
           </SelectTrigger>
           <SelectContent>
             <SelectItem textValue="monthly" id="monthly">
-              Monthly
+              Mensual
             </SelectItem>
             <SelectItem textValue="yearly" id="yearly">
-              Yearly
+              Anual
             </SelectItem>
           </SelectContent>
         </Select>
