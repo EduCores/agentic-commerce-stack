@@ -33,10 +33,10 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       <Card>
         <CardHeader><CardTitle>Catálogo universal ({products.length})</CardTitle></CardHeader>
         <CardContent>
-          <form className="mb-4 flex gap-2">
+          <form className="mb-4 flex flex-col gap-2 sm:flex-row">
             <input name="q" defaultValue={q} placeholder="Buscar SKU o título..." className="flex-1 rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
             <button type="submit" className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white">Buscar</button>
-            <a href="/products" className="rounded-lg border border-card-border px-4 py-2 text-sm">Limpiar</a>
+            <a href="/products" className="rounded-lg border border-card-border px-4 py-2 text-center text-sm">Limpiar</a>
           </form>
 
           {products.length === 0 ? (
