@@ -26,15 +26,13 @@ export function EmailPreviewCard({ kind, subject, html, mocked }: Props) {
         </CardTitle>
         <p className="text-xs text-text-tertiary">{subject}</p>
       </CardHeader>
-      <CardContent>
-        <div className="rounded-lg border border-card-border bg-white dark:bg-zinc-900 p-2">
-          <div
-            className={isDark ? "email-dark" : undefined}
-            style={{ colorScheme: isDark ? "dark" : "light" }}
-            dangerouslySetInnerHTML={{ __html: cleanHtml }}
-          />
-          {isDark && <style>{EMAIL_DARK_SCOPED_CSS}</style>}
-        </div>
+      <CardContent className="p-2">
+        <div
+          className={isDark ? "email-dark" : undefined}
+          style={{ colorScheme: isDark ? "dark" : "light" }}
+          dangerouslySetInnerHTML={{ __html: cleanHtml }}
+        />
+        {isDark && <style>{EMAIL_DARK_SCOPED_CSS}</style>}
       </CardContent>
     </Card>
   );
