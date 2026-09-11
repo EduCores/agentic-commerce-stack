@@ -6,6 +6,7 @@ import { AnalyticsSalesChart } from "./sales-chart";
 import { AnalyticsBreakdown } from "./breakdown";
 import { AnalyticsTopContent } from "./top-content";
 import type { AnalyticsData } from "./types";
+import Link from "next/link";
 
 export function AnalyticsDashboard() {
   const { data, isLoading } = useQuery<AnalyticsData>({
@@ -27,7 +28,7 @@ export function AnalyticsDashboard() {
           <p className="text-xs text-text-tertiary">Pedidos totales</p>
           <p className="text-2xl font-bold">{data.totals.orders}</p>
           <p className="text-xs text-text-tertiary">Ingresos ${data.totals.revenue.toLocaleString("es-CL")}</p>
-          <a href="/orders" className="text-xs font-medium text-brand-600 underline">Ver /orders</a>
+          <Link href="/orders" className="text-xs font-medium text-brand-600 underline">Ver /orders</Link>
         </CardContent>
       </Card>
       <AnalyticsBreakdown data={data} />

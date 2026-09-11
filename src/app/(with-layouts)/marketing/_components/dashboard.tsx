@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { MarketingFunnel } from "./funnel";
 import { MarketingChannelTable } from "./channel-table";
 import type { MarketingData } from "./types";
+import Link from "next/link";
 
 export function MarketingDashboard() {
   const { data, isLoading } = useQuery<MarketingData>({
@@ -25,11 +26,11 @@ export function MarketingDashboard() {
           <p className="text-xs text-text-tertiary">Impresiones estimadas · Ingresos ${data.totals.revenue.toLocaleString("es-CL")}</p>
         </CardContent>
       </Card>
-      <Card className="md:col-span-2">
+      <Card className="min-w-0 md:col-span-2">
         <CardHeader><CardTitle className="text-sm">Campañas por tienda (catálogo híbrido)</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {data.campaigns.length === 0 ? <p className="text-sm text-text-tertiary">Conecta una tienda en /store.</p> : data.campaigns.map((c) => (
-            <div key={c.id} className="flex items-center justify-between rounded-lg border border-card-border p-3 text-sm">
+            <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-card-border p-3 text-sm">
               <span>{c.name}</span>
               <span className="flex items-center gap-2">
                 <Badge color="gray">{c.products} productos</Badge>
@@ -46,7 +47,7 @@ export function MarketingDashboard() {
         <CardContent className="text-sm text-text-secondary">
           <p>Tus compradores llegan por: {data.channels.slice(0, 3).map((c) => c.channel).join(", ") || "—"}.</p>
           <p className="mt-2 text-xs text-text-tertiary">Refuerza el canal con mejor conversión y recupera carritos desde /admin/emails.</p>
-          <a href="/admin/emails" className="text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</a>
+          <Link href="/admin/emails" className="text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</Link>
         </CardContent>
       </Card>
       <MarketingChannelTable data={data} />

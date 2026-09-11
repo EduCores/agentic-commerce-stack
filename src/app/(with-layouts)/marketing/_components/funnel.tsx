@@ -10,7 +10,7 @@ const COLORS = ["#5750F1", "#8B5CF6", "#22C55E", "#F59E0B", "#06B6D4"];
 export function MarketingFunnel({ data }: { data: MarketingData | null }) {
   const rows = data?.funnel ?? [];
   return (
-    <Card className="md:col-span-2">
+    <Card className="min-w-0 md:col-span-2">
       <CardHeader><CardTitle className="text-sm">Embudo de conversión</CardTitle></CardHeader>
       <CardContent className="h-72 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">

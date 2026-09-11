@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { CrmGrowthChart } from "./growth-chart";
 import { CrmLeadsReport } from "./leads-report";
 import type { CrmData } from "./types";
+import Link from "next/link";
 
 export function CrmDashboard() {
   const { data, isLoading } = useQuery<CrmData>({
@@ -23,7 +24,7 @@ export function CrmDashboard() {
         <CardContent>
           <p className="text-2xl font-bold">{data.totals.customers}</p>
           <p className="text-xs text-text-tertiary">Clientes potenciales reales desde tus pedidos</p>
-          <a href="/orders" className="text-xs font-medium text-brand-600 underline">Ver /orders</a>
+          <Link href="/orders" className="text-xs font-medium text-brand-600 underline">Ver /orders</Link>
         </CardContent>
       </Card>
       <CrmGrowthChart data={data} />
@@ -32,8 +33,8 @@ export function CrmDashboard() {
         <CardHeader><CardTitle className="text-sm">Próximas tareas y reuniones</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {data.tasks.length === 0 ? <p className="text-sm text-text-tertiary">Sin pendientes. Todo al día.</p> : data.tasks.map((t) => (
-            <div key={t.id} className="flex items-center justify-between rounded-lg border border-card-border p-2.5 text-sm">
-              <span className="line-clamp-1">{t.title}</span>
+            <div key={t.id} className="flex items-center justify-between gap-2 rounded-lg border border-card-border p-2.5 text-sm">
+              <span className="line-clamp-1 min-w-0">{t.title}</span>
               <Badge color={t.type === "order" ? "warning" : "gray"}>{t.due}</Badge>
             </div>
           ))}
@@ -43,9 +44,9 @@ export function CrmDashboard() {
         <CardHeader><CardTitle className="text-sm">Actividad reciente</CardTitle></CardHeader>
         <CardContent className="space-y-1.5">
           {data.recentActivities.map((a) => (
-            <div key={a.id} className="flex items-center justify-between text-sm">
-              <span>{a.text}</span>
-              <span className="text-xs text-text-tertiary">{new Date(a.at).toLocaleString("es-CL")} · <a href="/workflows" className="underline">workflows</a></span>
+            <div key={a.id} className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 text-sm">
+              <span className="min-w-0">{a.text}</span>
+              <span className="shrink-0 text-xs text-text-tertiary">{new Date(a.at).toLocaleString("es-CL")} · <Link href="/workflows" className="underline">workflows</Link></span>
             </div>
           ))}
         </CardContent>

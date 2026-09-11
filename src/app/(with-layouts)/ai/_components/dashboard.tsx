@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { AiActivityChart } from "./activity-chart";
 import { AiAgentsTable } from "./agents-table";
 import type { AiStats } from "./types";
+import Link from "next/link";
 
 export function AiDashboard() {
   const { data, isLoading } = useQuery<AiStats>({
@@ -36,7 +37,7 @@ export function AiDashboard() {
               <Badge color="gray">{p.pct}%</Badge>
             </div>
           ))}
-          <a href="/admin" className="text-xs font-medium text-brand-600 underline">Probar en /admin</a>
+          <Link href="/admin" className="text-xs font-medium text-brand-600 underline">Probar en /admin</Link>
         </CardContent>
       </Card>
       <Card className="md:col-span-3">
@@ -45,7 +46,7 @@ export function AiDashboard() {
           {data.recent.length === 0 ? <p className="text-sm text-text-tertiary">Sin ejecuciones aún.</p> : data.recent.map((r) => (
             <div key={r.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
               <span>{r.agent}</span>
-              <span className="text-xs text-text-tertiary">{r.status} · {new Date(r.at).toLocaleString("es-CL")} · <a href="/workflows" className="underline">workflows</a></span>
+              <span className="shrink-0 text-xs text-text-tertiary">{r.status} · {new Date(r.at).toLocaleString("es-CL")} · <Link href="/workflows" className="underline">workflows</Link></span>
             </div>
           ))}
         </CardContent>

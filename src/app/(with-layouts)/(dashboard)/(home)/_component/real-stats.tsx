@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
+import Link from "next/link";
 
 type Stats = {
   counts: { products: number; orders: number; customers: number; agents: number; workflows: number; agentRuns: number; workflowRuns: number };
@@ -74,9 +75,9 @@ export function RealStats() {
       </Card>
       {alerts > 0 && (
         <Card className="md:col-span-4 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm"><span className="font-bold text-amber-700">⚠️ {alerts} pedido(s) con alerta</span> <span className="text-text-tertiary">— falló la validación, lo derivamos a una persona (salvamos la venta, revísalo en /orders)</span></p>
-            <a href="/orders?status=FAILED" className="text-sm font-medium text-amber-700 underline">Ver pedidos</a>
+            <Link href="/orders?status=FAILED" className="text-sm font-medium text-amber-700 underline shrink-0">Ver pedidos</Link>
           </CardContent>
         </Card>
       )}
@@ -85,7 +86,7 @@ export function RealStats() {
         <CardHeader><CardTitle className="text-sm">Productos con más demanda</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {data.topProducts.length === 0 ? <p className="text-xs text-text-tertiary">Sin ventas todavía</p> : data.topProducts.map((tp, i) => (
-            <div key={i} className="flex justify-between text-sm"><span>{tp.product?.title ?? "—"} <span className="text-xs text-text-tertiary">{tp.product?.sku}</span></span><Badge color="gray">{tp.quantity} uds</Badge></div>
+            <div key={i} className="flex justify-between gap-2 text-sm"><span className="min-w-0">{tp.product?.title ?? "—"} <span className="text-xs text-text-tertiary">{tp.product?.sku}</span></span><Badge color="gray">{tp.quantity} uds</Badge></div>
           ))}
         </CardContent>
       </Card>

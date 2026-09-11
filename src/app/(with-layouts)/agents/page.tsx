@@ -71,7 +71,7 @@ export default async function AgentsPage() {
         <CardHeader>
           <CardTitle>Cómo crear un agente</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-text-secondary space-y-2">
+        <CardContent className="text-sm text-text-secondary space-y-2 break-words">
           <p>1. Inserta en <code>prisma.agent</code> con <code>systemPrompt</code> y <code>config.tools</code>.</p>
           <p>2. Usa <code>agent/tools/*.ts</code> con <code>defineTool</code> + <code>zod</code>.</p>
           <p>3. El agente invoca <code>startWorkflow(processOrderWorkflow)</code> — puente EVE → Flujos de trabajo.</p>

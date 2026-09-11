@@ -1,6 +1,7 @@
 import FlowCanvas from "@/components/flow/FlowCanvas";
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { prisma } from "@/lib/adapters/prisma";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -26,13 +27,13 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
         {all.length > 1 && (
           <div className="mb-4 flex flex-wrap gap-2">
             {all.map((w) => (
-              <a
+              <Link
                 key={w.slug}
                 href={`/workflows?slug=${w.slug}`}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium border ${w.slug === workflow?.slug ? "bg-brand-500 text-button-primary-text border-brand-500" : "bg-card-background text-text-primary border-card-border hover:bg-background-gray-secondary"}`}
+                className={`rounded-lg px-4 py-2 text-sm font-medium border ${w.slug === workflow?.slug ? "bg-brand-500 text-button-primary-text border-brand-500" : "bg-card-background text-text-primary border-card-border hover:bg-background-gray-secondary"}`}
               >
                 {w.name}
-              </a>
+              </Link>
             ))}
           </div>
         )}

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
 import type { AnalyticsData } from "./types";
+import Link from "next/link";
 
 export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
   return (
@@ -34,12 +35,12 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
         <CardHeader><CardTitle className="text-sm">Stock bajo — reponer</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {data.lowStock.length === 0 ? <p className="text-sm text-text-tertiary">Sin datos</p> : data.lowStock.slice(0, 6).map((p) => (
-            <div key={p.sku} className="flex items-center justify-between text-sm">
-              <span>{p.title} <span className="text-xs text-text-tertiary">{p.sku}</span></span>
+            <div key={p.sku} className="flex items-center justify-between gap-2 text-sm">
+              <span className="min-w-0">{p.title} <span className="text-xs text-text-tertiary">{p.sku}</span></span>
               <Badge color={p.stock < 10 ? "error" : "gray"}>{p.stock}</Badge>
             </div>
           ))}
-          <a href="/products" className="text-xs font-medium text-brand-600 underline">Ver /products</a>
+          <Link href="/products" className="text-xs font-medium text-brand-600 underline">Ver /products</Link>
         </CardContent>
       </Card>
     </>

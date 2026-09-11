@@ -25,11 +25,11 @@ export default async function StorePage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader><CardTitle>Conexiones ({stores.length})</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 break-words">
             {stores.length === 0 ? (
               <p className="text-sm text-text-tertiary">Sin conexiones. Crea una con provider `mock` para la demo, o `shopify` con dominio/apiKey.</p>
             ) : stores.map((s) => (
-              <div key={s.id} className="rounded-lg border border-card-border p-3 space-y-2">
+              <div key={s.id} className="rounded-lg border border-card-border p-3 space-y-2 break-words">
                 <p className="font-medium">{s.name} <Badge color="gray">{s.provider}</Badge></p>
                 <p className="text-xs text-text-tertiary">{s.domain ?? "—"}</p>
                 <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activo" : "Inactivo"}</Badge>
@@ -59,7 +59,7 @@ export default async function StorePage() {
 
       <Card>
         <CardHeader><CardTitle>Adaptador universal</CardTitle></CardHeader>
-        <CardContent className="text-sm text-text-secondary">
+          <CardContent className="text-sm text-text-secondary break-words">
           <p><code>src/lib/adapters/store.ts</code> expone <code>getProduct/checkStock/reserveStock/syncProducts</code> idéntico para cualquier provider. Agrega Shopify/Woo heredando <code>mockAdapter</code>.</p>
         </CardContent>
       </Card>

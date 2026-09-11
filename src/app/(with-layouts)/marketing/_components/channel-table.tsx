@@ -4,7 +4,7 @@ import type { MarketingData } from "./types";
 
 export function MarketingChannelTable({ data }: { data: MarketingData }) {
   return (
-    <Card className="md:col-span-3">
+    <Card className="min-w-0 md:col-span-3">
       <CardHeader><CardTitle className="text-sm">Rendimiento por canal</CardTitle></CardHeader>
       <CardContent>
         {data.channels.length === 0 ? (

@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { AdminChat } from "@/components/chat/admin-chat";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export default function AdminAgentPage() {
         <CardContent className="text-xs text-text-tertiary space-y-1">
           <p>• Tienda (clientes): <code>{process.env.NEXT_PUBLIC_WHATSAPP_STORE ?? "56993301557"}</code> — widget público StarShop.</p>
           <p>• Equipo general: <code>{process.env.NEXT_PUBLIC_WHATSAPP_TEAM || "sin configurar"}</code> — botón flotante de este admin.</p>
-          <p>• Miembros: los teléfonos de <a href="/manage-team" className="underline">Gestionar el equipo</a> aparecen solos en el botón — agregar activa, pausar o eliminar los saca de WhatsApp.</p>
+          <p>• Miembros: los teléfonos de <Link href="/manage-team" className="underline">Gestionar el equipo</Link> aparecen solos en el botón — agregar activa, pausar o eliminar los saca de WhatsApp.</p>
           {!process.env.NEXT_PUBLIC_WHATSAPP_TEAM && (
             <p>Configura <code>NEXT_PUBLIC_WHATSAPP_TEAM</code> en <code>.env</code> y Vercel para el número general del equipo.</p>
           )}
