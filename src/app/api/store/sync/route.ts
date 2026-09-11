@@ -51,6 +51,14 @@ export async function POST(req: Request) {
   }
 
   const ms = Date.now() - start;
+  const lastSync = { at: new Date().toISOString(), synced, total: products.length || synced, errors, ms };
+
+  // Persiste el último sync en config (sin migración) para mostrar estado + reintento en /store
+  const prevConfig = (store.config as Record<string, unknown> | null) ?? {};
+  await prisma.storeConnection.update({
+    where: { id: store.id },
+    data: { config: { ...prevConfig, lastSync } },
+  });
 
   return NextResponse.json({
     ok: true,

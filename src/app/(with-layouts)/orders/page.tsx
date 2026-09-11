@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
+export const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
   PENDING: "warning",
   RESERVED: "warning",
   PAID: "success",
@@ -16,7 +16,7 @@ const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
   REFUNDED: "gray",
 };
 
-const STATUS_LABEL: Record<string, string> = {
+export const STATUS_LABEL: Record<string, string> = {
   PENDING: "Pendiente",
   RESERVED: "Reservado",
   PAID: "Pagado",
@@ -74,7 +74,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                 <tbody>
                   {orders.map((o) => (
                     <tr key={o.id} className="border-b border-card-border/60">
-                      <td className="p-2"><p className="font-mono text-xs">{o.id.slice(0, 8)}</p><p className="text-xs text-text-tertiary">{new Date(o.createdAt).toLocaleDateString("es-CL")}</p></td>
+                      <td className="p-2"><p className="font-mono text-xs"><Link href={`/orders/${o.id}`} className="underline hover:text-text-primary">{o.id.slice(0, 8)}</Link></p><p className="text-xs text-text-tertiary">{new Date(o.createdAt).toLocaleDateString("es-CL")}</p></td>
                       <td className="p-2">{o.customer?.name ?? "—"}<p className="text-xs text-text-tertiary">{o.customer?.email ?? ""}</p></td>
                       <td className="p-2">{o.store.name} <Badge color="gray">{o.store.provider}</Badge></td>
                       <td className="p-2 text-right">${Number(o.total).toLocaleString("es-CL")}</td>

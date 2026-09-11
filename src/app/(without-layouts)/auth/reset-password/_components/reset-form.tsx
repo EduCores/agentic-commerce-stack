@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/tailgrids/core/button";
 import { Input } from "@/components/tailgrids/core/input";
 import { Label } from "@/components/tailgrids/core/label";
+import Link from "next/link";
 
 export function ResetForm() {
   const [email, setEmail] = useState("");
@@ -53,7 +54,7 @@ export function ResetForm() {
         <Button onClick={confirm} appearance="fill" className="w-full" isDisabled={loading || !token || !password}>Actualizar contraseña</Button>
       </div>
       {msg && <p className="rounded-lg border border-card-border bg-background-gray-secondary_alt_2 break-all p-2 text-xs">{msg}</p>}
-      <p className="text-center text-xs text-text-tertiary"><a href="/auth/sign-in" className="font-medium text-brand-600 underline">Volver a Iniciar sesión</a></p>
+      <p className="text-center text-xs text-text-tertiary"><Link href="/auth/sign-in" className="font-medium text-brand-600 underline">Volver a Iniciar sesión</Link></p>
     </div>
   );
 }

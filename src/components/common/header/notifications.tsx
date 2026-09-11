@@ -12,7 +12,9 @@ import { OverlayWrapper } from "@/components/tailgrids/core/overlay";
 import { Popover } from "@/components/tailgrids/core/popover";
 import { ScrollArea, ScrollAreaViewport, ScrollBar } from "@/components/tailgrids/core/scroll-area";
 import { cn } from "@/utils/cn";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Header, Heading } from "react-aria-components";
 
@@ -23,7 +25,16 @@ interface Notification {
   description: string;
   timestamp: string;
   isUnread?: boolean;
+  href?: string;
 }
+
+type AlertOrder = {
+  id: string;
+  total: unknown;
+  status: string;
+  createdAt: string;
+  customer: { name: string | null } | null;
+};
 
 const defaultNotifications: { title: string; items: Notification[] }[] = [
   {
@@ -89,18 +100,57 @@ const defaultNotifications: { title: string; items: Notification[] }[] = [
 export function NotificationsButton() {
   const [notifications, setNotifications] = useState(defaultNotifications);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [readAlerts, setReadAlerts] = useState<string[]>([]);
+  const router = useRouter();
 
-  const unreadCount = notifications.flatMap((n) => n.items).filter((n) => n.isUnread).length;
+  const { data: alerts } = useQuery({
+    queryKey: ["order-alerts"],
+    queryFn: async () => {
+      const [failed, pending] = await Promise.all([
+        fetch("/api/orders?status=FAILED&take=5").then((r) => r.json()),
+        fetch("/api/orders?status=PENDING&take=5").then((r) => r.json()),
+      ]);
+      return {
+        items: [...(failed.items as AlertOrder[]), ...(pending.items as AlertOrder[])].slice(0, 6),
+      };
+    },
+    staleTime: 60000,
+  });
 
-  const handleMarkAsRead = (notificationId: string) => {
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((group) => ({
-        ...group,
-        items: group.items.map((item) =>
-          item.id === notificationId ? { ...item, isUnread: false } : item,
-        ),
-      })),
-    );
+  const alertItems: Notification[] = (alerts?.items ?? []).map((o) => ({
+    id: `alert-${o.id}`,
+    icon: <CreditCardIcon />,
+    title: `Pedido ${o.id.slice(0, 8)} ${o.status === "FAILED" ? "fallido" : "pendiente"}`,
+    description: `${o.customer?.name ?? "Sin cliente"} · $${Number(o.total).toLocaleString("es-CL")}`,
+    timestamp: new Date(o.createdAt).toLocaleString("es-CL"),
+    href: `/orders?status=${o.status}`,
+    isUnread: !readAlerts.includes(`alert-${o.id}`),
+  }));
+
+  const groups =
+    alertItems.length > 0
+      ? [{ title: "Pedidos con alerta", items: alertItems }, ...notifications]
+      : notifications;
+
+  const unreadCount = groups.flatMap((n) => n.items).filter((n) => n.isUnread).length;
+
+  const handleMarkAsRead = (notificationId: string, href?: string) => {
+    if (notificationId.startsWith("alert-")) {
+      setReadAlerts((prev) => (prev.includes(notificationId) ? prev : [...prev, notificationId]));
+    } else {
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((group) => ({
+          ...group,
+          items: group.items.map((item) =>
+            item.id === notificationId ? { ...item, isUnread: false } : item,
+          ),
+        })),
+      );
+    }
+    if (href) {
+      setIsOpen(false);
+      router.push(href);
+    }
   };
 
   const handleMarkAllAsRead = () => {
@@ -145,7 +195,7 @@ export function NotificationsButton() {
 
         <ScrollArea className="h-100 max-h-100">
           <ScrollAreaViewport>
-            {notifications.map((group) => (
+              {groups.map((group) => (
               <section key={group.title}>
                 {/* Group Header */}
                 <div className="border-t border-b border-border-primary bg-background-gray-secondary px-5 py-2">
@@ -157,7 +207,7 @@ export function NotificationsButton() {
                     <li key={notification.id}>
                       <button
                         className="group flex w-full cursor-pointer gap-3.5 rounded-lg px-3 py-3 transition-colors duration-300 hover:bg-background-gray-secondary_alt"
-                        onClick={() => handleMarkAsRead(notification.id)}
+                        onClick={() => handleMarkAsRead(notification.id, notification.href)}
                       >
                         {/* Icon */}
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border-secondary bg-background-gray-primary text-icon-secondary transition-all duration-300 group-hover:bg-brand-500 group-hover:text-button-primary-text group-hover:shadow-[0_1px_3px_0.5px_rgba(13,13,18,0.08)]">

@@ -2,6 +2,7 @@ import ThemeToggle from "@/components/common/header/theme-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { SignInForm } from "./_components/sign-in-form";
 import { SignInTheme } from "./_components/sign-in-theme";
+import Link from "next/link";
 
 export default function SignInPage() {
   return (
@@ -10,7 +11,7 @@ export default function SignInPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <a href="/login" className="text-xs font-medium text-brand-600 underline">← Volver</a>
+            <Link href="/login" className="text-xs font-medium text-brand-600 underline">← Volver</Link>
             <ThemeToggle />
           </div>
           <CardTitle className="text-xl">Iniciar sesión</CardTitle>

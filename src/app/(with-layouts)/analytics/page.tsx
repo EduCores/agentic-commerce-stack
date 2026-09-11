@@ -12,7 +12,7 @@ export default function AnalyticsPage() {
           <h2 className="text-xl font-bold text-black dark:text-white">Analítica</h2>
           <p className="text-sm text-text-tertiary">Tendencias reales de tu tienda: ventas, estados, canales y contenido top.</p>
         </div>
-        <a href="/api/analytics" className="rounded-lg border border-card-border px-3 py-1.5 text-sm">Exportar</a>
+        <a href="/api/analytics?format=csv" download className="rounded-lg border border-card-border px-3 py-1.5 text-sm">Exportar</a>
       </div>
       <AnalyticsDashboard />
     </div>

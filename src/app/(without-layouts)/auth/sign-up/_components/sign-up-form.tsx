@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/tailgrids/core/button";
 import { Input } from "@/components/tailgrids/core/input";
 import { Label } from "@/components/tailgrids/core/label";
+import Link from "next/link";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export function SignUpForm() {
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-600">{error}</p>}
       <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Creando..." : "Crear cuenta"}</Button>
-      <p className="text-center text-xs text-text-tertiary">¿Ya tienes cuenta? <a href="/auth/sign-in" className="font-medium text-brand-600 underline">Iniciar sesión</a></p>
+      <p className="text-center text-xs text-text-tertiary">¿Ya tienes cuenta? <Link href="/auth/sign-in" className="font-medium text-brand-600 underline">Iniciar sesión</Link></p>
     </form>
   );
 }

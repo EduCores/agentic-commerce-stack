@@ -33,6 +33,16 @@ export default async function StorePage() {
                 <p className="font-medium">{s.name} <Badge color="gray">{s.provider}</Badge></p>
                 <p className="text-xs text-text-tertiary">{s.domain ?? "—"}</p>
                 <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activo" : "Inactivo"}</Badge>
+                {(() => {
+                  const lastSync = (s.config as unknown as { lastSync?: { at: string; synced: number; total: number; errors: number } } | null)?.lastSync;
+                  if (!lastSync) return <p className="text-xs text-text-tertiary">Sin sincronizar todavía.</p>;
+                  return (
+                    <p className="text-xs text-text-tertiary">
+                      Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
+                      {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error — reintenta</span>}
+                    </p>
+                  );
+                })()}
                 <SyncButton storeId={s.id} storeName={s.name} />
               </div>
             ))}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/tailgrids/core/button";
 import { Input } from "@/components/tailgrids/core/input";
 import { Label } from "@/components/tailgrids/core/label";
+import Link from "next/link";
 
 export function SignInForm() {
   const router = useRouter();
@@ -47,11 +48,11 @@ export function SignInForm() {
       </div>
       <div className="flex items-center justify-between text-xs">
         <label className="flex items-center gap-2 text-text-secondary"><input type="checkbox" className="rounded [color-scheme:light] dark:[color-scheme:dark]" />Mantener mi sesión iniciada</label>
-        <a href="/auth/reset-password" className="font-medium text-brand-600 underline">¿Olvidaste tu contraseña?</a>
+        <Link href="/auth/reset-password" className="font-medium text-brand-600 underline">¿Olvidaste tu contraseña?</Link>
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-600">{error}</p>}
       <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Entrando..." : "Iniciar sesión"}</Button>
-      <p className="text-center text-xs text-text-tertiary">¿Eres nuevo por acá? <a href="/auth/sign-up" className="font-medium text-brand-600 underline">Crear cuenta</a></p>
+      <p className="text-center text-xs text-text-tertiary">¿Eres nuevo por acá? <Link href="/auth/sign-up" className="font-medium text-brand-600 underline">Crear cuenta</Link></p>
     </form>
   );
 }

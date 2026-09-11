@@ -11,6 +11,14 @@ import {
   InputGroupInput,
 } from "@/components/tailgrids/core/input-group";
 import {
+  Select,
+  SelectContent,
+  SelectIndicator,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/tailgrids/core/select";
+import {
   TableBody,
   TableCell,
   TableHead,
@@ -20,11 +28,12 @@ import {
 } from "@/components/tailgrids/core/table";
 import { getLastTransactionsData } from "@/services/api/home";
 import { MenuDotsIcon } from "@/utils/icon";
+import { downloadCsv } from "@/utils/download-csv";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { SKELETON_ROW_COUNT, STATUS_COLOR_MAP, STATUS_LABEL_MAP } from "./data";
-import { DownloadIcon, FilterIcon } from "./icon";
+import { DownloadIcon } from "./icon";
 import { TransactionSkeletonRow } from "./skeleton";
 import type { RawTransactionItem } from "@/services/api/home";
 
@@ -48,6 +57,8 @@ function toViewModel(raw: RawTransactionItem): TransactionViewModel {
 
 export default function LastTransactionsTable() {
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: rawResponse } = useQuery({
     queryKey: ["lastTransactions"],
@@ -61,9 +72,20 @@ export default function LastTransactionsTable() {
 
   const transactions: TransactionViewModel[] = rawResponse?.data.map(toViewModel) ?? [];
 
+  const statuses = useMemo(() => [...new Set(transactions.map((t) => t.status))], [transactions]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return transactions.filter(
+      (t) =>
+        (statusFilter === "all" || t.status === statusFilter) &&
+        (!q || t.orderId.toLowerCase().includes(q) || t.customer.toLowerCase().includes(q)),
+    );
+  }, [transactions, query, statusFilter]);
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedTransactions(transactions.map((tx) => tx.id));
+      setSelectedTransactions(filtered.map((tx) => tx.id));
     } else {
       setSelectedTransactions([]);
     }
@@ -78,7 +100,20 @@ export default function LastTransactionsTable() {
   };
 
   const isAllSelected =
-    transactions.length > 0 && selectedTransactions.length === transactions.length;
+    filtered.length > 0 && filtered.every((t) => selectedTransactions.includes(t.id));
+
+  const handleDownload = () => {
+    const rows = (selectedTransactions.length > 0
+      ? filtered.filter((t) => selectedTransactions.includes(t.id))
+      : filtered
+    ).map((t) => [t.orderId, t.date, t.time, t.customer, t.amount, t.status]);
+    if (rows.length === 0) return;
+    downloadCsv(
+      `transacciones-${new Date().toISOString().slice(0, 10)}.csv`,
+      ["Pedido", "Fecha", "Hora", "Cliente", "Monto", "Estado"],
+      rows,
+    );
+  };
 
   return (
     <Card>
@@ -86,20 +121,48 @@ export default function LastTransactionsTable() {
       <CardHeader className="mb-6">
         <CardTitle>Transacciones recientes</CardTitle>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           <InputGroup className="py-1.5">
             <InputGroupAddon align="inline-start" className="pr-0 text-icon-tertiary">
               <SearchIcon className="size-4" />
             </InputGroupAddon>
-            <InputGroupInput placeholder="Buscar" className="py-0 pl-2 text-sm" />
+            <InputGroupInput
+              placeholder="Buscar pedido o cliente"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="py-0 pl-2 text-sm"
+            />
           </InputGroup>
 
-          <Button appearance="outline" className="h-8 w-8 p-1.5 text-icon-tertiary">
-            <FilterIcon />
-          </Button>
-          <Button appearance="outline" className="h-8 w-8 p-1.5 text-icon-tertiary">
+          <Select value={statusFilter} onChange={(v) => setStatusFilter(String(v))} aria-label="Filtrar por estado">
+            <SelectTrigger className="h-8 w-auto px-2.5 text-xs">
+              <SelectValue />
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem id="all" textValue="Todos">Todos</SelectItem>
+              {statuses.map((s) => (
+                <SelectItem key={s} id={s} textValue={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            appearance="outline"
+            onClick={handleDownload}
+            isDisabled={isPending || filtered.length === 0}
+            aria-label={selectedTransactions.length > 0 ? `Descargar ${selectedTransactions.length} seleccionadas en CSV` : "Descargar filtradas en CSV"}
+            className="h-8 w-8 p-1.5 text-icon-tertiary"
+          >
             <DownloadIcon />
           </Button>
+          {selectedTransactions.length > 0 && (
+            <button
+              onClick={() => setSelectedTransactions([])}
+              className="text-xs font-medium text-text-secondary underline hover:text-text-primary"
+            >
+              Limpiar ({selectedTransactions.length})
+            </button>
+          )}
         </div>
       </CardHeader>
 
@@ -143,7 +206,14 @@ export default function LastTransactionsTable() {
               ? Array.from({ length: SKELETON_ROW_COUNT }).map((_, i) => (
                   <TransactionSkeletonRow key={i} />
                 ))
-              : transactions.map((tx) => (
+              : filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="px-6 py-6 text-center text-sm text-text-tertiary">
+                      Sin resultados para el filtro aplicado.
+                    </TableCell>
+                  </TableRow>
+                )
+              : filtered.map((tx) => (
                   <TableRow key={tx.id} className="[&_td]:border-none">
                     <TableCell className="px-2.5 py-4">
                       <div className="flex items-center justify-center">

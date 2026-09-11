@@ -3,8 +3,10 @@ import { prisma } from "@/lib/adapters/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const format = searchParams.get("format");
     const [orders, products] = await Promise.all([
       prisma.order.findMany({
         select: { total: true, status: true, source: true, createdAt: true, items: { select: { quantity: true, product: { select: { title: true, sku: true } } } } },
@@ -45,6 +47,28 @@ export async function GET() {
     const topContent = Object.values(viewsByProduct).sort((a, b) => b.views - a.views).slice(0, 6);
 
     const total = orders.reduce((a, o) => a + Number(o.total), 0);
+
+    if (format === "csv") {
+      const esc = (v: string | number) => {
+        const s = String(v ?? "");
+        return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const lines = [
+        ["fecha", "pedidos", "total_clp"],
+        ...salesByDay.map((d) => [d.date, d.orders, d.total]),
+        [],
+        ["estado", "pedidos"],
+        ...byStatus.map((s) => [s.status, s.count]),
+      ];
+      const csv = "\uFEFF" + lines.map((r) => r.map(esc).join(";")).join("\n");
+      return new Response(csv, {
+        headers: {
+          "Content-Type": "text/csv;charset=utf-8",
+          "Content-Disposition": `attachment; filename="analitica-${new Date().toISOString().slice(0, 10)}.csv"`,
+        },
+      });
+    }
+
     return NextResponse.json({ salesByDay, byStatus, bySource, topContent, lowStock: products, totals: { orders: orders.length, revenue: total } });
   } catch (e) {
     return NextResponse.json({ salesByDay: [], byStatus: [], bySource: [], topContent: [], lowStock: [], totals: { orders: 0, revenue: 0 }, warning: e instanceof Error ? e.message : String(e) });
