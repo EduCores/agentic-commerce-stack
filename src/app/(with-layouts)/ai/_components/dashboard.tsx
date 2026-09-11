@@ -31,7 +31,7 @@ export function AiDashboard() {
         <CardHeader><CardTitle className="text-sm">Distribución de proveedores de AI</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {data.providers.map((p) => (
-            <div key={p.name} className="flex items-center justify-between text-sm">
+            <div key={p.name} className="flex items-center justify-between gap-2 text-sm">
               <span className="font-mono text-xs">{p.name}</span>
               <Badge color="gray">{p.pct}%</Badge>
             </div>
@@ -43,7 +43,7 @@ export function AiDashboard() {
         <CardHeader><CardTitle className="text-sm">Actividad reciente</CardTitle></CardHeader>
         <CardContent className="space-y-1.5">
           {data.recent.length === 0 ? <p className="text-sm text-text-tertiary">Sin ejecuciones aún.</p> : data.recent.map((r) => (
-            <div key={r.id} className="flex items-center justify-between text-sm">
+            <div key={r.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
               <span>{r.agent}</span>
               <span className="text-xs text-text-tertiary">{r.status} · {new Date(r.at).toLocaleString("es-CL")} · <a href="/workflows" className="underline">workflows</a></span>
             </div>

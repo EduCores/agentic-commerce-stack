@@ -8,7 +8,7 @@ import type { AiStats } from "./types";
 export function AiActivityChart({ data }: { data: AiStats | null }) {
   const rows = data?.byDay ?? [];
   return (
-    <Card className="md:col-span-2">
+    <Card className="min-w-0 md:col-span-2">
       <CardHeader><CardTitle className="text-sm">Actividad semanal de AI</CardTitle></CardHeader>
       <CardContent className="h-64 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
