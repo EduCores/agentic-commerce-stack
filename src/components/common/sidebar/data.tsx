@@ -39,7 +39,7 @@ export const NAV_DATA: NavSection[] = [
         items: [],
       },
       {
-        title: "Correos electrónicos",
+        title: "Correos",
         icon: <LetterIcon />,
         url: "/admin/emails",
         items: [],
