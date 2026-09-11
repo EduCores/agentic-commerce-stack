@@ -1,15 +1,12 @@
 import { streamStarShopFlow, streamAgent } from "@/../agent";
+import { guardChatRequest, corsHeaders, isOriginAllowed } from "@/lib/api/chat-guard";
 
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  };
-}
-
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: corsHeaders() });
+export async function OPTIONS(req: Request) {
+  const origin = req.headers.get("origin");
+  if (!isOriginAllowed(origin)) {
+    return new Response(JSON.stringify({ error: "Origen no permitido" }), { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders(origin) } });
+  }
+  return new Response(null, { status: 204, headers: corsHeaders(origin) });
 }
 
 /**
@@ -20,9 +17,15 @@ export async function OPTIONS() {
  *        data: {"type":"done","text":"final","toolCalls":[...],"agentSlug":"..."}
  */
 export async function POST(req: Request) {
+  // Protección: allowlist de orígenes + rate-limit por IP (el proxy interno pasa marcado)
+  const guard = guardChatRequest(req, "chat-stream");
+  if (!guard.allowed) {
+    return new Response(JSON.stringify({ error: guard.error, retryAfter: guard.retryAfter }), { status: guard.status, headers: { "Content-Type": "application/json", ...guard.headers } });
+  }
+
   const { message, history, storeId, agentSlug, useFlow, isAdmin } = await req.json();
   if (!message) {
-    return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+    return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { "Content-Type": "application/json", ...guard.headers } });
   }
 
   const shouldUseFlow = useFlow !== false;
@@ -56,7 +59,7 @@ export async function POST(req: Request) {
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
-      ...corsHeaders(),
+      ...guard.headers,
     },
   });
 }

@@ -1,19 +1,17 @@
 ﻿import { NextResponse } from "next/server";
 import { runAgent, runStarShopFlow } from "@/../agent";
+import { guardChatRequest, corsHeaders, isOriginAllowed } from "@/lib/api/chat-guard";
 
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  };
+export async function OPTIONS(req: Request) {
+  const origin = req.headers.get("origin");
+  if (!isOriginAllowed(origin)) {
+    return NextResponse.json({ error: "Origen no permitido" }, { status: 403, headers: corsHeaders(origin) });
+  }
+  return NextResponse.json({}, { headers: corsHeaders(origin) });
 }
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders() });
-}
-
-export async function GET() {
+export async function GET(req: Request) {
+  const origin = req.headers.get("origin");
   const key = process.env.OPENROUTER_API_KEY ?? "";
   return NextResponse.json({
     ok: true,
@@ -24,19 +22,25 @@ export async function GET() {
     hasDatabaseUrl: !!process.env.DATABASE_URL,
     dbUrlHost: (process.env.DATABASE_URL ?? "").replace(/postgres(ql)?:\/\/[^@]*@/, "postgresql://").replace(/:.+@/, "@"),
     time: new Date().toISOString(),
-  }, { headers: corsHeaders() });
+  }, { headers: corsHeaders(origin) });
 }
 
 export async function POST(req: Request) {
+  // Protección: allowlist de orígenes + rate-limit por IP
+  const guard = guardChatRequest(req, "chat");
+  if (!guard.allowed) {
+    return NextResponse.json({ error: guard.error, retryAfter: guard.retryAfter }, { status: guard.status, headers: guard.headers });
+  }
+
   const { message, history, agentSlug, storeId, useFlow, stream, isAdmin } = await req.json();
-  if (!message) return NextResponse.json({ error: "message required" }, { status: 400, headers: corsHeaders() });
+  if (!message) return NextResponse.json({ error: "message required" }, { status: 400, headers: guard.headers });
   // Si el frontend pide stream:true, redirige a lógica SSE sin romper compatibilidad JSON
   if (stream) {
     const url = new URL(req.url);
     url.pathname = "/api/chat/stream";
-    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
+    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json", "x-acs-internal-proxy": "1" }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
     // Proxy streaming response tal cual
-    return new Response(r.body, { status: r.status, headers: { "Content-Type": "text/event-stream", ...corsHeaders() } });
+    return new Response(r.body, { status: r.status, headers: { "Content-Type": "text/event-stream", ...guard.headers } });
   }
   try {
     // Flujo 1→2→9 por defecto — router StarShop. isAdmin fuerza admin_ops para el admin.
@@ -95,12 +99,12 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ text, toolCalls, detectedIntent, crew, intentConfidence, intentSource }, { headers: corsHeaders() });
+    return NextResponse.json({ text, toolCalls, detectedIntent, crew, intentConfidence, intentSource }, { headers: guard.headers });
   } catch (e) {
         console.error("[API-CHAT] Error:", e);
     return NextResponse.json({
       error: "Internal server error",
       detail: e instanceof Error ? e.message : String(e),
-    }, { status: 500, headers: corsHeaders() });
+    }, { status: 500, headers: guard.headers });
   }
 }
