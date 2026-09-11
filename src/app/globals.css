@@ -601,6 +601,18 @@
   }
 }
 
+/* Navegación del sheet móvil: links e iconos +20% solo en móvil. */
+@media (max-width: 639.98px) {
+  .sidebar-sheet-nav a,
+  .sidebar-sheet-nav button {
+    font-size: 120%;
+  }
+  .sidebar-sheet-nav svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
 @keyframes pulse {
   0%,
   100% {
