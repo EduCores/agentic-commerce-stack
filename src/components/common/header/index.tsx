@@ -26,7 +26,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
               id="mobile-menu-toggle"
               onClick={onMenuClick}
               aria-label="Abrir menú lateral"
-              className="rounded-md px-1.5 py-1 text-icon-tertiary transition-colors hover:text-text-primary"
+              className="rounded-md p-3 text-icon-tertiary transition-colors hover:text-text-primary [&_svg]:size-7"
             >
               <MenuIcon />
             </button>
