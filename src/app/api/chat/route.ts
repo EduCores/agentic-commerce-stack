@@ -12,15 +12,13 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request) {
   const origin = req.headers.get("origin");
-  const key = process.env.OPENROUTER_API_KEY ?? "";
+  // Solo booleans/model: NO exponer prefijos de API key ni host de BD en un endpoint público
   return NextResponse.json({
     ok: true,
-    hasOpenRouterKey: !!key,
-    keyPrefix: key ? key.slice(0, 17) + "..." : "(vacía)",
-    keyLength: key.length,
+    hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
+    hasAdminKey: !!process.env.OPENROUTER_ADMIN_KEY,
     openRouterModel: process.env.OPENROUTER_MODEL ?? "(no env OPENROUTER_MODEL)",
     hasDatabaseUrl: !!process.env.DATABASE_URL,
-    dbUrlHost: (process.env.DATABASE_URL ?? "").replace(/postgres(ql)?:\/\/[^@]*@/, "postgresql://").replace(/:.+@/, "@"),
     time: new Date().toISOString(),
   }, { headers: corsHeaders(origin) });
 }
@@ -82,10 +80,6 @@ export async function POST(req: Request) {
     // Texto de respaldo: si el LLM devolvió tool calls sin texto, igual respondemos algo útil.
     // (finalText ya incluye directFallback desde runAgent; texto vacío aquí significa que todo falló)
     let text = (result.text ?? "").trim();
-    if (!text && result.directFallback) {
-      // el directChat ya generó texto: no pisarlo
-      text = (result.text ?? "").trim();
-    }
     if (!text) {
       if (autoQuery) {
         text = `Busqueda encontrada para "${autoQuery}"! Te abri la ventana de resultados con todos los productos disponibles. Le filtro por precio o potencia?`;
@@ -101,7 +95,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ text, toolCalls, detectedIntent, crew, intentConfidence, intentSource }, { headers: guard.headers });
   } catch (e) {
-        console.error("[API-CHAT] Error:", e);
+    console.error("[API-CHAT] Error:", e);
     return NextResponse.json({
       error: "Internal server error",
       detail: e instanceof Error ? e.message : String(e),

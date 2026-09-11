@@ -9,6 +9,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
 import { STARSHOP_CREWS, STARSHOP_LANGUAGE_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
+import { detectIntent } from "@/lib/eve/detect-intent";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
 import searchProducts from "./tools/search-products";
@@ -181,37 +182,90 @@ const ALL_TOOL_DEFS: Record<string, { description: string; inputSchema: z.ZodTyp
   orderTracking: { description: orderTracking.description, inputSchema: orderTracking.inputSchema as z.ZodTypeAny, execute: orderTracking.execute as never },
 };
 
+// Tools compilados UNA vez al cargar el módulo (evita reconstruir wrappers en cada request)
+const ALL_AI_TOOLS: Record<string, unknown> = Object.fromEntries(
+  Object.entries(ALL_TOOL_DEFS).map(([k, def]) => [
+    k,
+    tool({ description: def.description, inputSchema: def.inputSchema, execute: def.execute as never }),
+  ])
+);
+
 function toAISDKTools(filter?: string[]) {
-  const keys = filter ?? Object.keys(ALL_TOOL_DEFS);
+  if (!filter) return ALL_AI_TOOLS as never;
   const out: Record<string, unknown> = {};
-  for (const k of keys) {
-    const def = ALL_TOOL_DEFS[k];
-    if (!def) continue;
-    out[k] = tool({ description: def.description, inputSchema: def.inputSchema, execute: def.execute as never });
+  for (const k of filter) {
+    const t = ALL_AI_TOOLS[k];
+    if (t) out[k] = t;
   }
   return out as never;
 }
 
+// Mapa de crews por intención — estático, se construye UNA vez al cargar el módulo
+const CREW_CONFIG_MAP: Record<StarShopIntent, { slug: string; prompt: string; model: string }> = {
+  product_search: { slug: STARSHOP_CREWS.search_and_recommend.slug, prompt: STARSHOP_CREWS.search_and_recommend.prompt, model: STARSHOP_CREWS.search_and_recommend.model },
+  price_comparison: { slug: STARSHOP_CREWS.compare_prices.slug, prompt: STARSHOP_CREWS.compare_prices.prompt, model: STARSHOP_CREWS.compare_prices.model },
+  checkout_support: { slug: STARSHOP_CREWS.checkout_guide.slug, prompt: STARSHOP_CREWS.checkout_guide.prompt, model: STARSHOP_CREWS.checkout_guide.model },
+  general_inquiry: { slug: STARSHOP_CREWS.general_support.slug, prompt: STARSHOP_CREWS.general_support.prompt, model: STARSHOP_CREWS.general_support.model },
+  abandoned_cart: { slug: STARSHOP_CREWS.recover_cart.slug, prompt: STARSHOP_CREWS.recover_cart.prompt, model: STARSHOP_CREWS.recover_cart.model },
+  return_request: { slug: STARSHOP_CREWS.handle_return.slug, prompt: STARSHOP_CREWS.handle_return.prompt, model: STARSHOP_CREWS.handle_return.model },
+  order_tracking: { slug: STARSHOP_CREWS.order_tracking.slug, prompt: STARSHOP_CREWS.order_tracking.prompt, model: STARSHOP_CREWS.order_tracking.model },
+  escalate_human: { slug: STARSHOP_CREWS.escalate_human.slug, prompt: STARSHOP_CREWS.escalate_human.prompt, model: STARSHOP_CREWS.escalate_human.model },
+  admin_ops: { slug: STARSHOP_CREWS.admin_ops.slug, prompt: STARSHOP_CREWS.admin_ops.prompt, model: STARSHOP_CREWS.admin_ops.model },
+};
+
 function getCrewConfig(intent: StarShopIntent) {
-  const map: Record<StarShopIntent, { slug: string; prompt: string; model: string }> = {
-    product_search: { slug: STARSHOP_CREWS.search_and_recommend.slug, prompt: STARSHOP_CREWS.search_and_recommend.prompt, model: STARSHOP_CREWS.search_and_recommend.model },
-    price_comparison: { slug: STARSHOP_CREWS.compare_prices.slug, prompt: STARSHOP_CREWS.compare_prices.prompt, model: STARSHOP_CREWS.compare_prices.model },
-    checkout_support: { slug: STARSHOP_CREWS.checkout_guide.slug, prompt: STARSHOP_CREWS.checkout_guide.prompt, model: STARSHOP_CREWS.checkout_guide.model },
-    general_inquiry: { slug: STARSHOP_CREWS.general_support.slug, prompt: STARSHOP_CREWS.general_support.prompt, model: STARSHOP_CREWS.general_support.model },
-    abandoned_cart: { slug: STARSHOP_CREWS.recover_cart.slug, prompt: STARSHOP_CREWS.recover_cart.prompt, model: STARSHOP_CREWS.recover_cart.model },
-    return_request: { slug: STARSHOP_CREWS.handle_return.slug, prompt: STARSHOP_CREWS.handle_return.prompt, model: STARSHOP_CREWS.handle_return.model },
-    order_tracking: { slug: STARSHOP_CREWS.order_tracking.slug, prompt: STARSHOP_CREWS.order_tracking.prompt, model: STARSHOP_CREWS.order_tracking.model },
-    escalate_human: { slug: STARSHOP_CREWS.escalate_human.slug, prompt: STARSHOP_CREWS.escalate_human.prompt, model: STARSHOP_CREWS.escalate_human.model },
-    admin_ops: { slug: STARSHOP_CREWS.admin_ops.slug, prompt: STARSHOP_CREWS.admin_ops.prompt, model: STARSHOP_CREWS.admin_ops.model },
+  return CREW_CONFIG_MAP[intent];
+}
+
+/**
+ * Fire-and-forget: registra el router en workflows para observabilidad.
+ * Import dinámico para no cargar el engine en el cold path del LLM.
+ */
+function logRouterWorkflow(message: string, detectedIntent: StarShopIntent, tag: string) {
+  void (async () => {
+    try {
+      const { starShopRouterWorkflow } = await import("@/workflows/starshop-router");
+      const { startWorkflow } = await import("@/lib/workflows/engine");
+      await startWorkflow(starShopRouterWorkflow, { message, detectedIntent, orderId: undefined });
+    } catch (e) {
+      console.log(`[${tag}] workflow log failed`, e instanceof Error ? e.message : e);
+    }
+  })();
+}
+
+type ResolvedAgentConfig = {
+  agent: { id: string; slug: string; model: string | null; systemPrompt: string | null };
+  system: string;
+  modelId: string;
+  allowedTools: string[] | undefined;
+};
+
+/**
+ * Resuelve prompt/modelo/whitelist del agente UNA vez por request (antes estaba
+ * duplicado en runAgent y streamAgent). `_override` inyecta crew sin tocar DB.
+ */
+async function resolveAgent(params: { agentSlug: string; storeId?: string; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }): Promise<ResolvedAgentConfig> {
+  if (params._override) {
+    return {
+      agent: { id: `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt },
+      system: `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}`,
+      modelId: params._override.model,
+      allowedTools: params._override.allowedTools,
+    };
+  }
+  const agent = (await getAgentConfig(params.agentSlug)) as ResolvedAgentConfig["agent"];
+  return {
+    agent,
+    system: `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}`,
+    modelId: agent.model ?? DEFAULT_MODEL,
+    allowedTools: undefined,
   };
-  return map[intent];
 }
 
 export type RunAgentResult = Awaited<ReturnType<typeof runAgent>>;
 
 /** Flujo 1→2→6+3→4 — detecta intent (LLM con fallback heurístico) y despacha al crew */
 export async function runStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
-  const { detectIntent } = await import("@/lib/eve/detect-intent");
   // La clasificación considera el historial para no cambiar de crew a mitad de conversación.
   const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
   const detectedIntent: StarShopIntent = detected.intent;
@@ -219,16 +273,7 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
   const crew = getCrewConfig(detectedIntent);
   const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
 
-  // Ejecuta el workflow router en background para observabilidad (no bloquea respuesta)
-  void (async () => {
-    try {
-      const { starShopRouterWorkflow } = await import("@/workflows/starshop-router");
-      const { startWorkflow } = await import("@/lib/workflows/engine");
-      await startWorkflow(starShopRouterWorkflow, { message: params.input, detectedIntent, orderId: undefined });
-    } catch (e) {
-      console.log("[ACS-ROUTER] workflow log failed", e instanceof Error ? e.message : e);
-    }
-  })();
+  logRouterWorkflow(params.input, detectedIntent, "ACS-ROUTER");
 
   // Delega al runAgent del crew con historial (runAgent arma los mensajes UNA sola vez)
   const inner = await runAgent({
@@ -252,15 +297,7 @@ export async function runAdminOps(params: { input: string; storeId?: string; his
   const crew = getCrewConfig(detectedIntent);
   const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
 
-  void (async () => {
-    try {
-      const { starShopRouterWorkflow } = await import("@/workflows/starshop-router");
-      const { startWorkflow } = await import("@/lib/workflows/engine");
-      await startWorkflow(starShopRouterWorkflow, { message: params.input, detectedIntent, orderId: undefined });
-    } catch (e) {
-      console.log("[ACS-ADMIN] workflow log failed", e instanceof Error ? e.message : e);
-    }
-  })();
+  logRouterWorkflow(params.input, detectedIntent, "ACS-ADMIN");
 
   const inner = await runAgent({
     agentSlug: crew.slug,
@@ -277,21 +314,7 @@ export async function runAdminOps(params: { input: string; storeId?: string; his
 export async function runAgent(params: { agentSlug: string; input: string; storeId?: string; history?: unknown[]; useAdminKey?: boolean; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
   // _override: usado por runStarShopFlow para inyectar prompt/whitelist del crew sin tocar DB
   // useAdminKey: usa OPENROUTER_ADMIN_KEY (créditos separados de tienda)
-  let agent: { id: string; slug: string; model: string | null; systemPrompt: string | null };
-  let system: string;
-  let modelId: string;
-  let allowedTools: string[] | undefined;
-
-  if (params._override) {
-    agent = { id: `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt };
-    system = `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}`;
-    modelId = params._override.model;
-    allowedTools = params._override.allowedTools;
-  } else {
-    agent = await getAgentConfig(params.agentSlug) as never;
-    system = `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}`;
-    modelId = agent.model ?? DEFAULT_MODEL;
-  }
+  const { agent, system, modelId, allowedTools } = await resolveAgent(params);
 
   const model = getOpenRouter(params.useAdminKey).chat(modelId as never) as never;
 
@@ -320,7 +343,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
         directFallback: false,
         rawText: "",
         agentSlug: agent.slug,
-      } as unknown as typeof result & { text: string; toolCalls: unknown[]; directFallback: boolean; rawText: string; agentSlug: string };
+      };
     }
     throw e;
   }
@@ -356,24 +379,10 @@ export async function runAgent(params: { agentSlug: string; input: string; store
 }
 
 // ── Streaming: mismo router pero con streamText para efecto tipeo IA ──
-export async function* streamAgent(params: { agentSlug: string; input: string; storeId?: string; history?: unknown[]; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
-  let agent: { id: string; slug: string; model: string | null; systemPrompt: string | null };
-  let system: string;
-  let modelId: string;
-  let allowedTools: string[] | undefined;
+export async function* streamAgent(params: { agentSlug: string; input: string; storeId?: string; history?: unknown[]; useAdminKey?: boolean; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
+  const { agent, system, modelId, allowedTools } = await resolveAgent(params);
 
-  if (params._override) {
-    agent = { id: `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt };
-    system = `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}`;
-    modelId = params._override.model;
-    allowedTools = params._override.allowedTools;
-  } else {
-    agent = (await getAgentConfig(params.agentSlug)) as never;
-    system = `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}`;
-    modelId = agent.model ?? DEFAULT_MODEL;
-  }
-
-  const model = openrouter.chat(modelId as never) as never;
+  const model = getOpenRouter(params.useAdminKey).chat(modelId as never) as never;
 
   // Historial como mensajes con roles nativos (igual que en runAgent)
   const messages = toModelMessages(params.input, params.history);
@@ -398,7 +407,7 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
   // Si el LLM cortó sin texto (solo tool calls), genera respuesta conversacional
   // real vía llamada directa (misma lógica que runAgent, con contexto completo).
   if (!finalText.trim() && toolCalls.length > 0) {
-    const apiKey = process.env.OPENROUTER_API_KEY || "";
+    const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
     if (apiKey) {
       const directReply = await directChat(apiKey, modelId, system, messages);
       if (directReply) finalText = directReply;
@@ -408,21 +417,12 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
 }
 
 export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
-  const { detectIntent } = await import("@/lib/eve/detect-intent");
   const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
   const detectedIntent = detected.intent;
   const crew = getCrewConfig(detectedIntent);
   const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
 
-  void (async () => {
-    try {
-      const { starShopRouterWorkflow } = await import("@/workflows/starshop-router");
-      const { startWorkflow } = await import("@/lib/workflows/engine");
-      await startWorkflow(starShopRouterWorkflow, { message: params.input, detectedIntent, orderId: undefined });
-    } catch (e) {
-      console.log("[ACS-ROUTER-STREAM] workflow log failed", e instanceof Error ? e.message : e);
-    }
-  })();
+  logRouterWorkflow(params.input, detectedIntent, "ACS-ROUTER-STREAM");
 
   yield { type: "meta" as const, detectedIntent, crew: crew.slug, intentConfidence: detected.confidence, intentSource: detected.source };
 
@@ -437,4 +437,5 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
   }
 }
 
-export default { runAgent, runAdminOps, streamAgent, runStarShopFlow, streamStarShopFlow, tools: acsTools };
+const defaultExport = { runAgent, runAdminOps, streamAgent, runStarShopFlow, streamStarShopFlow, tools: acsTools };
+export default defaultExport;
