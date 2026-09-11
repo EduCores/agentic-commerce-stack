@@ -4,6 +4,15 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Button } from "@/components/tailgrids/core/button";
 import { Badge } from "@/components/tailgrids/core/badge";
+import {
+  Select,
+  SelectContent,
+  SelectIndicator,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/tailgrids/core/select";
 
 const KINDS = ["order_confirmation", "abandoned_cart", "return_update", "general"] as const;
 
@@ -43,14 +52,20 @@ export function EmailTestPanel() {
           Para
           <input value={to} onChange={(e) => setTo(e.target.value)} className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
         </label>
-        <label className="flex flex-col gap-1 text-xs">
-          Plantilla
-          <select value={template} onChange={(e) => setTemplate(e.target.value as typeof template)} className="rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]">
-            {KINDS.map((k) => (
-              <option key={k} value={k}>{k}</option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-col gap-1 text-xs">
+          <Select value={template} onChange={(v) => setTemplate(v as typeof template)} aria-label="Plantilla">
+            <SelectLabel>Plantilla</SelectLabel>
+            <SelectTrigger>
+              <SelectValue />
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectContent>
+              {KINDS.map((k) => (
+                <SelectItem key={k} id={k} textValue={k}>{k}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs">
           ID del pedido
           <input value={orderId} onChange={(e) => setOrderId(e.target.value)} className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
