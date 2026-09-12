@@ -14,9 +14,13 @@ function isPublic(pathname: string) {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  // Puente público del frontend StarShop (sin sesión admin): ingiere órdenes best-effort.
+  if (pathname === "/api/store/orders-ingest" || pathname.startsWith("/api/store/orders-ingest/")) {
+    return NextResponse.next();
+  }
   if (isPublic(pathname) || pathname.startsWith("/api/")) {
     // /api/chat es público para el widget de tienda. /api/admin/* siempre protegido.
-    const isAdminApi = pathname.startsWith("/api/admin") || pathname.startsWith("/api/store") || pathname.startsWith("/api/orders") || pathname.startsWith("/api/products") || pathname.startsWith("/api/dashboard") || pathname.startsWith("/api/agents") || pathname.startsWith("/api/workflows") || pathname.startsWith("/api/analytics") || pathname.startsWith("/api/marketing") || pathname.startsWith("/api/crm") || pathname.startsWith("/api/ai");
+    const isAdminApi = pathname.startsWith("/api/admin") || pathname.startsWith("/api/store") || pathname.startsWith("/api/slider") || pathname.startsWith("/api/orders") || pathname.startsWith("/api/products") || pathname.startsWith("/api/dashboard") || pathname.startsWith("/api/agents") || pathname.startsWith("/api/workflows") || pathname.startsWith("/api/analytics") || pathname.startsWith("/api/marketing") || pathname.startsWith("/api/crm") || pathname.startsWith("/api/ai");
     if (!isAdminApi) return NextResponse.next();
   }
 

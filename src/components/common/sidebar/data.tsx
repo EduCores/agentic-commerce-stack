@@ -39,6 +39,12 @@ export const NAV_DATA: NavSection[] = [
         items: [],
       },
       {
+        title: "Slider principal",
+        icon: <Widget4Icon />,
+        url: "/slider",
+        items: [],
+      },
+      {
         title: "Correos",
         icon: <LetterIcon />,
         url: "/admin/emails",
