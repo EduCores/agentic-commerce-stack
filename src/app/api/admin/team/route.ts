@@ -28,6 +28,8 @@ export async function POST(req: Request) {
   if (!email || !password) return NextResponse.json({ error: "email y password requeridos" }, { status: 400 });
   const existing = await prisma.adminUser.findUnique({ where: { email: String(email).toLowerCase().trim() } }).catch(() => null);
   if (existing) return NextResponse.json({ error: "Ese email ya es miembro" }, { status: 409 });
+  // Solo un owner puede crear otro owner; el resto queda member
+  const safeRole = role === "owner" && session.role === "owner" ? "owner" : "member";
   // Teléfono del equipo: se valida y queda activo en WhatsApp al crear
   let normalizedPhone: string | null = null;
   if (phone) {
@@ -35,7 +37,7 @@ export async function POST(req: Request) {
     if (!normalizedPhone) return NextResponse.json({ error: "Teléfono inválido (usa formato 569XXXXXXXX)" }, { status: 400 });
   }
   const created = await prisma.adminUser.create({
-    data: { email: String(email).toLowerCase().trim(), name: name ?? null, phone: normalizedPhone, role: role ?? "member", password: await hashPassword(String(password)) },
+    data: { email: String(email).toLowerCase().trim(), name: name ?? null, phone: normalizedPhone, role: safeRole, password: await hashPassword(String(password)) },
     select: MEMBER_SELECT,
   });
   return NextResponse.json(created, { status: 201 });
@@ -46,6 +48,17 @@ export async function PATCH(req: Request) {
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const { id, role, name, phone } = await req.json().catch(() => ({}));
   if (!id) return NextResponse.json({ error: "id requerido" }, { status: 400 });
+  // Cambiar roles es privilegio de owner
+  if (role && session.role !== "owner") return NextResponse.json({ error: "Solo un owner puede cambiar roles" }, { status: 403 });
+  if (role && !["owner", "member", "admin"].includes(String(role))) return NextResponse.json({ error: "Rol inválido" }, { status: 400 });
+  // No degradar al último owner
+  if (role && role !== "owner") {
+    const target = await prisma.adminUser.findUnique({ where: { id }, select: { role: true } }).catch(() => null);
+    if (target?.role === "owner") {
+      const owners = await prisma.adminUser.count({ where: { role: "owner" } }).catch(() => 1);
+      if (owners <= 1) return NextResponse.json({ error: "No puedes degradar al último owner" }, { status: 400 });
+    }
+  }
   // phone:"" lo borra (sale de WhatsApp); phone válido lo agrega/actualiza
   let phonePatch: { phone?: string | null } = {};
   if (phone !== undefined) {
@@ -68,6 +81,12 @@ export async function DELETE(req: Request) {
   if (!id) return NextResponse.json({ error: "id requerido" }, { status: 400 });
   const count = await prisma.adminUser.count().catch(() => 1);
   if (count <= 1) return NextResponse.json({ error: "No puedes eliminar al último miembro" }, { status: 400 });
+  // No dejar el equipo sin owner
+  const target = await prisma.adminUser.findUnique({ where: { id }, select: { role: true } }).catch(() => null);
+  if (target?.role === "owner") {
+    const owners = await prisma.adminUser.count({ where: { role: "owner" } }).catch(() => 1);
+    if (owners <= 1) return NextResponse.json({ error: "No puedes eliminar al último owner" }, { status: 400 });
+  }
   await prisma.adminUser.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }

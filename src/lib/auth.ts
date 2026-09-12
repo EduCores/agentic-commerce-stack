@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import * as bcrypt from "bcryptjs";
 import { prisma } from "@/lib/adapters/prisma";
+import { getJwtSecret } from "@/lib/jwt-secret";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.ADMIN_JWT_SECRET || process.env.AUTH_SECRET || "acs-dev-secret-change-in-prod-32chars");
+const JWT_SECRET = getJwtSecret();
 const COOKIE_NAME = "acs_admin_token";
 const SESSION_DAYS = 7;
 
@@ -51,8 +52,17 @@ export async function getAdminByEmail(email: string) {
 
 export async function ensureDefaultAdmin() {
   const email = (process.env.ADMIN_EMAIL || "admin@starshop.cl").toLowerCase();
-  const plain = process.env.ADMIN_PASSWORD || "StarShop2026!";
-  const name = process.env.ADMIN_NAME || "Dueño StarShop";
+  const plain = process.env.ADMIN_PASSWORD;
+  if (!plain) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("[auth] ADMIN_PASSWORD no configurado en producción. Define ADMIN_PASSWORD y redespliega.");
+    }
+    return ensureSeedAdmin(email, "StarShop2026!", process.env.ADMIN_NAME || "Dueño StarShop");
+  }
+  return ensureSeedAdmin(email, plain, process.env.ADMIN_NAME || "Dueño StarShop");
+}
+
+async function ensureSeedAdmin(email: string, plain: string, name: string) {
   const existing = await prisma.adminUser.findUnique({ where: { email } }).catch(() => null);
   if (existing) return existing;
   const hash = await hashPassword(plain);

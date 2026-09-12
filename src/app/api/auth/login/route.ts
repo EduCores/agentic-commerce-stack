@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { getAdminByEmail, verifyPassword, createSessionToken, AUTH_COOKIE, ensureDefaultAdmin } from "@/lib/auth";
+import { checkAuthRateLimit, rateLimitResponse } from "@/lib/api/rate-limit";
 
 export async function POST(req: Request) {
+  const rl = checkAuthRateLimit(req, "login", 10);
+  if (!rl.allowed) {
+    const { status, headers } = rateLimitResponse(rl.retryAfterSec);
+    return NextResponse.json({ error: "Demasiados intentos. Espera un momento." }, { status, headers });
+  }
   const { email, password } = await req.json().catch(() => ({}));
   if (!email || !password) return NextResponse.json({ error: "Email y contraseña requeridos" }, { status: 400 });
 

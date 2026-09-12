@@ -1,4 +1,6 @@
 import { streamStarShopFlow, streamAgent } from "@/../agent";
+import { cookies } from "next/headers";
+import { verifySessionToken, AUTH_COOKIE } from "@/lib/auth";
 import { guardChatRequest, corsHeaders, isOriginAllowed } from "@/lib/api/chat-guard";
 
 export async function OPTIONS(req: Request) {
@@ -23,7 +25,10 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: guard.error, retryAfter: guard.retryAfter }), { status: guard.status, headers: { "Content-Type": "application/json", ...guard.headers } });
   }
 
-  const { message, history, storeId, agentSlug, useFlow, isAdmin } = await req.json();
+  const { message, history, storeId, agentSlug, useFlow } = await req.json();
+  // isAdmin NUNCA viene del cliente: se deriva de la sesión
+  const token = (await cookies()).get(AUTH_COOKIE.name)?.value;
+  const isAdmin = token ? !!(await verifySessionToken(token)) : false;
   if (!message) {
     return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { "Content-Type": "application/json", ...guard.headers } });
   }
@@ -38,7 +43,7 @@ export async function POST(req: Request) {
       };
       try {
         const gen = shouldUseFlow
-          ? streamStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin: !!isAdmin })
+          ? streamStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin })
           : streamAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
 
         for await (const chunk of gen) {

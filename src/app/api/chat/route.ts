@@ -1,4 +1,6 @@
 ﻿import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { verifySessionToken, AUTH_COOKIE } from "@/lib/auth";
 import { runAgent, runStarShopFlow } from "@/../agent";
 import { guardChatRequest, corsHeaders, isOriginAllowed } from "@/lib/api/chat-guard";
 
@@ -30,7 +32,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: guard.error, retryAfter: guard.retryAfter }, { status: guard.status, headers: guard.headers });
   }
 
-  const { message, history, agentSlug, storeId, useFlow, stream, isAdmin } = await req.json();
+  const { message, history, agentSlug, storeId, useFlow, stream } = await req.json();
+  // isAdmin NUNCA viene del cliente: se deriva de la sesión (evita escalada a flujos admin + gasto de la key del dueño)
+  const token = (await cookies()).get(AUTH_COOKIE.name)?.value;
+  const isAdmin = token ? !!(await verifySessionToken(token)) : false;
   if (!message) return NextResponse.json({ error: "message required" }, { status: 400, headers: guard.headers });
   // Si el frontend pide stream:true, redirige a lógica SSE sin romper compatibilidad JSON
   if (stream) {
@@ -44,7 +49,7 @@ export async function POST(req: Request) {
     // Flujo 1→2→9 por defecto — router StarShop. isAdmin fuerza admin_ops para el admin.
     const shouldUseFlow = useFlow !== false;
     const result = shouldUseFlow
-      ? await runStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin: !!isAdmin })
+      ? await runStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin })
       : await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
     const detectedIntent = (result as unknown as { detectedIntent?: string }).detectedIntent;
     const crew = (result as unknown as { crew?: string }).crew;

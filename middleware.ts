@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 const COOKIE_NAME = "acs_admin_token";
-const JWT_SECRET = new TextEncoder().encode(process.env.ADMIN_JWT_SECRET || process.env.AUTH_SECRET || "acs-dev-secret-change-in-prod-32chars");
+const JWT_SECRET = getJwtSecret();
 
 const PUBLIC_PATHS = ["/login", "/auth", "/api/auth/login", "/api/auth/signup", "/api/auth/reset-request", "/api/auth/reset-confirm", "/api/auth/2fa", "/api/auth/logout", "/api/auth/me", "/api/chat", "/api/chat/stream", "/api/tts", "/_next", "/favicon", "/images", "/public"];
 
 function isPublic(pathname: string) {
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/") || pathname.startsWith(p));
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
 export async function middleware(req: NextRequest) {

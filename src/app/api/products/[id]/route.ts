@@ -3,7 +3,8 @@ import { prisma } from "@/lib/adapters/prisma";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = await prisma.product.findUnique({ where: { id }, include: { store: true } });
+  // store limitado a campos seguros: jamás exponer apiKey/apiSecret/webhookSecret
+  const product = await prisma.product.findUnique({ where: { id }, include: { store: { select: { id: true, name: true, provider: true, domain: true, isActive: true } } } });
   if (!product) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
   return NextResponse.json(product);
 }
