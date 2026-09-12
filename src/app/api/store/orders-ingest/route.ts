@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/adapters/prisma";
+import { checkAuthRateLimit, rateLimitResponse } from "@/lib/api/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,25 @@ async function ensureStarshopStore() {
 
 export async function POST(req: Request) {
   try {
+    // 1) Secreto compartido con el frontend (fail-closed: sin secreto no hay ingesta)
+    const expected = process.env.STARSHOP_INGEST_SECRET || "";
+    if (!expected) {
+      return NextResponse.json({ error: "Puente no configurado (STARSHOP_INGEST_SECRET)" }, { status: 503 });
+    }
+    const given = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+    const a = createHash("sha256").update(given).digest();
+    const b = createHash("sha256").update(expected).digest();
+    if (!given || !timingSafeEqual(a, b)) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    // 2) Rate limit por IP (backstop anti-flood)
+    const rl = checkAuthRateLimit(req, "orders-ingest", 60);
+    if (!rl.allowed) {
+      const { status, headers } = rateLimitResponse(rl.retryAfterSec);
+      return NextResponse.json({ error: "Demasiadas peticiones. Espera un momento." }, { status, headers });
+    }
+
     const body = await req.json().catch(() => ({}));
     const { orderId, customer, items, subtotal, shipping, grandTotal, currency, paymentMethod, paymentStatus, estimatedDays, statusUpdate, source } = body ?? {};
 
@@ -67,35 +88,33 @@ export async function POST(req: Request) {
       }
     }
 
-    // Ítems: resolver por SKU; si no existe el producto aún, se crea mínimo
+    // Ítems: precio SIEMPRE desde el catálogo local (nunca del cliente).
+    // SKU desconocido = 400 (el catálogo debe sincronizarse primero; no se inventan productos).
     const resolvedItems: { productId: string; quantity: number; price: string; total: string }[] = [];
     for (const it of items) {
-      const product = await prisma.product.findFirst({ where: { storeId: store.id, sku: String(it.sku) } });
-      let productId: string;
-      if (product) {
-        productId = product.id;
-      } else {
-        const created = await prisma.product.create({
-          data: {
-            storeId: store.id,
-            sku: String(it.sku),
-            title: String(it.name ?? it.sku),
-            price: String(it.price ?? 0),
-            currency: currency ?? "CLP",
-            stock: 0,
-            metadata: { autoCreatedFrom: "starshop-order" },
-          },
-        });
-        productId = created.id;
+      const qty = Math.floor(Number(it.quantity ?? 1));
+      if (!Number.isFinite(qty) || qty < 1 || qty > 999) {
+        return NextResponse.json({ error: `Cantidad inválida para SKU ${String(it.sku ?? "?")}` }, { status: 400 });
       }
-      const price = Number(it.price ?? 0);
+      const product = await prisma.product.findFirst({ where: { storeId: store.id, sku: String(it.sku) } });
+      if (!product) {
+        return NextResponse.json({ error: `SKU desconocido: ${String(it.sku)}. Sincroniza el catálogo primero.` }, { status: 400 });
+      }
+      const price = Number(product.price);
       resolvedItems.push({
-        productId,
-        quantity: Number(it.quantity ?? 1),
+        productId: product.id,
+        quantity: qty,
         price: String(price),
-        total: String(it.total ?? price * Number(it.quantity ?? 1)),
+        total: String(price * qty),
       });
     }
+
+    // Totales recalculados en servidor; si el cliente discrepa, se marca para revisión
+    const serverSubtotal = resolvedItems.reduce((a, it) => a + Number(it.total), 0);
+    const serverShipping = Math.max(0, Number(shipping ?? 0) || 0);
+    const serverTotal = serverSubtotal + serverShipping;
+    const clientTotal = Number(grandTotal ?? serverTotal);
+    const totalMismatch = clientTotal !== serverTotal;
 
     const metadata = statusUpdate
       ? undefined
@@ -108,6 +127,8 @@ export async function POST(req: Request) {
           rut: customer?.rut,
           telefono: customer?.telefono,
           source: source ?? "starshop-frontend",
+          clientTotal,
+          ...(totalMismatch ? { totalMismatch: true } : {}),
         };
 
     // Idempotente: si la orden ya existe (por externalId), solo actualiza estado
@@ -127,10 +148,10 @@ export async function POST(req: Request) {
         externalId: String(orderId),
         status: mapped.status,
         paymentStatus: mapped.paymentStatus,
-        currency: currency ?? "CLP",
-        subtotal: String(subtotal ?? 0),
-        shipping: String(shipping ?? 0),
-        total: String(grandTotal ?? 0),
+        currency: ["CLP", "USD"].includes(String(currency)) ? String(currency) : "CLP",
+        subtotal: String(serverSubtotal),
+        shipping: String(serverShipping),
+        total: String(serverTotal),
         source: source ?? "starshop-frontend",
         ...(metadata ? { metadata } : {}),
         items: { create: resolvedItems },
