@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="mt-6 space-y-5">
       <div className="px-2 lg:px-6">
-        <h1 className="mb-1 text-[28px] leading-8 font-medium text-text-primary">Panel — Dueño de tienda</h1>
+        <h2 className="mb-1 text-xl font-bold text-black dark:text-white">Panel — Dueño de tienda</h2>
         <p className="text-sm leading-5 text-text-tertiary">
           Métricas reales de tu ACS híbrido: productos, pedidos, agente Star y flujos de trabajo.
         </p>
