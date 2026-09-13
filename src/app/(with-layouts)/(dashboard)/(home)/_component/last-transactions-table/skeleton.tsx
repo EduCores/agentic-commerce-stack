@@ -4,7 +4,7 @@ import { TableCell, TableRow } from "@/components/tailgrids/core/table";
 export function TransactionSkeletonRow() {
   return (
     <TableRow className="[&_td]:border-none">
-      <TableCell className="px-2.5 py-4">
+      <TableCell className="px-1 py-4">
         <div className="flex items-center justify-center">
           <Skeleton className="size-4 rounded" />
         </div>

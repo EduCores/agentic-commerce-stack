@@ -171,7 +171,7 @@ export default function LastTransactionsTable() {
         <TableRoot className="w-full min-w-200 rounded-none border-none">
           <TableHeader>
             <TableRow className="[&_th]:border-t">
-              <TableHead className="w-9 px-5 py-2.5">
+              <TableHead className="w-6 px-1 py-2.5">
                 <div className="flex items-center justify-center">
                   <Checkbox
                     isSelected={isAllSelected}
@@ -215,7 +215,7 @@ export default function LastTransactionsTable() {
                 )
               : filtered.map((tx) => (
                   <TableRow key={tx.id} className="[&_td]:border-none">
-                    <TableCell className="px-2.5 py-4">
+                    <TableCell className="px-1 py-4">
                       <div className="flex items-center justify-center">
                         <Checkbox
                           isSelected={selectedTransactions.includes(tx.id)}
