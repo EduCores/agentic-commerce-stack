@@ -21,8 +21,11 @@ const STATUS_MAP: Record<IngestStatus, { status: "PENDING" | "PAID" | "FAILED" |
 };
 
 async function ensureStarshopStore() {
-  const existing = await prisma.storeConnection.findFirst({ where: { provider: "starshop" } });
+  // Prefiere la conexión activa (seed-store) para que las órdenes no caigan en duplicadas desactivadas.
+  const existing = await prisma.storeConnection.findFirst({ where: { provider: "starshop", isActive: true } });
   if (existing) return existing;
+  const any = await prisma.storeConnection.findFirst({ where: { provider: "starshop" } });
+  if (any) return any;
   return prisma.storeConnection.create({
     data: {
       name: "Starshop Frontend",
@@ -57,7 +60,10 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const { orderId, customer, items, subtotal, shipping, grandTotal, currency, paymentMethod, paymentStatus, estimatedDays, statusUpdate, source } = body ?? {};
 
-    if (!orderId || !Array.isArray(items) || items.length === 0) {
+    if (!orderId) {
+      return NextResponse.json({ error: "orderId es requerido" }, { status: 400 });
+    }
+    if (!statusUpdate && (!Array.isArray(items) || items.length === 0)) {
       return NextResponse.json({ error: "orderId e items son requeridos" }, { status: 400 });
     }
 
@@ -91,7 +97,7 @@ export async function POST(req: Request) {
     // Ítems: precio SIEMPRE desde el catálogo local (nunca del cliente).
     // SKU desconocido = 400 (el catálogo debe sincronizarse primero; no se inventan productos).
     const resolvedItems: { productId: string; quantity: number; price: string; total: string }[] = [];
-    for (const it of items) {
+    for (const it of (items ?? [])) {
       const qty = Math.floor(Number(it.quantity ?? 1));
       if (!Number.isFinite(qty) || qty < 1 || qty > 999) {
         return NextResponse.json({ error: `Cantidad inválida para SKU ${String(it.sku ?? "?")}` }, { status: 400 });
@@ -139,6 +145,11 @@ export async function POST(req: Request) {
         data: { status: mapped.status, paymentStatus: mapped.paymentStatus, ...(metadata ? { metadata } : {}) },
       });
       return NextResponse.json({ ok: true, updated: true, orderId: existingOrder.id });
+    }
+
+    // Status update sin orden previa → 404 (no crear órdenes basura con total 0)
+    if (statusUpdate) {
+      return NextResponse.json({ error: "Orden no encontrada para actualizar estado", orderId }, { status: 404 });
     }
 
     const order = await prisma.order.create({

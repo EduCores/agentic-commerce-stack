@@ -30,7 +30,9 @@ export async function POST(req: Request) {
       for (const p of products) {
         try {
           const existing = await prisma.product.findFirst({ where: { storeId, sku: p.sku } });
+          const prevMeta = (existing?.metadata as Record<string, unknown> | null) ?? {};
           const data = {
+            externalId: p.externalId ?? existing?.externalId ?? null,
             title: p.title,
             description: p.description ?? p.shortDescription ?? null,
             price: String(p.price ?? 0),
@@ -39,14 +41,16 @@ export async function POST(req: Request) {
             stock: Number(p.stock ?? 0),
             isActive: true,
             images: p.images ?? [],
+            // Fusiona metadata: conserva categorySlug/tags/aliases del seed (los usa el agente ACS)
             metadata: {
-              externalId: p.externalId,
-              category: p.category ?? null,
-              subcategory: p.subcategory ?? null,
-              brand: p.brand ?? null,
-              secCertified: p.secCertified ?? false,
-              discount: p.discount ?? null,
-              url: p.url ?? null,
+              ...prevMeta,
+              externalId: p.externalId ?? prevMeta.externalId ?? null,
+              category: p.category ?? prevMeta.category ?? null,
+              subcategory: p.subcategory ?? prevMeta.subcategory ?? null,
+              brand: p.brand ?? prevMeta.brand ?? null,
+              secCertified: p.secCertified ?? prevMeta.secCertified ?? false,
+              discount: p.discount ?? prevMeta.discount ?? null,
+              url: p.url ?? prevMeta.url ?? null,
               syncedAt: new Date().toISOString(),
             },
           };
