@@ -121,10 +121,10 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-5">
-      <form onSubmit={onSubmit} className="space-y-4 rounded-xl border-[0.5px] border-card-border bg-card-background p-5 lg:col-span-2">
+    <div className="grid gap-4 lg:grid-cols-5 lg:items-start">
+      <form onSubmit={onSubmit} className="flex w-full min-h-0 flex-col gap-4 self-start overflow-visible rounded-xl border-[0.5px] border-card-border bg-card-background p-5 lg:col-span-2">
         <h3 className="font-semibold text-text-primary">{editingId == null ? "Nuevo slide" : `Editando #${editingId}`}</h3>
-        <div className="grid gap-4">
+        <div className="grid w-full gap-4">
           <label className="grid gap-1.5">
             <span className="text-xs font-medium text-text-secondary">Título *</span>
             <Input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Iluminación Industrial LED" className="w-full" />
