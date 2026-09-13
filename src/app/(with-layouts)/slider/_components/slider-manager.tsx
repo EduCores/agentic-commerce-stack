@@ -122,46 +122,68 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-5">
-      <form onSubmit={onSubmit} className="space-y-3 rounded-xl border-[0.5px] border-card-border bg-card-background p-5 lg:col-span-2">
+      <form onSubmit={onSubmit} className="space-y-4 rounded-xl border-[0.5px] border-card-border bg-card-background p-5 lg:col-span-2">
         <h3 className="font-semibold text-text-primary">{editingId == null ? "Nuevo slide" : `Editando #${editingId}`}</h3>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-text-secondary">Título *</label>
-          <Input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Iluminación Industrial LED" />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-text-secondary">Subtítulo</label>
-          <Input value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="Hasta 50% OFF + Envío Gratis RM" />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-text-secondary">Descripción</label>
-          <Input value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Proyectores, High Bay y alumbrado…" />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-secondary">CTA</label>
-            <Input value={form.cta} onChange={(e) => set("cta", e.target.value)} placeholder="Ver Ofertas" />
+        <div className="grid gap-4">
+          <label className="grid gap-1.5">
+            <span className="text-xs font-medium text-text-secondary">Título *</span>
+            <Input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Iluminación Industrial LED" className="w-full" />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-medium text-text-secondary">Subtítulo</span>
+            <Input value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="Hasta 50% OFF + Envío Gratis RM" className="w-full" />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-medium text-text-secondary">Descripción</span>
+            <Input value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Proyectores, High Bay y alumbrado…" className="w-full" />
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="grid gap-1.5">
+              <span className="text-xs font-medium text-text-secondary">CTA</span>
+              <Input value={form.cta} onChange={(e) => set("cta", e.target.value)} placeholder="Ver Ofertas" className="w-full" />
+            </label>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-medium text-text-secondary">Orden</span>
+              <Input type="number" value={String(form.sortOrder)} onChange={(e) => set("sortOrder", Number(e.target.value))} className="w-full" />
+            </label>
           </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-secondary">Orden</label>
-            <Input type="number" value={String(form.sortOrder)} onChange={(e) => set("sortOrder", Number(e.target.value))} />
-          </div>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-medium text-text-secondary">Imagen *</span>
+            <div className="flex gap-2">
+              <Input value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="/LED.png o https://…" className="flex-1" />
+              <label className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-lg border border-card-border bg-card-background px-3 py-2 text-xs font-medium text-text-primary hover:bg-background-gray-secondary">
+                Subir img
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    const reader = new FileReader();
+                    reader.onload = () => set("image", String(reader.result ?? ""));
+                    reader.readAsDataURL(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+            {form.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={form.image} alt="Preview" className="mt-1 h-28 w-full rounded-lg border border-card-border object-cover" />
+            ) : null}
+            <span className="text-[11px] leading-4 text-text-tertiary">Pega una URL o ruta <code>/public</code> (ej: <code>/mi-banner.png</code>), o sube un archivo para preview (se guarda como data URL).</span>
+          </label>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-medium text-text-secondary">Gradiente (clases Tailwind)</span>
+            <Input value={form.bg} onChange={(e) => set("bg", e.target.value)} placeholder="from-amber-500 to-orange-600" className="w-full" />
+          </label>
+          <label className="flex items-center gap-2 text-sm text-text-secondary">
+            <input type="checkbox" checked={form.active} onChange={(e) => set("active", e.target.checked)} className="size-4 accent-current" />
+            Activo (visible en el frontend)
+          </label>
         </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-text-secondary">Imagen * (ruta /public o URL)</label>
-          <Input value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="/LED.png o https://…" />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-text-secondary">Gradiente (clases Tailwind)</label>
-          <Input value={form.bg} onChange={(e) => set("bg", e.target.value)} placeholder="from-amber-500 to-orange-600" />
-        </div>
-        <label className="flex items-center gap-2 text-sm text-text-secondary">
-          <input type="checkbox" checked={form.active} onChange={(e) => set("active", e.target.checked)} className="size-4 accent-current" />
-          Activo (visible en el frontend)
-        </label>
-        <div className="rounded-xl border border-dashed border-card-border bg-background-gray-secondary p-3 text-xs text-text-secondary">
-          💡 Para usar una imagen nueva: cópiala a <code>StarShop/public/</code> (ej: <code>/mi-banner.png</code>) y escribe esa ruta arriba. El frontend la sirve al instante.
-        </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 pt-1">
           <Button type="submit" appearance="fill" isDisabled={saving} className="flex-1">
             {saving ? "Guardando…" : editingId == null ? "Crear slide" : "Guardar cambios"}
           </Button>
