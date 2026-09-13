@@ -8,16 +8,16 @@ import { cn } from "@/utils/cn";
 import { ReactNode, useState } from "react";
 
 export default function WithLayout({ children }: { children: ReactNode }) {
-  // XL+ sidebar expand/collapse state
+  // LG+ sidebar expand/collapse state (1024)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  // Mobile sheet open state (< xl breakpoint)
+  // Mobile sheet open state (< lg breakpoint)
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   return (
     <div className="flex h-full">
-      {/*  Desktop sidebar (xl+) — always in DOM, toggles width  */}
+      {/*  Desktop sidebar (lg+) — always in DOM, toggles width  */}
       <aside
         style={{
           width: isSidebarOpen ? "270px" : "72px",
@@ -25,12 +25,12 @@ export default function WithLayout({ children }: { children: ReactNode }) {
           transition:
             "width 300ms cubic-bezier(0.4,0,0.2,1), min-width 300ms cubic-bezier(0.4,0,0.2,1)",
         }}
-        className="hidden shrink-0 overflow-hidden xl:block"
+        className="hidden shrink-0 overflow-hidden lg:block"
       >
         <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       </aside>
 
-      {/*  Mobile sidebar (< xl) — Sheet sliding from the left  */}
+      {/*  Mobile sidebar (< lg) — Sheet sliding from the left  */}
 
       <SheetOverlay isOpen={isMobileSheetOpen} onOpenChange={setIsMobileSheetOpen}>
         <SheetContent

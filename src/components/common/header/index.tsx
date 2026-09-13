@@ -18,8 +18,8 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b-[0.5px] border-card-border bg-card-surface-area px-2 py-4 lg:px-5">
-        {/*  Mobile layout (< xl)  3-column grid: menu | logo | dots */}
-        <div className="flex items-center xl:hidden">
+        {/*  Mobile layout (< lg)  3-column grid: menu | logo | dots */}
+        <div className="flex items-center lg:hidden">
           {/* Left: Menu / Hamburger */}
           <div className="flex flex-1 justify-start">
             <button
@@ -57,8 +57,8 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </div>
         </div>
 
-        {/* Desktop layout (xl+) - original layout */}
-        <div className="hidden items-center justify-between xl:flex">
+        {/* Desktop layout (lg+) - original layout */}
+        <div className="hidden items-center justify-between lg:flex">
           {/* Left Side - Search */}
           <div className="max-w-xs flex-1">
             <SearchBar />
@@ -82,7 +82,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 // Mobile Info
 function MobileInfoDrawer({ isOpen }: { isOpen: boolean }) {
   return (
-    <div className={cn("xl:hidden", isOpen ? "block" : "hidden")}>
+    <div className={cn("lg:hidden", isOpen ? "block" : "hidden")}>
       <div className="px-5 py-4 shadow-xs">
         <div className="flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5">
