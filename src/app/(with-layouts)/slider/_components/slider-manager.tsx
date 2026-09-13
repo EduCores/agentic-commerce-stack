@@ -186,10 +186,10 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
               <Input type="number" value={String(form.sortOrder)} onChange={(e) => set("sortOrder", Number(e.target.value))} className="w-full" />
             </label>
           </div>
-          <label className="grid gap-1.5">
+          <label className="grid min-w-0 gap-1.5">
             <span className="text-xs font-medium text-text-secondary">Imagen *</span>
-            <div className="flex gap-2">
-              <Input value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="/LED.png o https://…" className="flex-1" />
+            <div className="flex min-w-0 gap-2">
+              <Input value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="/LED.png o https://…" className="flex-1 min-w-0 truncate" />
               <label className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-lg border border-card-border bg-card-background px-3 py-2 text-xs font-medium text-text-primary hover:bg-background-gray-secondary">
                 Subir img
                 <input
