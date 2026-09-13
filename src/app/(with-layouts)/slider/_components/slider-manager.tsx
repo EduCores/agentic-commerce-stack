@@ -75,6 +75,45 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
     setForm(emptyForm);
   }
 
+  async function fileToWebP(file: File): Promise<string> {
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result ?? ""));
+      reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+      reader.readAsDataURL(file);
+    });
+    // Si ya es WebP, no convertir
+    if (file.type === "image/webp") return dataUrl;
+    // Intenta convertir vía canvas
+    try {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error("No se pudo decodificar la imagen"));
+        i.src = dataUrl;
+      });
+      const canvas = document.createElement("canvas");
+      const maxW = 1920;
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+      if (w > maxW) {
+        h = Math.round((h * maxW) / w);
+        w = maxW;
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return dataUrl;
+      ctx.drawImage(img, 0, 0, w, h);
+      const webp = canvas.toDataURL("image/webp", 0.85);
+      // Algunos navegadores devuelven data:image/png si no soportan WebP
+      if (webp.startsWith("data:image/webp")) return webp;
+      return dataUrl;
+    } catch {
+      return dataUrl;
+    }
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim() || !form.image.trim()) {
@@ -157,13 +196,18 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const f = e.target.files?.[0];
                     if (!f) return;
-                    const reader = new FileReader();
-                    reader.onload = () => set("image", String(reader.result ?? ""));
-                    reader.readAsDataURL(f);
-                    e.target.value = "";
+                    try {
+                      const webp = await fileToWebP(f);
+                      set("image", webp);
+                      if (webp.startsWith("data:image/webp")) toast.success("Imagen convertida a WebP");
+                    } catch (err) {
+                      toast.error(String(err));
+                    } finally {
+                      e.target.value = "";
+                    }
                   }}
                 />
               </label>
@@ -172,7 +216,7 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={form.image} alt="Preview" className="mt-1 h-28 w-full rounded-lg border border-card-border object-cover" />
             ) : null}
-            <span className="text-[11px] leading-4 text-text-tertiary">Pega una URL o ruta <code>/public</code> (ej: <code>/mi-banner.png</code>), o sube un archivo para preview (se guarda como data URL).</span>
+            <span className="text-[11px] leading-4 text-text-tertiary">Pega una URL o ruta <code>/public</code> (ej: <code>/mi-banner.png</code>), o sube un archivo — se convierte a <b>WebP</b> y se guarda como data URL.</span>
           </label>
           <label className="grid gap-1.5">
             <span className="text-xs font-medium text-text-secondary">Gradiente (clases Tailwind)</span>
