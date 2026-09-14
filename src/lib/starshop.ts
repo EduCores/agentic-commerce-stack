@@ -40,6 +40,81 @@ export async function fetchStarshopProducts(): Promise<{ products: StarshopProdu
   return { products: json.products ?? [], syncedAt: json.syncedAt };
 }
 
+// ============================================================
+// Sync MULTI-TENANT: catálogo VIVO por tienda (fuente de verdad).
+// GET {STARSHOP_API_URL}/api/tenant/catalog?tenant=<storeId>
+// — storeId aquí ES el slug del tenant en StarShop (misma identidad
+//   que manda el widget en cada mensaje). Ver docs/SYNC-CONTRACTO.md
+//   en el repo StarShop.
+// ============================================================
+
+/** Payload que devuelve StarShop en /api/tenant/catalog (camelCase del dominio Product). */
+interface TenantCatalogPayload {
+  tenantId?: string;
+  provider?: string;
+  syncedAt?: string;
+  currency?: string;
+  total?: number;
+  products?: Array<{
+    id: string;
+    sku: string;
+    name: string;
+    slug?: string;
+    description?: string | null;
+    shortDescription?: string | null;
+    price: number;
+    originalPrice?: number | null;
+    discount?: number | null;
+    stock?: number;
+    images?: string[];
+    category?: string | null;
+    subcategory?: string | null;
+    brand?: string | null;
+    secCertified?: boolean;
+    isB2B?: boolean;
+    tierPrices?: unknown;
+    tags?: string[];
+    warranty?: string | null;
+  }>;
+}
+
+/** Fila del catálogo por tenant → forma que espera el upsert del sync (StarshopProductRow). */
+export function normalizeTenantProduct(p: NonNullable<TenantCatalogPayload["products"]>[number]): StarshopProductRow {
+  return {
+    externalId: p.id,
+    sku: p.sku,
+    title: p.name,
+    description: p.description ?? null,
+    shortDescription: p.shortDescription ?? null,
+    price: p.price,
+    compareAtPrice: p.originalPrice ?? null,
+    currency: "CLP",
+    stock: p.stock ?? 0,
+    images: p.images ?? [],
+    category: p.category ?? null,
+    subcategory: p.subcategory ?? null,
+    brand: p.brand ?? null,
+    secCertified: p.secCertified ?? false,
+    discount: p.discount ?? null,
+    url: `/producto/${p.id}`,
+  };
+}
+
+/**
+ * Lee el catálogo del tenant (slug = storeId) desde StarShop.
+ * Idempotente del lado ACS: el upsert del sync es por (storeId, sku).
+ */
+export async function fetchTenantCatalog(storeId: string): Promise<{ products: StarshopProductRow[]; syncedAt?: string; provider?: string }> {
+  const res = await fetch(`${starshopBase()}/api/tenant/catalog?tenant=${encodeURIComponent(storeId)}`, { cache: "no-store" });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`StarShop tenant catalog ${res.status}: ${body.slice(0, 200)}`);
+  }
+  const json = (await res.json()) as TenantCatalogPayload;
+  const products = (json.products ?? []).map(normalizeTenantProduct);
+  return { products, syncedAt: json.syncedAt, provider: json.provider };
+}
+
 export interface HeroSlideRow {
   id: number;
   title: string;

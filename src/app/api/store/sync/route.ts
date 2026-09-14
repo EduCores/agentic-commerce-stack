@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/adapters/prisma";
-import { fetchStarshopProducts } from "@/lib/starshop";
+import { fetchTenantCatalog } from "@/lib/starshop";
 
 export const dynamic = "force-dynamic";
 
 /**
  * POST /api/store/sync — Sincronización real contra StarShop.
- * Body: { storeId: string }
- * 1) Lee el catálogo autoritativo de StarShop (GET /api/store/products)
+ * Body: { storeId: string }   (storeId === slug del tenant en StarShop)
+ * 1) Lee el catálogo autoritativo del TENANT en StarShop
+ *    (GET /api/tenant/catalog?tenant=<storeId> — con stock por sucursal
+ *    agregado cuando el provider de la tienda es supabase/prisma)
  * 2) Upsert por (storeId, sku) preservando reservedStock local
  * 3) Registra lastSync en config como antes
  */
@@ -25,7 +27,8 @@ export async function POST(req: Request) {
 
   try {
     if (store.provider === "starshop") {
-      const { products } = await fetchStarshopProducts();
+      // Multi-tenant: cada tienda sincroniza SU catálogo vivo (slug = storeId).
+      const { products } = await fetchTenantCatalog(storeId);
       total = products.length;
       for (const p of products) {
         try {
@@ -97,7 +100,7 @@ export async function POST(req: Request) {
     }
   } catch (err) {
     return NextResponse.json(
-      { error: `No se pudo leer el catálogo de StarShop: ${err instanceof Error ? err.message : String(err)}` },
+      { error: `No se pudo leer el catálogo del tenant en StarShop: ${err instanceof Error ? err.message : String(err)}` },
       { status: 502 },
     );
   }
