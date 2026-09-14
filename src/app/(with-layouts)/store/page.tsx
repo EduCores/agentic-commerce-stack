@@ -1,15 +1,22 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
-import { Button } from "@/components/tailgrids/core/button";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
 import { SyncButton } from "./_components/sync-button";
+import { ConnectButton } from "./_components/connect-button";
 
 export const dynamic = "force-dynamic";
+
+type StoreConfig = {
+  lastSync?: { at: string; synced: number; total: number; errors: number };
+  lastHealthCheck?: { at: string; ok: boolean; total: number | null; latencyMs: number; error: string | null };
+};
 
 export default async function StorePage() {
   const stores = await prisma.storeConnection.findMany({ orderBy: { createdAt: "desc" } }).catch(() => []);
   const products = await prisma.product.findMany({ take: 12, orderBy: { updatedAt: "desc" } }).catch(() => []);
+  const primary = stores[0];
+  const primaryHealth = ((primary?.config as unknown as StoreConfig | null)?.lastHealthCheck) ?? null;
 
   return (
     <div className="space-y-6 p-3 sm:p-6">
@@ -19,7 +26,7 @@ export default async function StorePage() {
           <h2 className="text-xl font-bold text-black dark:text-white">Conexiones de tienda</h2>
           <p className="text-sm text-text-tertiary">Conecta tu tienda — Shopify, WooCommerce, Magento o personalizada. Un solo sistema para vender.</p>
         </div>
-        <Button appearance="fill" className="w-full shrink-0 whitespace-nowrap sm:w-auto">Conectar tienda</Button>
+        <ConnectButton storeId={primary?.id} storeName={primary?.name ?? "tienda"} initial={primaryHealth} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -34,13 +41,25 @@ export default async function StorePage() {
                 <p className="text-xs text-text-tertiary">{s.domain ?? "—"}</p>
                 <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activo" : "Inactivo"}</Badge>
                 {(() => {
-                  const lastSync = (s.config as unknown as { lastSync?: { at: string; synced: number; total: number; errors: number } } | null)?.lastSync;
+                  const cfg = s.config as unknown as StoreConfig | null;
+                  const lastSync = cfg?.lastSync;
                   if (!lastSync) return <p className="text-xs text-text-tertiary">Sin sincronizar todavía.</p>;
                   return (
                     <p className="text-xs text-text-tertiary">
                       Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
                       {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error — reintenta</span>}
                     </p>
+                  );
+                })()}
+                {(() => {
+                  const h = (s.config as unknown as StoreConfig | null)?.lastHealthCheck;
+                  if (!h) return null;
+                  return (
+                    <Badge color={h.ok ? "success" : "gray"}>
+                      {h.ok
+                        ? `Conectada ✓ · ${h.total ?? "—"} productos · ${h.latencyMs}ms`
+                        : `Sin conexión: ${h.error ?? "desconocido"}`}
+                    </Badge>
                   );
                 })()}
                 <SyncButton storeId={s.id} storeName={s.name} />
