@@ -654,3 +654,8 @@
     padding: calc(var(--spacing) * 1);
   }
 }
+
+.text-text-primary {
+  padding-left: 6px;
+  padding-top: 6px;
+}
