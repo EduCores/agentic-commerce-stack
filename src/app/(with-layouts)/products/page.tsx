@@ -24,16 +24,16 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   }));
 
   return (
-    <div className="space-y-6 p-3 sm:p-6">
+    <div className="min-w-0 space-y-6 overflow-hidden p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Productos", href: "/products" }]} />
       <div>
         <h2 className="text-xl font-bold text-black dark:text-white">Productos — Catálogo híbrido</h2>
         <p className="text-sm text-text-tertiary">Híbrido: {providers.join(", ") || "mock"} · {products.length} productos · Una sola fuente en Prisma (te sirve para Shopify/Woo/Mock sin duplicar pantallas).</p>
       </div>
 
-      <Card>
+      <Card className="min-w-0 overflow-hidden">
         <CardHeader><CardTitle>Catálogo universal ({products.length})</CardTitle></CardHeader>
-        <CardContent>
+        <CardContent className="min-w-0">
           <form className="mb-4 flex flex-col gap-2 sm:flex-row">
             <input name="q" defaultValue={q} placeholder="Buscar SKU o título..." className="flex-1 rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
             <button type="submit" className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-button-primary-text">Buscar</button>
