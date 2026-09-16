@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function AiPage() {
   return (
-    <div className="space-y-6 p-3 sm:p-6">
+    <div className="min-w-0 space-y-6 overflow-hidden p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "AI", href: "/ai" }]} />
       <div>
         <h2 className="text-xl font-bold text-black dark:text-white">AI</h2>
