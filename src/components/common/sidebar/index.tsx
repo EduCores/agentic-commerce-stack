@@ -44,7 +44,7 @@ export default function Sidebar({
                     isSidebarOpen
                         ? 'justify-between'
                         : 'flex-col justify-center gap-4',
-                    isMobileSheet ? 'gap-2 px-3 pt-7' : 'px-4 pt-7',
+                    isMobileSheet ? 'gap-2 pl-3 pr-1 pt-7' : 'px-4 pt-7',
                 )}
             >
                 <Link href='/' suppressHydrationWarning aria-label="Ir al panel principal">
