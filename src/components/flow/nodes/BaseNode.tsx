@@ -51,6 +51,12 @@ export function BaseNode({ data, selected }: NodeProps) {
         </div>
       )}
       {d.intent && <p className="mt-1 text-[10px] uppercase tracking-widest text-brand-500">{d.intent}</p>}
+      {(d.prompt || d.model) && (
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {d.prompt && <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-medium text-brand-700">prompt propio</span>}
+          {d.model && <span className="rounded-full bg-background-gray-secondary px-2 py-0.5 text-[10px] text-text-secondary">{d.model.split("/").pop()}</span>}
+        </div>
+      )}
       {!d.agent && d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{d.type}</p>}
       <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
     </div>

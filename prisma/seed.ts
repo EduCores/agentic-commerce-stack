@@ -260,9 +260,11 @@ async function main() {
   });
 
   // 5) Workflow StarShop Router 1→2→6+3→4 (grafo XYFlow)
+  // El grafo y el estado de publicación se CONSERVAN al re-sembrar: las ediciones
+  // hechas en /workflows son la fuente de configuración del router (ver agent/lib/crew-graph.ts).
   await prisma.workflowDefinition.upsert({
     where: { slug: "starshop-intent-router" },
-    update: { graph: starShopRouterGraph, steps: starShopRouterSteps, name: "StarShop Intent Router", description: "1 Welcome → 2 Route By Intent → 3.x Crews (6+3) → 4 Confirm Order", isActive: true, trigger: "eve_tool" },
+    update: { steps: starShopRouterSteps },
     create: {
       slug: "starshop-intent-router",
       name: "StarShop Intent Router",

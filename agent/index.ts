@@ -8,7 +8,8 @@ import { z } from "zod";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
-import { STARSHOP_CREWS, STARSHOP_LANGUAGE_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
+import { STARSHOP_CREWS, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
+import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type GraphCrewOverride } from "./lib/crew-graph";
 import { detectIntent } from "@/lib/eve/detect-intent";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
@@ -143,17 +144,9 @@ async function logRunSafe(data: {
 
 // Intent detection vive en @/lib/eve/detect-intent (LLM con fallback heurístico mock).
 // Whitelist de tools por crew (cada crew solo ve sus tools)
-const CREW_TOOL_MAP: Record<StarShopIntent, string[]> = {
-  product_search: ["searchProducts", "checkStock", "calculatePricing", "navigateTo", "scrapeWebsite"],
-  price_comparison: ["searchProducts", "scrapeWebsite", "calculatePricing"],
-  checkout_support: ["checkStock", "calculatePricing", "checkout", "processPurchase", "navigateTo", "sendEmail"],
-  general_inquiry: ["scrapeWebsite", "navigateTo"],
-  abandoned_cart: ["sendEmail", "searchProducts", "calculatePricing"],
-  return_request: ["scrapeWebsite", "sendEmail", "searchProducts", "orderTracking"],
-  order_tracking: ["orderTracking", "sendEmail", "scrapeWebsite"],
-  escalate_human: ["sendEmail"],
-  admin_ops: ["searchProducts", "checkStock", "orderTracking", "scrapeWebsite", "sendEmail"],
-};
+// Whitelist de tools por intent (definida en prisma/starshop-prompts.ts: misma fuente
+// que usa el grafo publicado, para que código y grafo no puedan divergir).
+const CREW_TOOL_MAP = STARSHOP_CREW_TOOLS;
 
 // Registry para UI y para `ai` SDK (todos los tools)
 export const acsTools = {
@@ -201,20 +194,80 @@ function toAISDKTools(filter?: string[]) {
 }
 
 // Mapa de crews por intención — estático, se construye UNA vez al cargar el módulo
-const CREW_CONFIG_MAP: Record<StarShopIntent, { slug: string; prompt: string; model: string }> = {
-  product_search: { slug: STARSHOP_CREWS.search_and_recommend.slug, prompt: STARSHOP_CREWS.search_and_recommend.prompt, model: STARSHOP_CREWS.search_and_recommend.model },
-  price_comparison: { slug: STARSHOP_CREWS.compare_prices.slug, prompt: STARSHOP_CREWS.compare_prices.prompt, model: STARSHOP_CREWS.compare_prices.model },
-  checkout_support: { slug: STARSHOP_CREWS.checkout_guide.slug, prompt: STARSHOP_CREWS.checkout_guide.prompt, model: STARSHOP_CREWS.checkout_guide.model },
-  general_inquiry: { slug: STARSHOP_CREWS.general_support.slug, prompt: STARSHOP_CREWS.general_support.prompt, model: STARSHOP_CREWS.general_support.model },
-  abandoned_cart: { slug: STARSHOP_CREWS.recover_cart.slug, prompt: STARSHOP_CREWS.recover_cart.prompt, model: STARSHOP_CREWS.recover_cart.model },
-  return_request: { slug: STARSHOP_CREWS.handle_return.slug, prompt: STARSHOP_CREWS.handle_return.prompt, model: STARSHOP_CREWS.handle_return.model },
-  order_tracking: { slug: STARSHOP_CREWS.order_tracking.slug, prompt: STARSHOP_CREWS.order_tracking.prompt, model: STARSHOP_CREWS.order_tracking.model },
-  escalate_human: { slug: STARSHOP_CREWS.escalate_human.slug, prompt: STARSHOP_CREWS.escalate_human.prompt, model: STARSHOP_CREWS.escalate_human.model },
-  admin_ops: { slug: STARSHOP_CREWS.admin_ops.slug, prompt: STARSHOP_CREWS.admin_ops.prompt, model: STARSHOP_CREWS.admin_ops.model },
+// Mapeo StarShopIntent (detectIntent) -> key de STARSHOP_CREWS (prisma/starshop-prompts.ts).
+// OJO: los nombres NO coinciden 1:1 (ej. checkout_support usa el crew checkout_guide).
+const intentToCrewKey: Record<StarShopIntent, keyof typeof STARSHOP_CREWS> = {
+  product_search: "search_and_recommend",
+  price_comparison: "compare_prices",
+  checkout_support: "checkout_guide",
+  general_inquiry: "general_support",
+  abandoned_cart: "recover_cart",
+  return_request: "handle_return",
+  order_tracking: "order_tracking",
+  escalate_human: "escalate_human",
+  admin_ops: "admin_ops",
 };
 
-function getCrewConfig(intent: StarShopIntent) {
-  return CREW_CONFIG_MAP[intent];
+// Tools realmente registradas/instanciadas (para validar overrides del grafo)
+const KNOWN_TOOLS = Object.keys(ALL_TOOL_DEFS) as string[];
+
+// Allowlist de modelos: un typo en el editor jamas rompe el chat (se ignora el override)
+const ALLOWED_MODELS = [
+  "qwen/qwen3-30b-a3b-instruct-2507",
+  "openai/gpt-4o",
+  "google/gemini-2-0-flash-001",
+] as const;
+
+// Cache local de overrides del grafo (60s) compartido por getCrewConfig y el endpoint de chat
+const OVERRIDES_TTL_MS = 60_000;
+let crewOverridesCache: Partial<Record<StarShopIntent, GraphCrewOverride>> | null = null;
+let crewOverridesAt = 0;
+
+/**
+ * Carga (o reutiliza si el cache sigue fresco) los overrides del grafo publicado.
+ * Nunca lanza: si la BD o el grafo fallan, getGraphCrewOverrides devuelve null.
+ */
+export async function refreshCrewOverrides() {
+  if (crewOverridesCache && Date.now() - crewOverridesAt < OVERRIDES_TTL_MS) return crewOverridesCache;
+  crewOverridesCache = await getGraphCrewOverrides(KNOWN_TOOLS, [...ALLOWED_MODELS]);
+  crewOverridesAt = Date.now();
+  return crewOverridesCache;
+}
+
+/** Ultimo mapa de overrides cargado (null = usa config del codigo). */
+export function getCachedCrewOverrides() {
+  return crewOverridesCache;
+}
+
+/** Invalida el cache local y el de crew-graph (tras guardar/publicar un grafo). */
+export function clearCrewGraphCache() {
+  clearGraphCache();
+  crewOverridesCache = null;
+  crewOverridesAt = 0;
+}
+
+/**
+ * Config del crew (slug/prompt/modelo/tools) para un intent.
+ * Prioridad: override validado del grafo publicado > config del codigo (fallback).
+ * Cada request tiene SIEMPRE una config completa: el agente nunca corre sin prompt/modelo.
+ */
+export async function getCrewConfig(intent: StarShopIntent): Promise<{ slug: string; prompt: string; model: string; tools: string[] }> {
+  const base = STARSHOP_CREWS[intentToCrewKey[intent]];
+  const baseTools = CREW_TOOL_MAP[intent] ?? Object.keys(ALL_TOOL_DEFS);
+
+  const overrides = await refreshCrewOverrides();
+  const ov = overrides?.[intent];
+
+  // Sin grafo publicado (o grafo invalido) para este intent -> config del codigo
+  if (!ov) return { slug: base.slug, prompt: base.prompt, model: base.model, tools: baseTools };
+
+  // Solo campos ya validados por crew-graph (prompt > 40 chars, modelo en allowlist, tools del registry)
+  return {
+    slug: base.slug,
+    prompt: ov.prompt ?? base.prompt,
+    model: ov.model ?? base.model,
+    tools: ov.tools ?? baseTools,
+  };
 }
 
 /**
@@ -264,29 +317,6 @@ async function resolveAgent(params: { agentSlug: string; storeId?: string; _over
 
 export type RunAgentResult = Awaited<ReturnType<typeof runAgent>>;
 
-/** Flujo 1→2→6+3→4 — detecta intent (LLM con fallback heurístico) y despacha al crew */
-export async function runStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
-  // La clasificación considera el historial para no cambiar de crew a mitad de conversación.
-  const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
-  const detectedIntent: StarShopIntent = detected.intent;
-
-  const crew = getCrewConfig(detectedIntent);
-  const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
-
-  logRouterWorkflow(params.input, detectedIntent, "ACS-ROUTER");
-
-  // Delega al runAgent del crew con historial (runAgent arma los mensajes UNA sola vez)
-  const inner = await runAgent({
-    agentSlug: crew.slug,
-    input: params.input,
-    storeId: params.storeId,
-    history: params.history,
-    _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools },
-  } as never);
-
-  return { ...inner, detectedIntent, crew: crew.slug, allowedTools, intentConfidence: detected.confidence, intentSource: detected.source };
-}
-
 /**
  * Admin Ops dedicado — NO usa heurística, siempre crew admin_ops.
  * Endpoint separado /api/admin/chat: sin flag que olvidar, sin tildes que fallar,
@@ -294,7 +324,7 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
  */
 export async function runAdminOps(params: { input: string; storeId?: string; history?: unknown[] }) {
   const detectedIntent: StarShopIntent = "admin_ops";
-  const crew = getCrewConfig(detectedIntent);
+  const crew = await getCrewConfig(detectedIntent);
   const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
 
   logRouterWorkflow(params.input, detectedIntent, "ACS-ADMIN");
@@ -419,8 +449,13 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
 export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
   const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
   const detectedIntent = detected.intent;
-  const crew = getCrewConfig(detectedIntent);
-  const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
+
+  // Usar cache de overrides si ya fue refresheado, o refrescarlo
+  if (!crewOverridesCache) {
+    await refreshCrewOverrides();
+  }
+  const crew = await getCrewConfig(detectedIntent);
+  // Override validado del grafo (o config del código como fallback)
 
   logRouterWorkflow(params.input, detectedIntent, "ACS-ROUTER-STREAM");
 
@@ -431,11 +466,35 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
     input: params.input,
     storeId: params.storeId,
     history: params.history,
-    _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools },
+    _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools: crew.tools },
   } as never)) {
     yield chunk;
   }
 }
 
-const defaultExport = { runAgent, runAdminOps, streamAgent, runStarShopFlow, streamStarShopFlow, tools: acsTools };
+// Wrapper non-streaming de runAgent con el flow StarShop (para compat con chat endpoint)
+export async function runStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
+  const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
+  const detectedIntent = detected.intent;
+  const crew = await getCrewConfig(detectedIntent);
+  // Override validado del grafo (o config del código como fallback)
+  logRouterWorkflow(params.input, detectedIntent, "ACS-ROUTER");
+  const agentResult = await runAgent({
+    agentSlug: crew.slug,
+    input: params.input,
+    storeId: params.storeId,
+    history: params.history,
+    _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools: crew.tools },
+  } as never);
+  return {
+    ...(agentResult as { text: string; toolCalls?: unknown[] }),
+    detectedIntent,
+    crew: crew.slug,
+    intentConfidence: detected.confidence,
+    intentSource: detected.source,
+    toolCalls: (agentResult as { toolCalls?: unknown[] })?.toolCalls ?? [],
+  };
+}
+
+const defaultExport = { runAgent, runAdminOps, streamAgent, runStarShopFlow, streamStarShopFlow, tools: ALL_TOOL_DEFS, clearCrewGraphCache };
 export default defaultExport;

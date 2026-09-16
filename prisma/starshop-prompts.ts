@@ -193,3 +193,21 @@ export const STARSHOP_INTENTS = [
 ] as const;
 
 export type StarShopIntent = typeof STARSHOP_INTENTS[number];
+
+/**
+ * Whitelist de tools por intent — FUENTE ÚNICA compartida por:
+ * - agent/index.ts (config del código, fallback del runtime)
+ * - src/workflows/starshop-router.ts (grafo publicado/editable en /workflows)
+ * Debe coincidir con el registry real de tools del agente (ALL_TOOL_DEFS en agent/index.ts).
+ */
+export const STARSHOP_CREW_TOOLS: Record<StarShopIntent, string[]> = {
+  product_search: ["searchProducts", "checkStock", "calculatePricing", "navigateTo", "scrapeWebsite"],
+  price_comparison: ["searchProducts", "scrapeWebsite", "calculatePricing"],
+  checkout_support: ["checkStock", "calculatePricing", "checkout", "processPurchase", "navigateTo", "sendEmail"],
+  general_inquiry: ["scrapeWebsite", "navigateTo"],
+  abandoned_cart: ["sendEmail", "searchProducts", "calculatePricing"],
+  return_request: ["scrapeWebsite", "sendEmail", "searchProducts", "orderTracking"],
+  order_tracking: ["orderTracking", "sendEmail", "scrapeWebsite"],
+  escalate_human: ["sendEmail"],
+  admin_ops: ["searchProducts", "checkStock", "orderTracking", "scrapeWebsite", "sendEmail"],
+};

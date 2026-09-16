@@ -1,7 +1,7 @@
 ﻿import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySessionToken, AUTH_COOKIE } from "@/lib/auth";
-import { runAgent, runStarShopFlow } from "@/../agent";
+import { runAgent, runStarShopFlow, refreshCrewOverrides } from "@/../agent";
 import { guardChatRequest, corsHeaders, isOriginAllowed } from "@/lib/api/chat-guard";
 
 export async function OPTIONS(req: Request) {
@@ -46,24 +46,43 @@ export async function POST(req: Request) {
     return new Response(r.body, { status: r.status, headers: { "Content-Type": "text/event-stream", ...guard.headers } });
   }
   try {
-    // Flujo 1→2→9 por defecto — router StarShop. isAdmin fuerza admin_ops para el admin.
+        // Flujo 1→2→9 por defecto — router StarShop. isAdmin fuerza admin_ops para el admin.
     const shouldUseFlow = useFlow !== false;
-    const result = shouldUseFlow
-      ? await runStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin })
-      : await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
-    const detectedIntent = (result as unknown as { detectedIntent?: string }).detectedIntent;
-    const crew = (result as unknown as { crew?: string }).crew;
-    const intentConfidence = (result as unknown as { intentConfidence?: number }).intentConfidence ?? null;
-    const intentSource = (result as unknown as { intentSource?: string }).intentSource ?? "heuristic";
-    const rawCalls = (result.toolCalls ?? []) as unknown as Array<Record<string, unknown>>;
-    const toolCalls = rawCalls.map((tc) => {
-      const toolName = (tc.toolName ?? tc.name) as string | undefined;
+    let detectedIntent: string | undefined, crew: string | undefined, intentConfidence: number | null, intentSource: string;
+    let result: unknown;
+    let rawCalls: Array<Record<string, unknown>> = [];
+    let toolCalls: Array<{ toolName: string; args: Record<string, unknown>; output: Record<string, unknown> }> = [];
+    let text: string;
+
+            if (shouldUseFlow) {
+      // Refrescar overrides del grafo (cached 60s) antes de ejecutar el flow
+      await refreshCrewOverrides();
+      result = await runStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin });
+      const r = result as unknown as { detectedIntent?: string; crew?: string; intentConfidence?: number; intentSource?: string; toolCalls?: Array<Record<string, unknown>>; text?: string };
+      detectedIntent = r.detectedIntent;
+      crew = r.crew;
+      intentConfidence = r.intentConfidence ?? null;
+      intentSource = r.intentSource ?? "heuristic";
+      rawCalls = r.toolCalls ?? [];
+      text = (r.text ?? "").trim();
+    } else {
+      result = await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
+      detectedIntent = undefined;
+      crew = undefined;
+      intentConfidence = null;
+      intentSource = "direct";
+      rawCalls = [];
+      text = ((result as unknown as { text?: string }).text ?? "").trim();
+    }
+        const toolCallsMapped: Array<{ toolName: string; args: Record<string, unknown>; output: Record<string, unknown> }> = rawCalls.map((tc) => {
+      const toolName = ((tc.toolName ?? tc.name) as string | undefined) ?? "unknown";
       const input = (tc.input ?? tc.args ?? {}) as Record<string, unknown>;
       const output = (tc.output ?? {}) as Record<string, unknown>;
       const args: Record<string, unknown> = { ...input };
       if (typeof output.navigateTo === "string") args.path = output.navigateTo;
       return { toolName, args, output };
     });
+    toolCalls = toolCallsMapped;
 
     // Inyección robusta de navegación: si el LLM llamó searchProducts pero NO navigateTo,
     // agregamos /busqueda?q= automáticamente para garantizar la experiencia.
@@ -82,9 +101,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // Texto de respaldo: si el LLM devolvió tool calls sin texto, igual respondemos algo útil.
+        // Texto de respaldo: si el LLM devolvió tool calls sin texto, igual respondemos algo útil.
     // (finalText ya incluye directFallback desde runAgent; texto vacío aquí significa que todo falló)
-    let text = (result.text ?? "").trim();
     if (!text) {
       if (autoQuery) {
         text = `Busqueda encontrada para "${autoQuery}"! Te abri la ventana de resultados con todos los productos disponibles. Le filtro por precio o potencia?`;
