@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/adapters/prisma";
+import { DEMO_MODE } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,25 @@ export async function GET() {
       products: s._count.products,
       orders: s._count.orders,
     }));
+
+    // DEMO_MOCK: marketing activo sin datos reales
+    if (DEMO_MODE && orders.length === 0) {
+      return NextResponse.json({
+        channels: [
+          { channel: "starshop", spend: 120000, clicks: 840, convRate: 4.2, revenue: 680000 },
+          { channel: "shopify", spend: 80000, clicks: 520, convRate: 3.8, revenue: 420000 },
+        ],
+        funnel: [
+          { stage: "Impresiones", value: 3200 },
+          { stage: "Visitas", value: 960 },
+          { stage: "Carritos", value: 240 },
+          { stage: "Pedidos", value: 80 },
+          { stage: "Pagados", value: 62 },
+        ],
+        campaigns: [{ id: "demo", name: "Starshop Frontend — starshop", active: true, products: 48, orders: 80 }],
+        totals: { impressions: 3200, revenue: 1100000 },
+      });
+    }
 
     return NextResponse.json({ channels, funnel, campaigns, totals: { impressions: funnel[0].value, revenue: orders.reduce((a, o) => a + Number(o.total), 0) } });
   } catch (e) {

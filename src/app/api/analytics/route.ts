@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/adapters/prisma";
+import { DEMO_MODE } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,25 @@ export async function GET(req: Request) {
     const topContent = Object.values(viewsByProduct).sort((a, b) => b.views - a.views).slice(0, 6);
 
     const total = orders.reduce((a, o) => a + Number(o.total), 0);
+
+    // DEMO_MOCK: analítica activa sin datos reales
+    if (DEMO_MODE && orders.length === 0) {
+      const mockSalesByDay = Array.from({ length: 7 }).map((_, i) => {
+        const d = new Date(); d.setDate(d.getDate() - (6 - i));
+        return { date: d.toISOString().slice(0, 10), total: [80000, 120000, 95000, 210000, 180000, 250000, 310000][i], orders: [2,4,3,6,5,8,7][i] };
+      });
+      return NextResponse.json({
+        salesByDay: mockSalesByDay,
+        byStatus: [{ status: "PAID", count: 42 }, { status: "PENDING", count: 7 }, { status: "FULFILLED", count: 31 }],
+        bySource: [{ source: "starshop", count: 58 }, { source: "shopify", count: 22 }],
+        topContent: [
+          { sku: "TAL-20V-01", title: "Taladro percutor 20V", views: 342, uniques: 98 },
+          { sku: "LED-36W-03", title: "Panel LED 36W", views: 298, uniques: 87 },
+        ],
+        lowStock: [{ title: "Sierra circular 7-1/4", sku: "SIE-714-02", stock: 3 }, { title: "Taladro percutor 20V", sku: "TAL-20V-01", stock: 5 }],
+        totals: { orders: 80, revenue: 1240000 },
+      });
+    }
 
     if (format === "csv") {
       const esc = (v: string | number) => {

@@ -56,7 +56,7 @@ export default function Sidebar({
                     className={cn(
                         'transition-colors',
                         isMobileSheet
-                            ? 'shrink-0 rounded-lg p-2.5 text-icon-tertiary hover:bg-background-gray-primary hover:text-text-primary [&_svg]:size-6'
+                            ? 'shrink-0 rounded-lg p-3.5 text-icon-tertiary hover:bg-background-gray-primary hover:text-text-primary [&_svg]:size-8'
                             : 'p-1.5 text-icon-tertiary hover:text-text-secondary',
                     )}
                     aria-label={

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/adapters/prisma";
+import { DEMO_MODE } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,24 @@ export async function GET() {
       ...activities.map((a) => ({ id: a.id, text: `${a.agent.name} ejecutado`, at: a.createdAt, kind: "agent" })),
       ...stepLogs.map((s) => ({ id: s.id, text: `${s.stepName} → ${s.status}`, at: s.createdAt, kind: "workflow" })),
     ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 8);
+
+    // DEMO_MOCK: CRM activo sin datos reales
+    if (DEMO_MODE && customers.length === 0) {
+      const now = new Date();
+      return NextResponse.json({
+        leads: [
+          { id: "1", name: "Constructora Andes", email: "contacto@andes.cl", deals: 5, revenue: 420000, performance: "Alta" },
+          { id: "2", name: "Ferretería Sur", email: "ventas@sur.cl", deals: 3, revenue: 180000, performance: "Media" },
+        ],
+        growth: Array.from({ length: 6 }).map((_, i) => ({ week: `S-${i+1}`, leads: [2,4,3,6,5,8][i] })),
+        tasks: [{ id: "t1", title: "Revisar pedido DEMO-1001 (PENDING)", due: "Hoy", type: "order" }],
+        recentActivities: [
+          { id: "a1", text: "sales-assistant ejecutado", at: now, kind: "agent" },
+          { id: "s1", text: "RESERVE_STOCK → COMPLETED", at: now, kind: "workflow" },
+        ],
+        totals: { customers: 2 },
+      });
+    }
 
     return NextResponse.json({ leads, growth, tasks, recentActivities, totals: { customers: customers.length } });
   } catch (e) {
