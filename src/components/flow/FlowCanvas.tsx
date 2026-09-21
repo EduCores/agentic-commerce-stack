@@ -27,6 +27,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { Badge } from "@/components/tailgrids/core/badge";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card } from "@/components/tailgrids/core/card";
 import { cn } from "@/utils/cn";
@@ -373,18 +374,13 @@ export default function FlowCanvas({
       {/* ── Lienzo ─────────────────────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <Card className="flex flex-wrap items-center gap-2 py-3">
-          <span
-            className={cn(
-              "rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest",
-              isLoading ? "bg-background-gray-secondary text-text-tertiary" : isLive ? "bg-emerald-100 text-emerald-700" : "bg-background-gray-secondary text-text-tertiary",
-            )}
-          >
-            {isLoading ? "Cargando" : isLive ? "🟢 Publicado" : "Borrador"}
-          </span>
+          <Badge color={isLoading ? "gray" : isLive ? "success" : "gray"}>
+            {isLoading ? "Cargando" : isLive ? "Publicado" : "Borrador"}
+          </Badge>
           <span className="text-[11px] text-text-tertiary">
             {isLive ? "El agente lee prompt/modelo/tools de estos nodos." : "El agente usa la configuración del código hasta que publiques."}
           </span>
-          {dirty && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Cambios sin guardar</span>}
+          {dirty && <Badge color="warning">Cambios sin guardar</Badge>}
           <div className="ml-auto flex flex-wrap gap-2">
             <Button size="sm" variant="ghost" appearance="outline" isDisabled={readOnly} onClick={handleAutoLayout}>
               Auto-orden
@@ -559,8 +555,10 @@ export default function FlowCanvas({
                       disabled={readOnly}
                       onClick={() => toggleTool(tool)}
                       className={cn(
-                        "rounded-full border px-2 py-0.5 text-[10px] transition disabled:cursor-not-allowed",
-                        active ? "border-brand-500 bg-brand-100 font-semibold text-brand-700" : "border-card-border bg-card-background text-text-tertiary hover:border-brand-500",
+                        "rounded-lg border px-2 py-0.5 text-[10px] font-medium transition disabled:cursor-not-allowed",
+                        active
+                          ? "border-transparent bg-badge-primary-background text-badge-primary-text"
+                          : "border-transparent bg-badge-neutral-background text-badge-neutral-text hover:border-brand-500",
                       )}
                     >
                       {tool}
@@ -619,7 +617,7 @@ export default function FlowCanvas({
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Inspector</p>
               <p className="mt-1 text-[11px] leading-4 text-text-secondary">
-                Selecciona un nodo crew o una conexión para editar sus valores. El bloque "Cómo funciona" está debajo del diagrama.
+                Selecciona un nodo crew o una conexión para editar sus valores. El bloque «Cómo funciona» está debajo del diagrama.
               </p>
             </div>
           </>

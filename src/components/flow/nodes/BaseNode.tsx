@@ -2,6 +2,7 @@
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { cn } from "@/utils/cn";
+import { Badge } from "@/components/tailgrids/core/badge";
 import type { FlowNodeData } from "../types";
 import { NODE_LABEL_ES, NODE_STATUS_ES, NODE_TYPE_ES, INTENT_LABEL_ES } from "../types";
 
@@ -11,6 +12,13 @@ const statusRing: Record<string, string> = {
   failed: "ring-2 ring-red-500",
   pending: "ring-1 ring-gray-300",
   idle: "",
+};
+
+const statusColor: Record<string, "success" | "warning" | "error" | "gray"> = {
+  completed: "success",
+  running: "warning",
+  failed: "error",
+  pending: "gray",
 };
 
 export function BaseNode({ data, selected }: NodeProps) {
@@ -28,17 +36,9 @@ export function BaseNode({ data, selected }: NodeProps) {
         <span className="h-2 w-2 rounded-full bg-brand-500" />
         <span className="text-sm font-semibold text-text-primary">{NODE_LABEL_ES[d.label] ?? d.label}</span>
         {d.status && d.status !== "idle" && (
-          <span
-            className={cn(
-              "ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
-              d.status === "completed" && "bg-emerald-100 text-emerald-700",
-              d.status === "running" && "bg-amber-100 text-amber-700",
-              d.status === "failed" && "bg-red-100 text-red-700",
-              d.status === "pending" && "bg-gray-100 text-gray-600"
-            )}
-          >
+          <Badge color={statusColor[d.status] ?? "gray"} className="ml-auto">
             {NODE_STATUS_ES[d.status] ?? d.status}
-          </span>
+          </Badge>
         )}
       </div>
       {d.description && <p className="mt-1.5 text-xs leading-4 text-text-tertiary line-clamp-2">{d.description}</p>}
@@ -46,7 +46,9 @@ export function BaseNode({ data, selected }: NodeProps) {
       {d.tools && d.tools.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {d.tools.slice(0, 3).map((t) => (
-            <span key={t} className="rounded-full bg-background-gray-secondary px-2 py-0.5 text-[10px] text-text-secondary">{t}</span>
+            <Badge key={t} color="gray" className="text-[10px]">
+              {t}
+            </Badge>
           ))}
           {d.tools.length > 3 && <span className="text-[10px] text-text-tertiary">+{d.tools.length - 3}</span>}
         </div>
@@ -54,8 +56,12 @@ export function BaseNode({ data, selected }: NodeProps) {
       {d.intent && <p className="mt-1 text-[10px] uppercase tracking-widest text-brand-500">{INTENT_LABEL_ES[d.intent] ?? d.intent}</p>}
       {(d.prompt || d.model) && (
         <div className="mt-1.5 flex flex-wrap gap-1">
-          {d.prompt && <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-medium text-brand-700">prompt propio</span>}
-          {d.model && <span className="rounded-full bg-background-gray-secondary px-2 py-0.5 text-[10px] text-text-secondary">{d.model.split("/").pop()}</span>}
+          {d.prompt && (
+            <Badge color="primary" className="text-[10px]">
+              prompt propio
+            </Badge>
+          )}
+          {d.model && <Badge color="gray" className="text-[10px]">{d.model.split("/").pop()}</Badge>}
         </div>
       )}
       {!d.agent && d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{NODE_TYPE_ES[d.type] ?? d.type}</p>}
