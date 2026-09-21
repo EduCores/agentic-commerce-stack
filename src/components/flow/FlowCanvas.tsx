@@ -31,7 +31,7 @@ import { Button } from "@/components/tailgrids/core/button";
 import { Card } from "@/components/tailgrids/core/card";
 import { cn } from "@/utils/cn";
 import { BaseNode } from "./nodes/BaseNode";
-import { NODE_PALETTE, FLOW_INTENTS, FLOW_MIN_PROMPT_LENGTH, FLOW_MODELS, FLOW_TOOLS, type FlowGraph, type FlowNodeData, type FlowNodeType } from "./types";
+import { NODE_PALETTE, FLOW_INTENTS, FLOW_MIN_PROMPT_LENGTH, FLOW_MODELS, FLOW_TOOLS, INTENT_LABEL_ES, type FlowGraph, type FlowNodeData, type FlowNodeType } from "./types";
 
 const nodeTypes = { base: BaseNode };
 type RFInstance = ReactFlowInstance<Node, Edge>;
@@ -127,7 +127,7 @@ function toFlowEdges(graph: FlowGraph): Edge[] {
     id: e.id,
     source: e.source,
     target: e.target,
-    label: typeof e.label === "string" ? e.label : "",
+    label: typeof e.label === "string" ? (INTENT_LABEL_ES[e.label] ?? e.label) : "",
     type: "smoothstep",
     markerEnd: { type: MarkerType.ArrowClosed },
   }));
@@ -387,7 +387,7 @@ export default function FlowCanvas({
           {dirty && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Cambios sin guardar</span>}
           <div className="ml-auto flex flex-wrap gap-2">
             <Button size="sm" variant="ghost" appearance="outline" isDisabled={readOnly} onClick={handleAutoLayout}>
-              Auto-layout
+              Auto-orden
             </Button>
             <Button size="sm" variant="ghost" appearance="outline" isDisabled={readOnly || saving || !onSave} onClick={handleSave}>
               {saving ? "Guardando..." : "Guardar cambios"}
@@ -484,7 +484,7 @@ export default function FlowCanvas({
                 <option value="">— sin intent (nodo informativo) —</option>
                 {FLOW_INTENTS.map((intent) => (
                   <option key={intent} value={intent}>
-                    {intent}
+                    {INTENT_LABEL_ES[intent] ?? intent} ({intent})
                   </option>
                 ))}
               </select>
@@ -611,7 +611,7 @@ export default function FlowCanvas({
                 Tienes cambios sin guardar: guarda antes de publicar para que el agente los reciba.
               </p>
             )}
-            {workflowSlug && <p className="text-[10px] text-text-tertiary">Workflow: {workflowSlug}</p>}
+            {workflowSlug && <p className="text-[10px] text-text-tertiary">Flujo: {workflowSlug}</p>}
           </>
         )}
       </Card>

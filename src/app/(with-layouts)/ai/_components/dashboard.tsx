@@ -41,7 +41,7 @@ export function AiDashboard() {
         </CardContent>
       </Card>
       <Card className="min-w-0 overflow-hidden md:col-span-3">
-        <CardHeader><CardTitle className="text-sm">Actividad reciente</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Actividad del Agente</CardTitle></CardHeader>
         <CardContent className="min-w-0 space-y-1.5 break-words">
           {data.recent.length === 0 ? <p className="text-sm text-text-tertiary">Sin ejecuciones aún.</p> : data.recent.map((r) => (
             <div key={r.id} className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">

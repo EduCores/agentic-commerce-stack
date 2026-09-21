@@ -3,6 +3,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { cn } from "@/utils/cn";
 import type { FlowNodeData } from "../types";
+import { NODE_LABEL_ES, NODE_STATUS_ES, NODE_TYPE_ES, INTENT_LABEL_ES } from "../types";
 
 const statusRing: Record<string, string> = {
   running: "ring-2 ring-amber-400 animate-pulse",
@@ -25,7 +26,7 @@ export function BaseNode({ data, selected }: NodeProps) {
       <Handle type="target" position={Position.Top} className="!bg-gray-400" />
       <div className="flex items-center gap-2">
         <span className="h-2 w-2 rounded-full bg-brand-500" />
-        <span className="text-sm font-semibold text-text-primary">{d.label}</span>
+        <span className="text-sm font-semibold text-text-primary">{NODE_LABEL_ES[d.label] ?? d.label}</span>
         {d.status && d.status !== "idle" && (
           <span
             className={cn(
@@ -36,7 +37,7 @@ export function BaseNode({ data, selected }: NodeProps) {
               d.status === "pending" && "bg-gray-100 text-gray-600"
             )}
           >
-            {d.status}
+            {NODE_STATUS_ES[d.status] ?? d.status}
           </span>
         )}
       </div>
@@ -50,14 +51,14 @@ export function BaseNode({ data, selected }: NodeProps) {
           {d.tools.length > 3 && <span className="text-[10px] text-text-tertiary">+{d.tools.length - 3}</span>}
         </div>
       )}
-      {d.intent && <p className="mt-1 text-[10px] uppercase tracking-widest text-brand-500">{d.intent}</p>}
+      {d.intent && <p className="mt-1 text-[10px] uppercase tracking-widest text-brand-500">{INTENT_LABEL_ES[d.intent] ?? d.intent}</p>}
       {(d.prompt || d.model) && (
         <div className="mt-1.5 flex flex-wrap gap-1">
           {d.prompt && <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-medium text-brand-700">prompt propio</span>}
           {d.model && <span className="rounded-full bg-background-gray-secondary px-2 py-0.5 text-[10px] text-text-secondary">{d.model.split("/").pop()}</span>}
         </div>
       )}
-      {!d.agent && d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{d.type}</p>}
+      {!d.agent && d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{NODE_TYPE_ES[d.type] ?? d.type}</p>}
       <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
     </div>
   );

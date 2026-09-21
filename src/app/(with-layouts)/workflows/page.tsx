@@ -54,7 +54,7 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
                 }`}
               >
                 {w.name}
-                {w.isActive && <span className="ml-2 text-[10px] uppercase tracking-widest">live</span>}
+                {w.isActive && <span className="ml-2 text-[10px] uppercase tracking-widest">en vivo</span>}
               </Link>
             ))}
           </div>
