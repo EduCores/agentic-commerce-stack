@@ -48,3 +48,4 @@ next-env.d.ts
 # Logs locales del dev server
 acs-dev-*.log
 
+dev-server.log
