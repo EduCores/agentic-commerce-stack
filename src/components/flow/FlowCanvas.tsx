@@ -450,6 +450,29 @@ export default function FlowCanvas({
             </p>
           )}
         </Card>
+
+        {/* ── Cómo funciona ─────────────────────────────────────────────────── */}
+        <Card className="shrink-0 space-y-2 p-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Cómo funciona</p>
+            <p className="mt-1 text-[11px] leading-4 text-text-secondary">
+              Este grafo es la configuración del router del agente cuando está <strong>publicado</strong>.
+            </p>
+          </div>
+          <ol className="space-y-1.5 text-[11px] leading-4 text-text-tertiary">
+            <li>1. Selecciona un nodo crew y edita su <strong>prompt</strong>, <strong>modelo</strong> y <strong>tools</strong>.</li>
+            <li>2. El campo <strong>Intent</strong> decide a qué conversación aplica el nodo.</li>
+            <li>3. <strong>Guardar cambios</strong> persiste el borrador (no afecta al agente).</li>
+            <li>4. <strong>Publicar</strong> activa el grafo: el agente lo usa en ~60 s.</li>
+            <li>5. Si algo queda inválido, el agente ignora ese campo y usa el código.</li>
+          </ol>
+          {dirty && (
+            <p className="rounded-lg bg-amber-100 p-2 text-[10px] leading-4 font-semibold text-amber-700">
+              Tienes cambios sin guardar: guarda antes de publicar para que el agente los reciba.
+            </p>
+          )}
+          {workflowSlug && <p className="text-[10px] text-text-tertiary">Flujo: {workflowSlug}</p>}
+        </Card>
       </div>
 
       {/* ── Inspector ──────────────────────────────────────────────────────── */}
@@ -594,24 +617,11 @@ export default function FlowCanvas({
         ) : (
           <>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Cómo funciona</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Inspector</p>
               <p className="mt-1 text-[11px] leading-4 text-text-secondary">
-                Este grafo es la configuración del router del agente cuando está <strong>publicado</strong>.
+                Selecciona un nodo crew o una conexión para editar sus valores. El bloque "Cómo funciona" está debajo del diagrama.
               </p>
             </div>
-            <ol className="space-y-1.5 text-[11px] leading-4 text-text-tertiary">
-              <li>1. Selecciona un nodo crew y edita su <strong>prompt</strong>, <strong>modelo</strong> y <strong>tools</strong>.</li>
-              <li>2. El campo <strong>Intent</strong> decide a qué conversación aplica el nodo.</li>
-              <li>3. <strong>Guardar cambios</strong> persiste el borrador (no afecta al agente).</li>
-              <li>4. <strong>Publicar</strong> activa el grafo: el agente lo usa en ~60 s.</li>
-              <li>5. Si algo queda inválido, el agente ignora ese campo y usa el código.</li>
-            </ol>
-            {dirty && (
-              <p className="rounded-lg bg-amber-100 p-2 text-[10px] leading-4 font-semibold text-amber-700">
-                Tienes cambios sin guardar: guarda antes de publicar para que el agente los reciba.
-              </p>
-            )}
-            {workflowSlug && <p className="text-[10px] text-text-tertiary">Flujo: {workflowSlug}</p>}
           </>
         )}
       </Card>
