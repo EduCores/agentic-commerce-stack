@@ -82,10 +82,7 @@ export function TemplateSection({ templates, onReload }: Props) {
                 {t.builtin && <Badge color="primary">sistema</Badge>}
                 <Badge color={t.isActive ? "success" : "gray"}>{t.isActive ? "activa" : "inactiva"}</Badge>
               </CardTitle>
-              <p className="text-xs text-text-tertiary">
-                <code>{t.key}</code>
-                {t.description ? ` · ${t.description}` : ""}
-              </p>
+              {t.description && <p className="text-xs text-text-tertiary">{t.description}</p>}
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="truncate text-xs text-text-secondary" title={t.subject}>

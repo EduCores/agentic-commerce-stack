@@ -117,7 +117,7 @@ export function EmailsStudio() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <Badge color={mocked ? "gray" : "success"}>{mocked ? "modo prueba (sin RESEND_API_KEY)" : "envío real por Resend"}</Badge>
-        <Badge color="primary">cron cada hora + botón Procesar ahora</Badge>
+        <Badge color="primary">automático cada hora + botón Procesar ahora</Badge>
       </div>
       <TabRoot defaultValue="plantillas">
         <TabList>

@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { AiActivityChart } from "./activity-chart";
 import { AiAgentsTable } from "./agents-table";
 import type { AiStats, AiRange } from "./types";
+import { AGENT_STATUS_ES } from "./types";
 import Link from "next/link";
+import { Activity, BadgeCheck, Bot, Wallet } from "lucide-react";
 
 export function AiDashboard() {
   const [days, setDays] = useState<AiRange>(7);
@@ -19,25 +20,78 @@ export function AiDashboard() {
   if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando AI...</CardContent></Card>;
   if (!data) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Sin datos</CardContent></Card>;
 
+  const avgCost = data.totals.requests > 0 ? data.totals.cost / data.totals.requests : 0;
+  const providerMain = data.providers[0];
+
   return (
     <div className="grid min-w-0 gap-4 md:grid-cols-3">
-      <Card className="min-w-0 overflow-hidden">
-        <CardHeader><CardTitle className="text-sm">Analítica de costos de AI</CardTitle></CardHeader>
-        <CardContent className="min-w-0 break-words">
-          <p className="text-2xl font-bold">${data.totals.cost.toLocaleString("es-CL")}</p>
-          <p className="text-xs text-text-tertiary">{data.totals.requests} solicitudes · {data.totals.successRate}% éxito · {data.totals.activeAgents} agentes activos</p>
-          <div className="mt-3 space-y-2 border-t border-card-border pt-3">
-            <p className="text-xs font-medium text-text-secondary">Distribución de proveedores de AI</p>
-            {data.providers.map((p) => (
-              <div key={p.name} className="flex min-w-0 items-center justify-between gap-2 text-sm">
-                <span className="min-w-0 break-words font-mono text-xs">{p.name}</span>
-                <Badge color="gray">{p.pct}%</Badge>
-              </div>
-            ))}
-            <Link href="/admin" className="text-xs font-medium text-brand-600 underline">Probar en /admin</Link>
+      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-primary-500 to-brand-500 p-6 text-white md:col-span-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold tracking-[-0.2px]">Analítica de costos de AI</h3>
+            <p className="text-xs text-white/75">
+              OpenRouter · {data.totals.requests.toLocaleString("es-CL")} solicitudes en {days} días · {providerMain?.name ?? "openrouter/qwen"} lidera con {providerMain?.pct ?? 72}%
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <Link href="/admin" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/20">
+            Probar en /admin →
+          </Link>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
+                <Wallet />
+              </span>
+              <p className="text-xs font-medium text-white/80">Costo total</p>
+            </div>
+            <p className="mt-2 text-2xl font-extrabold tracking-tight">${data.totals.cost.toLocaleString("es-CL")}</p>
+            <p className="text-xs text-white/70">${avgCost.toFixed(2)} por solicitud · modelo qwen3-30b</p>
+          </div>
+          <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
+                <Activity />
+              </span>
+              <p className="text-xs font-medium text-white/80">Solicitudes</p>
+            </div>
+            <p className="mt-2 text-2xl font-extrabold tracking-tight">{data.totals.requests.toLocaleString("es-CL")}</p>
+            <p className="text-xs text-white/70">{Math.round(data.totals.requests / days)} por día promedio</p>
+          </div>
+          <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
+                <BadgeCheck />
+              </span>
+              <p className="text-xs font-medium text-white/80">Tasa de éxito</p>
+            </div>
+            <p className="mt-2 text-2xl font-extrabold tracking-tight">{data.totals.successRate.toLocaleString("es-CL")}%</p>
+            <p className="text-xs text-white/70">{data.totals.successRate >= 95 ? "Excelente" : data.totals.successRate >= 85 ? "Buena" : "Revisar"} · objetivo 95%</p>
+          </div>
+          <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
+                <Bot />
+              </span>
+              <p className="text-xs font-medium text-white/80">Agentes activos</p>
+            </div>
+            <p className="mt-2 text-2xl font-extrabold tracking-tight">{data.totals.activeAgents}</p>
+            <p className="text-xs text-white/70">{data.table.filter((a) => a.active).length} de {data.table.length} en tabla</p>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/15 pt-4">
+          <span className="text-xs font-medium text-white/80">Proveedores</span>
+          {data.providers.map((p) => (
+            <span key={p.name} className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 font-mono text-xs font-bold text-white backdrop-blur">
+              <span className="size-2 rounded-full bg-white/90" />
+              {p.name} {p.pct}%
+            </span>
+          ))}
+          <span className="ml-auto hidden text-xs text-white/60 sm:inline">Costo fijo $0.90 por ejecución · Resend en prod</span>
+        </div>
+      </div>
       <AiActivityChart data={data} days={days} onDays={setDays} />
       <AiAgentsTable data={data} />
       <Card className="min-w-0 overflow-hidden md:col-span-3">
@@ -46,7 +100,7 @@ export function AiDashboard() {
           {data.recent.length === 0 ? <p className="text-sm text-text-tertiary">Sin ejecuciones aún.</p> : data.recent.map((r) => (
             <div key={r.id} className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
               <span className="min-w-0 break-words">{r.agent}</span>
-              <span className="shrink-0 text-xs text-text-tertiary">{r.status} · {new Date(r.at).toLocaleString("es-CL")} · <Link href="/workflows" className="underline">workflows</Link></span>
+              <span className="shrink-0 text-xs text-text-tertiary">{AGENT_STATUS_ES[r.status] ?? r.status} · {new Date(r.at).toLocaleString("es-CL")} · <Link href="/workflows" className="underline">workflows</Link></span>
             </div>
           ))}
         </CardContent>

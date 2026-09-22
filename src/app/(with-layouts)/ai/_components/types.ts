@@ -9,3 +9,12 @@ export type AiStats = {
 
 export const AI_RANGES = [7, 14, 21, 28] as const;
 export type AiRange = (typeof AI_RANGES)[number];
+
+/** Estados de ejecución del agente en español. */
+export const AGENT_STATUS_ES: Record<string, string> = {
+  PENDING: "Pendiente",
+  RUNNING: "En curso",
+  COMPLETED: "Completado",
+  FAILED: "Fallido",
+  CANCELLED: "Cancelado",
+};

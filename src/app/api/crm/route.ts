@@ -23,9 +23,12 @@ const RUN_STATUS_ES: Record<string, string> = {
   CANCELLED: "Cancelado",
 };
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const [customers, orders, pendingRuns, activities, stepLogs, orderStats] = await Promise.all([
+    // Rango del gráfico de crecimiento: 7 | 14 | 21 | 28 días.
+    const rawDays = Number(new URL(req.url).searchParams.get("days"));
+    const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
+    const [customers, orders, pendingRuns, activities, stepLogs, orderStats, customerDates] = await Promise.all([
       prisma.customer.findMany({
         take: 50,
         orderBy: { createdAt: "desc" },
@@ -36,6 +39,7 @@ export async function GET() {
       prisma.agentRun.findMany({ take: 8, orderBy: { createdAt: "desc" }, include: { agent: { select: { name: true, slug: true } } } }),
       prisma.orderStepLog.findMany({ take: 8, orderBy: { createdAt: "desc" }, select: { id: true, stepName: true, status: true, createdAt: true, orderId: true } }),
       prisma.order.findMany({ take: 300, orderBy: { createdAt: "desc" }, select: { total: true, createdAt: true } }),
+      prisma.customer.findMany({ take: 500, orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
     ]);
 
     const leads = customers.map((c) => {
@@ -47,19 +51,18 @@ export async function GET() {
     const customersDeals = leads.reduce((a, l) => a + l.deals, 0);
     const avgTicket = customersDeals > 0 ? Math.round(customersRevenue / customersDeals) : 0;
 
-    // Crecimiento semanal (últimas 6 semanas): clientes nuevos + ingresos.
-    const growth: { week: string; leads: number; revenue: number }[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      start.setDate(start.getDate() - i * 7 - 6);
-      const end = new Date(start);
-      end.setDate(end.getDate() + 7);
-      const count = customers.filter((c) => c.createdAt >= start && c.createdAt < end).length;
+    // Crecimiento diario (últimos N días): clientes nuevos + ingresos por día.
+    const growth: { day: string; leads: number; revenue: number }[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const count = customerDates.filter((c) => c.createdAt.toISOString().slice(0, 10) === key).length;
       const revenue = orderStats
-        .filter((o) => o.createdAt >= start && o.createdAt < end)
+        .filter((o) => o.createdAt.toISOString().slice(0, 10) === key)
         .reduce((a, o) => a + Number(o.total), 0);
-      growth.push({ week: `S-${5 - i + 1}`, leads: count, revenue: Math.round(revenue) });
+      growth.push({ day: key, leads: count, revenue: Math.round(revenue) });
     }
 
     const tasks = [
@@ -75,12 +78,18 @@ export async function GET() {
     // DEMO_MOCK: CRM activo sin datos reales
     if (DEMO_MODE && customers.length === 0) {
       const now = new Date();
+      const baseLeads = [2, 4, 3, 6, 5, 8, 3];
+      const baseRevenue = [120000, 210000, 180000, 320000, 290000, 410000, 350000];
       return NextResponse.json({
         leads: [
           { id: "1", name: "Constructora Andes", email: "contacto@andes.cl", deals: 5, revenue: 420000, performance: "Alta" },
           { id: "2", name: "Ferretería Sur", email: "ventas@sur.cl", deals: 3, revenue: 180000, performance: "Media" },
         ],
-        growth: Array.from({ length: 6 }).map((_, i) => ({ week: `S-${i+1}`, leads: [2,4,3,6,5,8][i], revenue: [120000,210000,180000,320000,290000,410000][i] })),
+        growth: Array.from({ length: days }).map((_, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - (days - 1 - i));
+          return { day: d.toISOString().slice(0, 10), leads: baseLeads[i % baseLeads.length], revenue: baseRevenue[i % baseRevenue.length] };
+        }),
         tasks: [{ id: "t1", title: "Revisar pedido DEMO-1001 (Pendiente)", due: "Hoy", type: "order" }],
         recentActivities: [
           { id: "a1", text: "sales-assistant ejecutado", at: now, kind: "agent" },

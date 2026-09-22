@@ -1,18 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { CrmGrowthChart } from "./growth-chart";
 import { CrmLeadsReport } from "./leads-report";
-import type { CrmData } from "./types";
+import type { CrmData, CrmRange } from "./types";
 import Link from "next/link";
 import { TrendingUp, Users, Wallet } from "lucide-react";
 
 export function CrmDashboard() {
+  const [days, setDays] = useState<CrmRange>(7);
   const { data, isLoading } = useQuery<CrmData>({
-    queryKey: ["crm"],
-    queryFn: async () => (await fetch("/api/crm")).json(),
+    queryKey: ["crm", days],
+    queryFn: async () => (await fetch(`/api/crm?days=${days}`)).json(),
   });
 
   if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando CRM...</CardContent></Card>;
@@ -21,8 +23,8 @@ export function CrmDashboard() {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <div className="overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 p-6 text-white md:col-span-3">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-          <div>
+        <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:justify-around sm:gap-6">
+          <div className="flex flex-col items-center">
             <div className="flex items-center gap-2.5">
               <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
                 <Users />
@@ -32,8 +34,8 @@ export function CrmDashboard() {
             <p className="mt-2 text-4xl font-extrabold tracking-tight">{data.totals.customers.toLocaleString("es-CL")}</p>
           </div>
           <div className="hidden w-px self-stretch bg-white/20 sm:block" />
-          <div className="sm:text-right">
-            <div className="flex items-center gap-2.5 sm:justify-end">
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-2.5">
               <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
                 <Wallet />
               </span>
@@ -42,8 +44,8 @@ export function CrmDashboard() {
             <p className="mt-2 text-4xl font-extrabold tracking-tight">${data.totals.revenue.toLocaleString("es-CL")}</p>
           </div>
           <div className="hidden w-px self-stretch bg-white/20 sm:block" />
-          <div className="sm:text-right">
-            <div className="flex items-center gap-2.5 sm:justify-end">
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-2.5">
               <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
                 <TrendingUp />
               </span>
@@ -54,7 +56,7 @@ export function CrmDashboard() {
         </div>
         <Link href="/orders" className="mt-4 inline-block text-xs font-medium text-white/90 underline">Ver /orders</Link>
       </div>
-      <CrmGrowthChart data={data} />
+      <CrmGrowthChart data={data} days={days} onDays={setDays} />
       <CrmLeadsReport data={data} />
       <Card>
         <CardHeader><CardTitle className="text-sm">Próximas tareas y reuniones</CardTitle></CardHeader>

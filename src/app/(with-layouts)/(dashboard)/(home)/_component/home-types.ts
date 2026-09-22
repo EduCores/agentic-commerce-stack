@@ -29,3 +29,14 @@ export type SalesRange = (typeof SALES_RANGES)[number];
 export function formatCLP(n: number): string {
   return Number(n).toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
 }
+
+/** Estados de pedido en español (los badges nunca muestran el código en inglés). */
+export const ORDER_STATUS_ES: Record<string, string> = {
+  PENDING: "Pendiente",
+  RESERVED: "Reservado",
+  PAID: "Pagado",
+  FULFILLED: "Completado",
+  CANCELLED: "Cancelado",
+  FAILED: "Fallido",
+  REFUNDED: "Reembolsado",
+};

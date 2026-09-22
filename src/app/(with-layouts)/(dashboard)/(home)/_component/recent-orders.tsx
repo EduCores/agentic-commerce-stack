@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Badge } from "@/components/tailgrids/core/badge";
-import { formatCLP, type HomeStats } from "./home-types";
+import { formatCLP, ORDER_STATUS_ES, type HomeStats } from "./home-types";
 
 const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
   PAID: "success",
@@ -33,7 +33,7 @@ export function RecentOrders({ orders }: { orders: HomeStats["recentOrders"] }) 
               </span>
               <span className="flex shrink-0 items-center gap-2">
                 <span className="text-xs font-bold">{formatCLP(Number(o.total))}</span>
-                <Badge color={STATUS_COLOR[o.status] ?? "gray"}>{o.status}</Badge>
+                <Badge color={STATUS_COLOR[o.status] ?? "gray"}>{ORDER_STATUS_ES[o.status] ?? o.status}</Badge>
               </span>
             </div>
           ))
