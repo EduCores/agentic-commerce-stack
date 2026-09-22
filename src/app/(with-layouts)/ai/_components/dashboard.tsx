@@ -24,21 +24,19 @@ export function AiDashboard() {
         <CardContent className="min-w-0 break-words">
           <p className="text-2xl font-bold">${data.totals.cost.toLocaleString("es-CL")}</p>
           <p className="text-xs text-text-tertiary">{data.totals.requests} solicitudes · {data.totals.successRate}% éxito · {data.totals.activeAgents} agentes activos</p>
+          <div className="mt-3 space-y-2 border-t border-card-border pt-3">
+            <p className="text-xs font-medium text-text-secondary">Distribución de proveedores de AI</p>
+            {data.providers.map((p) => (
+              <div key={p.name} className="flex min-w-0 items-center justify-between gap-2 text-sm">
+                <span className="min-w-0 break-words font-mono text-xs">{p.name}</span>
+                <Badge color="gray">{p.pct}%</Badge>
+              </div>
+            ))}
+            <Link href="/admin" className="text-xs font-medium text-brand-600 underline">Probar en /admin</Link>
+          </div>
         </CardContent>
       </Card>
       <AiActivityChart data={data} />
-      <Card className="min-w-0 overflow-hidden">
-        <CardHeader><CardTitle className="text-sm">Distribución de proveedores de AI</CardTitle></CardHeader>
-        <CardContent className="min-w-0 space-y-2 break-words">
-          {data.providers.map((p) => (
-            <div key={p.name} className="flex min-w-0 items-center justify-between gap-2 text-sm">
-              <span className="min-w-0 break-words font-mono text-xs">{p.name}</span>
-              <Badge color="gray">{p.pct}%</Badge>
-            </div>
-          ))}
-          <Link href="/admin" className="text-xs font-medium text-brand-600 underline">Probar en /admin</Link>
-        </CardContent>
-      </Card>
       <AiAgentsTable data={data} />
       <Card className="min-w-0 overflow-hidden md:col-span-3">
         <CardHeader><CardTitle className="text-sm">Actividad del Agente</CardTitle></CardHeader>

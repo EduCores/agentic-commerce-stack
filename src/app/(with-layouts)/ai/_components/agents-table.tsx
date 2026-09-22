@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export function AiAgentsTable({ data }: { data: AiStats }) {
   return (
-    <Card className="min-w-0 md:col-span-2">
+    <Card className="min-w-0 md:col-span-3">
       <CardHeader><CardTitle className="text-sm">Agentes AI — equipos StarShop</CardTitle></CardHeader>
       <CardContent>
         {data.table.length === 0 ? (
