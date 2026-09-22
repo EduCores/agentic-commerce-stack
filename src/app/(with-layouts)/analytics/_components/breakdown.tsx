@@ -22,8 +22,8 @@ const STATUS_ES: Record<string, string> = {
 function sourceLabel(source: string): string {
   const s = source.trim().toLowerCase();
   if (s.includes("starshop")) return "StarShop";
-  if (s.includes("meta") || s.includes("facebook") || s.includes("instagram")) return "Meta";
-  if (s.includes("whatsapp")) return "WhatsApp";
+  if (s.includes("meta") || s.includes("facebook") || s.includes("instagram") || s.includes("shopify")) return "Meta";
+  if (s.includes("whatsapp") || s === "eve" || s.startsWith("eve_") || s.startsWith("eve-")) return "whatsapp";
   if (s === "manual" || s.includes("tienda") || s === "store") return "Tienda física";
   return source;
 }

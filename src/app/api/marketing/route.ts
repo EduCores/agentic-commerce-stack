@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 function channelLabel(source: string): string {
   const s = source.trim().toLowerCase();
   if (s.includes("starshop")) return "Starshop";
-  if (s.includes("meta") || s.includes("facebook") || s.includes("instagram")) return "Meta";
-  if (s.includes("whatsapp")) return "whatsapp";
+  if (s.includes("meta") || s.includes("facebook") || s.includes("instagram") || s.includes("shopify")) return "Meta";
+  if (s.includes("whatsapp") || s === "eve" || s.startsWith("eve_") || s.startsWith("eve-")) return "whatsapp";
   if (s === "manual" || s.includes("tienda") || s.includes("física") || s === "store") return "Tienda física";
   return source;
 }
