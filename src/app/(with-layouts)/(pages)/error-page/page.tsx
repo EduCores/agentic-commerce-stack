@@ -32,7 +32,7 @@ export default function ErrorPage() {
 
                 {/* Content Section */}
                 <div className='mt-6'>
-                    <Card className='relative flex flex-col items-center justify-center overflow-clip rounded-xl border border-border-secondary bg-card-background p-5'>
+                    <Card className='relative flex flex-col items-center justify-center overflow-clip rounded-xl border-[0.5px] border-border-secondary bg-card-background p-5'>
                         <div className='relative flex w-full flex-col items-center justify-center pt-10 pb-20'>
                             {/* Illustration Container */}
                             <div className='relative flex h-62.5 w-125 flex-col items-center justify-center overflow-clip rounded-[746px] border border-border-secondary/20'>

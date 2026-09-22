@@ -26,7 +26,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
 
       {/* Page Content */}
       <div className="space-y-5 px-2 lg:px-6">
-        <div className="flex max-w-full flex-col gap-x-0 gap-y-6 rounded-xl border border-card-border bg-card-background p-0 md:flex-row md:gap-y-8 lg:min-h-150">
+        <div className="flex max-w-full flex-col gap-x-0 gap-y-6 rounded-xl border-[0.5px] border-card-border bg-card-background p-0 md:flex-row md:gap-y-8 lg:min-h-150">
           {/* Sidebar Navigation */}
           <nav className="flex w-full shrink-0 grow flex-col gap-2 self-stretch border-card-border px-3 py-6 lg:max-w-84.5 lg:border-r">
             {tabsItems.map((item) => {
