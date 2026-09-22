@@ -29,7 +29,7 @@ export function SyncButton({ storeId, storeName }: { storeId: string; storeName:
 
   return (
     <div className="space-y-2">
-      <Button appearance="fill" onClick={onSync} isDisabled={loading} className="w-full">
+      <Button appearance="fill" onClick={onSync} isDisabled={loading} className="h-auto min-h-9 w-full py-2.5 leading-snug">
         {loading ? "Sincronizando..." : `Sincronizar ${shortName}`}
       </Button>
       {loading && <div className="h-2 w-full overflow-hidden rounded-full bg-background-gray-secondary"><div className="h-full w-1/2 animate-pulse bg-brand-500" /></div>}
