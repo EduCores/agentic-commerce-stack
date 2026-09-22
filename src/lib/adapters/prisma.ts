@@ -8,12 +8,14 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient() {
-  const url = process.env.DATABASE_URL;
+  // En dev usamos el pooled para no saturar el rol (free tier ~5 conexiones). En prod, Accelerate o directa.
+  const pooled = process.env.DATABASE_URL_POOLED;
+  const url = pooled || process.env.DATABASE_URL;
   if (url?.startsWith("prisma+postgres://") || url?.startsWith("prisma://")) {
     return new PrismaClient({ accelerateUrl: url });
   }
   if (url?.startsWith("postgres://") || url?.startsWith("postgresql://")) {
-    const adapter = new PrismaPg({ connectionString: url });
+    const adapter = new PrismaPg({ connectionString: url, max: 5, idleTimeoutMillis: 10000 } as never);
     return new PrismaClient({ adapter });
   }
   return new PrismaClient({
