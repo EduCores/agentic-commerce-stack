@@ -647,15 +647,12 @@
   }
 }
 
-/* Móvil + tablet (<lg = 1024px): .p-5 compacto -> calc(var(--spacing) * 1) = 0.25rem.
-   Cubre Card (p-5 base) y cualquier uso de p-5 sin tocar desktop. */
-@media (max-width: 1023.98px) {
-  .p-5 {
-    padding: calc(var(--spacing) * 1);
-  }
-}
-
 .text-text-primary {
   padding-left: 6px;
   padding-top: 6px;
+}
+
+/* .p-5 global -> calc(var(--spacing) * 3). Sin capa: gana a la utilidad de Tailwind en todos los tamaños. */
+.p-5 {
+  padding: calc(var(--spacing) * 3);
 }
