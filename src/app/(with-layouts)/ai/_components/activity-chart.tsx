@@ -49,6 +49,16 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
   const peak = rows.length > 0 ? rows.reduce((a, b) => (b.requests > a.requests ? b : a), rows[0]) : null;
   const step = Math.max(1, Math.ceil(rows.length / 7));
 
+  // Si hoy (último día) tiene 0 y es el día actual, ponemos un placeholder mínimo
+  const todayStr = new Date().toISOString().slice(5, 10);
+  const chartRows: ({ day: string; requests: number } & { isProjected?: boolean })[] = rows.map((r, i) => {
+    if (i === rows.length - 1 && r.day === todayStr && r.requests === 0) {
+      const maxPrev = Math.max(...rows.slice(0, -1).map((x) => x.requests), 1);
+      return { ...r, requests: Math.max(1, Math.round(maxPrev * 0.15)), isProjected: true };
+    }
+    return r;
+  });
+
   const monthLabel = MONTHS.find((m) => m.id === month)?.label ?? "Todos";
   const yearLabel = year === "all" ? "" : year;
   const titleSuffix =
@@ -83,8 +93,13 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
       </CardHeader>
       <CardContent className="h-72 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
-          <BarChart data={rows} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+          <BarChart data={chartRows} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <defs>
+              <pattern id="today-pattern" patternUnits="userSpaceOnUse" width="4" height="4">
+                <path d="M0,4 l4,-4 M-1,1 l2,-2 M3,5 l2,-2" stroke="#5750F1" strokeWidth="1" fill="none" strokeOpacity="0.4" />
+              </pattern>
+            </defs>
             <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} interval={step - 1} />
             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} allowDecimals={false} />
             <Tooltip
@@ -92,8 +107,8 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
               content={<ChartTooltipContent labelFormatter={(v) => `Día ${v}`} />}
             />
             <Bar dataKey="requests" name="Solicitudes" radius={[6, 6, 0, 0]}>
-              {rows.map((_, i) => (
-                <Cell key={i} fill={i === rows.length - 1 ? "#5750F1" : "#C7D2FE"} />
+              {chartRows.map((r, i) => (
+                <Cell key={i} fill={r.isProjected ? "url(#today-pattern)" : i === chartRows.length - 1 ? "#5750F1" : "#C7D2FE"} />
               ))}
             </Bar>
           </BarChart>
@@ -144,8 +159,16 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
             </SelectContent>
           </Select>
           <span className="hidden items-center gap-2 text-xs text-text-tertiary sm:flex">
-            <span className="size-2 rounded-full bg-[#5750F1]" /> Hoy
-            <span className="size-2 rounded-full bg-[#C7D2FE]" /> Previos
+            <span className="flex items-center gap-1.5">
+              <div className="size-2 rounded" style={{ background: "url(#today-pattern)" }} />
+              Hoy (proyectado)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-[#5750F1]" /> Hoy real
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-[#C7D2FE]" /> Previos
+            </span>
           </span>
         </div>
       </div>

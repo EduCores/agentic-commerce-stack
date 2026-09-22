@@ -125,11 +125,11 @@ export function AnalyticsSalesChart({ data, days, onDays, month, year, onMonth, 
         </div>
         <span className="mt-3 flex w-full items-center justify-between gap-3 text-xs text-text-secondary sm:mt-0 sm:w-auto">
           <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full" style={{ backgroundColor: "#00cf2f" }} aria-hidden="true" />
+            <span className="size-2.5 rounded-full bg-primary-500" aria-hidden="true" />
             Ventas ($)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full" style={{ backgroundColor: "#00cf2f" }} aria-hidden="true" />
+            <span className="size-2.5 rounded-full bg-primary-300" aria-hidden="true" />
             Pedidos (n°)
           </span>
         </span>
