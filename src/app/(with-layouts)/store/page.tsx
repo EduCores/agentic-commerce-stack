@@ -4,7 +4,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
 import { SyncButton } from "./_components/sync-button";
 import { ConnectButton } from "./_components/connect-button";
-import { Package } from "lucide-react";
+import { Package, Store } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -30,51 +30,81 @@ export default async function StorePage() {
         <ConnectButton storeId={primary?.id} storeName={primary?.name ?? "tienda"} initial={primaryHealth} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader><CardTitle>Conexiones ({stores.length})</CardTitle></CardHeader>
-          <CardContent className="space-y-2 break-words">
+      <div className="space-y-4">
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-badge-primary-background text-badge-primary-text [&>svg]:size-4">
+                <Store size={16} />
+              </span>
+              <CardTitle>Conexiones ({stores.length})</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {stores.length === 0 ? (
               <p className="text-sm text-text-tertiary">Sin conexiones. Crea una con provider `mock` para la demo, o `shopify` con dominio/apiKey.</p>
-            ) : stores.map((s) => (
-              <div key={s.id} className="rounded-lg border border-card-border p-3 space-y-2 break-words">
-                <p className="font-medium">{s.name} <Badge color="gray">{s.provider}</Badge></p>
-                <p className="text-xs text-text-tertiary">{s.domain ?? "—"}</p>
-                <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activo" : "Inactivo"}</Badge>
-                {(() => {
-                  const cfg = s.config as unknown as StoreConfig | null;
-                  const lastSync = cfg?.lastSync;
-                  if (!lastSync) return <p className="text-xs text-text-tertiary">Sin sincronizar todavía.</p>;
-                  return (
-                    <p className="text-xs text-text-tertiary">
-                      Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
-                      {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error — reintenta</span>}
-                    </p>
-                  );
-                })()}
-                {(() => {
-                  const h = (s.config as unknown as StoreConfig | null)?.lastHealthCheck;
-                  if (!h) return null;
-                  return (
-                    <Badge color={h.ok ? "success" : "gray"}>
-                      {h.ok
-                        ? `Conectada ✓ · ${h.total ?? "—"} productos · ${h.latencyMs}ms`
-                        : `Sin conexión: ${h.error ?? "desconocido"}`}
-                    </Badge>
-                  );
-                })()}
-                <SyncButton storeId={s.id} storeName={s.name} />
-              </div>
-            ))}
+            ) : stores.map((s) => {
+              const cfg = s.config as unknown as StoreConfig | null;
+              const lastSync = cfg?.lastSync;
+              const health = cfg?.lastHealthCheck;
+              return (
+                <div key={s.id} className="rounded-xl border border-card-border bg-card-background p-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-sm [&>svg]:size-5">
+                        <Store />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-semibold text-text-primary">{s.name}</p>
+                          <Badge color="gray">{s.provider}</Badge>
+                          <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activo" : "Inactivo"}</Badge>
+                          {health && (
+                            <Badge color={health.ok ? "success" : "error"}>
+                              {health.ok ? `Conectada · ${health.total ?? "—"} prod · ${health.latencyMs}ms` : `Sin conexión`}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="mt-1 truncate text-xs text-text-tertiary">{s.domain ?? "—"}</p>
+                        <p className="mt-1 text-xs text-text-tertiary">
+                          {lastSync ? (
+                            <>
+                              Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
+                              {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error</span>}
+                            </>
+                          ) : (
+                            "Sin sincronizar todavía"
+                          )}
+                        </p>
+                        {health && !health.ok && (
+                          <p className="mt-1 text-xs text-red-600">{health.error ?? "Error desconocido"}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-col gap-2 lg:w-44">
+                      <SyncButton storeId={s.id} storeName={s.name} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
-        <Card className="md:col-span-2">
-          <CardHeader><CardTitle>Catálogo universal ({products.length})</CardTitle></CardHeader>
+
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+                <Package size={16} />
+              </span>
+              <CardTitle>Catálogo universal ({products.length})</CardTitle>
+            </div>
+          </CardHeader>
           <CardContent>
             {products.length === 0 ? (
               <p className="text-sm text-text-tertiary">Sin productos. Ejecuta <code>prisma/seed.ts</code> o conecta tu tienda y sincroniza.</p>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {products.map((p) => {
                   const stockState =
                     p.stock <= 0
@@ -83,7 +113,7 @@ export default async function StorePage() {
                         ? { dot: "bg-amber-500", badge: "Bajo stock" as const, color: "warning" as const }
                         : { dot: "bg-emerald-500", badge: "Disponible" as const, color: "success" as const };
                   return (
-                    <div key={p.id} className="rounded-lg border border-card-border bg-card-background p-3 transition hover:border-brand-500">
+                    <div key={p.id} className="rounded-lg border border-card-border bg-card-background p-3 transition hover:border-brand-500 hover:shadow-sm">
                       <div className="flex items-center justify-between gap-2.5">
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text">
                           <Package size={18} />
