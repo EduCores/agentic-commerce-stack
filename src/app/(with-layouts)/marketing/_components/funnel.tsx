@@ -14,10 +14,10 @@ export function MarketingFunnel({ data }: { data: MarketingData | null }) {
       <CardHeader><CardTitle className="text-sm">Embudo de conversión</CardTitle></CardHeader>
       <CardContent className="h-72 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
-          <BarChart data={rows} layout="vertical" margin={{ top: 8, right: 16, left: 40, bottom: 0 }}>
+          <BarChart data={rows} layout="vertical" margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-            <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
-            <YAxis type="category" dataKey="stage" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={90} />
+            <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} tickCount={7} />
+            <YAxis type="category" dataKey="stage" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={78} />
             <Tooltip content={<ChartTooltipContent />} />
             <Bar dataKey="value" radius={[0, 6, 6, 0]}>
               {rows.map((_, i) => (
