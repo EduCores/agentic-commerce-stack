@@ -29,8 +29,8 @@ export function CrmDashboard() {
           </span>
           <h3 className="text-sm font-bold tracking-[-0.2px]">Clientes, tareas y actividad — ligada a pedidos y agente</h3>
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur">
+        <div className="mt-4 grid gap-4 sm:grid-cols-[1.3fr_0.85fr_0.85fr]">
+          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0">
             <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-8">
               <Users />
             </span>
@@ -40,7 +40,7 @@ export function CrmDashboard() {
               <p className="text-xs text-white/70">{data.leads.length} leads reales</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur">
+          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0">
             <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-8">
               <Wallet />
             </span>
@@ -50,7 +50,7 @@ export function CrmDashboard() {
               <p className="text-xs text-white/70">Acumulado real</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur">
+          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0">
             <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-8">
               <TrendingUp />
             </span>
