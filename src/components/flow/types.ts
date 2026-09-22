@@ -109,7 +109,7 @@ export const FLOW_INTENTS = STARSHOP_INTENTS;
  * y sigue usando el modelo del código (comportamiento seguro, no rompe el chat).
  */
 export const FLOW_MODELS: Array<{ id: string; label: string }> = [
-  { id: "qwen/qwen3-30b-a3b-instruct-2507", label: "Qwen3 30B A3B Instruct (estable, barato)" },
+  { id: "qwen/qwen3-30b", label: "Qwen3 30B (estable, barato)" },
   { id: "openai/gpt-4o", label: "GPT-4o (mejor calidad, más caro)" },
   { id: "google/gemini-2-0-flash-001", label: "Gemini 2.0 Flash (rápido)" },
 ];
