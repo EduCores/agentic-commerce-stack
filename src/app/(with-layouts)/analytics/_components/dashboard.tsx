@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/tailgrids/core/card";
 import { AnalyticsSalesChart } from "./sales-chart";
-import { AnalyticsBreakdown } from "./breakdown";
+import { AnalyticsStatusChart, AnalyticsSourceChart } from "./breakdown";
 import { AnalyticsTopContent } from "./top-content";
 import type { AnalyticsData, AnalyticsRange } from "./types";
 import Link from "next/link";
@@ -50,7 +50,10 @@ export function AnalyticsDashboard() {
         <Link href="/orders" className="mt-4 inline-block text-xs font-medium text-white/90 underline">Ver /orders</Link>
       </div>
       <AnalyticsSalesChart data={data} days={days} onDays={setDays} />
-      <AnalyticsBreakdown data={data} />
+      <div className="grid gap-4 md:col-span-3 md:grid-cols-10">
+        <AnalyticsStatusChart data={data} className="min-w-0 md:col-span-7" />
+        <AnalyticsSourceChart data={data} className="min-w-0 md:col-span-3" />
+      </div>
       <AnalyticsTopContent data={data} />
     </div>
   );

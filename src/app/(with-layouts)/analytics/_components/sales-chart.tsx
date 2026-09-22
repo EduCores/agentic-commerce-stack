@@ -17,7 +17,7 @@ export function AnalyticsSalesChart({ data, days, onDays }: Props) {
   const step = Math.max(1, Math.ceil(rows.length / 7));
 
   return (
-    <Card className="min-w-0 md:col-span-2">
+    <Card className="min-w-0 md:col-span-3">
       <CardHeader><CardTitle className="text-sm">Analítica de visitas — ventas de los últimos {days} días</CardTitle></CardHeader>
       <CardContent className="h-72 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
