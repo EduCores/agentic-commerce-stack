@@ -7,6 +7,7 @@ import { CrmGrowthChart } from "./growth-chart";
 import { CrmLeadsReport } from "./leads-report";
 import type { CrmData } from "./types";
 import Link from "next/link";
+import { TrendingUp, Users, Wallet } from "lucide-react";
 
 export function CrmDashboard() {
   const { data, isLoading } = useQuery<CrmData>({
@@ -19,14 +20,40 @@ export function CrmDashboard() {
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <Card>
-        <CardHeader><CardTitle className="text-sm">Clientes</CardTitle></CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">{data.totals.customers}</p>
-          <p className="text-xs text-text-tertiary">Clientes potenciales reales desde tus pedidos</p>
-          <Link href="/orders" className="text-xs font-medium text-brand-600 underline">Ver /orders</Link>
-        </CardContent>
-      </Card>
+      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 p-6 text-white md:col-span-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
+                <Users />
+              </span>
+              <p className="text-sm font-medium text-white/90">Clientes</p>
+            </div>
+            <p className="mt-2 text-4xl font-extrabold tracking-tight">{data.totals.customers.toLocaleString("es-CL")}</p>
+          </div>
+          <div className="hidden w-px self-stretch bg-white/20 sm:block" />
+          <div className="sm:text-right">
+            <div className="flex items-center gap-2.5 sm:justify-end">
+              <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
+                <Wallet />
+              </span>
+              <p className="text-sm font-medium text-white/90">Ingresos por clientes</p>
+            </div>
+            <p className="mt-2 text-4xl font-extrabold tracking-tight">${data.totals.revenue.toLocaleString("es-CL")}</p>
+          </div>
+          <div className="hidden w-px self-stretch bg-white/20 sm:block" />
+          <div className="sm:text-right">
+            <div className="flex items-center gap-2.5 sm:justify-end">
+              <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
+                <TrendingUp />
+              </span>
+              <p className="text-sm font-medium text-white/90">Ticket promedio</p>
+            </div>
+            <p className="mt-2 text-4xl font-extrabold tracking-tight">${data.totals.avgTicket.toLocaleString("es-CL")}</p>
+          </div>
+        </div>
+        <Link href="/orders" className="mt-4 inline-block text-xs font-medium text-white/90 underline">Ver /orders</Link>
+      </div>
       <CrmGrowthChart data={data} />
       <CrmLeadsReport data={data} />
       <Card>
