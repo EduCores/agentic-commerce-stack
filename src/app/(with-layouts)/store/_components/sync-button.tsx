@@ -7,6 +7,8 @@ import { toast } from "sonner";
 export function SyncButton({ storeId, storeName }: { storeId: string; storeName: string }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ synced: number; total: number; ms: number } | null>(null);
+  // Nombre corto para el botón: la tienda StarShop siempre se muestra como "StarShop".
+  const shortName = storeName.toLowerCase().includes("starshop") ? "StarShop" : storeName;
 
   async function onSync() {
     setLoading(true);
@@ -28,7 +30,7 @@ export function SyncButton({ storeId, storeName }: { storeId: string; storeName:
   return (
     <div className="space-y-2">
       <Button appearance="fill" onClick={onSync} isDisabled={loading} className="w-full">
-        {loading ? "Sincronizando..." : `Sincronizar ${storeName}`}
+        {loading ? "Sincronizando..." : `Sincronizar ${shortName}`}
       </Button>
       {loading && <div className="h-2 w-full overflow-hidden rounded-full bg-background-gray-secondary"><div className="h-full w-1/2 animate-pulse bg-brand-500" /></div>}
       {result && (
