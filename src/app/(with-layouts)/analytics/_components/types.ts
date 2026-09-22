@@ -6,3 +6,6 @@ export type AnalyticsData = {
   lowStock: { title: string; sku: string; stock: number }[];
   totals: { orders: number; revenue: number };
 };
+
+export const ANALYTICS_RANGES = [7, 14, 21, 28] as const;
+export type AnalyticsRange = (typeof ANALYTICS_RANGES)[number];

@@ -8,17 +8,20 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const format = searchParams.get("format");
+    // Rango del gráfico de visitas/ventas: 7 | 14 | 21 | 28 días.
+    const rawDays = Number(searchParams.get("days"));
+    const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
     const [orders, products] = await Promise.all([
       prisma.order.findMany({
         select: { total: true, status: true, source: true, createdAt: true, items: { select: { quantity: true, product: { select: { title: true, sku: true } } } } },
         orderBy: { createdAt: "desc" },
-        take: 200,
+        take: 500,
       }),
       prisma.product.findMany({ select: { title: true, sku: true, stock: true }, take: 10, orderBy: { stock: "asc" } }),
     ]);
 
     const salesByDay: { date: string; total: number; orders: number }[] = [];
-    for (let i = 6; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setHours(0, 0, 0, 0);
       d.setDate(d.getDate() - i);
@@ -51,9 +54,11 @@ export async function GET(req: Request) {
 
     // DEMO_MOCK: analítica activa sin datos reales
     if (DEMO_MODE && orders.length === 0) {
-      const mockSalesByDay = Array.from({ length: 7 }).map((_, i) => {
-        const d = new Date(); d.setDate(d.getDate() - (6 - i));
-        return { date: d.toISOString().slice(0, 10), total: [80000, 120000, 95000, 210000, 180000, 250000, 310000][i], orders: [2,4,3,6,5,8,7][i] };
+      const baseTotal = [80000, 120000, 95000, 210000, 180000, 250000, 310000];
+      const baseOrders = [2, 4, 3, 6, 5, 8, 7];
+      const mockSalesByDay = Array.from({ length: days }).map((_, i) => {
+        const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
+        return { date: d.toISOString().slice(0, 10), total: baseTotal[i % baseTotal.length], orders: baseOrders[i % baseOrders.length] };
       });
       return NextResponse.json({
         salesByDay: mockSalesByDay,

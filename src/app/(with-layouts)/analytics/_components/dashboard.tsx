@@ -1,19 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/tailgrids/core/card";
 import { AnalyticsSalesChart } from "./sales-chart";
 import { AnalyticsBreakdown } from "./breakdown";
 import { AnalyticsTopContent } from "./top-content";
-import type { AnalyticsData } from "./types";
+import type { AnalyticsData, AnalyticsRange } from "./types";
 import Link from "next/link";
 import { Cart2, Wallet2 } from "@tailgrids/icons";
 
 export function AnalyticsDashboard() {
+  const [days, setDays] = useState<AnalyticsRange>(7);
   const { data, isLoading } = useQuery<AnalyticsData>({
-    queryKey: ["analytics"],
+    queryKey: ["analytics", days],
     queryFn: async () => {
-      const r = await fetch("/api/analytics");
+      const r = await fetch(`/api/analytics?days=${days}`);
       return r.json();
     },
   });
@@ -23,8 +25,7 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <AnalyticsSalesChart data={data} />
-      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 to-primary-500 p-6 text-white">
+      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 to-primary-500 p-6 text-white md:col-span-3">
         <div className="flex items-center gap-2.5">
           <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
             <Cart2 />
@@ -43,6 +44,7 @@ export function AnalyticsDashboard() {
         </div>
         <Link href="/orders" className="mt-4 inline-block text-xs font-medium text-white/90 underline">Ver /orders</Link>
       </div>
+      <AnalyticsSalesChart data={data} days={days} onDays={setDays} />
       <AnalyticsBreakdown data={data} />
       <AnalyticsTopContent data={data} />
     </div>
