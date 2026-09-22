@@ -5,6 +5,7 @@ import {
   Button as AriaButton,
   Dialog as AriaDialog,
   Modal as AriaModal,
+  ModalOverlay as AriaModalOverlay,
   Heading,
   type DialogProps as AriaDialogProps,
   type HeadingProps,
@@ -29,31 +30,38 @@ export function Dialog({
   ...props
 }: DialogProps) {
   return (
-    <AriaModal isOpen={isOpen} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
-      <AriaDialog
-        className={cn(
-          "fixed top-1/2 left-1/2 w-full max-w-140 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border-primary bg-background-white-primary p-6 shadow-lg outline-none max-sm:max-w-[calc(100%-2rem)]",
-          className,
-        )}
-        {...props}
-      >
-        {({ close }) => (
-          <>
-            {typeof children === "function" ? children({ close }) : children}
-            {showCloseButton && (
-              <AriaButton
-                onPress={close}
-                aria-label="Cerrar"
-                className="absolute top-4 right-4 flex size-7 items-center justify-center rounded-lg text-text-100 opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none [&>svg]:size-5"
-              >
-                <Close />
-                <span className="sr-only">Cerrar</span>
-              </AriaButton>
-            )}
-          </>
-        )}
-      </AriaDialog>
-    </AriaModal>
+    <AriaModalOverlay
+      isOpen={isOpen}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px] animate-[modal-fade_0.2s_ease-out]"
+    >
+      <AriaModal>
+        <AriaDialog
+          className={cn(
+            "relative max-h-[calc(100dvh-2rem)] w-full max-w-140 overflow-y-auto rounded-xl border border-border-primary bg-background-white-primary p-6 shadow-2xl outline-none transition-all duration-200 ease-out data-[entering]:scale-95 data-[entering]:opacity-0 max-sm:max-w-full",
+            className,
+          )}
+          {...props}
+        >
+          {({ close }) => (
+            <>
+              {typeof children === "function" ? children({ close }) : children}
+              {showCloseButton && (
+                <AriaButton
+                  onPress={close}
+                  aria-label="Cerrar"
+                  className="absolute top-4 right-4 flex size-7 items-center justify-center rounded-lg text-text-100 opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none [&>svg]:size-5"
+                >
+                  <Close />
+                  <span className="sr-only">Cerrar</span>
+                </AriaButton>
+              )}
+            </>
+          )}
+        </AriaDialog>
+      </AriaModal>
+    </AriaModalOverlay>
   );
 }
 

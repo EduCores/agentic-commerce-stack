@@ -182,13 +182,21 @@ export function TemplateEditorDialog({ open, onOpenChange, template, onSaved }: 
           <Toggle label="Plantilla activa" checked={form.isActive} onChange={(e) => set("isActive", e.target.checked)} />
         </div>
         <div className="min-w-0">
-          <p className="mb-1 text-xs text-text-tertiary">Vista previa en vivo{preview?.sig === formSig ? ` — ${preview.subject}` : ""}</p>
-          <div className="rounded-xl border border-card-border bg-background-white-primary p-2">
-            {preview?.sig === formSig ? (
-              <div dangerouslySetInnerHTML={{ __html: preview.html }} />
-            ) : (
-              <p className="p-4 text-xs text-text-tertiary">Escribe asunto y cuerpo para ver el correo aquí mismo.</p>
-            )}
+          <p className="mb-1 text-xs text-text-tertiary">Vista previa en vivo</p>
+          <div className="overflow-hidden rounded-xl border border-card-border shadow-sm">
+            <div className="flex items-center justify-between gap-2 border-b border-card-border bg-background-gray-secondary px-3 py-2">
+              <p className="min-w-0 truncate text-xs font-semibold text-text-primary">
+                {preview?.sig === formSig ? preview.subject : "—"}
+              </p>
+              <Badge color="primary">vista previa</Badge>
+            </div>
+            <div className="bg-background-gray-secondary/50 p-4">
+              {preview?.sig === formSig ? (
+                <div dangerouslySetInnerHTML={{ __html: preview.html }} />
+              ) : (
+                <p className="p-4 text-center text-xs text-text-tertiary">Escribe asunto y cuerpo para ver el correo aquí mismo.</p>
+              )}
+            </div>
           </div>
         </div>
       </DialogBody>

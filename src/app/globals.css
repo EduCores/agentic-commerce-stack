@@ -623,6 +623,16 @@
   }
 }
 
+/* Entrada del modal: el overlay aparece con fundido (el diálogo usa zoom vía data-entering). */
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Marquee Scroller Wrapper */
 .scroller {
   overflow: hidden;

@@ -29,11 +29,13 @@ export const EMAIL_DARK_SCOPED_CSS = darkCss(".email-dark");
 
 /** Armazón visual compartido: mismo HTML en editor, preview, mock y producción. */
 export function emailShell(title: string, preheader: string, body: string): string {
-  return `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #eee;border-radius:12px;overflow:hidden" class="dark-invert">`
-    + `<div style="background:${BRAND};padding:16px 20px;font-weight:bold;color:${INK};font-size:16px">${title}</div>`
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #f0ede4;border-radius:20px;overflow:hidden" class="dark-invert">`
+    + `<div style="background:linear-gradient(135deg,#FFD814 0%,#FFB800 100%);padding:26px 30px;color:${INK}" class="dark-invert-body">`
+    + `<p style="margin:0;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.65">StarShop</p>`
+    + `<p style="margin:4px 0 0;font-size:20px;font-weight:800;letter-spacing:-.3px">${title}</p></div>`
     + `<div style="display:none;max-height:0;overflow:hidden;opacity:0">${preheader}</div>`
-    + `<div style="padding:20px;color:${INK};font-size:14px;line-height:1.6" class="dark-invert-body">${body}</div>`
-    + `<div style="padding:12px 20px;font-size:12px;color:${MUTED};border-top:1px solid #eee" class="dark-invert-footer">StarShop · B2B Chile · ventas@starshop.cl</div>`
+    + `<div style="padding:28px 30px;color:#1a1a1a;font-size:15px;line-height:1.7" class="dark-invert-body">${body}</div>`
+    + `<div style="padding:18px 30px 22px;font-size:12.5px;color:${MUTED};border-top:1px solid #f0ede4;text-align:center" class="dark-invert-footer">StarShop · B2B Chile<br/><a href="mailto:ventas@starshop.cl" style="color:${MUTED};text-decoration:underline">ventas@starshop.cl</a></div>`
     + `</div>`
     + `<style>@media (prefers-color-scheme: dark){${darkCss("")}}</style>`;
 }
