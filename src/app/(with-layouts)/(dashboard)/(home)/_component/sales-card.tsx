@@ -1,16 +1,45 @@
 "use client";
 
 import { TrendingUp } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectIndicator,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/tailgrids/core/select";
 import { SALES_RANGES, formatCLP, type SalesRange } from "./home-types";
+
+const MONTHS = [
+  { id: "all", label: "Mes" },
+  { id: "1", label: "Enero" },
+  { id: "2", label: "Febrero" },
+  { id: "3", label: "Marzo" },
+  { id: "4", label: "Abril" },
+  { id: "5", label: "Mayo" },
+  { id: "6", label: "Junio" },
+  { id: "7", label: "Julio" },
+  { id: "8", label: "Agosto" },
+  { id: "9", label: "Septiembre" },
+  { id: "10", label: "Octubre" },
+  { id: "11", label: "Noviembre" },
+  { id: "12", label: "Diciembre" },
+] as const;
+const YEARS = ["all", "2024", "2025", "2026"] as const;
 
 type Props = {
   sales: { date: string; total: number }[];
   days: SalesRange;
   onDays: (d: SalesRange) => void;
+  month: string;
+  year: string;
+  onMonth: (v: string) => void;
+  onYear: (v: string) => void;
 };
 
 /** Ventas a lo ancho (100%) con selector de rango debajo, al estilo del sitio. */
-export function SalesCard({ sales, days, onDays }: Props) {
+export function SalesCard({ sales, days, onDays, month, year, onMonth, onYear }: Props) {
   const max = Math.max(...sales.map((x) => x.total), 1);
   const total = sales.reduce((a, x) => a + x.total, 0);
   // Eje de fechas aparte (máx ~8 etiquetas): nunca colisionan aunque crezcan los días.
@@ -71,6 +100,34 @@ export function SalesCard({ sales, days, onDays }: Props) {
             {r} días
           </button>
         ))}
+        <div className="ml-auto flex items-center gap-2">
+          <Select value={month} onChange={(v) => onMonth(String(v))} aria-label="Filtrar por mes">
+            <SelectTrigger className="h-8 min-w-24 text-xs">
+              <SelectValue />
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectContent>
+              {MONTHS.map((m) => (
+                <SelectItem key={m.id} id={m.id} textValue={m.label}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={year} onChange={(v) => onYear(String(v))} aria-label="Filtrar por año">
+            <SelectTrigger className="h-8 min-w-20 text-xs">
+              <SelectValue />
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectContent>
+              {YEARS.map((y) => (
+                <SelectItem key={y} id={y} textValue={y === "all" ? "Año" : y}>
+                  {y === "all" ? "Año" : y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );

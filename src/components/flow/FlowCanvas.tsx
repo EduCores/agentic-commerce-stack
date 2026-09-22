@@ -211,6 +211,9 @@ const graphNodes = useMemo(() => {
   const dragging = useRef<FlowNodeType | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [panelPos, setPanelPos] = useState({ x: 16, y: 56 });
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const panelDrag = useRef({ offsetX: 0, offsetY: 0, dragging: false });
 
   // Pantalla completa: escucha cambios del Fullscreen API (Esc sale solo)
   useEffect(() => {
@@ -225,6 +228,27 @@ const graphNodes = useMemo(() => {
     if (!document.fullscreenElement) el.requestFullscreen?.();
     else document.exitFullscreen?.();
   }, []);
+
+  const onPanelHeaderMouseDown = useCallback((e: React.MouseEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    panelDrag.current = { offsetX: e.clientX - rect.left - panelPos.x, offsetY: e.clientY - rect.top - panelPos.y, dragging: true };
+    const onMove = (ev: MouseEvent) => {
+      if (!panelDrag.current.dragging) return;
+      const r = containerRef.current?.getBoundingClientRect();
+      if (!r) return;
+      const x = ev.clientX - r.left - panelDrag.current.offsetX;
+      const y = ev.clientY - r.top - panelDrag.current.offsetY;
+      setPanelPos({ x: Math.max(0, Math.min(x, r.width - 360)), y: Math.max(0, Math.min(y, r.height - 200)) });
+    };
+    const onUp = () => {
+      panelDrag.current.dragging = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [panelPos.x, panelPos.y]);
 
   // Re-sincroniza cuando el server entrega otro grafo (cambio de workflow o reload)
   useEffect(() => {
@@ -487,6 +511,122 @@ const graphNodes = useMemo(() => {
               <Controls />
               <MiniMap className="!bg-card-background" pannable zoomable />
             </ReactFlow>
+            {isFullscreen && (
+              <div
+                style={{ left: panelPos.x, top: panelPos.y }}
+                className={cn(
+                  "absolute z-20 max-h-[70vh] overflow-hidden rounded-xl border border-card-border bg-card-background shadow-2xl",
+                  panelCollapsed ? "w-auto" : "w-[380px] max-w-[calc(100%-32px)]",
+                )}
+              >
+                <div
+                  className="flex cursor-move select-none items-center justify-between gap-2 rounded-t-xl bg-background-gray-secondary px-3 py-2"
+                  onMouseDown={onPanelHeaderMouseDown}
+                >
+                  <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">
+                    {selectedNode ? "Nodo seleccionado" : selectedEdge ? "Conexión" : "Inspector"}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    {selectedNode && <Badge color="gray">{selectedNode.id}</Badge>}
+                    {selectedEdge && <Badge color="gray">{selectedEdge.id}</Badge>}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      appearance="outline"
+                      className="h-6 px-2 py-0 text-[10px]"
+                      onClick={() => setPanelCollapsed((v) => !v)}
+                    >
+                      {panelCollapsed ? "Expandir" : "Reducir"}
+                    </Button>
+                  </div>
+                </div>
+                {!panelCollapsed && (
+                  <div className="max-h-[60vh] overflow-y-auto p-3">
+                    {selectedNode ? (
+                      <div className="space-y-3">
+                        <div className="grid gap-3">
+                          <Field label="Nombre">
+                            <input className={inputCls} value={nodeData.label ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ label: e.target.value })} />
+                          </Field>
+                          <Field label="Descripción">
+                            <input className={inputCls} value={nodeData.description ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ description: e.target.value })} />
+                          </Field>
+                          <Field label="Intent (crew)">
+                            <select className={inputCls} value={nodeData.intent ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ intent: e.target.value || undefined })}>
+                              <option value="">— sin intent —</option>
+                              {FLOW_INTENTS.map((intent) => (
+                                <option key={intent} value={intent}>
+                                  {INTENT_LABEL_ES[intent] ?? intent}
+                                </option>
+                              ))}
+                            </select>
+                          </Field>
+                          <Field label="Modelo">
+                            <select className={inputCls} value={nodeData.model ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ model: e.target.value || undefined })}>
+                              <option value="">— usar el del código —</option>
+                              {FLOW_MODELS.map((m) => (
+                                <option key={m.id} value={m.id}>
+                                  {m.label}
+                                </option>
+                              ))}
+                            </select>
+                          </Field>
+                          <Field label={`Prompt (${promptLength}/${FLOW_MIN_PROMPT_LENGTH})`}>
+                            <textarea
+                              rows={4}
+                              className={cn(inputCls, "h-auto resize-y font-mono text-[11px] leading-4")}
+                              value={nodeData.prompt ?? ""}
+                              disabled={readOnly}
+                              placeholder="Prompt del crew..."
+                              onChange={(e) => updateNodeData({ prompt: e.target.value })}
+                            />
+                          </Field>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="ghost" appearance="outline" className="flex-1" isDisabled={readOnly} onClick={() => instance?.fitView({ nodes: [{ id: selectedNode.id }], padding: 0.8, duration: 300 })}>
+                            Centrar
+                          </Button>
+                          <Button size="sm" variant="danger" appearance="outline" className="flex-1" isDisabled={readOnly} onClick={handleDeleteNode}>
+                            Eliminar
+                          </Button>
+                        </div>
+                      </div>
+                    ) : selectedEdge ? (
+                      <div className="space-y-3">
+                        <div className="rounded-lg bg-background-gray-secondary p-2 text-[11px] text-text-secondary">
+                          {selectedEdge.source} → {selectedEdge.target}
+                        </div>
+                        <Field label="Etiqueta (intent ruteado)">
+                          <input
+                            className={inputCls}
+                            value={typeof selectedEdge.label === "string" ? selectedEdge.label : ""}
+                            disabled={readOnly}
+                            placeholder="ej: product_search"
+                            onChange={(e) => updateEdgeLabel(e.target.value)}
+                          />
+                        </Field>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          appearance="outline"
+                          className="w-full"
+                          isDisabled={readOnly}
+                          onClick={() => {
+                            setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
+                            setSelectedEdgeId(null);
+                            setDirty(true);
+                          }}
+                        >
+                          Eliminar conexión
+                        </Button>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] leading-4 text-text-secondary">Selecciona un nodo crew o una conexión para editar.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           {!readOnly && (
             <p className="mt-2 text-[10px] leading-4 text-text-tertiary">

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { AiActivityChart } from "./activity-chart";
 import { AiAgentsTable } from "./agents-table";
+import { AiModelsChart } from "./models-chart";
 import type { AiStats, AiRange } from "./types";
 import { AGENT_STATUS_ES } from "./types";
 import Link from "next/link";
@@ -12,9 +13,16 @@ import { Activity, BadgeCheck, Bot, Wallet } from "lucide-react";
 
 export function AiDashboard() {
   const [days, setDays] = useState<AiRange>(7);
+  const [month, setMonth] = useState("all");
+  const [year, setYear] = useState("all");
   const { data, isLoading } = useQuery<AiStats>({
-    queryKey: ["ai-stats", days],
-    queryFn: async () => (await fetch(`/api/ai/stats?days=${days}`)).json(),
+    queryKey: ["ai-stats", days, month, year],
+    queryFn: async () => {
+      const params = new URLSearchParams({ days: String(days) });
+      if (month !== "all") params.set("month", month);
+      if (year !== "all") params.set("year", year);
+      return (await fetch(`/api/ai/stats?${params}`)).json();
+    },
   });
 
   if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando AI...</CardContent></Card>;
@@ -22,6 +30,14 @@ export function AiDashboard() {
 
   const avgCost = data.totals.requests > 0 ? data.totals.cost / data.totals.requests : 0;
   const providerMain = data.providers[0];
+  const periodLabel =
+    month !== "all" && year !== "all"
+      ? `${month}/${year}`
+      : month !== "all"
+        ? `mes ${month}`
+        : year !== "all"
+          ? `año ${year}`
+          : `${days} días`;
 
   return (
     <div className="grid min-w-0 gap-4 md:grid-cols-3">
@@ -30,7 +46,7 @@ export function AiDashboard() {
           <div>
             <h3 className="text-sm font-bold tracking-[-0.2px]">Analítica de costos de AI</h3>
             <p className="text-xs text-white/75">
-              OpenRouter · {data.totals.requests.toLocaleString("es-CL")} solicitudes en {days} días · {providerMain?.name ?? "openrouter/qwen"} lidera con {providerMain?.pct ?? 72}%
+              OpenRouter · {data.totals.requests.toLocaleString("es-CL")} solicitudes en {periodLabel} · {providerMain?.name ?? "openrouter/qwen"} lidera con {providerMain?.pct ?? 72}%
             </p>
           </div>
           <Link href="/admin" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/20">
@@ -92,7 +108,8 @@ export function AiDashboard() {
           <span className="ml-auto hidden text-xs text-white/60 sm:inline">Costo fijo $0.90 por ejecución · Resend en prod</span>
         </div>
       </div>
-      <AiActivityChart data={data} days={days} onDays={setDays} />
+      <AiActivityChart data={data} days={days} onDays={setDays} month={month} year={year} onMonth={setMonth} onYear={setYear} />
+      <AiModelsChart data={data} />
       <AiAgentsTable data={data} />
       <Card className="min-w-0 overflow-hidden md:col-span-3">
         <CardHeader><CardTitle className="text-sm">Actividad del Agente</CardTitle></CardHeader>

@@ -8,9 +8,12 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const format = searchParams.get("format");
-    // Rango del gráfico de visitas/ventas: 7 | 14 | 21 | 28 días.
     const rawDays = Number(searchParams.get("days"));
     const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
+    const rawMonth = Number(searchParams.get("month"));
+    const rawYear = Number(searchParams.get("year"));
+    const month = rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;
+    const year = rawYear >= 2020 && rawYear <= 2035 ? rawYear : null;
     const [orders, products] = await Promise.all([
       prisma.order.findMany({
         select: { total: true, status: true, source: true, createdAt: true, items: { select: { quantity: true, product: { select: { title: true, sku: true } } } } },

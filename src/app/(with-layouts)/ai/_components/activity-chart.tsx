@@ -3,28 +3,69 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core/chart";
 import { Bar, BarChart, CartesianGrid, Cell, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Select,
+  SelectContent,
+  SelectIndicator,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/tailgrids/core/select";
 import type { AiStats, AiRange } from "./types";
 import { AI_RANGES } from "./types";
+
+const MONTHS = [
+  { id: "all", label: "Todos" },
+  { id: "1", label: "Enero" },
+  { id: "2", label: "Febrero" },
+  { id: "3", label: "Marzo" },
+  { id: "4", label: "Abril" },
+  { id: "5", label: "Mayo" },
+  { id: "6", label: "Junio" },
+  { id: "7", label: "Julio" },
+  { id: "8", label: "Agosto" },
+  { id: "9", label: "Septiembre" },
+  { id: "10", label: "Octubre" },
+  { id: "11", label: "Noviembre" },
+  { id: "12", label: "Diciembre" },
+] as const;
+
+const YEARS = ["all", "2024", "2025", "2026"] as const;
 
 type Props = {
   data: AiStats | null;
   days: AiRange;
   onDays: (d: AiRange) => void;
+  month: string;
+  year: string;
+  onMonth: (v: string) => void;
+  onYear: (v: string) => void;
 };
 
-export function AiActivityChart({ data, days, onDays }: Props) {
+export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYear }: Props) {
   const rows = data?.byDay ?? [];
   const total = rows.reduce((a, r) => a + r.requests, 0);
   const avg = rows.length > 0 ? Math.round(total / rows.length) : 0;
   const peak = rows.length > 0 ? rows.reduce((a, b) => (b.requests > a.requests ? b : a), rows[0]) : null;
   const step = Math.max(1, Math.ceil(rows.length / 7));
 
+  const monthLabel = MONTHS.find((m) => m.id === month)?.label ?? "Todos";
+  const yearLabel = year === "all" ? "" : year;
+  const titleSuffix =
+    month !== "all" && year !== "all"
+      ? `${monthLabel} ${yearLabel}`
+      : month !== "all"
+        ? monthLabel
+        : year !== "all"
+          ? yearLabel
+          : `últimos ${days} días`;
+
   return (
     <Card className="min-w-0 md:col-span-3 overflow-hidden">
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-sm">Actividad de AI — últimos {days} días</CardTitle>
+            <CardTitle className="text-sm">Actividad de AI — {titleSuffix}</CardTitle>
             <p className="mt-1 text-xs text-text-tertiary">
               {total.toLocaleString("es-CL")} solicitudes · {avg}/día promedio
               {peak ? ` · pico ${peak.day} con ${peak.requests}` : ""}
@@ -75,10 +116,38 @@ export function AiActivityChart({ data, days, onDays }: Props) {
             {r} días
           </button>
         ))}
-        <span className="ml-auto hidden items-center gap-2 text-xs text-text-tertiary sm:flex">
-          <span className="size-2 rounded-full bg-[#5750F1]" /> Hoy
-          <span className="size-2 rounded-full bg-[#C7D2FE]" /> Días previos
-        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <Select value={month} onChange={(v) => onMonth(String(v))} aria-label="Filtrar por mes">
+            <SelectTrigger className="h-8 min-w-28 text-xs">
+              <SelectValue />
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectContent>
+              {MONTHS.map((m) => (
+                <SelectItem key={m.id} id={m.id} textValue={m.label}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={year} onChange={(v) => onYear(String(v))} aria-label="Filtrar por año">
+            <SelectTrigger className="h-8 min-w-20 text-xs">
+              <SelectValue />
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectContent>
+              {YEARS.map((y) => (
+                <SelectItem key={y} id={y} textValue={y === "all" ? "Año" : y}>
+                  {y === "all" ? "Año" : y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="hidden items-center gap-2 text-xs text-text-tertiary sm:flex">
+            <span className="size-2 rounded-full bg-[#5750F1]" /> Hoy
+            <span className="size-2 rounded-full bg-[#C7D2FE]" /> Previos
+          </span>
+        </div>
       </div>
     </Card>
   );

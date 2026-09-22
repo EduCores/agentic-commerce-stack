@@ -18,10 +18,15 @@ import type { HomeStats, SalesRange } from "./home-types";
 /** Home Hub: lo más relevante del ACS ordenado por valor para el dueño. */
 export function RealStats() {
   const [days, setDays] = useState<SalesRange>(7);
+  const [month, setMonth] = useState("all");
+  const [year, setYear] = useState("all");
   const { data, isLoading } = useQuery<HomeStats>({
-    queryKey: ["dashboard-stats", days],
+    queryKey: ["dashboard-stats", days, month, year],
     queryFn: async () => {
-      const r = await fetch(`/api/dashboard/stats?days=${days}`);
+      const params = new URLSearchParams({ days: String(days) });
+      if (month !== "all") params.set("month", month);
+      if (year !== "all") params.set("year", year);
+      const r = await fetch(`/api/dashboard/stats?${params}`);
       if (!r.ok) throw new Error("No se pudieron cargar las métricas");
       return r.json();
     },
@@ -46,7 +51,7 @@ export function RealStats() {
 
       {/* 3 Ventas — tendencia clara, selector moderno */}
       <div className="md:col-span-4">
-        <SalesCard sales={data.salesByDay} days={days} onDays={setDays} />
+        <SalesCard sales={data.salesByDay} days={days} onDays={setDays} month={month} year={year} onMonth={setMonth} onYear={setYear} />
       </div>
 
       {/* 4 Operativa comercial — embudo, canales y stock comparten la fila clave */}

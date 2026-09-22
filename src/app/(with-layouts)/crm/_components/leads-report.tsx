@@ -40,7 +40,7 @@ export function CrmLeadsReport({ data }: { data: CrmData }) {
                       </div>
                     </td>
                     <td className="p-2 text-right font-medium">{l.deals}</td>
-                    <td className="p-2 text-right font-bold text-brand-600">${l.revenue.toLocaleString("es-CL")}</td>
+                    <td className="p-2 text-right font-bold text-white">${l.revenue.toLocaleString("es-CL")}</td>
                     <td className="p-2 text-right">
                       <Badge color={l.performance === "Alta" ? "success" : l.performance === "Media" ? "warning" : "gray"}>
                         {l.performance === "Alta" && <Award className="mr-1 size-3" />}
