@@ -63,7 +63,7 @@ export const NAV_DATA: NavSection[] = [
       },
       {
         title: "Agentes",
-        icon: <Bot size={18} />,
+        icon: <Bot size={22} />,
         url: "/agents",
         items: [],
       },
