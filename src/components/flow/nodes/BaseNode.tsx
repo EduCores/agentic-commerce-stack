@@ -26,8 +26,8 @@ export function BaseNode({ data, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "w-44 rounded-xl border bg-card-background px-3 py-2.5 shadow-sm transition",
-        selected ? "border-brand-500 shadow-md" : "border-card-border",
+        "w-44 rounded-xl border-0 bg-card-background px-3 py-2.5 shadow-sm transition",
+        selected ? "shadow-md ring-1 ring-brand-500" : "",
         statusRing[d.status ?? "idle"]
       )}
     >

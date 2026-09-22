@@ -658,11 +658,11 @@
 }
 
 /* .border-[0.5px]: ancho hairline comentado — sin borde visible (se conserva la clase). Sin capa: gana a la utilidad de Tailwind. */
-.border-[0\.5px] {
+.border-\[0\.5px\] {
   /* border-width: .5px; */
   border-width: 0;
 }
-.border-b-[0\.5px] {
+.border-b-\[0\.5px\] {
   /* border-bottom-width: .5px; */
   border-bottom-width: 0;
 }
