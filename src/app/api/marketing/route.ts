@@ -19,7 +19,7 @@ const CHANNEL_ORDER = ["Starshop", "Meta", "whatsapp", "Tienda física"];
 export async function GET() {
   try {
     const [orders, stores, stepLogs] = await Promise.all([
-      prisma.order.findMany({ select: { total: true, status: true, source: true, createdAt: true }, take: 300, orderBy: { createdAt: "desc" } }),
+      prisma.order.findMany({ select: { total: true, status: true, source: true, createdAt: true, customerId: true }, take: 300, orderBy: { createdAt: "desc" } }),
       prisma.storeConnection.findMany({ select: { id: true, name: true, provider: true, isActive: true, _count: { select: { products: true, orders: true } } } }),
       prisma.orderStepLog.count().catch(() => 0),
     ]);
@@ -50,6 +50,20 @@ export async function GET() {
       });
 
     const paid = orders.filter((o) => o.status === "PAID" || o.status === "FULFILLED").length;
+    // Audiencia: compradores únicos totales y por canal.
+    const audienceCustomers = new Set(orders.map((o) => o.customerId).filter(Boolean)).size;
+    const audienceByChannel = Object.entries(
+      orders.reduce<Record<string, Set<string>>>((acc, o) => {
+        if (!o.customerId) return acc;
+        const k = channelLabel(o.source ?? "manual");
+        acc[k] = acc[k] ?? new Set<string>();
+        acc[k].add(o.customerId);
+        return acc;
+      }, {})
+    )
+      .map(([channel, set]) => ({ channel, customers: set.size }))
+      .sort((a, b) => b.customers - a.customers);
+    const audience = { customers: audienceCustomers, byChannel: audienceByChannel };
     const funnel = [
       { stage: "Impresiones", value: orders.length * 40 + stepLogs },
       { stage: "Visitas", value: orders.length * 12 },
@@ -84,11 +98,20 @@ export async function GET() {
         ],
         campaigns: [{ id: "demo", name: "Starshop Frontend — starshop", active: true, products: 48, orders: 80 }],
         totals: { impressions: 3200, revenue: 1100000 },
+        audience: {
+          customers: 34,
+          byChannel: [
+            { channel: "Starshop", customers: 18 },
+            { channel: "Meta", customers: 9 },
+            { channel: "whatsapp", customers: 5 },
+            { channel: "Tienda física", customers: 2 },
+          ],
+        },
       });
     }
 
-    return NextResponse.json({ channels, funnel, campaigns, totals: { impressions: funnel[0].value, revenue: orders.reduce((a, o) => a + Number(o.total), 0) } });
+    return NextResponse.json({ channels, funnel, campaigns, audience, totals: { impressions: funnel[0].value, revenue: orders.reduce((a, o) => a + Number(o.total), 0) } });
   } catch (e) {
-    return NextResponse.json({ channels: [], funnel: [], campaigns: [], totals: { impressions: 0, revenue: 0 }, warning: e instanceof Error ? e.message : String(e) });
+    return NextResponse.json({ channels: [], funnel: [], campaigns: [], audience: { customers: 0, byChannel: [] }, totals: { impressions: 0, revenue: 0 }, warning: e instanceof Error ? e.message : String(e) });
   }
 }
