@@ -64,12 +64,6 @@ export function AnalyticsSalesChart({ data, days, onDays, month, year, onMonth, 
         <ChartContainer className="h-full w-full" height="100%" width="100%">
           <AreaChart data={rows} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <defs>
-              <linearGradient id="analytics-sales-bg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#5750F1" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#5750F1" stopOpacity={0} />
-              </linearGradient>
-            </defs>
             <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: "var(--color-text-tertiary)", fontSize: 11 }} tickFormatter={(v: string) => v.slice(5)} interval={step - 1} />
             <YAxis
               axisLine={false}
@@ -79,8 +73,8 @@ export function AnalyticsSalesChart({ data, days, onDays, month, year, onMonth, 
               width={44}
             />
             <Tooltip content={<ChartTooltipContent />} />
-            <Area type="monotone" dataKey="total" name="Ventas" stroke="#5750F1" strokeWidth={2} fill="url(#analytics-sales-bg)" dot={false} />
-            <Area type="monotone" dataKey="orders" name="Pedidos" stroke="#D8B4FE" strokeWidth={2} fill="transparent" dot={false} />
+            <Area type="monotone" dataKey="total" name="Ventas" stroke="#00cf2f" strokeWidth={2} fill="#00cf2f" fillOpacity={0.3} dot={false} />
+            <Area type="monotone" dataKey="orders" name="Pedidos" stroke="#00cf2f" strokeWidth={2} strokeDasharray="4 4" fill="transparent" dot={false} />
           </AreaChart>
         </ChartContainer>
       </CardContent>
@@ -131,11 +125,11 @@ export function AnalyticsSalesChart({ data, days, onDays, month, year, onMonth, 
         </div>
         <span className="mt-3 flex w-full items-center justify-between gap-3 text-xs text-text-secondary sm:mt-0 sm:w-auto">
           <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full" style={{ backgroundColor: "#5750F1" }} aria-hidden="true" />
+            <span className="size-2.5 rounded-full" style={{ backgroundColor: "#00cf2f" }} aria-hidden="true" />
             Ventas ($)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full" style={{ backgroundColor: "#D8B4FE" }} aria-hidden="true" />
+            <span className="size-2.5 rounded-full" style={{ backgroundColor: "#00cf2f" }} aria-hidden="true" />
             Pedidos (n°)
           </span>
         </span>
