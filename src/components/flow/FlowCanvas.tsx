@@ -464,11 +464,20 @@ export default function FlowCanvas({
               Conectar: arrastra desde el círculo inferior de un nodo hasta el círculo superior de otro. Borrar: selecciona el nodo o la conexión y pulsa Supr.
             </p>
           )}
+          {!selectedNode && !selectedEdge && (
+            <div className="mt-2">
+              <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Inspector</p>
+              <p className="mt-1 text-[11px] leading-4 text-text-secondary">
+                Selecciona un nodo crew o una conexión para editar sus valores.
+              </p>
+            </div>
+          )}
         </Card>
       </div>
       </div>
 
       {/* ── Inspector (debajo del diagrama, en horizontal) ─────────────────── */}
+      {(selectedNode || selectedEdge) && (
       <Card className="w-full shrink-0 space-y-3">
         {selectedNode ? (
           <>
@@ -577,7 +586,7 @@ export default function FlowCanvas({
               </Button>
             </div>
           </>
-        ) : selectedEdge ? (
+        ) : selectedEdge && (
           <>
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Conexión</p>
@@ -613,17 +622,9 @@ export default function FlowCanvas({
               Eliminar conexión
             </Button>
           </>
-        ) : (
-          <>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Inspector</p>
-              <p className="mt-1 text-[11px] leading-4 text-text-secondary">
-                Selecciona un nodo crew o una conexión para editar sus valores.
-              </p>
-            </div>
-          </>
         )}
       </Card>
+      )}
 
       {/* ── Cómo funciona ───────────────────────────────────────────────────── */}
       <Card className="w-full shrink-0 space-y-2 p-3">
