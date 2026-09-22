@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Bot } from "lucide-react";
 import {
   ChatIcon,
   HomeIcon,
@@ -7,7 +8,6 @@ import {
   TableIcon,
   TaskIcon,
   UserGroupIcon,
-  UserIcon,
   Widget4Icon,
   WindowIcon,
 } from "./icon";
@@ -63,7 +63,7 @@ export const NAV_DATA: NavSection[] = [
       },
       {
         title: "Agentes",
-        icon: <UserIcon />,
+        icon: <Bot size={18} />,
         url: "/agents",
         items: [],
       },
