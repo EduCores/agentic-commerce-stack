@@ -48,7 +48,7 @@ export default async function AgentsPage() {
             <code className="rounded bg-background-gray-secondary px-1 py-0.5">prisma/starshop-prompts.ts</code>
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Link href="/workflows" className="rounded-lg border border-card-border bg-card-background px-4 py-2 text-sm font-medium hover:bg-background-gray-secondary">
             Ver flujos
           </Link>

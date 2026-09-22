@@ -114,7 +114,7 @@ export function AdminChat() {
           <ChatBubble key={m.id} role={m.role} text={m.text} streaming={m.streaming} isTyping={loading && m.role === "assistant" && !m.text} />
         ))}
       </CardContent>
-      <div className="shrink-0 border-t p-3 flex gap-2 bg-white">
+      <div className="shrink-0 border-t p-3 flex items-center gap-2 bg-white">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

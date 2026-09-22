@@ -582,7 +582,7 @@ const graphNodes = useMemo(() => {
                             />
                           </Field>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                           <Button size="sm" variant="ghost" appearance="outline" className="flex-1" isDisabled={readOnly} onClick={() => instance?.fitView({ nodes: [{ id: selectedNode.id }], padding: 0.8, duration: 300 })}>
                             Centrar
                           </Button>

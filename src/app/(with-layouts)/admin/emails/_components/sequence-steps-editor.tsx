@@ -63,7 +63,7 @@ export function SequenceStepsEditor({ steps, onChange, templates }: Props) {
           <div className="rounded-xl border border-card-border bg-card-background p-3">
             <div className="mb-2 flex items-center justify-between">
               <Badge color="success">Paso {i + 1} · Enviar correo</Badge>
-              <div className="flex gap-1">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => move(i, -1)}

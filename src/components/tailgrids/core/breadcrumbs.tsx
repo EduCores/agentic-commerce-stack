@@ -29,9 +29,11 @@ export function Breadcrumbs({
             {items.map((item, index) => (
                 <li
                     key={item.href}
-                    className='contents text-text-tertiary [&_svg]:text-current!'
+                    className="flex items-center gap-1 text-text-tertiary"
                 >
-                    {index > 0 && <Divider type={dividerType} />}
+                    {index > 0 && (
+                        <Divider type={dividerType} className="flex items-center" />
+                    )}
 
                     <Link
                         href={item.href}
@@ -41,7 +43,6 @@ export function Breadcrumbs({
                         )}
                     >
                         {item.icon}
-
                         {item.label}
                     </Link>
                 </li>
@@ -50,15 +51,15 @@ export function Breadcrumbs({
     );
 }
 
-function Divider({ type }: { type: PropsType['dividerType'] }) {
+function Divider({ type, className }: { type: PropsType['dividerType']; className?: string }) {
     switch (type) {
         case 'chevron':
-            return <ChevronRight className='size-4' />;
+            return <ChevronRight className={cn('size-4', className)} />;
 
         case 'dot':
-            return <span className='size-1 rounded-full bg-text-200' />;
+            return <span className={cn('size-1 rounded-full bg-text-200', className)} />;
 
         default:
-            return <span>/</span>;
+            return <span className={cn('text-text-tertiary', className)}>/</span>;
     }
 }

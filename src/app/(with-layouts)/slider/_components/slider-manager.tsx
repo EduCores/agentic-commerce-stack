@@ -229,7 +229,7 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
             Activo (visible en el frontend)
           </label>
         </div>
-        <div className="flex gap-2 pt-1">
+        <div className="flex items-center gap-2 pt-1">
           <Button type="submit" appearance="fill" isDisabled={saving} className="flex-1">
             {saving ? "Guardando…" : editingId == null ? "Crear slide" : "Guardar cambios"}
           </Button>
@@ -245,7 +245,7 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
           </p>
         )}
         {slides.map((s) => (
-          <div key={s.id} className="flex gap-3 rounded-xl border-[0.5px] border-card-border bg-card-background p-3">
+          <div key={s.id} className="flex items-center gap-3 rounded-xl border-[0.5px] border-card-border bg-card-background p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={s.image} alt={s.title} className="h-20 w-32 shrink-0 rounded-lg object-cover" />
             <div className="min-w-0 flex-1">
