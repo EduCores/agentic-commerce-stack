@@ -61,7 +61,7 @@ export function BaseNode({ data, selected }: NodeProps) {
               prompt propio
             </Badge>
           )}
-          {d.model && <Badge color="primary" className="text-[10px]">{d.model.split("/").pop()}</Badge>}
+          {d.model && <Badge color="success" className="text-[10px]">{d.model.split("/").pop()}</Badge>}
         </div>
       )}
       {!d.agent && d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{NODE_TYPE_ES[d.type] ?? d.type}</p>}
