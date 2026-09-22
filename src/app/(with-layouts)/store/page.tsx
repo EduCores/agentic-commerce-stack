@@ -84,21 +84,19 @@ export default async function StorePage() {
                         : { dot: "bg-emerald-500", badge: "Disponible" as const, color: "success" as const };
                   return (
                     <div key={p.id} className="rounded-lg border border-card-border bg-card-background p-3 transition hover:border-brand-500">
-                      <div className="flex items-start gap-2.5">
+                      <div className="flex items-center justify-between gap-2.5">
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text">
                           <Package size={18} />
                         </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="flex items-center gap-1.5 text-sm font-medium text-text-primary">
-                            <span className={`size-2 shrink-0 rounded-full ${stockState.dot}`} title={stockState.badge} />
-                            <span className="truncate">{p.title}</span>
-                          </p>
-                          <p className="mt-0.5 text-xs text-text-tertiary">{p.sku}</p>
-                        </div>
                         <p className="shrink-0 text-sm font-extrabold text-brand-600">
                           ${Number(p.price).toLocaleString("es-CL")}
                         </p>
                       </div>
+                      <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-text-primary">
+                        <span className={`size-2 shrink-0 rounded-full ${stockState.dot}`} title={stockState.badge} />
+                        <span className="min-w-0 break-words">{p.title}</span>
+                      </p>
+                      <p className="mt-0.5 text-xs text-text-tertiary">{p.sku}</p>
                       <div className="mt-2.5 flex items-center justify-between border-t border-card-border/60 pt-2 text-xs text-text-tertiary">
                         <span>Stock {p.stock} · Reservado {p.reservedStock}</span>
                         <Badge color={stockState.color}>{stockState.badge}</Badge>
