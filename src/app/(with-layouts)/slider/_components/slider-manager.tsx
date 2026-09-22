@@ -161,7 +161,7 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-5 lg:items-start">
-      <form onSubmit={onSubmit} className="flex w-full min-h-0 flex-col gap-4 self-start overflow-visible rounded-xl border-[0.5px] border-card-border bg-card-background p-5 lg:col-span-2">
+      <form onSubmit={onSubmit} className="flex w-full min-h-0 flex-col gap-4 self-start overflow-visible rounded-xl border border-card-border bg-card-background p-5 lg:col-span-2">
         <h3 className="font-semibold text-text-primary">{editingId == null ? "Nuevo slide" : `Editando #${editingId}`}</h3>
         <div className="grid w-full gap-4">
           <label className="grid gap-1.5">
@@ -238,12 +238,12 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
       </form>
       <div className="space-y-3 lg:col-span-3">
         {slides.length === 0 && (
-          <p className="rounded-xl border-[0.5px] border-card-border bg-card-background p-5 text-sm text-text-tertiary">
+          <p className="rounded-xl border border-card-border bg-card-background p-5 text-sm text-text-tertiary">
             Sin slides. Crea el primero con el formulario.
           </p>
         )}
         {slides.map((s) => (
-          <div key={s.id} className="flex gap-3 rounded-xl border-[0.5px] border-card-border bg-card-background p-3">
+          <div key={s.id} className="flex gap-3 rounded-xl border border-card-border bg-card-background p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={s.image} alt={s.title} className="h-20 w-32 shrink-0 rounded-lg object-cover" />
             <div className="min-w-0 flex-1">

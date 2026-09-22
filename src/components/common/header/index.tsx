@@ -17,7 +17,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b-[0.5px] border-card-border bg-card-surface-area px-2 py-4 lg:px-5">
+      <header className="sticky top-0 z-40 w-full border-b border-card-border bg-card-surface-area px-2 py-4 lg:px-5">
         {/*  Mobile layout (< lg)  3-column grid: menu | logo | dots */}
         <div className="flex items-center lg:hidden">
           {/* Left: Menu / Hamburger */}
