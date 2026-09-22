@@ -27,7 +27,8 @@ function darkCss(scope: string): string {
 /** Reglas oscuras con alcance .email-dark: el preview en la app sigue el tema (no el SO). */
 export const EMAIL_DARK_SCOPED_CSS = darkCss(".email-dark");
 
-function shell(title: string, preheader: string, body: string): string {
+/** Armazón visual compartido: mismo HTML en editor, preview, mock y producción. */
+export function emailShell(title: string, preheader: string, body: string): string {
   return `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #eee;border-radius:12px;overflow:hidden" class="dark-invert">`
     + `<div style="background:${BRAND};padding:16px 20px;font-weight:bold;color:${INK};font-size:16px">${title}</div>`
     + `<div style="display:none;max-height:0;overflow:hidden;opacity:0">${preheader}</div>`
@@ -51,7 +52,7 @@ export function buildOrderConfirmation(opts: { orderId: string; customerName?: s
     + `<table style="width:100%;border-collapse:collapse;margin:12px 0">${rows(items, currency)}</table>`
     + `<p><b>Total: $${total.toLocaleString("es-CL")} ${currency}</b></p>`
     + `<p>Te avisaremos cuando salga a despacho. Seguimiento en /orders.</p>`;
-  return { subject, html: shell("Pedido confirmado", `Pedido ${opts.orderId}`, body), text: `Hola ${name}, tu pedido ${opts.orderId} confirmado. Total $${total} ${currency}.` };
+  return { subject, html: emailShell("Pedido confirmado", `Pedido ${opts.orderId}`, body), text: `Hola ${name}, tu pedido ${opts.orderId} confirmado. Total $${total} ${currency}.` };
 }
 
 export function buildAbandonedCart(opts: { customerName?: string; items?: Item[]; recoverUrl?: string; currency?: string }): EmailBuilt {
@@ -64,7 +65,7 @@ export function buildAbandonedCart(opts: { customerName?: string; items?: Item[]
     + `<table style="width:100%;border-collapse:collapse;margin:12px 0">${rows(items, currency)}</table>`
     + `<p><a href="${url}" style="display:inline-block;background:${BRAND};color:${INK};padding:10px 18px;border-radius:999px;font-weight:bold;text-decoration:none">Retomar compra</a></p>`
     + `<p>¿Necesitas ayuda con stock o despacho? Responde este correo.</p>`;
-  return { subject, html: shell("Carro guardado", "Retoma tu compra", body), text: `Hola ${name}, dejaste ${items.length} producto(s) en tu carro. Retómalo: ${url}` };
+  return { subject, html: emailShell("Carro guardado", "Retoma tu compra", body), text: `Hola ${name}, dejaste ${items.length} producto(s) en tu carro. Retómalo: ${url}` };
 }
 
 export function buildReturnUpdate(opts: { customerName?: string; orderId?: string; status?: string; steps?: string[] }): EmailBuilt {
@@ -76,13 +77,13 @@ export function buildReturnUpdate(opts: { customerName?: string; orderId?: strin
   const body = `<p>Hola ${name},</p><p>Tu devolución del pedido <b>${orderId}</b> está: <b>${status}</b>.</p>`
     + `<ol>${steps.map((s) => `<li>${s}</li>`).join("")}</ol>`
     + `<p>Si está aprobada, el reembolso tarda 3-5 días hábiles.</p>`;
-  return { subject, html: shell("Devolución", `Pedido ${orderId}`, body), text: `Hola ${name}, devolución ${orderId}: ${status}. Pasos: ${steps.join(" → ")}` };
+  return { subject, html: emailShell("Devolución", `Pedido ${orderId}`, body), text: `Hola ${name}, devolución ${orderId}: ${status}. Pasos: ${steps.join(" → ")}` };
 }
 
 export function buildGeneral(opts: { title?: string; body?: string; to?: string }): EmailBuilt {
   const title = opts.title ?? "Mensaje StarShop";
   const bodyText = opts.body ?? "Gracias por tu contacto. Te ayudamos con catálogo, stock y despacho.";
-  return { subject: title, html: shell(title, title, `<p>${bodyText.replace(/\n/g, "<br/>")}</p>`), text: `${title}\n\n${bodyText}` };
+  return { subject: title, html: emailShell(title, title, `<p>${bodyText.replace(/\n/g, "<br/>")}</p>`), text: `${title}\n\n${bodyText}` };
 }
 
 export function buildTemplate(kind: EmailTemplateKind, opts: { subject?: string; text?: string; orderId?: string; to?: string }): EmailBuilt {

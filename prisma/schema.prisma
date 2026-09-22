@@ -287,3 +287,98 @@ enum StepStatus {
   SKIPPED
   RETRYING
 }
+
+// ───────── Correos transaccionales (plantillas editables + secuencias) ─────────
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  key         String   @unique // order_confirmation | abandoned_cart | return_update | general | custom_*
+  name        String   // nombre amigable: "Pedido confirmado"
+  description String?
+  subject     String   // admite {{variables}}
+  preheader   String?
+  headerTitle String   // título del encabezado del HTML
+  body        String   @db.Text // texto con {{variables}} (saltos de línea)
+  buttonText  String?
+  buttonUrl   String?  // admite {{link}}
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  logs        EmailLog[]
+
+  @@index([isActive])
+}
+
+model EmailLog {
+  id          String      @id @default(cuid())
+  to          String
+  templateId  String?
+  template    EmailTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  templateKey String?
+  subject     String
+  status      EmailStatus @default(MOCKED)
+  providerId  String?
+  error       String?     @db.Text
+  createdAt   DateTime    @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+  @@index([to])
+}
+
+enum EmailStatus {
+  SENT
+  MOCKED
+  FAILED
+}
+
+// Secuencia de correos estilo flujo: pasos [{ waitHours, templateKey, subject? }]
+model EmailSequence {
+  id          String   @id @default(cuid())
+  name        String   // "Recuperar carrito abandonado"
+  description String?
+  trigger     String   @default("ABANDONED_CART") // ABANDONED_CART | MANUAL
+  isActive    Boolean  @default(true)
+  steps       Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  enrollments EmailSequenceEnrollment[]
+
+  @@index([isActive])
+  @@index([trigger])
+}
+
+model EmailSequenceEnrollment {
+  id           String        @id @default(cuid())
+  sequenceId   String
+  sequence     EmailSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  email        String
+  customerName String?
+  cartId       String?
+  currentStep  Int           @default(0)
+  nextRunAt    DateTime
+  status       String        @default("ACTIVE") // ACTIVE | COMPLETED | CANCELLED
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status, nextRunAt])
+  @@index([email])
+}
+
+// Carro abandonado detectado (pedidos PENDING + reporte de tiendas)
+model CartAbandonment {
+  id             String   @id @default(cuid())
+  cartKey        String?  @unique
+  email          String
+  customerName   String?
+  items          Json     // [{ title, qty, price }]
+  total          Decimal  @db.Decimal(10, 2)
+  currency       String   @default("CLP")
+  recoverUrl     String?
+  status         String   @default("OPEN") // OPEN | RECOVERED | EXPIRED
+  lastActivityAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status, lastActivityAt])
+  @@index([email])
+}

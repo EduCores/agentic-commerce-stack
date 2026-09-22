@@ -4,6 +4,7 @@ import { defineTool } from "@/lib/eve/defineTool";
 /**
  * Agent Mail Tool — ACS
  * Envía emails transaccionales (confirmación, carrito abandonado, devolución).
+ * Usa la plantilla activa de /admin/emails y deja todo en el historial (EmailLog).
  * En dev/log mode sin RESEND_API_KEY solo loguea y devuelve ok mock (no bloquea flujo).
  * En prod con RESEND_API_KEY usa Resend API (https://resend.com).
  */
@@ -13,67 +14,36 @@ export default defineTool({
   inputSchema: z.object({
     to: z.string().email().describe("Email destinatario"),
     subject: z.string().min(3).describe("Asunto del email"),
-    html: z.string().optional().describe("Cuerpo HTML (si no se provee, se genera desde text)"),
+    html: z.string().optional().describe("Cuerpo HTML (si no se provee, se genera desde la plantilla)"),
     text: z.string().optional().describe("Cuerpo texto plano alternativo"),
     orderId: z.string().optional().describe("ID de pedido relacionado (para tracking)"),
     template: z.enum(["order_confirmation", "abandoned_cart", "return_update", "general"]).default("general"),
   }),
   async execute({ to, subject, html, text, orderId, template }) {
-    const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.EMAIL_FROM ?? "StarShop <noreply@starshop.cl>";
-    // Templates visuales compartidos con /admin/emails (mock y prod usan el mismo HTML)
-    const { buildTemplate } = await import("@/lib/eve/email-templates");
-    const built = buildTemplate(template, { subject, text, orderId, to });
-    const bodyHtml = html ?? built.html;
-    const bodyText = text ?? built.text;
-    const finalSubject = subject || built.subject;
-
-    // Mock mode: sin API key, no falla — loguea
-    if (!apiKey) {
-      console.log(`[AgentMail MOCK] to=${to} subject="${finalSubject}" template=${template} orderId=${orderId ?? "-"}`);
-      console.log(`[AgentMail MOCK] html snippet: ${bodyHtml.slice(0, 200)}`);
+    const { sendTransactionalEmail } = await import("@/lib/emails/send");
+    const result = await sendTransactionalEmail({
+      to,
+      templateKey: template,
+      subject,
+      text,
+      html,
+      orderId,
+      vars: { nombre: to, pedido: orderId ?? "" },
+    });
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? "No se pudo enviar", to, subject, template };
+    }
+    if (result.mocked) {
       return {
         ok: true,
         mocked: true,
         to,
-        subject: finalSubject,
+        subject: result.subject,
         template,
         orderId: orderId ?? null,
-        previewHtml: bodyHtml,
         message: "Email mockeado (sin RESEND_API_KEY). En prod configura RESEND_API_KEY y EMAIL_FROM.",
       };
     }
-
-    // Prod: Resend API
-    try {
-      const r = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from,
-          to: [to],
-          subject: finalSubject,
-          html: bodyHtml,
-          text: bodyText,
-          tags: [
-            { name: "template", value: template },
-            ...(orderId ? [{ name: "orderId", value: orderId }] : []),
-          ],
-        }),
-        signal: AbortSignal.timeout(10000),
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        console.log("[AgentMail] Resend HTTP", r.status, j);
-        return { ok: false, error: j?.message ?? `HTTP ${r.status}`, to, subject, template };
-      }
-      return { ok: true, mocked: false, id: j.id, to, subject, template, orderId: orderId ?? null };
-    } catch (e) {
-      console.log("[AgentMail] error", e instanceof Error ? e.message : e);
-      return { ok: false, error: e instanceof Error ? e.message : String(e), to, subject, template, mocked: false };
-    }
+    return { ok: true, mocked: false, id: result.id, to, subject: result.subject, template, orderId: orderId ?? null };
   },
 });
