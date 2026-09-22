@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/tailgrids/core/card";
 import { StatHero } from "./stat-hero";
-import { StatCards } from "./stat-cards";
 import { SalesCard } from "./sales-card";
 import { SiteSummaries } from "./site-summaries";
 import { TopProducts } from "./top-products";
@@ -39,34 +38,36 @@ export function RealStats() {
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
-      {/* 1 Hero financiero — lo primero que quiere ver el dueño */}
+      {/* 1 Hero financiero unificado — lo primero que quiere ver el dueño */}
       <div className="md:col-span-4">
-        <StatHero orders={data.counts.orders} revenue={data.revenue} alerts={alerts} />
+        <StatHero
+          orders={data.counts.orders}
+          revenue={data.revenue}
+          alerts={alerts}
+          availability={data.stock.availability}
+          stockTotal={data.stock.total}
+          reserved={data.stock.reserved}
+        />
       </div>
 
-      {/* 2 KPIs rápidos con iconos StarShop a la derecha */}
-      <div className="md:col-span-4">
-        <StatCards stats={data} />
-      </div>
-
-      {/* 3 Ventas — tendencia clara, selector moderno */}
+      {/* 2 Ventas — tendencia clara, selector moderno */}
       <div className="md:col-span-4">
         <SalesCard sales={data.salesByDay} days={days} onDays={setDays} month={month} year={year} onMonth={setMonth} onYear={setYear} />
       </div>
 
-      {/* 4 Operativa comercial — embudo, canales y stock comparten la fila clave */}
+      {/* 3 Operativa comercial — embudo, canales y stock comparten la fila clave */}
       <div className="md:col-span-4 grid gap-4 md:grid-cols-3">
         <HomeFunnelCard />
         <HomeChannelsCard />
         <HomeLowStockCard />
       </div>
 
-      {/* 5 Inteligencia y automatización — AI, marketing y carritos */}
+      {/* 4 Inteligencia y automatización — AI, marketing y carritos */}
       <div className="md:col-span-4">
         <SiteSummaries />
       </div>
 
-      {/* 6 Detalle de oferta y demanda */}
+      {/* 5 Detalle de oferta y demanda */}
       <div className="md:col-span-2">
         <TopProducts items={data.topProducts} />
       </div>
@@ -74,7 +75,7 @@ export function RealStats() {
         <RecentOrders orders={data.recentOrders} />
       </div>
 
-      {/* 7 Operación diaria — tareas y actividad */}
+      {/* 6 Operación diaria — tareas y actividad */}
       <div className="md:col-span-4">
         <HomeOpsCard />
       </div>
