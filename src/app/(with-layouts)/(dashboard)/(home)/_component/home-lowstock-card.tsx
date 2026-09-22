@@ -18,8 +18,7 @@ export function HomeLowStockCard() {
 
   return (
     <div className="rounded-xl border border-card-border bg-card-background p-5">
-      <div className="h-1.5 rounded-full bg-gradient-to-r from-teal-400 to-[#328e8f]" />
-      <div className="mt-3 flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <span className="flex size-8 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
           <TriangleAlert />
         </span>

@@ -403,3 +403,25 @@ model MetaConnection {
 
   @@index([isActive])
 }
+
+
+// ───────── Slider del home (hero del frontend StarShop) ─────────
+// Fuente de verdad del carrusel del home: el panel ACS crea/edita/publica
+// los slides y el frontend los consume. `image` admite ruta del frontend
+// (/b2b.jpg), URL absoluta o data URL (subida convertida a WebP).
+model HeroSlide {
+  id          Int      @id @default(autoincrement())
+  title       String
+  subtitle    String   @default("")
+  description String   @default("")
+  cta         String   @default("Ver más")
+  image       String   @default("")
+  bg          String   @default("from-slate-700 to-slate-900") // clases Tailwind del degradado
+  badge       String   @default("🔥 OFERTA LIMITADA")
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true) // publicado en el frontend
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}

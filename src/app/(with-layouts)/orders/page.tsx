@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
 import Link from "next/link";
+import { ReceiptText, TriangleAlert } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -29,14 +30,32 @@ export const STATUS_LABEL: Record<string, string> = {
 export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const { status } = await searchParams;
   const where = status ? { status: status as never } : {};
-  const orders = await prisma.order.findMany({
-    where: where as never,
-    take: 50,
-    orderBy: { createdAt: "desc" },
-    include: { customer: { select: { name: true, email: true } }, store: { select: { name: true, provider: true } }, items: { include: { product: { select: { sku: true, title: true } } } } },
-  }).catch(() => []);
+  const include = {
+    customer: { select: { name: true, email: true } },
+    store: { select: { name: true, provider: true } },
+    items: { include: { product: { select: { sku: true, title: true } } } },
+  } as const;
+
+  const [orders, latestOrder, reviewOrder] = await Promise.all([
+    // Lista con el filtro de estado activo.
+    prisma.order
+      .findMany({ where: where as never, take: 50, orderBy: { createdAt: "desc" }, include })
+      .catch(() => []),
+    // El pedido más reciente real (sin filtro): el que acaba de entrar.
+    prisma.order.findFirst({ orderBy: { createdAt: "desc" }, include }).catch(() => null),
+    // El último con alerta (FAILED/PENDING) + motivo del flujo: lo accionable para salvar la venta.
+    prisma.order
+      .findFirst({
+        where: { status: { in: ["FAILED", "PENDING"] } } as never,
+        orderBy: { createdAt: "desc" },
+        include: { ...include, stepLogs: { where: { status: "FAILED" } as never, orderBy: { createdAt: "desc" }, take: 1 } },
+      })
+      .catch(() => null),
+  ]);
 
   const alertCount = orders.filter((o) => o.status === "FAILED" || o.status === "PENDING").length;
+  const formatItems = (o: { items: { quantity: number; product: { title: string } }[] }) =>
+    o.items.map((it) => `${it.product.title} x${it.quantity}`).join(", ");
 
   return (
     <div className="space-y-6 p-3 sm:p-6">
@@ -59,6 +78,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
           ))}
         </div>
       </div>
+
 
       <Card>
         <CardHeader><CardTitle>Pedidos recientes</CardTitle></CardHeader>
@@ -89,16 +109,95 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         </CardContent>
       </Card>
 
-      {orders[0] && (
-        <Card>
-          <CardHeader><CardTitle>Detalle del pedido (más reciente)</CardTitle></CardHeader>
-          <CardContent className="text-sm space-y-2">
-            <p><span className="font-medium">ID:</span> {orders[0].id}</p>
-            <p><span className="font-medium">Productos:</span> {orders[0].items.map((it) => `${it.product.title} x${it.quantity}`).join(", ") || "—"}</p>
-            <p className="text-xs text-text-tertiary">Los registros del flujo de trabajo se ven en <code>/workflows</code> → <code>OrderStepLog</code> (tiempo real XYFlow).</p>
-          </CardContent>
-        </Card>
-      )}
+      {/* Fila de detalle: el más reciente (sin filtro) y, a su derecha, el accionable con alerta. */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Informativo: el pedido más reciente real, sin importar el filtro activo. */}
+        {latestOrder && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+                  <ReceiptText />
+                </span>
+                <CardTitle className="text-sm">Último pedido — sin filtro</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="text-sm">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <Link href={`/orders/${latestOrder.id}`} className="font-mono text-xs font-bold text-brand-600 underline">
+                  {latestOrder.id.slice(0, 8)}
+                </Link>
+                <Badge color={STATUS_COLOR[latestOrder.status] ?? "gray"}>{STATUS_LABEL[latestOrder.status] ?? latestOrder.status}</Badge>
+                <Badge color={latestOrder.paymentStatus === "PAID" ? "success" : "gray"}>Pago: {STATUS_LABEL[latestOrder.paymentStatus] ?? latestOrder.paymentStatus}</Badge>
+                <span className="font-medium text-text-primary">{latestOrder.customer?.name ?? "Sin cliente"}</span>
+                <span className="ml-auto text-xl font-extrabold tracking-tight text-text-primary">${Number(latestOrder.total).toLocaleString("es-CL")}</span>
+              </div>
+              <p className="mt-2 text-xs text-text-tertiary">
+                {new Date(latestOrder.createdAt).toLocaleString("es-CL")} · {latestOrder.store.name} ({latestOrder.store.provider})
+              </p>
+              <p className="mt-2 line-clamp-1 text-text-primary" title={formatItems(latestOrder)}>
+                {formatItems(latestOrder) || "Sin productos"}
+              </p>
+              <p className="mt-2 text-xs text-text-tertiary">
+                Traza del flujo (OrderStepLog, intentos y errores) en{" "}
+                <Link href={`/orders/${latestOrder.id}`} className="font-medium text-brand-600 underline">
+                  el detalle del pedido
+                </Link>
+                .
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Accionable: el último pedido con alerta, con el motivo del flujo y acceso directo. */}
+        {reviewOrder && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-badge-warning-background text-badge-warning-text [&>svg]:size-4">
+                  <TriangleAlert />
+                </span>
+                <CardTitle className="text-sm">Pedido a revisar — último con alerta</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="text-sm">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <Badge color={STATUS_COLOR[reviewOrder.status] ?? "gray"}>{STATUS_LABEL[reviewOrder.status] ?? reviewOrder.status}</Badge>
+                <span className="font-medium text-text-primary">{reviewOrder.customer?.name ?? "Sin cliente"}</span>
+                {reviewOrder.customer?.email && (
+                  <a href={`mailto:${reviewOrder.customer.email}`} className="text-xs text-brand-600 underline">
+                    {reviewOrder.customer.email}
+                  </a>
+                )}
+                <span className="ml-auto text-xl font-extrabold tracking-tight text-text-primary">${Number(reviewOrder.total).toLocaleString("es-CL")}</span>
+              </div>
+              <p className="mt-2 text-xs text-text-tertiary">
+                {new Date(reviewOrder.createdAt).toLocaleString("es-CL")} · {reviewOrder.store.name} ({reviewOrder.store.provider}) · ID {reviewOrder.id.slice(0, 8)}
+              </p>
+              <p className="mt-2 line-clamp-2 text-text-primary" title={formatItems(reviewOrder)}>
+                {formatItems(reviewOrder) || "Sin productos"}
+              </p>
+              {reviewOrder.stepLogs[0]?.error ? (
+                <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-950/20">
+                  Motivo del flujo: {reviewOrder.stepLogs[0].error}
+                </p>
+              ) : (
+                <p className="mt-2 text-xs text-text-tertiary">
+                  {reviewOrder.status === "FAILED"
+                    ? "Sin error registrado en el flujo — revisa la línea de tiempo en el detalle."
+                    : "Pendiente de pago o confirmación: contacta al cliente para cerrar la venta."}
+                </p>
+              )}
+              <Link
+                href={`/orders/${reviewOrder.id}`}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-bold text-button-primary-text hover:bg-brand-600"
+              >
+                Ver detalle del pedido →
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

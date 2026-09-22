@@ -57,6 +57,8 @@
 
   --color-chart-line: var(--chart-line);
 
+  --color-chart-positive: var(--chart-positive);
+
   /* Foreground Colors */
   --color-foreground-50: var(--foreground-50);
   --color-foreground-100: var(--foreground-100);
@@ -674,4 +676,14 @@
 .border-b-\[0\.5px\] {
   /* border-bottom-width: .5px; */
   border-bottom-width: 0;
+}
+
+/* Barras del gráfico "Ventas de los últimos N días" (home): verde sólido #00cf2f, sin gradiente.
+   Se fija --tw-gradient-from: #00cf2f para que ninguna utilidad de gradiente lo pinte con el amarillo
+   de marca; el relleno real es background-color plano (background-image: none).
+   Sin capa: gana a la utilidad de Tailwind. */
+.sales-bar-solid {
+  --tw-gradient-from: var(--chart-positive);
+  background-color: var(--chart-positive);
+  background-image: none;
 }

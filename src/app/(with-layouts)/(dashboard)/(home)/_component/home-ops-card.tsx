@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { ListChecks } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
 
 type CrmData = {
@@ -21,8 +22,12 @@ export function HomeOpsCard() {
 
   return (
     <div className="rounded-xl border border-card-border bg-card-background p-5">
-      <div className="h-1.5 rounded-full bg-gradient-to-r from-violet-400 to-purple-500" />
-      <h3 className="mt-3 text-sm font-semibold tracking-[-0.2px] text-text-primary">Operación — tareas y actividad</h3>
+      <div className="flex items-center gap-2.5">
+        <span className="flex size-9 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4.5">
+          <ListChecks />
+        </span>
+        <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Operación — tareas y actividad</h3>
+      </div>
       <div className="mt-3 space-y-2">
         {tasks.length === 0 ? (
           <p className="text-xs text-text-tertiary">Sin pendientes. Todo al día.</p>

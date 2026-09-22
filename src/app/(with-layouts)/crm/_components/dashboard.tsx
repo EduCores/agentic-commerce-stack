@@ -36,7 +36,9 @@ export function CrmDashboard() {
           </span>
           <h3 className="text-sm font-bold tracking-[-0.2px]">Clientes, tareas y actividad — ligada a pedidos y agente</h3>
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-[1.3fr_0.85fr_0.85fr]">
+        {/* Clientes se angosta a 0.7fr (su valor es corto: 34) para que "$38.925.600" quepa en Ingresos/Ticket.
+            3 columnas solo desde xl: con el sidebar visible el contenedor (658-786px en 1024-1152) no alcanza. */}
+        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-[0.7fr_1.15fr_1.15fr]">
           <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0">
             <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-8">
               <Users />
@@ -57,7 +59,7 @@ export function CrmDashboard() {
               <p className="text-xs text-white/70">Acumulado real</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0">
+          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0 md:col-span-2 xl:col-span-1">
             <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-8">
               <TrendingUp />
             </span>
@@ -87,8 +89,7 @@ export function CrmDashboard() {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="h-1.5 rounded-full bg-gradient-to-r from-teal-400 to-[#328e8f]" />
-          {data.tasks.length === 0 ? <p className="mt-3 text-sm text-text-tertiary">Sin pendientes. Todo al día.</p> : data.tasks.map((t) => (
+          {data.tasks.length === 0 ? <p className="text-sm text-text-tertiary">Sin pendientes. Todo al día.</p> : data.tasks.map((t) => (
             <div key={t.id} className="flex items-center gap-3 rounded-lg border border-card-border bg-card-background p-3 text-sm transition hover:border-brand-500/40">
               <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${t.type === "order" ? "bg-badge-warning-background text-badge-warning-text" : "bg-badge-sky-background text-badge-sky-text"} [&>svg]:size-4`}>
                 {t.type === "order" ? <Wallet /> : <TrendingUp />}
@@ -109,8 +110,7 @@ export function CrmDashboard() {
           </div>
         </CardHeader>
         <CardContent className="space-y-1.5">
-          <div className="h-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-500" />
-          <div className="mt-3 space-y-2">
+          <div className="space-y-2">
             {data.recentActivities.map((a) => (
               <div key={a.id} className="flex items-center gap-3 rounded-lg border border-card-border/60 px-3 py-2.5 text-sm transition hover:bg-background-gray-secondary/40">
                 <span className="size-2 shrink-0 rounded-full bg-emerald-500" />

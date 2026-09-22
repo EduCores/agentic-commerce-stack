@@ -16,11 +16,10 @@ export function CrmLeadsReport({ data }: { data: CrmData }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-1.5 rounded-full bg-gradient-to-r from-violet-400 to-indigo-500" />
         {data.leads.length === 0 ? (
-          <p className="mt-3 text-sm text-text-tertiary">Aún no hay clientes. Se crean con cada pedido.</p>
+          <p className="text-sm text-text-tertiary">Aún no hay clientes. Se crean con cada pedido.</p>
         ) : (
-          <div className="mt-3 overflow-x-auto">
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-card-border bg-background-gray-secondary/40 text-xs text-text-tertiary">
                 <tr><th className="p-2 text-left">Cliente</th><th className="p-2 text-right">Negocios</th><th className="p-2 text-right">Ingresos</th><th className="p-2 text-right">Nivel</th></tr>

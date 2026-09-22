@@ -75,7 +75,6 @@ export default async function AgentsPage() {
             <p className="mt-1 text-xs text-text-tertiary">{tools.length} tools validadas con zod · cada agente ve solo las suyas</p>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="h-1.5 rounded-full bg-gradient-to-r from-sky-400 to-blue-500" />
             {tools.map((t) => {
               const meta = TOOL_META[t.name] ?? { icon: Wrench, color: "bg-badge-gray-background text-badge-gray-text" };
               const Icon = meta.icon;
@@ -105,9 +104,8 @@ export default async function AgentsPage() {
             <p className="mt-1 text-xs text-text-tertiary">Bienvenida + 8 equipos · verde activo, gris pausado · modelo y prompt visibles</p>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="h-1.5 rounded-full bg-gradient-to-r from-violet-400 to-indigo-500" />
             {agents.length === 0 ? (
-              <p className="mt-3 text-sm text-text-tertiary">Todavía no hay agentes. Ejecuta el seed o crea uno. Demo: slug <code>sales-assistant</code>.</p>
+              <p className="text-sm text-text-tertiary">Todavía no hay agentes. Ejecuta el seed o crea uno. Demo: slug <code>sales-assistant</code>.</p>
             ) : (
               agents.map((a, i) => (
                 <div key={a.id} className="rounded-lg border border-card-border p-3 transition hover:border-violet-400/40 hover:bg-background-gray-secondary/20">
@@ -146,7 +144,6 @@ export default async function AgentsPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <div className="h-1.5 rounded-full bg-gradient-to-r from-teal-400 to-[#328e8f]" />
           <ol className="grid gap-3 sm:grid-cols-3">
             <li className="rounded-lg border border-card-border bg-background-gray-secondary/30 p-3">
               <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-black">1</span>

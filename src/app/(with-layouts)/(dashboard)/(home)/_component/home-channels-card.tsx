@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { Share2 } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
 
 type Channel = { channel: string; revenue: number; convRate: number; count?: number };
@@ -18,9 +19,15 @@ export function HomeChannelsCard() {
 
   return (
     <div className="rounded-xl border border-card-border bg-card-background p-5">
-      <div className="h-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-500" />
-      <h3 className="mt-3 text-sm font-semibold tracking-[-0.2px] text-text-primary">Canales que más convierten</h3>
-      <p className="text-xs text-text-tertiary">Por donde entra el dinero hoy</p>
+      <div className="flex items-center gap-2.5">
+        <span className="flex size-9 items-center justify-center rounded-lg bg-badge-success-background text-badge-success-text [&>svg]:size-4.5">
+          <Share2 />
+        </span>
+        <div>
+          <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Canales que más convierten</h3>
+          <p className="text-xs text-text-tertiary">Por donde entra el dinero hoy</p>
+        </div>
+      </div>
       <div className="mt-3 space-y-2">
         {channels.length === 0 ? (
           <p className="text-xs text-text-tertiary">Sin canales aún.</p>

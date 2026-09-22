@@ -124,7 +124,6 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </div>
         </CardHeader>
         <CardContent className="text-sm text-text-secondary space-y-3">
-          <div className="h-1.5 rounded-full bg-gradient-to-r from-violet-400 via-blue-500 to-sky-400" />
           <p>
             <code className="rounded bg-background-gray-secondary px-1.5 py-0.5 text-xs">src/lib/adapters/store.ts</code> expone{" "}
             <Badge color="primary">getProduct</Badge> <Badge color="sky">checkStock</Badge> <Badge color="violet">reserveStock</Badge>{" "}

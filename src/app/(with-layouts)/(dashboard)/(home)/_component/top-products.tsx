@@ -1,5 +1,6 @@
 "use client";
 
+import { Package } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
 import type { HomeStats } from "./home-types";
 
@@ -7,8 +8,12 @@ import type { HomeStats } from "./home-types";
 export function TopProducts({ items }: { items: HomeStats["topProducts"] }) {
   return (
     <div className="rounded-xl border border-card-border bg-card-background p-5">
-      <div className="h-1.5 rounded-full bg-gradient-to-r from-sky-400 to-blue-500" />
-      <h3 className="mt-3 text-sm font-semibold tracking-[-0.2px] text-text-primary">Productos con más demanda</h3>
+      <div className="flex items-center gap-2.5">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+          <Package />
+        </span>
+        <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Productos con más demanda</h3>
+      </div>
       <div className="mt-3 space-y-2">
         {items.length === 0 ? (
           <p className="text-xs text-text-tertiary">Sin ventas todavía</p>

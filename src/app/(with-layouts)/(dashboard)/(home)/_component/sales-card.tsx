@@ -69,8 +69,9 @@ export function SalesCard({ sales, days, onDays, month, year, onMonth, onYear }:
           const h = Math.max(3, Math.round((d.total / max) * 100));
           return (
             <div key={d.date} className="flex h-full flex-1 flex-col justify-end" title={`${d.date}: ${formatCLP(d.total)}`}>
+              {/* Barras: verde sólido (#00cf2f) con la clase especial .sales-bar-solid — sin gradiente. */}
               <div
-                className="w-full rounded-t bg-gradient-to-t from-brand-500 to-[#328e8f]"
+                className="sales-bar-solid w-full rounded-t"
                 style={{ height: `${h}%` }}
               />
             </div>

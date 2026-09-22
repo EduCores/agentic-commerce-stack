@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { formatCLP, ORDER_STATUS_ES, type HomeStats } from "./home-types";
 
@@ -15,9 +16,13 @@ const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
 export function RecentOrders({ orders }: { orders: HomeStats["recentOrders"] }) {
   return (
     <div className="rounded-xl border border-card-border bg-card-background p-5">
-      <div className="h-1.5 rounded-full bg-gradient-to-r from-violet-400 to-purple-500" />
-      <div className="mt-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Últimos pedidos</h3>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">
+            <ShoppingCart />
+          </span>
+          <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Últimos pedidos</h3>
+        </div>
         <Link href="/orders" className="text-xs font-medium text-brand-600 underline">
           Ver todos →
         </Link>
