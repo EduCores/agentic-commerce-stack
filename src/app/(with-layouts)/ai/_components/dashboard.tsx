@@ -27,7 +27,6 @@ export function AiDashboard() {
         </CardContent>
       </Card>
       <AiActivityChart data={data} />
-      <AiAgentsTable data={data} />
       <Card className="min-w-0 overflow-hidden">
         <CardHeader><CardTitle className="text-sm">Distribución de proveedores de AI</CardTitle></CardHeader>
         <CardContent className="min-w-0 space-y-2 break-words">
@@ -40,6 +39,7 @@ export function AiDashboard() {
           <Link href="/admin" className="text-xs font-medium text-brand-600 underline">Probar en /admin</Link>
         </CardContent>
       </Card>
+      <AiAgentsTable data={data} />
       <Card className="min-w-0 overflow-hidden md:col-span-3">
         <CardHeader><CardTitle className="text-sm">Actividad del Agente</CardTitle></CardHeader>
         <CardContent className="min-w-0 space-y-1.5 break-words">
