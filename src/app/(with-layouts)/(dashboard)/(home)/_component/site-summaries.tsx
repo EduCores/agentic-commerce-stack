@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { BotUser1, Cart2, Megaphone1 } from "@tailgrids/icons";
+import { Bot, Megaphone, ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { formatCLP } from "./home-types";
 
@@ -73,7 +73,7 @@ export function SiteSummaries() {
         <div className={`h-1.5 rounded-full bg-gradient-to-r from-violet-400 to-purple-500`} />
         <div className="mt-3 flex items-center gap-2.5">
           <span className="flex size-9 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4.5">
-            <BotUser1 />
+            <Bot />
           </span>
           <p className="text-sm font-medium text-text-secondary">Agente AI</p>
         </div>
@@ -98,7 +98,7 @@ export function SiteSummaries() {
         <div className={`h-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-500`} />
         <div className="mt-3 flex items-center gap-2.5">
           <span className="flex size-9 items-center justify-center rounded-lg bg-badge-success-background text-badge-success-text [&>svg]:size-4.5">
-            <Megaphone1 />
+            <Megaphone />
           </span>
           <p className="text-sm font-medium text-text-secondary">Marketing</p>
         </div>
@@ -124,7 +124,7 @@ export function SiteSummaries() {
           <div className={`h-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500`} />
           <div className="mt-3 flex items-center gap-2.5">
             <span className="flex size-9 items-center justify-center rounded-lg bg-badge-warning-background text-badge-warning-text [&>svg]:size-4.5">
-              <Cart2 />
+              <ShoppingBag />
             </span>
             <p className="text-sm font-medium text-text-secondary">Carros por recuperar</p>
           </div>

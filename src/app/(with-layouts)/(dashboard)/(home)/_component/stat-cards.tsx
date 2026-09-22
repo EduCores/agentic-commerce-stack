@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bolt1, BoxArchive1, Cart2, UserMultiple1 } from "@tailgrids/icons";
+import { Package, ShoppingCart, Users, Workflow } from "lucide-react";
 import { formatCLP, type HomeStats } from "./home-types";
 
 type Accent = {
@@ -24,7 +24,7 @@ export function StatCards({ stats }: Props) {
   const cards = [
     {
       accent: ACCENTS.sky,
-      icon: <BoxArchive1 />,
+      icon: <Package />,
       title: "Productos",
       value: stats.counts.products.toLocaleString("es-CL"),
       detail: `Stock total ${stats.stock.total} · Disponibilidad ${stats.stock.availability}%`,
@@ -33,7 +33,7 @@ export function StatCards({ stats }: Props) {
     },
     {
       accent: ACCENTS.violet,
-      icon: <Cart2 />,
+      icon: <ShoppingCart />,
       title: "Pedidos",
       value: stats.counts.orders.toLocaleString("es-CL"),
       detail: `Ingresos ${formatCLP(stats.revenue)}`,
@@ -42,7 +42,7 @@ export function StatCards({ stats }: Props) {
     },
     {
       accent: ACCENTS.success,
-      icon: <UserMultiple1 />,
+      icon: <Users />,
       title: "Clientes",
       value: stats.counts.customers.toLocaleString("es-CL"),
       detail: `Agentes ${stats.counts.agents} · Ejecuciones ${stats.counts.agentRuns}`,
@@ -51,7 +51,7 @@ export function StatCards({ stats }: Props) {
     },
     {
       accent: ACCENTS.warning,
-      icon: <Bolt1 />,
+      icon: <Workflow />,
       title: "Flujos de trabajo",
       value: stats.counts.workflows.toLocaleString("es-CL"),
       detail: `Ejecuciones ${stats.counts.workflowRuns}`,

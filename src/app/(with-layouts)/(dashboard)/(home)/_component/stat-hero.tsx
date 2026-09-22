@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Cart2, Wallet2 } from "@tailgrids/icons";
+import { ShoppingCart, Wallet } from "lucide-react";
 import { formatCLP } from "./home-types";
 
 type Props = {
@@ -17,7 +17,7 @@ export function StatHero({ orders, revenue, alerts }: Props) {
       <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 to-primary-500 p-6 text-white">
         <div className="flex items-center gap-3">
           <span className="flex size-10 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-5">
-            <Cart2 />
+            <ShoppingCart />
           </span>
           <p className="text-sm font-medium text-white/90">Pedidos totales</p>
         </div>
@@ -30,7 +30,7 @@ export function StatHero({ orders, revenue, alerts }: Props) {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-lg bg-black/10 [&>svg]:size-5">
-              <Wallet2 />
+              <Wallet />
             </span>
             <p className="text-sm font-medium">Ingresos</p>
           </div>

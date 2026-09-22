@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendUp2 } from "@tailgrids/icons";
+import { TrendingUp } from "lucide-react";
 import { SALES_RANGES, formatCLP, type SalesRange } from "./home-types";
 
 type Props = {
@@ -24,7 +24,7 @@ export function SalesCard({ sales, days, onDays }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
           <span className="flex size-9 items-center justify-center rounded-lg bg-badge-primary-background text-badge-primary-text [&>svg]:size-4.5">
-            <TrendUp2 />
+            <TrendingUp />
           </span>
           <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">
             Ventas de los últimos {days} días
