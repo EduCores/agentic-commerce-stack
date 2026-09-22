@@ -31,13 +31,31 @@ export async function GET(req: Request) {
       salesByDay.push({ date: d.toISOString().slice(0, 10), total: day.reduce((a, o) => a + Number(o.total), 0), orders: day.length });
     }
 
-    const byStatus = Object.entries(
-      orders.reduce<Record<string, number>>((acc, o) => ({ ...acc, [o.status]: (acc[o.status] ?? 0) + 1 }), {})
-    ).map(([status, count]) => ({ status, count }));
+    const byStatusMap = orders.reduce<Record<string, { count: number; revenue: number }>>((acc, o) => {
+      const k = o.status;
+      acc[k] = acc[k] ?? { count: 0, revenue: 0 };
+      acc[k].count += 1;
+      acc[k].revenue += Number(o.total);
+      return acc;
+    }, {});
+    const byStatus = Object.entries(byStatusMap).map(([status, v]) => ({
+      status,
+      count: v.count,
+      revenue: Math.round(v.revenue),
+    }));
 
-    const bySource = Object.entries(
-      orders.reduce<Record<string, number>>((acc, o) => ({ ...acc, [o.source ?? "manual"]: (acc[o.source ?? "manual"] ?? 0) + 1 }), {})
-    ).map(([source, count]) => ({ source, count }));
+    const bySourceMap = orders.reduce<Record<string, { count: number; revenue: number }>>((acc, o) => {
+      const k = o.source ?? "manual";
+      acc[k] = acc[k] ?? { count: 0, revenue: 0 };
+      acc[k].count += 1;
+      acc[k].revenue += Number(o.total);
+      return acc;
+    }, {});
+    const bySource = Object.entries(bySourceMap).map(([source, v]) => ({
+      source,
+      count: v.count,
+      revenue: Math.round(v.revenue),
+    }));
 
     const viewsByProduct = orders
       .flatMap((o) => o.items)
