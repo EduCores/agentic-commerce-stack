@@ -19,7 +19,7 @@ const CHANNEL_ORDER = ["Starshop", "Meta", "Whatsapp", "Tienda física"];
 export async function GET() {
   try {
     const [orders, stores, stepLogs] = await Promise.all([
-      prisma.order.findMany({ select: { total: true, status: true, source: true, createdAt: true, customerId: true }, take: 300, orderBy: { createdAt: "desc" } }),
+      prisma.order.findMany({ select: { total: true, status: true, source: true, createdAt: true, customerId: true, storeId: true }, take: 300, orderBy: { createdAt: "desc" } }),
       prisma.storeConnection.findMany({ select: { id: true, name: true, provider: true, isActive: true, _count: { select: { products: true, orders: true } } } }),
       prisma.orderStepLog.count().catch(() => 0),
     ]);
@@ -74,10 +74,12 @@ export async function GET() {
 
     const campaigns = stores.map((s) => ({
       id: s.id,
-      name: `${s.name} — ${s.provider}`,
+      name: s.name,
+      provider: s.provider,
       active: s.isActive,
       products: s._count.products,
       orders: s._count.orders,
+      revenue: orders.filter((o) => o.storeId === s.id).reduce((a, o) => a + Number(o.total), 0),
     }));
 
     // DEMO_MOCK: marketing activo sin datos reales
@@ -96,7 +98,7 @@ export async function GET() {
           { stage: "Pedidos", value: 80 },
           { stage: "Pagados", value: 62 },
         ],
-        campaigns: [{ id: "demo", name: "Starshop Frontend — starshop", active: true, products: 48, orders: 80 }],
+        campaigns: [{ id: "demo", name: "Starshop Frontend", provider: "starshop", active: true, products: 48, orders: 80, revenue: 1100000 }],
         totals: { impressions: 3200, revenue: 1100000 },
         audience: {
           customers: 34,
