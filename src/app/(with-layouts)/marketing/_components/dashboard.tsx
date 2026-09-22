@@ -26,6 +26,9 @@ function CampaignsHero({ data }: { data: MarketingData }) {
           <p className="mt-1 text-xs text-white/75">
             Catálogo híbrido: cada tienda conectada es una campaña. Datos compartidos por <span className="font-semibold text-white">StoreConnection</span> (productos + pedidos por tienda).
           </p>
+          <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
+            <span className="size-1.5 rounded-full bg-amber-300" /> Modo mock — conecta para datos reales
+          </span>
         </div>
         <Link href="/store" className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-white/90">
           Gestionar tiendas →
@@ -146,43 +149,56 @@ export function MarketingDashboard() {
   if (!data) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Sin datos</CardContent></Card>;
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      <MetaConnectCard />
+    <div className="space-y-6">
+      {/* 1. Rendimiento de campañas — abre la página por encima del título */}
       <CampaignsHero data={data} />
-      <CampaignsDetail data={data} />
+
+      {/* 2. Embudo de conversión — justo debajo del hero */}
       <MarketingFunnel data={data} />
-      <div className="grid gap-4 md:col-span-3 md:grid-cols-2">
-        <MarketingChannelTable data={data} />
-        <Card className="min-w-0">
-          <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
-          <CardContent className="text-sm text-text-secondary">
-            <p>
-              <strong className="text-2xl font-extrabold tracking-tight text-text-primary">
-                {(data.audience?.customers ?? 0).toLocaleString("es-CL")}
-              </strong>{" "}
-              <span className="text-text-tertiary">compradores únicos</span>
-            </p>
-            <div className="mt-3 space-y-1.5">
-              {(data.audience?.byChannel ?? []).slice(0, 4).map((a) => (
-                <div key={a.channel} className="flex items-center justify-between gap-2 text-sm">
-                  <span>{a.channel}</span>
-                  <Badge color="gray">{a.customers} personas</Badge>
-                </div>
-              ))}
-            </div>
-            {(() => {
-              const best = [...data.channels].sort((a, b) => b.convRate - a.convRate)[0];
-              return best ? (
-                <p className="mt-3 border-t border-card-border pt-3 text-xs text-text-tertiary">
-                  Tu mejor canal es <strong className="text-text-primary">{best.channel}</strong> con{" "}
-                  <strong className="text-text-primary">{best.convRate}% conversión</strong>. Refuérzalo y
-                  recupera carritos desde /admin/emails.
-                </p>
-              ) : null;
-            })()}
-            <Link href="/admin/emails" className="mt-1 inline-block text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</Link>
-          </CardContent>
-        </Card>
+
+      {/* 3. Título de página */}
+      <div className="pt-2">
+        <h2 className="text-xl font-bold text-black dark:text-white">Marketing</h2>
+        <p className="text-sm text-text-tertiary">Canales, funnel y campañas ligadas a tus tiendas y pedidos reales.</p>
+      </div>
+
+      {/* 4-6. Resto: campañas por tienda, Meta Ads, canales + audiencia */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <CampaignsDetail data={data} />
+        <MetaConnectCard />
+        <div className="grid gap-4 md:col-span-3 md:grid-cols-2">
+          <MarketingChannelTable data={data} />
+          <Card className="min-w-0">
+            <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
+            <CardContent className="text-sm text-text-secondary">
+              <p>
+                <strong className="text-2xl font-extrabold tracking-tight text-text-primary">
+                  {(data.audience?.customers ?? 0).toLocaleString("es-CL")}
+                </strong>{" "}
+                <span className="text-text-tertiary">compradores únicos</span>
+              </p>
+              <div className="mt-3 space-y-1.5">
+                {(data.audience?.byChannel ?? []).slice(0, 4).map((a) => (
+                  <div key={a.channel} className="flex items-center justify-between gap-2 text-sm">
+                    <span>{a.channel}</span>
+                    <Badge color="gray">{a.customers} personas</Badge>
+                  </div>
+                ))}
+              </div>
+              {(() => {
+                const best = [...data.channels].sort((a, b) => b.convRate - a.convRate)[0];
+                return best ? (
+                  <p className="mt-3 border-t border-card-border pt-3 text-xs text-text-tertiary">
+                    Tu mejor canal es <strong className="text-text-primary">{best.channel}</strong> con{" "}
+                    <strong className="text-text-primary">{best.convRate}% conversión</strong>. Refuérzalo y
+                    recupera carritos desde /admin/emails.
+                  </p>
+                ) : null;
+              })()}
+              <Link href="/admin/emails" className="mt-1 inline-block text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
