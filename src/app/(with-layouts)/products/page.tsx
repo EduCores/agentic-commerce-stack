@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { prisma } from "@/lib/adapters/prisma";
 import Link from "next/link";
 import { CatalogTable, type CatalogRow } from "./_components/catalog-table";
-import { Boxes, Package, Store, Sparkles } from "lucide-react";
+import { Boxes, Package, Store, Box, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +74,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </div>
           <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur">
             <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white [&>svg]:size-6">
-              <Sparkles />
+              <Box />
             </span>
             <div>
               <p className="text-xs font-medium text-white/80">Stock</p>
