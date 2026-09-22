@@ -46,7 +46,7 @@ export function BaseNode({ data, selected }: NodeProps) {
       {d.tools && d.tools.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {d.tools.slice(0, 3).map((t) => (
-            <Badge key={t} color="gray" className="text-[10px]">
+            <Badge key={t} color="primary" className="text-[10px]">
               {t}
             </Badge>
           ))}
@@ -61,7 +61,7 @@ export function BaseNode({ data, selected }: NodeProps) {
               prompt propio
             </Badge>
           )}
-          {d.model && <Badge color="gray" className="text-[10px]">{d.model.split("/").pop()}</Badge>}
+          {d.model && <Badge color="primary" className="text-[10px]">{d.model.split("/").pop()}</Badge>}
         </div>
       )}
       {!d.agent && d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{NODE_TYPE_ES[d.type] ?? d.type}</p>}
