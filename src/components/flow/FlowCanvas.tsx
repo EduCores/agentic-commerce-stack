@@ -134,17 +134,6 @@ function toFlowEdges(graph: FlowGraph): Edge[] {
   }));
 }
 
-/** True si hay nodos compartiendo posición (se montan uno sobre otro). */
-function positionsOverlap(nodes: Node[]): boolean {
-  const seen = new Set<string>();
-  for (const n of nodes) {
-    const key = `${Math.round(n.position.x)},${Math.round(n.position.y)}`;
-    if (seen.has(key)) return true;
-    seen.add(key);
-  }
-  return false;
-}
-
 function toFlowGraph(nodes: Node[], edges: Edge[]): FlowGraph {
   return {
     nodes: nodes.map((n) => ({
@@ -201,11 +190,12 @@ export default function FlowCanvas({
   isLoading = false,
 }: FlowCanvasProps) {
   const graph = useMemo(() => initialData ?? initialGraphForType("trigger"), [initialData]);
-  // Si el grafo guardado tiene nodos apilados (misma posición), se auto-ordenan al cargar.
-  const graphNodes = useMemo(() => {
+  /** Auto-orden al cargar: el grafo guardado siempre se muestra ordenado por capas
+ *  (BFS por conexiones), sin nodos amontonados ni superpuestos. */
+const graphNodes = useMemo(() => {
     const raw = toFlowNodes(graph);
     const rawEdges = toFlowEdges(graph);
-    return positionsOverlap(raw) ? layeredLayout(raw, rawEdges) : raw;
+    return layeredLayout(raw, rawEdges);
   }, [graph]);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(graphNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(toFlowEdges(graph));
@@ -263,7 +253,10 @@ export default function FlowCanvas({
       if (readOnly) return;
       const palette = NODE_PALETTE.find((p) => p.type === type) ?? NODE_PALETTE[0];
       const id = newId(palette.type);
-      const fallback = { x: 40 + (nodes.length % 4) * (NODE_W + 30), y: 40 + Math.floor(nodes.length / 4) * (NODE_H + 40) };
+      const fallback = {
+        x: 40,
+        y: nodes.reduce((maxY, n) => Math.max(maxY, n.position.y + NODE_H), 0) + GAP_Y,
+      };
       setNodes((nds) => [
         ...nds,
         {
@@ -277,7 +270,7 @@ export default function FlowCanvas({
       setSelectedEdgeId(null);
       setDirty(true);
     },
-    [nodes.length, readOnly, setNodes],
+    [nodes, readOnly, setNodes],
   );
 
   const onDragStart = useCallback((event: DragEvent<HTMLButtonElement>, type: FlowNodeType) => {
