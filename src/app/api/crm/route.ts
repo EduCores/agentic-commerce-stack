@@ -25,9 +25,13 @@ const RUN_STATUS_ES: Record<string, string> = {
 
 export async function GET(req: Request) {
   try {
-    // Rango del gráfico de crecimiento: 7 | 14 | 21 | 28 días.
-    const rawDays = Number(new URL(req.url).searchParams.get("days"));
+    const url = new URL(req.url);
+    const rawDays = Number(url.searchParams.get("days"));
     const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
+    const rawMonth = Number(url.searchParams.get("month"));
+    const rawYear = Number(url.searchParams.get("year"));
+    const month = rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;
+    const year = rawYear >= 2020 && rawYear <= 2035 ? rawYear : null;
     const [customers, orders, pendingRuns, activities, stepLogs, orderStats, customerDates] = await Promise.all([
       prisma.customer.findMany({
         take: 50,
@@ -53,16 +57,36 @@ export async function GET(req: Request) {
 
     // Crecimiento diario (últimos N días): clientes nuevos + ingresos por día.
     const growth: { day: string; leads: number; revenue: number }[] = [];
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date();
-      d.setHours(0, 0, 0, 0);
-      d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
-      const count = customerDates.filter((c) => c.createdAt.toISOString().slice(0, 10) === key).length;
-      const revenue = orderStats
-        .filter((o) => o.createdAt.toISOString().slice(0, 10) === key)
-        .reduce((a, o) => a + Number(o.total), 0);
-      growth.push({ day: key, leads: count, revenue: Math.round(revenue) });
+
+    if (month && year) {
+      const daysInMonth = new Date(year, month, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const start = new Date(year, month - 1, d, 0, 0, 0, 0);
+        const next = new Date(year, month - 1, d + 1, 0, 0, 0, 0);
+        const key = start.toISOString().slice(0, 10);
+        const count = customerDates.filter((c) => c.createdAt >= start && c.createdAt < next).length;
+        const revenue = orderStats.filter((o) => o.createdAt >= start && o.createdAt < next).reduce((a, o) => a + Number(o.total), 0);
+        growth.push({ day: key, leads: count, revenue: Math.round(revenue) });
+      }
+    } else if (year && !month) {
+      for (let m = 0; m < 12; m++) {
+        const start = new Date(year, m, 1, 0, 0, 0, 0);
+        const next = new Date(year, m + 1, 1, 0, 0, 0, 0);
+        const key = start.toISOString().slice(0, 7);
+        const count = customerDates.filter((c) => c.createdAt >= start && c.createdAt < next).length;
+        const revenue = orderStats.filter((o) => o.createdAt >= start && o.createdAt < next).reduce((a, o) => a + Number(o.total), 0);
+        growth.push({ day: key, leads: count, revenue: Math.round(revenue) });
+      }
+    } else {
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        const count = customerDates.filter((c) => c.createdAt.toISOString().slice(0, 10) === key).length;
+        const revenue = orderStats.filter((o) => o.createdAt.toISOString().slice(0, 10) === key).reduce((a, o) => a + Number(o.total), 0);
+        growth.push({ day: key, leads: count, revenue: Math.round(revenue) });
+      }
     }
 
     const tasks = [
@@ -80,16 +104,30 @@ export async function GET(req: Request) {
       const now = new Date();
       const baseLeads = [2, 4, 3, 6, 5, 8, 3];
       const baseRevenue = [120000, 210000, 180000, 320000, 290000, 410000, 350000];
+      const mockGrowth =
+        month && year
+          ? Array.from({ length: new Date(year, month, 0).getDate() }).map((_, i) => ({
+              day: `${year}-${String(month).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`,
+              leads: baseLeads[i % baseLeads.length],
+              revenue: baseRevenue[i % baseRevenue.length],
+            }))
+          : year && !month
+            ? Array.from({ length: 12 }).map((_, i) => ({
+                day: `${year}-${String(i + 1).padStart(2, "0")}`,
+                leads: baseLeads[i % baseLeads.length] * 3,
+                revenue: baseRevenue[i % baseRevenue.length] * 3,
+              }))
+            : Array.from({ length: days }).map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (days - 1 - i));
+                return { day: d.toISOString().slice(0, 10), leads: baseLeads[i % baseLeads.length], revenue: baseRevenue[i % baseRevenue.length] };
+              });
       return NextResponse.json({
         leads: [
           { id: "1", name: "Constructora Andes", email: "contacto@andes.cl", deals: 5, revenue: 420000, performance: "Alta" },
           { id: "2", name: "Ferretería Sur", email: "ventas@sur.cl", deals: 3, revenue: 180000, performance: "Media" },
         ],
-        growth: Array.from({ length: days }).map((_, i) => {
-          const d = new Date();
-          d.setDate(d.getDate() - (days - 1 - i));
-          return { day: d.toISOString().slice(0, 10), leads: baseLeads[i % baseLeads.length], revenue: baseRevenue[i % baseRevenue.length] };
-        }),
+        growth: mockGrowth,
         tasks: [{ id: "t1", title: "Revisar pedido DEMO-1001 (Pendiente)", due: "Hoy", type: "order" }],
         recentActivities: [
           { id: "a1", text: "sales-assistant ejecutado", at: now, kind: "agent" },

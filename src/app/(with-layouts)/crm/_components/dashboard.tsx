@@ -12,9 +12,16 @@ import { TrendingUp, Users, Wallet } from "lucide-react";
 
 export function CrmDashboard() {
   const [days, setDays] = useState<CrmRange>(7);
+  const [month, setMonth] = useState("all");
+  const [year, setYear] = useState("all");
   const { data, isLoading } = useQuery<CrmData>({
-    queryKey: ["crm", days],
-    queryFn: async () => (await fetch(`/api/crm?days=${days}`)).json(),
+    queryKey: ["crm", days, month, year],
+    queryFn: async () => {
+      const params = new URLSearchParams({ days: String(days) });
+      if (month !== "all") params.set("month", month);
+      if (year !== "all") params.set("year", year);
+      return (await fetch(`/api/crm?${params}`)).json();
+    },
   });
 
   if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando CRM...</CardContent></Card>;
@@ -68,7 +75,7 @@ export function CrmDashboard() {
           </Link>
         </div>
       </div>
-      <CrmGrowthChart data={data} days={days} onDays={setDays} />
+      <CrmGrowthChart data={data} days={days} onDays={setDays} month={month} year={year} onMonth={setMonth} onYear={setYear} />
       <CrmLeadsReport data={data} />
       <Card>
         <CardHeader>
