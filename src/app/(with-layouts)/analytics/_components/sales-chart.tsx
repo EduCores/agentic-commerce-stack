@@ -30,7 +30,13 @@ export function AnalyticsSalesChart({ data, days, onDays }: Props) {
               </linearGradient>
             </defs>
             <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: "var(--color-text-tertiary)", fontSize: 11 }} tickFormatter={(v: string) => v.slice(5)} interval={step - 1} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--color-text-tertiary)", fontSize: 11 }} />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "var(--color-text-tertiary)", fontSize: 11 }}
+              tickFormatter={(v: number) => (v >= 1000 ? `${Math.round(v / 1000)} mil` : `${v}`)}
+              width={44}
+            />
             <Tooltip content={<ChartTooltipContent />} />
             <Area type="monotone" dataKey="total" name="Ventas" stroke="#5750F1" strokeWidth={2} fill="url(#analytics-sales-bg)" dot={false} />
             <Area type="monotone" dataKey="orders" name="Pedidos" stroke="#D8B4FE" strokeWidth={2} fill="transparent" dot={false} />
@@ -54,6 +60,16 @@ export function AnalyticsSalesChart({ data, days, onDays }: Props) {
             {r} días
           </button>
         ))}
+        <span className="ml-auto flex items-center gap-3 text-xs text-text-secondary">
+          <span className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full" style={{ backgroundColor: "#5750F1" }} aria-hidden="true" />
+            Ventas ($)
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full" style={{ backgroundColor: "#D8B4FE" }} aria-hidden="true" />
+            Pedidos (n°)
+          </span>
+        </span>
       </div>
     </Card>
   );
