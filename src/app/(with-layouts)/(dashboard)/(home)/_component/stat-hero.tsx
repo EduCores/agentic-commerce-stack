@@ -10,43 +10,41 @@ type Props = {
   alerts: number;
 };
 
-/** Los 2 números que mandan: pedidos totales e ingresos, bien destacados. */
+/** Hero financiero: pedidos e ingresos con iconos grandes a la derecha, foco total. */
 export function StatHero({ orders, revenue, alerts }: Props) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 to-primary-500 p-6 text-white">
-        <div className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-5">
-            <ShoppingCart />
-          </span>
-          <p className="text-sm font-medium text-white/90">Pedidos totales</p>
-        </div>
-        <p className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">{orders.toLocaleString("es-CL")}</p>
-        <Link href="/orders" className="mt-2 inline-block text-xs font-medium text-white/90 underline">
-          Ver pedidos →
-        </Link>
-      </div>
-      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-amber-300 to-brand-500 p-6 text-amber-950">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-lg bg-black/10 [&>svg]:size-5">
-              <Wallet />
-            </span>
-            <p className="text-sm font-medium">Ingresos</p>
-          </div>
-          {alerts > 0 && (
-            <Link
-              href="/orders?status=FAILED"
-              className="rounded-lg bg-black/10 px-2 py-1 text-xs font-bold underline"
-            >
-              ⚠️ {alerts} con alerta
+      <div className="flex items-center justify-between gap-4 overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 to-primary-500 p-6 text-white">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-white/85">Pedidos totales</p>
+          <p className="mt-1 text-4xl font-extrabold tracking-tight md:text-5xl">{orders.toLocaleString("es-CL")}</p>
+          <div className="mt-3 flex items-center gap-2">
+            <Link href="/orders" className="text-xs font-bold text-white/90 underline hover:text-white">
+              Ver pedidos →
             </Link>
-          )}
+            {alerts > 0 && (
+              <Link href="/orders?status=FAILED" className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold backdrop-blur hover:bg-white/20">
+                ⚠️ {alerts} con alerta
+              </Link>
+            )}
+          </div>
         </div>
-        <p className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">{formatCLP(revenue)}</p>
-        <Link href="/analytics" className="mt-2 inline-block text-xs font-medium underline">
-          Ver analítica →
-        </Link>
+        <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur [&>svg]:size-9">
+          <ShoppingCart />
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between gap-4 overflow-hidden rounded-xl bg-gradient-to-br from-amber-300 via-brand-500 to-amber-400 p-6 text-amber-950">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-amber-900/80">Ingresos totales</p>
+          <p className="mt-1 text-4xl font-extrabold tracking-tight md:text-5xl">{formatCLP(revenue)}</p>
+          <Link href="/analytics" className="mt-3 inline-block text-xs font-bold text-amber-900/80 underline hover:text-amber-950">
+            Ver analítica →
+          </Link>
+        </div>
+        <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-black/10 backdrop-blur [&>svg]:size-9">
+          <Wallet />
+        </span>
       </div>
     </div>
   );

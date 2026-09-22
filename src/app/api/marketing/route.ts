@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/adapters/prisma";
 import { DEMO_MODE } from "@/lib/demo";
+import { getMetaMarketingData } from "@/lib/adapters/meta";
 
 export const dynamic = "force-dynamic";
 
@@ -18,13 +19,14 @@ const CHANNEL_ORDER = ["Starshop", "Meta", "Whatsapp", "Tienda física"];
 
 export async function GET() {
   try {
-    const [orders, stores, stepLogs] = await Promise.all([
+    const [orders, stores, stepLogs, metaLive] = await Promise.all([
       prisma.order.findMany({ select: { total: true, status: true, source: true, createdAt: true, customerId: true, storeId: true }, take: 300, orderBy: { createdAt: "desc" } }),
       prisma.storeConnection.findMany({ select: { id: true, name: true, provider: true, isActive: true, _count: { select: { products: true, orders: true } } } }),
       prisma.orderStepLog.count().catch(() => 0),
+      getMetaMarketingData().catch(() => null),
     ]);
 
-    const channels = Object.entries(
+    const channelsBase = Object.entries(
       orders.reduce<Record<string, { count: number; revenue: number }>>((acc, o) => {
         const k = channelLabel(o.source ?? "manual");
         acc[k] = acc[k] ?? { count: 0, revenue: 0 };
@@ -39,15 +41,33 @@ export async function GET() {
         clicks: v.count * 12,
         convRate: v.count > 0 ? Math.round((orders.filter((o) => o.status === "PAID" || o.status === "FULFILLED").length / Math.max(orders.length, 1)) * 1000) / 10 : 0,
         revenue: v.revenue,
-      }))
-      .sort((a, b) => {
-        const ia = CHANNEL_ORDER.indexOf(a.channel);
-        const ib = CHANNEL_ORDER.indexOf(b.channel);
-        if (ia === -1 && ib === -1) return a.channel.localeCompare(b.channel);
-        if (ia === -1) return 1;
-        if (ib === -1) return -1;
-        return ia - ib;
-      });
+        isLive: false as boolean,
+      }));
+
+    // Si hay datos reales de Meta, pisa el canal Meta con datos live (plug & play)
+    const channelsUnsorted = metaLive
+      ? channelsBase.map((c) => {
+          if (c.channel !== "Meta") return c;
+          // Si Meta trae conversiones, estima revenue con ticket promedio; si no, mantiene revenue de pedidos
+          const avgTicket = orders.length > 0 ? orders.reduce((a, o) => a + Number(o.total), 0) / Math.max(orders.length, 1) : 0;
+          const liveRevenue = metaLive.conversions > 0 && avgTicket > 0 ? Math.round(metaLive.conversions * avgTicket) : c.revenue;
+          return {
+            ...c,
+            spend: Math.round(metaLive.spend),
+            clicks: metaLive.clicks,
+            revenue: liveRevenue || c.revenue,
+            isLive: true,
+          };
+        })
+      : channelsBase;
+    const channels = channelsUnsorted.sort((a, b) => {
+      const ia = CHANNEL_ORDER.indexOf(a.channel);
+      const ib = CHANNEL_ORDER.indexOf(b.channel);
+      if (ia === -1 && ib === -1) return a.channel.localeCompare(b.channel);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
 
     const paid = orders.filter((o) => o.status === "PAID" || o.status === "FULFILLED").length;
     // Audiencia: compradores únicos totales y por canal.

@@ -382,3 +382,24 @@ model CartAbandonment {
   @@index([status, lastActivityAt])
   @@index([email])
 }
+
+// ───────── Meta Ads (plug & play) ─────────
+model MetaConnection {
+  id          String   @id @default(cuid())
+  name        String   // ej "StarShop Ads"
+  adAccountId String   // sin prefijo act_ (solo dígitos)
+  accessToken String   @db.Text // token de usuario sistema / largo plazo — cifrar en prod
+  appId       String?
+  appSecret   String?  @db.Text
+  pixelId     String?
+  businessId  String?
+  isActive    Boolean  @default(true)
+  lastSyncAt  DateTime?
+  lastSyncStatus String? // OK | ERROR
+  lastError   String?  @db.Text
+  config      Json?    // { accountName, currency, cache: insights }
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+}

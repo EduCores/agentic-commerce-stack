@@ -68,7 +68,10 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
   const total = data.totals.revenue;
   const raw = CHANNELS.map((name) => data.channels.find((c) => c.channel === name)?.revenue ?? 0);
   const values = distribute(total, raw);
-  const rows = CHANNELS.map((name, i) => ({ name, revenue: values[i] }));
+  const rows = CHANNELS.map((name, i) => {
+    const live = data.channels.find((c) => c.channel === name);
+    return { name, revenue: values[i], isLive: live?.isLive ?? false, spend: live?.spend ?? 0 };
+  });
 
   return (
     <Card className="min-w-0">
@@ -86,8 +89,12 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
               <span className="flex min-w-0 items-center gap-2.5">
                 <ChannelIcon name={r.name} />
                 <span className="text-sm text-text-secondary">{r.name}</span>
+                {r.isLive && <span className="rounded-full bg-[#0866FF] px-1.5 py-0.5 text-xs font-bold text-white">Live</span>}
               </span>
-              <span className="text-sm font-bold text-text-primary">${r.revenue.toLocaleString("es-CL")}</span>
+              <span className="text-right">
+                <span className="block text-sm font-bold text-text-primary">${r.revenue.toLocaleString("es-CL")}</span>
+                {r.isLive && <span className="text-xs text-text-tertiary">${r.spend.toLocaleString("es-CL")} spend real</span>}
+              </span>
             </div>
           ))}
         </div>

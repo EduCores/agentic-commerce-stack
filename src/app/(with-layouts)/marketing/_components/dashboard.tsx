@@ -8,6 +8,7 @@ import { MarketingChannelTable } from "./channel-table";
 import type { MarketingData } from "./types";
 import Link from "next/link";
 import { Megaphone, Package, Store, TrendingUp } from "lucide-react";
+import { MetaConnectCard } from "./meta-connect-card";
 
 function CampaignsHero({ data }: { data: MarketingData }) {
   const totalProducts = data.campaigns.reduce((a, c) => a + c.products, 0);
@@ -146,6 +147,7 @@ export function MarketingDashboard() {
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
+      <MetaConnectCard />
       <CampaignsHero data={data} />
       <CampaignsDetail data={data} />
       <MarketingFunnel data={data} />
