@@ -9,7 +9,11 @@ import {
   SelectValue,
 } from "@/components/tailgrids/core/select";
 
-const ROLES = ["member", "admin", "owner"] as const;
+const ROLES = [
+  { id: "member", label: "Miembro" },
+  { id: "admin", label: "Administrador" },
+  { id: "owner", label: "Dueño" },
+] as const;
 
 type Props = {
   value: string;
@@ -27,8 +31,8 @@ export function RoleSelect({ value, onChange, label, size = "md" }: Props) {
       </SelectTrigger>
       <SelectContent>
         {ROLES.map((r) => (
-          <SelectItem key={r} id={r} textValue={r}>
-            {r}
+          <SelectItem key={r.id} id={r.id} textValue={r.label}>
+            {r.label}
           </SelectItem>
         ))}
       </SelectContent>
