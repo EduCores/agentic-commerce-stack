@@ -55,8 +55,13 @@ export function MarketingFunnel({ data }: { data: MarketingData | null }) {
         </ChartContainer>
       </CardContent>
       <div className="flex flex-wrap items-center gap-2 border-t border-card-border px-5 py-3">
-        {steps.map((s) => (
-          <span key={s.stage} className="rounded-lg bg-background-gray-secondary px-2.5 py-1 text-xs text-text-secondary">
+        {steps.map((s, i) => (
+          <span key={s.stage} className="flex items-center gap-1.5 rounded-lg bg-background-gray-secondary px-2.5 py-1 text-xs text-text-secondary">
+            <span
+              className="size-2 shrink-0 rounded-full"
+              style={{ backgroundColor: COLORS[(i + 1) % COLORS.length] }}
+              aria-hidden="true"
+            />
             {s.stage}: <strong className="text-text-primary">{pct(s.conv)}</strong>
           </span>
         ))}
