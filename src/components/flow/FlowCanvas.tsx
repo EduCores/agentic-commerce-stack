@@ -43,9 +43,9 @@ const DRAG_MIME = "application/acs-node";
 const inputCls =
   "w-full rounded-lg border border-card-border bg-card-background px-2.5 py-1.5 text-xs text-text-primary outline-none transition focus:border-brand-500 disabled:cursor-not-allowed disabled:opacity-60";
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <div className="space-y-1">
+    <div className={cn("space-y-1", className)}>
       <p className="text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">{label}</p>
       {children}
     </div>
@@ -134,6 +134,17 @@ function toFlowEdges(graph: FlowGraph): Edge[] {
   }));
 }
 
+/** True si hay nodos compartiendo posición (se montan uno sobre otro). */
+function positionsOverlap(nodes: Node[]): boolean {
+  const seen = new Set<string>();
+  for (const n of nodes) {
+    const key = `${Math.round(n.position.x)},${Math.round(n.position.y)}`;
+    if (seen.has(key)) return true;
+    seen.add(key);
+  }
+  return false;
+}
+
 function toFlowGraph(nodes: Node[], edges: Edge[]): FlowGraph {
   return {
     nodes: nodes.map((n) => ({
@@ -190,7 +201,13 @@ export default function FlowCanvas({
   isLoading = false,
 }: FlowCanvasProps) {
   const graph = useMemo(() => initialData ?? initialGraphForType("trigger"), [initialData]);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(toFlowNodes(graph));
+  // Si el grafo guardado tiene nodos apilados (misma posición), se auto-ordenan al cargar.
+  const graphNodes = useMemo(() => {
+    const raw = toFlowNodes(graph);
+    const rawEdges = toFlowEdges(graph);
+    return positionsOverlap(raw) ? layeredLayout(raw, rawEdges) : raw;
+  }, [graph]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(graphNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(toFlowEdges(graph));
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
@@ -202,12 +219,12 @@ export default function FlowCanvas({
 
   // Re-sincroniza cuando el server entrega otro grafo (cambio de workflow o reload)
   useEffect(() => {
-    setNodes(toFlowNodes(graph));
+    setNodes(graphNodes);
     setEdges(toFlowEdges(graph));
     setSelectedNodeId(null);
     setSelectedEdgeId(null);
     setDirty(false);
-  }, [graph, setNodes, setEdges]);
+  }, [graph, graphNodes, setNodes, setEdges]);
 
   const selectedNode = useMemo(() => nodes.find((n) => n.id === selectedNodeId) ?? null, [nodes, selectedNodeId]);
   const selectedEdge = useMemo(() => edges.find((e) => e.id === selectedEdgeId) ?? null, [edges, selectedEdgeId]);
@@ -336,7 +353,9 @@ export default function FlowCanvas({
   }, [readOnly, selectedNodeId, setEdges, setNodes]);
 
   return (
-    <div className="flex flex-col gap-3 xl:flex-row">
+    <div className="flex flex-col gap-3">
+      {/* Fila superior: paleta + lienzo (móvil los apila verticalmente) */}
+      <div className="flex flex-col gap-3 xl:flex-row">
       {/* ── Paleta de nodos (drag & drop o clic) ─────────────────────────── */}
       <Card className="w-full shrink-0 space-y-3 xl:w-60">
         <div>
@@ -470,138 +489,143 @@ export default function FlowCanvas({
           {workflowSlug && <p className="text-[10px] text-text-tertiary">Flujo: {workflowSlug}</p>}
         </Card>
       </div>
+      </div>
 
-      {/* ── Inspector ──────────────────────────────────────────────────────── */}
-      <Card className="w-full shrink-0 space-y-3 xl:w-80">
+      {/* ── Inspector (debajo del diagrama, en horizontal) ─────────────────── */}
+      <Card className="w-full shrink-0 space-y-3">
         {selectedNode ? (
           <>
-            <div>
+            <div className="flex flex-wrap items-center gap-2">
               <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Nodo seleccionado</p>
-              <p className="text-[10px] text-text-tertiary">{selectedNode.id}</p>
+              <Badge color="gray">{selectedNode.id}</Badge>
             </div>
 
-            <Field label="Nombre">
-              <input className={inputCls} value={nodeData.label ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ label: e.target.value })} />
-            </Field>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <Field label="Nombre">
+                <input className={inputCls} value={nodeData.label ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ label: e.target.value })} />
+              </Field>
 
-            <Field label="Descripción">
-              <input className={inputCls} value={nodeData.description ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ description: e.target.value })} />
-            </Field>
+              <Field label="Descripción" className="md:col-span-2">
+                <input className={inputCls} value={nodeData.description ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ description: e.target.value })} />
+              </Field>
 
-            <Field label="Tipo de nodo">
-              <select className={inputCls} value={nodeData.type} disabled={readOnly} onChange={(e) => updateNodeData({ type: e.target.value as FlowNodeType })}>
-                {NODE_PALETTE.map((item) => (
-                  <option key={item.type} value={item.type}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
+              <Field label="Tipo de nodo">
+                <select className={inputCls} value={nodeData.type} disabled={readOnly} onChange={(e) => updateNodeData({ type: e.target.value as FlowNodeType })}>
+                  {NODE_PALETTE.map((item) => (
+                    <option key={item.type} value={item.type}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-            <Field label="Intent (crew que atiende)">
-              <select className={inputCls} value={nodeData.intent ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ intent: e.target.value || undefined })}>
-                <option value="">— sin intent (nodo informativo) —</option>
-                {FLOW_INTENTS.map((intent) => (
-                  <option key={intent} value={intent}>
-                    {INTENT_LABEL_ES[intent] ?? intent} ({intent})
-                  </option>
-                ))}
-              </select>
-              <p className="text-[10px] leading-4 text-text-tertiary">
-                Solo intents válidos configuran al agente.
-              </p>
-            </Field>
+              <Field label="Intent (crew que atiende)">
+                <select className={inputCls} value={nodeData.intent ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ intent: e.target.value || undefined })}>
+                  <option value="">— sin intent (nodo informativo) —</option>
+                  {FLOW_INTENTS.map((intent) => (
+                    <option key={intent} value={intent}>
+                      {INTENT_LABEL_ES[intent] ?? intent} ({intent})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] leading-4 text-text-tertiary">
+                  Solo intents válidos configuran al agente.
+                </p>
+              </Field>
 
-            <Field label="Modelo">
-              <select className={inputCls} value={nodeData.model ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ model: e.target.value || undefined })}>
-                <option value="">— usar el del código —</option>
-                {FLOW_MODELS.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label}
-                  </option>
-                ))}
-                {nodeData.model && !FLOW_MODELS.some((m) => m.id === nodeData.model) && (
-                  <option value={nodeData.model}>{nodeData.model} (no permitido → se ignora)</option>
-                )}
-              </select>
-            </Field>
+              <Field label="Modelo">
+                <select className={inputCls} value={nodeData.model ?? ""} disabled={readOnly} onChange={(e) => updateNodeData({ model: e.target.value || undefined })}>
+                  <option value="">— usar el del código —</option>
+                  {FLOW_MODELS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.label}
+                    </option>
+                  ))}
+                  {nodeData.model && !FLOW_MODELS.some((m) => m.id === nodeData.model) && (
+                    <option value={nodeData.model}>{nodeData.model} (no permitido → se ignora)</option>
+                  )}
+                </select>
+              </Field>
 
-            <Field label={`Prompt del crew (${promptLength}/${FLOW_MIN_PROMPT_LENGTH})`}>
-              <textarea
-                rows={7}
-                className={cn(inputCls, "h-auto resize-y font-mono text-[11px] leading-4")}
-                value={nodeData.prompt ?? ""}
-                disabled={readOnly}
-                placeholder="Si lo dejas vacío o muy corto, el agente usa el prompt del código."
-                onChange={(e) => updateNodeData({ prompt: e.target.value })}
-              />
-              <p className={cn("text-[10px] leading-4", promptLength === 0 ? "text-text-tertiary" : promptLength >= FLOW_MIN_PROMPT_LENGTH ? "text-emerald-600" : "text-amber-600")}>
-                {promptLength === 0
-                  ? "Vacío: el agente usa el prompt del código."
-                  : promptLength >= FLOW_MIN_PROMPT_LENGTH
-                    ? "✔ Se aplicará cuando publiques."
-                    : `Faltan ${FLOW_MIN_PROMPT_LENGTH - promptLength} caracteres para que el agente lo use.`}
-              </p>
-            </Field>
+              <Field label={`Prompt del crew (${promptLength}/${FLOW_MIN_PROMPT_LENGTH})`} className="md:col-span-2 xl:col-span-3">
+                <textarea
+                  rows={5}
+                  className={cn(inputCls, "h-auto resize-y font-mono text-[11px] leading-4")}
+                  value={nodeData.prompt ?? ""}
+                  disabled={readOnly}
+                  placeholder="Si lo dejas vacío o muy corto, el agente usa el prompt del código."
+                  onChange={(e) => updateNodeData({ prompt: e.target.value })}
+                />
+                <p className={cn("text-[10px] leading-4", promptLength === 0 ? "text-text-tertiary" : promptLength >= FLOW_MIN_PROMPT_LENGTH ? "text-emerald-600" : "text-amber-600")}>
+                  {promptLength === 0
+                    ? "Vacío: el agente usa el prompt del código."
+                    : promptLength >= FLOW_MIN_PROMPT_LENGTH
+                      ? "✔ Se aplicará cuando publiques."
+                      : `Faltan ${FLOW_MIN_PROMPT_LENGTH - promptLength} caracteres para que el agente lo use.`}
+                </p>
+              </Field>
 
-            <Field label="Tools permitidas">
-              <div className="flex flex-wrap gap-1">
-                {FLOW_TOOLS.map((tool) => {
-                  const active = ((nodeData.tools ?? []) as string[]).includes(tool);
-                  return (
-                    <button
-                      key={tool}
-                      type="button"
-                      disabled={readOnly}
-                      onClick={() => toggleTool(tool)}
-                      className={cn(
-                        "rounded-lg border px-2 py-0.5 text-[10px] font-medium transition disabled:cursor-not-allowed",
-                        active
-                          ? "border-transparent bg-badge-primary-background text-badge-primary-text"
-                          : "border-transparent bg-badge-neutral-background text-badge-neutral-text hover:border-brand-500",
-                      )}
-                    >
-                      {tool}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-[10px] leading-4 text-text-tertiary">Sin selección se usan las tools del código para ese intent; nombres inválidos se filtran.</p>
-            </Field>
+              <Field label="Tools permitidas" className="md:col-span-2 xl:col-span-3">
+                <div className="flex flex-wrap gap-1">
+                  {FLOW_TOOLS.map((tool) => {
+                    const active = ((nodeData.tools ?? []) as string[]).includes(tool);
+                    return (
+                      <button
+                        key={tool}
+                        type="button"
+                        disabled={readOnly}
+                        onClick={() => toggleTool(tool)}
+                        className={cn(
+                          "rounded-lg border px-2 py-0.5 text-[10px] font-medium transition disabled:cursor-not-allowed",
+                          active
+                            ? "border-transparent bg-badge-primary-background text-badge-primary-text"
+                            : "border-transparent bg-badge-neutral-background text-badge-neutral-text hover:border-brand-500",
+                        )}
+                      >
+                        {tool}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] leading-4 text-text-tertiary">Sin selección se usan las tools del código para ese intent; nombres inválidos se filtran.</p>
+              </Field>
+            </div>
 
-            <div className="flex gap-2 pt-1">
-              <Button size="sm" variant="ghost" appearance="outline" className="flex-1" isDisabled={readOnly} onClick={() => instance?.fitView({ nodes: [{ id: selectedNode.id }], padding: 0.8, duration: 300 })}>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button size="sm" variant="ghost" appearance="outline" className="min-w-40 flex-1" isDisabled={readOnly} onClick={() => instance?.fitView({ nodes: [{ id: selectedNode.id }], padding: 0.8, duration: 300 })}>
                 Centrar
               </Button>
-              <Button size="sm" variant="danger" appearance="outline" className="flex-1" isDisabled={readOnly} onClick={handleDeleteNode}>
+              <Button size="sm" variant="danger" appearance="outline" className="min-w-40 flex-1" isDisabled={readOnly} onClick={handleDeleteNode}>
                 Eliminar nodo
               </Button>
             </div>
           </>
         ) : selectedEdge ? (
           <>
-            <div>
+            <div className="flex flex-wrap items-center gap-2">
               <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Conexión</p>
-              <p className="text-[10px] text-text-tertiary">{selectedEdge.id}</p>
+              <Badge color="gray">{selectedEdge.id}</Badge>
             </div>
             <div className="rounded-lg bg-background-gray-secondary p-2 text-[11px] text-text-secondary">
               {selectedEdge.source} → {selectedEdge.target}
             </div>
-            <Field label="Etiqueta (intent ruteado)">
-              <input
-                className={inputCls}
-                value={typeof selectedEdge.label === "string" ? selectedEdge.label : ""}
-                disabled={readOnly}
-                placeholder="ej: product_search"
-                onChange={(e) => updateEdgeLabel(e.target.value)}
-              />
-              <p className="text-[10px] leading-4 text-text-tertiary">Informativa para el diagrama; el ruteo real lo define el campo Intent del nodo.</p>
-            </Field>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <Field label="Etiqueta (intent ruteado)" className="md:col-span-2">
+                <input
+                  className={inputCls}
+                  value={typeof selectedEdge.label === "string" ? selectedEdge.label : ""}
+                  disabled={readOnly}
+                  placeholder="ej: product_search"
+                  onChange={(e) => updateEdgeLabel(e.target.value)}
+                />
+                <p className="text-[10px] leading-4 text-text-tertiary">Informativa para el diagrama; el ruteo real lo define el campo Intent del nodo.</p>
+              </Field>
+            </div>
             <Button
               size="sm"
               variant="danger"
               appearance="outline"
-              className="w-full"
+              className="w-full md:w-auto"
               isDisabled={readOnly}
               onClick={() => {
                 setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
