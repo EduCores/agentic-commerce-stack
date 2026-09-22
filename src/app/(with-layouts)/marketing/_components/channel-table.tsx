@@ -71,7 +71,7 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
   const rows = CHANNELS.map((name, i) => ({ name, revenue: values[i] }));
 
   return (
-    <Card className="min-w-0 md:col-span-3">
+    <Card className="min-w-0">
       <CardHeader><CardTitle className="text-sm">Rendimiento por canal</CardTitle></CardHeader>
       <CardContent>
         <div className="flex items-center justify-between border-b border-card-border pb-2">

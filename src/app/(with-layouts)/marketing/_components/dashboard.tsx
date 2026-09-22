@@ -42,15 +42,17 @@ export function MarketingDashboard() {
         </CardContent>
       </Card>
       <MarketingFunnel data={data} />
-      <Card>
-        <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
-        <CardContent className="text-sm text-text-secondary">
-          <p>Tus compradores llegan por: {data.channels.slice(0, 3).map((c) => c.channel).join(", ") || "—"}.</p>
-          <p className="mt-2 text-xs text-text-tertiary">Refuerza el canal con mejor conversión y recupera carritos desde /admin/emails.</p>
-          <Link href="/admin/emails" className="text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</Link>
-        </CardContent>
-      </Card>
-      <MarketingChannelTable data={data} />
+      <div className="grid gap-4 md:col-span-3 md:grid-cols-2">
+        <MarketingChannelTable data={data} />
+        <Card className="min-w-0">
+          <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
+          <CardContent className="text-sm text-text-secondary">
+            <p>Tus compradores llegan por: {data.channels.slice(0, 3).map((c) => c.channel).join(", ") || "—"}.</p>
+            <p className="mt-2 text-xs text-text-tertiary">Refuerza el canal con mejor conversión y recupera carritos desde /admin/emails.</p>
+            <Link href="/admin/emails" className="text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</Link>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
