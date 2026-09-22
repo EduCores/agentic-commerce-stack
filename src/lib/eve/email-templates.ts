@@ -65,7 +65,7 @@ export function buildAbandonedCart(opts: { customerName?: string; items?: Item[]
   const subject = `Dejaste productos en tu carro — retómalo en 1 clic`;
   const body = `<p>Hola ${name},</p><p>Guardamos tu carro:</p>`
     + `<table style="width:100%;border-collapse:collapse;margin:12px 0">${rows(items, currency)}</table>`
-    + `<p><a href="${url}" style="display:inline-block;background:${BRAND};color:${INK};padding:10px 18px;border-radius:999px;font-weight:bold;text-decoration:none">Retomar compra</a></p>`
+    + `<p><a href="${url}" style="display:inline-block;background:${BRAND};color:${INK};padding:10px 18px;border-radius:4px;font-weight:bold;text-decoration:none">Retomar compra</a></p>`
     + `<p>¿Necesitas ayuda con stock o despacho? Responde este correo.</p>`;
   return { subject, html: emailShell("Carro guardado", "Retoma tu compra", body), text: `Hola ${name}, dejaste ${items.length} producto(s) en tu carro. Retómalo: ${url}` };
 }

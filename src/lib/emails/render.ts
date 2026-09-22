@@ -16,7 +16,7 @@ export function renderCustomEmail(fields: EmailFields, vars: EmailVars) {
   const bodyHtml = renderVarsHtml(fields.body, vars);
   const link = renderVarsText(fields.buttonUrl ?? "", vars) || "#";
   const cta = fields.buttonText
-    ? `<p style="margin:20px 0 6px"><a href="${link}" style="display:inline-block;background:linear-gradient(135deg,#FFD814 0%,#FFB800 100%);color:#111111;padding:13px 28px;border-radius:999px;font-weight:800;font-size:15px;text-decoration:none;box-shadow:0 4px 14px rgba(255,184,0,.35)">${fields.buttonText}</a></p>`
+    ? `<p style="margin:20px 0 6px"><a href="${link}" style="display:inline-block;background:linear-gradient(135deg,#FFD814 0%,#FFB800 100%);color:#111111;padding:13px 28px;border-radius:4px;font-weight:800;font-size:15px;text-decoration:none;box-shadow:0 4px 14px rgba(255,184,0,.35)">${fields.buttonText}</a></p>`
     : "";
   const html = emailShell(fields.headerTitle, renderVarsText(fields.preheader ?? "", vars), bodyHtml + cta);
   const text = `${subject}\n\n${renderVarsText(fields.body, vars)}`;
