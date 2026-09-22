@@ -23,7 +23,6 @@ export function MarketingFunnel({ data }: { data: MarketingData | null }) {
     const prev = rows[i].value;
     return { stage: r.stage, value: r.value, conv: prev > 0 ? r.value / prev : 0 };
   });
-  const worst = steps.length > 0 ? steps.reduce((a, b) => (b.conv < a.conv ? b : a)) : null;
 
   return (
     <Card className="min-w-0 md:col-span-3">
@@ -65,11 +64,6 @@ export function MarketingFunnel({ data }: { data: MarketingData | null }) {
             {s.stage}: <strong className="text-text-primary">{pct(s.conv)}</strong>
           </span>
         ))}
-        {worst && worst.conv < 1 && (
-          <span className="text-xs text-text-tertiary">
-            Mayor fuga en <strong className="text-text-secondary">{worst.stage}</strong>
-          </span>
-        )}
         <Link href="/admin/emails" className="ml-auto text-xs font-medium text-brand-600 underline">
           Recuperar abandonos →
         </Link>
