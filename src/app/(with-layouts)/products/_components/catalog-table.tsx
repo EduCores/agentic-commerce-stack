@@ -51,7 +51,7 @@ export function CatalogTable({ rows }: Props) {
           </thead>
           <tbody>
             {rows.map((p) => {
-              const stockColor = p.stock <= 0 ? "bg-red-500" : p.stock < 10 ? "bg-amber-500" : "bg-emerald-500";
+              const stockColor = p.stock <= 0 ? "bg-red-500" : p.stock < 10 ? "bg-teal-500" : "bg-emerald-500";
               const providerColor: "success" | "primary" | "warning" | "gray" | "sky" =
                 p.provider === "shopify" ? "success" : p.provider === "woocommerce" ? "primary" : p.provider === "magento" ? "warning" : p.provider === "custom" ? "sky" : "gray";
               return (

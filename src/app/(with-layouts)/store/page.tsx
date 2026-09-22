@@ -110,7 +110,7 @@ export default async function StorePage() {
                     p.stock <= 0
                       ? { dot: "bg-red-500", badge: "Agotado" as const, color: "error" as const }
                       : p.stock < 10
-                        ? { dot: "bg-amber-500", badge: "Bajo stock" as const, color: "warning" as const }
+                        ? { dot: "bg-teal-500", badge: "Bajo stock" as const, color: "success" as const }
                         : { dot: "bg-emerald-500", badge: "Disponible" as const, color: "success" as const };
                   return (
                     <div key={p.id} className="rounded-lg border border-card-border bg-card-background p-3 transition hover:border-brand-500 hover:shadow-sm">

@@ -70,7 +70,7 @@ export function SalesCard({ sales, days, onDays, month, year, onMonth, onYear }:
           return (
             <div key={d.date} className="flex h-full flex-1 flex-col justify-end" title={`${d.date}: ${formatCLP(d.total)}`}>
               <div
-                className="w-full rounded-t bg-gradient-to-t from-brand-500 to-amber-300"
+                className="w-full rounded-t bg-gradient-to-t from-brand-500 to-[#328e8f]"
                 style={{ height: `${h}%` }}
               />
             </div>

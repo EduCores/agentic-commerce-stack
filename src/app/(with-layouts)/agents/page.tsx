@@ -139,14 +139,14 @@ export default async function AgentsPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 [&>svg]:size-4">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
               <Sparkles />
             </span>
             <CardTitle>Cómo crear un agente — en 3 pasos</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <div className="h-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500" />
+          <div className="h-1.5 rounded-full bg-gradient-to-r from-teal-400 to-[#328e8f]" />
           <ol className="grid gap-3 sm:grid-cols-3">
             <li className="rounded-lg border border-card-border bg-background-gray-secondary/30 p-3">
               <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-black">1</span>

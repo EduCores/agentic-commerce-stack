@@ -18,9 +18,9 @@ export function HomeLowStockCard() {
 
   return (
     <div className="rounded-xl border border-card-border bg-card-background p-5">
-      <div className="h-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500" />
+      <div className="h-1.5 rounded-full bg-gradient-to-r from-teal-400 to-[#328e8f]" />
       <div className="mt-3 flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 [&>svg]:size-4">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
           <TriangleAlert />
         </span>
         <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Stock crítico — reponer</h3>
