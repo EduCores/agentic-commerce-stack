@@ -7,6 +7,11 @@ export const dynamic = "force-dynamic";
 const COST_PER_RUN: Record<string, number> = {
   "qwen/qwen3-30b-a3b-instruct-2507": 0.9,
   "qwen/qwen3-30b-a3b": 0.9,
+  // Fake para demo (quitar en entrega): Gemini, Claude, Chat-GPT
+  "google/gemini-pro": 1.2,
+  "anthropic/claude-3-5-sonnet": 1.5,
+  "openai/gpt-4": 2.0,
+  "openai/gpt-4o-mini": 1.0,
 };
 
 export async function GET(req: Request) {
@@ -92,6 +97,18 @@ export async function GET(req: Request) {
       }))
       .sort((a, b) => b.requests - a.requests);
 
+    // --- DEMO FAKE (quitar en entrega): inyecta Gemini, Claude y Chat-GPT para mostrar variedad ---
+    if (!byModel.some((m) => m.model.includes("gemini"))) {
+      byModel.push({ model: "google/gemini-pro", requests: 18, cost: 21.6, revenue: Math.round(18 * avgRevenuePerReq) || 540000 });
+    }
+    if (!byModel.some((m) => m.model.includes("claude"))) {
+      byModel.push({ model: "anthropic/claude-3-5-sonnet", requests: 14, cost: 21.0, revenue: Math.round(14 * avgRevenuePerReq) || 420000 });
+    }
+    if (!byModel.some((m) => m.model === "openai/gpt-4")) {
+      byModel.push({ model: "openai/gpt-4", requests: 22, cost: 44.0, revenue: Math.round(22 * avgRevenuePerReq) || 680000 });
+    }
+    byModel.sort((a, b) => b.requests - a.requests);
+
     const providers = [
       { name: "openrouter/qwen", pct: 72 },
       { name: "openai", pct: 14 },
@@ -120,8 +137,12 @@ export async function GET(req: Request) {
           { id: "1", name: "Asistente Ventas", slug: "sales-assistant", model: "qwen/qwen3-30b-a3b", active: true, requests: 12, success: 96.4, cost: 10.8, revenue: 420000 },
           { id: "2", name: "Soporte Checkout", slug: "checkout-support", model: "qwen/qwen3-30b-a3b", active: true, requests: 8, success: 96.4, cost: 7.2, revenue: 280000 },
         ],
+        // Fake demo (quitar en entrega)
         byModel: [
           { model: "qwen/qwen3-30b-a3b", requests: 32, cost: 28.8, revenue: 890000 },
+          { model: "openai/gpt-4", requests: 22, cost: 44.0, revenue: 680000 },
+          { model: "google/gemini-pro", requests: 18, cost: 21.6, revenue: 540000 },
+          { model: "anthropic/claude-3-5-sonnet", requests: 14, cost: 21.0, revenue: 420000 },
           { model: "openai/gpt-4o-mini", requests: 10, cost: 9.0, revenue: 310000 },
         ],
         providers,
