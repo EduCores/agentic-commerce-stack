@@ -121,8 +121,8 @@ export default function LastTransactionsTable() {
       <CardHeader className="mb-6 flex-col items-stretch justify-start">
         <CardTitle>Transacciones recientes</CardTitle>
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          <InputGroup className="py-1.5">
+        <div className="flex items-center gap-2">
+          <InputGroup className="min-w-0 flex-[4] py-1.5">
             <InputGroupAddon align="inline-start" className="pr-0 text-icon-tertiary">
               <SearchIcon className="size-4" />
             </InputGroupAddon>
@@ -134,8 +134,9 @@ export default function LastTransactionsTable() {
             />
           </InputGroup>
 
+          <div className="min-w-0 flex-[4]">
           <Select value={statusFilter} onChange={(v) => setStatusFilter(String(v))} aria-label="Filtrar por estado">
-            <SelectTrigger className="h-8 w-auto px-2.5 text-xs">
+            <SelectTrigger className="h-8 w-full px-2.5 text-xs">
               <SelectValue />
               <SelectIndicator />
             </SelectTrigger>
@@ -146,12 +147,13 @@ export default function LastTransactionsTable() {
               ))}
             </SelectContent>
           </Select>
+          </div>
           <Button
             appearance="outline"
             onClick={handleDownload}
             isDisabled={isPending || filtered.length === 0}
             aria-label={selectedTransactions.length > 0 ? `Descargar ${selectedTransactions.length} seleccionadas en CSV` : "Descargar filtradas en CSV"}
-            className="h-8 w-8 p-1.5 text-icon-tertiary"
+            className="h-8 min-w-0 flex-[2] p-1.5 text-icon-tertiary"
           >
             <DownloadIcon />
           </Button>
