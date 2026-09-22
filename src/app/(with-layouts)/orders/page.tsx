@@ -47,15 +47,15 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
           <p className="text-xs text-text-tertiary">El bot no perdió la venta: revisa el detalle y contacta a tu cliente. Los registros están en /workflows.</p>
         </div>
       )}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-3">
         <div>
           <h2 className="text-xl font-bold text-black dark:text-white">Pedidos</h2>
           <p className="text-sm text-text-tertiary">Híbrido: {orders.length} pedidos · Filtra por estado · Fuente Prisma (igual para mock/Shopify).</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/orders" className={`rounded-lg px-3 py-1.5 text-sm ${!status ? "bg-brand-500 text-button-primary-text" : "border border-card-border"}`}>Todos</Link>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          <Link href="/orders" className={`rounded-lg px-3 py-2 text-center text-sm font-medium ${!status ? "bg-brand-500 text-button-primary-text" : "border border-card-border bg-card-background hover:bg-background-gray-secondary"}`}>Todos</Link>
           {["PENDING", "PAID", "FULFILLED", "CANCELLED"].map((s) => (
-            <Link key={s} href={`/orders?status=${s}`} className={`rounded-lg px-3 py-1.5 text-sm ${status === s ? "bg-brand-500 text-button-primary-text" : "border border-card-border"}`}>{STATUS_LABEL[s] ?? s}</Link>
+            <Link key={s} href={`/orders?status=${s}`} className={`rounded-lg px-3 py-2 text-center text-sm font-medium ${status === s ? "bg-brand-500 text-button-primary-text" : "border border-card-border bg-card-background hover:bg-background-gray-secondary"}`}>{STATUS_LABEL[s] ?? s}</Link>
           ))}
         </div>
       </div>
