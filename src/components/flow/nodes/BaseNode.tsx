@@ -26,15 +26,15 @@ export function BaseNode({ data, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "min-w-64 rounded-xl border bg-card-background px-4 py-3 shadow-sm transition",
+        "w-44 rounded-xl border bg-card-background px-3 py-2.5 shadow-sm transition",
         selected ? "border-brand-500 shadow-md" : "border-card-border",
         statusRing[d.status ?? "idle"]
       )}
     >
       <Handle type="target" position={Position.Top} className="!bg-gray-400" />
       <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-brand-500" />
-        <span className="text-sm font-semibold text-text-primary">{NODE_LABEL_ES[d.label] ?? d.label}</span>
+        <span className="h-2 w-2 shrink-0 rounded-full bg-brand-500" />
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-primary">{NODE_LABEL_ES[d.label] ?? d.label}</span>
         {d.status && d.status !== "idle" && (
           <Badge color={statusColor[d.status] ?? "gray"} className="ml-auto">
             {NODE_STATUS_ES[d.status] ?? d.status}
