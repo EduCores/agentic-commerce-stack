@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/tailgrids/core/button";
 import { Input } from "@/components/tailgrids/core/input";
 import { Badge } from "@/components/tailgrids/core/badge";
@@ -41,15 +41,17 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  // Sincroniza si el padre trae datos nuevos (patrón render, sin effect).
+  const [prevInitial, setPrevInitial] = useState(initialSlides);
+  if (prevInitial !== initialSlides) {
+    setPrevInitial(initialSlides);
+    setSlides(initialSlides);
+  }
 
   async function refresh() {
     const json = await api("/api/slider");
     setSlides(json.slides ?? []);
   }
-
-  useEffect(() => {
-    setSlides(initialSlides);
-  }, [initialSlides]);
 
   function set<K extends keyof typeof emptyForm>(key: K, value: (typeof emptyForm)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -214,7 +216,7 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
             </div>
             {form.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={form.image} alt="Preview" className="mt-1 h-28 w-full rounded-lg border border-card-border object-cover" />
+              <img src={form.image} alt="Vista previa" className="mt-1 h-28 w-full rounded-lg border border-card-border object-cover" />
             ) : null}
             <span className="text-[11px] leading-4 text-text-tertiary">Pega una URL o ruta <code>/public</code> (ej: <code>/mi-banner.png</code>), o sube un archivo — se convierte a <b>WebP</b> y se guarda como data URL.</span>
           </label>

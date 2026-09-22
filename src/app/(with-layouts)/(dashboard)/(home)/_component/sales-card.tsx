@@ -13,7 +13,11 @@ type Props = {
 export function SalesCard({ sales, days, onDays }: Props) {
   const max = Math.max(...sales.map((x) => x.total), 1);
   const total = sales.reduce((a, x) => a + x.total, 0);
+  // Eje de fechas aparte (máx ~8 etiquetas): nunca colisionan aunque crezcan los días.
   const step = Math.max(1, Math.ceil(sales.length / 7));
+  const ticks = sales.filter((_, i) => i % step === 0);
+  const last = sales[sales.length - 1];
+  if (last && ticks[ticks.length - 1]?.date !== last.date) ticks.push(last);
 
   return (
     <div className="rounded-xl border border-card-border bg-card-background p-5">
@@ -32,18 +36,22 @@ export function SalesCard({ sales, days, onDays }: Props) {
       </div>
 
       <div className="mt-4 flex h-28 items-end gap-1">
-        {sales.map((d, i) => {
+        {sales.map((d) => {
           const h = Math.max(3, Math.round((d.total / max) * 100));
           return (
-            <div key={d.date} className="flex h-full flex-1 flex-col items-center justify-end gap-1" title={`${d.date}: ${formatCLP(d.total)}`}>
+            <div key={d.date} className="flex h-full flex-1 flex-col justify-end" title={`${d.date}: ${formatCLP(d.total)}`}>
               <div
                 className="w-full rounded-t bg-gradient-to-t from-brand-500 to-amber-300"
                 style={{ height: `${h}%` }}
               />
-              {i % step === 0 && <span className="text-[10px] text-text-tertiary">{d.date.slice(5)}</span>}
             </div>
           );
         })}
+      </div>
+      <div className="mt-1.5 flex items-center justify-between gap-1">
+        {ticks.map((d) => (
+          <span key={d.date} className="text-[10px] whitespace-nowrap text-text-tertiary">{d.date.slice(5)}</span>
+        ))}
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-card-border pt-4">
