@@ -118,7 +118,7 @@ export default function LastTransactionsTable() {
   return (
     <Card>
       {/* Header */}
-      <CardHeader className="mb-6">
+      <CardHeader className="mb-6 flex-col items-stretch justify-start">
         <CardTitle>Transacciones recientes</CardTitle>
 
         <div className="flex flex-wrap items-center gap-1.5">
