@@ -9,12 +9,12 @@ function channelLabel(source: string): string {
   const s = source.trim().toLowerCase();
   if (s.includes("starshop")) return "Starshop";
   if (s.includes("meta") || s.includes("facebook") || s.includes("instagram") || s.includes("shopify")) return "Meta";
-  if (s.includes("whatsapp") || s === "eve" || s.startsWith("eve_") || s.startsWith("eve-")) return "whatsapp";
+  if (s.includes("whatsapp") || s === "eve" || s.startsWith("eve_") || s.startsWith("eve-")) return "Whatsapp";
   if (s === "manual" || s.includes("tienda") || s.includes("física") || s === "store") return "Tienda física";
   return source;
 }
 
-const CHANNEL_ORDER = ["Starshop", "Meta", "whatsapp", "Tienda física"];
+const CHANNEL_ORDER = ["Starshop", "Meta", "Whatsapp", "Tienda física"];
 
 export async function GET() {
   try {
@@ -86,7 +86,7 @@ export async function GET() {
         channels: [
           { channel: "Starshop", spend: 120000, clicks: 840, convRate: 4.2, revenue: 680000 },
           { channel: "Meta", spend: 80000, clicks: 520, convRate: 3.8, revenue: 420000 },
-          { channel: "whatsapp", spend: 30000, clicks: 210, convRate: 6.1, revenue: 180000 },
+          { channel: "Whatsapp", spend: 30000, clicks: 210, convRate: 6.1, revenue: 180000 },
           { channel: "Tienda física", spend: 15000, clicks: 90, convRate: 8.0, revenue: 95000 },
         ],
         funnel: [
@@ -103,7 +103,7 @@ export async function GET() {
           byChannel: [
             { channel: "Starshop", customers: 18 },
             { channel: "Meta", customers: 9 },
-            { channel: "whatsapp", customers: 5 },
+            { channel: "Whatsapp", customers: 5 },
             { channel: "Tienda física", customers: 2 },
           ],
         },

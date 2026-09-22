@@ -23,7 +23,7 @@ function sourceLabel(source: string): string {
   const s = source.trim().toLowerCase();
   if (s.includes("starshop")) return "StarShop";
   if (s.includes("meta") || s.includes("facebook") || s.includes("instagram") || s.includes("shopify")) return "Meta";
-  if (s.includes("whatsapp") || s === "eve" || s.startsWith("eve_") || s.startsWith("eve-")) return "whatsapp";
+  if (s.includes("whatsapp") || s === "eve" || s.startsWith("eve_") || s.startsWith("eve-")) return "Whatsapp";
   if (s === "manual" || s.includes("tienda") || s === "store") return "Tienda física";
   return source;
 }

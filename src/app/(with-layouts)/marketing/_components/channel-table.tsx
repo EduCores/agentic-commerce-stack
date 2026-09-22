@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { Facebook, Shop, Whatsapp } from "@tailgrids/icons";
 import type { MarketingData } from "./types";
 
-const CHANNELS = ["Starshop", "Meta", "whatsapp", "Tienda física"];
+const CHANNELS = ["Starshop", "Meta", "Whatsapp", "Tienda física"];
 
 /** Piso mínimo por canal (8%): reparte lo real pero nadie queda en 0. */
 const FLOOR_PCT = 0.08;
@@ -50,7 +50,7 @@ function ChannelIcon({ name }: { name: string }) {
       </span>
     );
   }
-  if (name === "whatsapp") {
+  if (name === "Whatsapp") {
     return (
       <span className={`${chip} bg-badge-success-background text-badge-success-text`}>
         <Whatsapp size={20} />
