@@ -4,6 +4,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
 import { SyncButton } from "./_components/sync-button";
 import { ConnectButton } from "./_components/connect-button";
+import { Package } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -74,12 +75,37 @@ export default async function StorePage() {
               <p className="text-sm text-text-tertiary">Sin productos. Ejecuta <code>prisma/seed.ts</code> o conecta tu tienda y sincroniza.</p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
-                {products.map((p) => (
-                  <div key={p.id} className="rounded-lg border border-card-border p-3">
-                    <p className="text-sm font-medium">{p.title} <span className="text-xs text-text-tertiary">({p.sku})</span></p>
-                    <p className="text-xs text-text-tertiary">${Number(p.price)} — stock {p.stock} (reservado {p.reservedStock})</p>
-                  </div>
-                ))}
+                {products.map((p) => {
+                  const stockState =
+                    p.stock <= 0
+                      ? { dot: "bg-red-500", badge: "Agotado" as const, color: "error" as const }
+                      : p.stock < 10
+                        ? { dot: "bg-amber-500", badge: "Bajo stock" as const, color: "warning" as const }
+                        : { dot: "bg-emerald-500", badge: "Disponible" as const, color: "success" as const };
+                  return (
+                    <div key={p.id} className="rounded-lg border border-card-border bg-card-background p-3 transition hover:border-brand-500">
+                      <div className="flex items-start gap-2.5">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text">
+                          <Package size={18} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="flex items-center gap-1.5 text-sm font-medium text-text-primary">
+                            <span className={`size-2 shrink-0 rounded-full ${stockState.dot}`} title={stockState.badge} />
+                            <span className="truncate">{p.title}</span>
+                          </p>
+                          <p className="mt-0.5 text-xs text-text-tertiary">{p.sku}</p>
+                        </div>
+                        <p className="shrink-0 text-sm font-extrabold text-brand-600">
+                          ${Number(p.price).toLocaleString("es-CL")}
+                        </p>
+                      </div>
+                      <div className="mt-2.5 flex items-center justify-between border-t border-card-border/60 pt-2 text-xs text-text-tertiary">
+                        <span>Stock {p.stock} · Reservado {p.reservedStock}</span>
+                        <Badge color={stockState.color}>{stockState.badge}</Badge>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>
