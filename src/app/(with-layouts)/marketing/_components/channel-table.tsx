@@ -75,7 +75,7 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
       <CardHeader><CardTitle className="text-sm">Rendimiento por canal</CardTitle></CardHeader>
       <CardContent>
         <div className="flex items-center justify-between border-b border-card-border pb-2">
-          <span className="text-sm font-bold text-brand-600">Ingresos</span>
+          <span className="text-sm font-bold text-text-primary">Ingresos</span>
           <span className="text-xl font-extrabold tracking-tight text-brand-600">
             ${total.toLocaleString("es-CL")}
           </span>
@@ -87,7 +87,7 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
                 <ChannelIcon name={r.name} />
                 <span className="text-sm text-text-secondary">{r.name}</span>
               </span>
-              <span className="text-sm font-bold text-brand-600">${r.revenue.toLocaleString("es-CL")}</span>
+              <span className="text-sm font-bold text-text-primary">${r.revenue.toLocaleString("es-CL")}</span>
             </div>
           ))}
         </div>
