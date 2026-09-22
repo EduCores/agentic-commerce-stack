@@ -4,7 +4,10 @@ import { DEMO_MODE } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Rango del gráfico de ventas del home: 7 | 14 | 21 | 28 días.
+  const rawDays = Number(new URL(req.url).searchParams.get("days"));
+  const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
   try {
     const [productsCount, ordersCount, customersCount, agentsCount, workflowsCount, products, orders, agents, workflows] = await Promise.all([
       prisma.product.count(),
@@ -35,28 +38,35 @@ export async function GET() {
       return { product: p, quantity: g._sum.quantity };
     });
 
-    // Sales by day (last 7 days)
+    // Ventas por día (últimos N días) — una sola consulta, se agrupa en JS.
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    since.setDate(since.getDate() - (days - 1));
+    const rangeOrders = await prisma.order
+      .findMany({ where: { createdAt: { gte: since } }, select: { total: true, createdAt: true } })
+      .catch(() => []);
     const salesByDay: { date: string; total: number }[] = [];
-    for (let i = 6; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setHours(0, 0, 0, 0);
       d.setDate(d.getDate() - i);
-      const next = new Date(d);
-      next.setDate(next.getDate() + 1);
-      const dayOrders = await prisma.order.findMany({ where: { createdAt: { gte: d, lt: next } }, select: { total: true } }).catch(() => []);
-      const sum = dayOrders.reduce((acc, o) => acc + Number(o.total), 0);
-      salesByDay.push({ date: d.toISOString().slice(0, 10), total: sum });
+      const key = d.toISOString().slice(0, 10);
+      const sum = rangeOrders
+        .filter((o) => o.createdAt.toISOString().slice(0, 10) === key)
+        .reduce((acc, o) => acc + Number(o.total), 0);
+      salesByDay.push({ date: key, total: sum });
     }
 
     // DEMO_MOCK: muestra ACS activo a clientes sin datos reales — quitar antes de vender (NEXT_PUBLIC_DEMO_MODE=false)
     if (DEMO_MODE && productsCount === 0 && ordersCount === 0) {
+      const base = [120000, 340000, 280000, 510000, 420000, 680000, 590000];
       return NextResponse.json({
         counts: { products: 48, orders: 127, customers: 34, agents: 9, workflows: 4, agentRuns: 312, workflowRuns: 89 },
         stock: { total: 520, reserved: 38, availability: 92.7 },
         revenue: 8940000,
-        salesByDay: Array.from({ length: 7 }).map((_, i) => {
-          const d = new Date(); d.setDate(d.getDate() - (6 - i));
-          return { date: d.toISOString().slice(0, 10), total: [120000, 340000, 280000, 510000, 420000, 680000, 590000][i] };
+        salesByDay: Array.from({ length: days }).map((_, i) => {
+          const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
+          return { date: d.toISOString().slice(0, 10), total: base[i % base.length] };
         }),
         topProducts: [
           { product: { title: "Taladro percutor 20V", sku: "TAL-20V-01", price: "49990", stock: 32 }, quantity: 42 },
