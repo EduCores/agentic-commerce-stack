@@ -1,34 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
-import { Badge } from "@/components/tailgrids/core/badge";
 import type { MarketingData } from "./types";
 
+const KNOWN_CHANNELS = ["Starshop", "Meta", "whatsapp", "Tienda física"];
+
 export function MarketingChannelTable({ data }: { data: MarketingData }) {
+  const total = data.totals.revenue;
+  const rows = KNOWN_CHANNELS.map((name) => ({
+    name,
+    revenue: data.channels.find((c) => c.channel === name)?.revenue ?? 0,
+  }));
+  const extra = data.channels.filter((c) => !KNOWN_CHANNELS.includes(c.channel));
+
   return (
     <Card className="min-w-0 md:col-span-3">
       <CardHeader><CardTitle className="text-sm">Rendimiento por canal</CardTitle></CardHeader>
       <CardContent>
-        {data.channels.length === 0 ? (
-          <p className="text-sm text-text-tertiary">Sin canales aún. Los pedidos con <code>source</code> alimentan esta tabla.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-card-border text-xs text-text-tertiary">
-                <tr><th className="p-2 text-left">Canal</th><th className="p-2 text-right">Inversión</th><th className="p-2 text-right">Clics</th><th className="p-2 text-right">Conversión %</th><th className="p-2 text-right">Ingresos</th></tr>
-              </thead>
-              <tbody>
-                {data.channels.map((c) => (
-                  <tr key={c.channel} className="border-b border-card-border/60">
-                    <td className="p-2"><Badge color="gray">{c.channel}</Badge></td>
-                    <td className="p-2 text-right">${c.spend.toLocaleString("es-CL")}</td>
-                    <td className="p-2 text-right">{c.clicks}</td>
-                    <td className="p-2 text-right">{c.convRate}%</td>
-                    <td className="p-2 text-right">${c.revenue.toLocaleString("es-CL")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <div className="flex items-center justify-between border-b border-card-border pb-2">
+          <span className="text-sm font-semibold text-text-primary">Ingresos</span>
+          <span className="text-sm font-semibold text-text-primary">${total.toLocaleString("es-CL")}</span>
+        </div>
+        <div className="mt-2 space-y-1">
+          {rows.map((r) => (
+            <div key={r.name} className="flex items-center justify-between border-b border-card-border/60 py-1.5 text-sm">
+              <span className="text-text-secondary">{r.name}</span>
+              <span className="text-text-primary">${r.revenue.toLocaleString("es-CL")}</span>
+            </div>
+          ))}
+          {extra.map((c) => (
+            <div key={c.channel} className="flex items-center justify-between border-b border-card-border/60 py-1.5 text-sm">
+              <span className="text-text-secondary">{c.channel}</span>
+              <span className="text-text-primary">${c.revenue.toLocaleString("es-CL")}</span>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
