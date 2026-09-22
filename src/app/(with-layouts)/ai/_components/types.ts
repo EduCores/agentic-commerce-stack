@@ -6,3 +6,6 @@ export type AiStats = {
   workflows: { status: string; _count: { status: number } }[];
   recent: { id: string; agent: string; status: string; at: string }[];
 };
+
+export const AI_RANGES = [7, 14, 21, 28] as const;
+export type AiRange = (typeof AI_RANGES)[number];

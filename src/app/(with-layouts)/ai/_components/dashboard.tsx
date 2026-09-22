@@ -1,17 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { AiActivityChart } from "./activity-chart";
 import { AiAgentsTable } from "./agents-table";
-import type { AiStats } from "./types";
+import type { AiStats, AiRange } from "./types";
 import Link from "next/link";
 
 export function AiDashboard() {
+  const [days, setDays] = useState<AiRange>(7);
   const { data, isLoading } = useQuery<AiStats>({
-    queryKey: ["ai-stats"],
-    queryFn: async () => (await fetch("/api/ai/stats")).json(),
+    queryKey: ["ai-stats", days],
+    queryFn: async () => (await fetch(`/api/ai/stats?days=${days}`)).json(),
   });
 
   if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando AI...</CardContent></Card>;
@@ -36,7 +38,7 @@ export function AiDashboard() {
           </div>
         </CardContent>
       </Card>
-      <AiActivityChart data={data} />
+      <AiActivityChart data={data} days={days} onDays={setDays} />
       <AiAgentsTable data={data} />
       <Card className="min-w-0 overflow-hidden md:col-span-3">
         <CardHeader><CardTitle className="text-sm">Actividad del Agente</CardTitle></CardHeader>

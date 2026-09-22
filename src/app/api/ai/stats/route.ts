@@ -9,17 +9,20 @@ const COST_PER_RUN: Record<string, number> = {
   "qwen/qwen3-30b-a3b": 0.9,
 };
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Rango del gráfico de actividad: 7 | 14 | 21 | 28 días.
+  const rawDays = Number(new URL(req.url).searchParams.get("days"));
+  const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
   try {
     const [agents, runs, wfRuns, recentRuns] = await Promise.all([
       prisma.agent.findMany({ select: { id: true, name: true, slug: true, model: true, isActive: true, _count: { select: { runs: true } } }, take: 20, orderBy: { createdAt: "desc" } }),
-      prisma.agentRun.findMany({ select: { status: true, createdAt: true, agent: { select: { model: true } } }, take: 200, orderBy: { createdAt: "desc" } }),
+      prisma.agentRun.findMany({ select: { status: true, createdAt: true, agent: { select: { model: true } } }, take: 500, orderBy: { createdAt: "desc" } }),
       prisma.workflowRun.groupBy({ by: ["status"], _count: { status: true } }).catch(() => []),
       prisma.agentRun.findMany({ take: 8, orderBy: { createdAt: "desc" }, include: { agent: { select: { name: true } } } }),
     ]);
 
     const byDay: { day: string; requests: number }[] = [];
-    for (let i = 6; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setHours(0, 0, 0, 0);
       d.setDate(d.getDate() - i);
@@ -52,9 +55,14 @@ export async function GET() {
     // DEMO_MOCK: AI activo sin ejecuciones reales
     if (DEMO_MODE && runs.length === 0) {
       const now = new Date();
+      const base = [4, 7, 5, 9, 6, 8, 3];
       return NextResponse.json({
         totals: { requests: 42, cost: 37.8, successRate: 96.4, activeAgents: 8 },
-        byDay: Array.from({ length: 7 }).map((_, i) => ({ day: `09-${10+i}`, requests: [4,7,5,9,6,8,3][i] })),
+        byDay: Array.from({ length: days }).map((_, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - (days - 1 - i));
+          return { day: d.toISOString().slice(5, 10), requests: base[i % base.length] };
+        }),
         table: [
           { id: "1", name: "Asistente Ventas", slug: "sales-assistant", model: "qwen/qwen3-30b-a3b", active: true, requests: 12, success: 96.4 },
           { id: "2", name: "Soporte Checkout", slug: "checkout-support", model: "qwen/qwen3-30b-a3b", active: true, requests: 8, success: 96.4 },
