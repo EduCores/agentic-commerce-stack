@@ -23,38 +23,36 @@ export function CrmDashboard() {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <div className="overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 p-6 text-white md:col-span-3">
-        <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:justify-around sm:gap-6">
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-2.5">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
-                <Users />
-              </span>
-              <p className="text-sm font-medium text-white/90">Clientes</p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur">
+            <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 [&>svg]:size-7">
+              <Users />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white/85">Clientes</p>
+              <p className="text-2xl font-extrabold tracking-tight md:text-3xl">{data.totals.customers.toLocaleString("es-CL")}</p>
             </div>
-            <p className="mt-2 text-4xl font-extrabold tracking-tight">{data.totals.customers.toLocaleString("es-CL")}</p>
           </div>
-          <div className="hidden w-px self-stretch bg-white/20 sm:block" />
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-2.5">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
-                <Wallet />
-              </span>
-              <p className="text-sm font-medium text-white/90">Ingresos por clientes</p>
+          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur">
+            <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 [&>svg]:size-7">
+              <Wallet />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white/85">Ingresos por clientes</p>
+              <p className="text-2xl font-extrabold tracking-tight md:text-3xl">${data.totals.revenue.toLocaleString("es-CL")}</p>
             </div>
-            <p className="mt-2 text-4xl font-extrabold tracking-tight">${data.totals.revenue.toLocaleString("es-CL")}</p>
           </div>
-          <div className="hidden w-px self-stretch bg-white/20 sm:block" />
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-2.5">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-white/20 [&>svg]:size-4.5">
-                <TrendingUp />
-              </span>
-              <p className="text-sm font-medium text-white/90">Ticket promedio</p>
+          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur">
+            <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 [&>svg]:size-7">
+              <TrendingUp />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white/85">Ticket promedio</p>
+              <p className="text-2xl font-extrabold tracking-tight md:text-3xl">${data.totals.avgTicket.toLocaleString("es-CL")}</p>
             </div>
-            <p className="mt-2 text-4xl font-extrabold tracking-tight">${data.totals.avgTicket.toLocaleString("es-CL")}</p>
           </div>
         </div>
-        <Link href="/orders" className="mt-4 inline-block text-xs font-medium text-white/90 underline">Ver /orders</Link>
+        <Link href="/orders" className="mt-4 inline-block text-xs font-medium text-white/90 underline">Ver /orders →</Link>
       </div>
       <CrmGrowthChart data={data} days={days} onDays={setDays} />
       <CrmLeadsReport data={data} />

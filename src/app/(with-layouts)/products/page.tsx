@@ -1,8 +1,10 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
+import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { prisma } from "@/lib/adapters/prisma";
 import Link from "next/link";
 import { CatalogTable, type CatalogRow } from "./_components/catalog-table";
+import { Boxes, Package, Store, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +13,9 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const where = q ? { OR: [{ sku: { contains: q, mode: "insensitive" as const } }, { title: { contains: q, mode: "insensitive" as const } }] } : {};
   const products = await prisma.product.findMany({ where: where as never, take: 50, orderBy: { updatedAt: "desc" }, include: { store: { select: { name: true, provider: true } } } }).catch(() => []);
   const providers = [...new Set(products.map((p) => p.store.provider))];
+  const totalStock = products.reduce((a, p) => a + p.stock, 0);
+  const lowStock = products.filter((p) => p.stock < 10).length;
+  const activeCount = products.filter((p) => p.isActive).length;
   const rows: CatalogRow[] = products.map((p) => ({
     id: String(p.id),
     sku: p.sku,
@@ -27,17 +32,78 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     <div className="min-w-0 space-y-6 overflow-hidden p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Productos", href: "/products" }]} />
       <div>
-        <h2 className="text-xl font-bold text-black dark:text-white">Productos — Catálogo híbrido</h2>
-        <p className="text-sm text-text-tertiary">Híbrido: {providers.join(", ") || "mock"} · {products.length} productos · Una sola fuente en Prisma (te sirve para Shopify/Woo/Mock sin duplicar pantallas).</p>
+        <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">Productos — Catálogo híbrido</h2>
+        <p className="text-sm text-text-tertiary">Unifica Shopify, WooCommerce, Magento y mock en una sola fuente Prisma. Busca, filtra y opera sin duplicar pantallas.</p>
+      </div>
+
+      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 via-blue-600 to-primary-600 p-6 text-white">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-[-0.2px]">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-white/15 text-white [&>svg]:size-4">
+                <Package />
+              </span>
+              Catálogo universal
+            </h3>
+            <p className="mt-1 text-xs text-white/75">
+              {providers.join(" · ") || "mock"} · {products.length} productos · Stock total {totalStock.toLocaleString("es-CL")} · Actualizado desde Prisma
+            </p>
+          </div>
+          <Badge color="success" className="border-white/20 bg-white text-blue-700">Híbrido activo</Badge>
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white [&>svg]:size-6">
+              <Boxes />
+            </span>
+            <div>
+              <p className="text-xs font-medium text-white/80">Productos</p>
+              <p className="text-2xl font-extrabold tracking-tight">{products.length.toLocaleString("es-CL")}</p>
+              <p className="text-xs text-white/70">{activeCount} activos · {products.length - activeCount} inactivos</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white [&>svg]:size-6">
+              <Store />
+            </span>
+            <div>
+              <p className="text-xs font-medium text-white/80">Proveedores</p>
+              <p className="text-2xl font-extrabold tracking-tight">{providers.length}</p>
+              <p className="text-xs text-white/70">{providers.slice(0, 3).join(", ") || "mock"}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white [&>svg]:size-6">
+              <Sparkles />
+            </span>
+            <div>
+              <p className="text-xs font-medium text-white/80">Stock</p>
+              <p className="text-2xl font-extrabold tracking-tight">{totalStock.toLocaleString("es-CL")} uds</p>
+              <p className="text-xs text-white/70">{lowStock} con stock bajo · disponibilidad inmediata</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <Card className="min-w-0 overflow-hidden">
-        <CardHeader><CardTitle>Catálogo universal ({products.length})</CardTitle></CardHeader>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+              <Package size={16} />
+            </span>
+            <CardTitle>Catálogo universal ({products.length})</CardTitle>
+          </div>
+        </CardHeader>
         <CardContent className="min-w-0">
           <form className="mb-4 flex flex-col gap-2 sm:flex-row">
-            <input name="q" defaultValue={q} placeholder="Buscar SKU o título..." className="flex-1 rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
-            <button type="submit" className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-button-primary-text">Buscar</button>
-            <Link href="/products" className="rounded-lg border border-card-border px-4 py-2 text-center text-sm">Limpiar</Link>
+            <div className="relative flex-1">
+              <input name="q" defaultValue={q} placeholder="Buscar SKU o título..." className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 pl-9 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              </span>
+            </div>
+            <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-2 text-sm font-bold text-black hover:bg-brand-600">Buscar</button>
+            <Link href="/products" className="rounded-lg border border-card-border bg-card-background px-4 py-2 text-center text-sm font-medium hover:bg-background-gray-secondary">Limpiar</Link>
           </form>
 
           {products.length === 0 ? (
@@ -49,10 +115,29 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Híbrido — cómo agregar tu proveedor real</CardTitle></CardHeader>
-        <CardContent className="text-sm text-text-secondary space-y-1">
-          <p><code>src/lib/adapters/store.ts</code> expone <code>getProduct/checkStock/reserveStock/syncProducts</code> idéntico para <code>mock/shopify/woocommerce/magento/custom</code>.</p>
-          <p>Crea <code>StoreConnection</code> en <code>/store</code> con <code>provider: shopify</code> + <code>domain/apiKey</code>, luego <code>POST /api/store/sync</code> (próximo) hará la sincronización real.</p>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">
+              <Sparkles size={16} />
+            </span>
+            <CardTitle>Híbrido — cómo agregar tu proveedor real</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="text-sm text-text-secondary space-y-3">
+          <div className="h-1.5 rounded-full bg-gradient-to-r from-violet-400 via-blue-500 to-sky-400" />
+          <p>
+            <code className="rounded bg-background-gray-secondary px-1.5 py-0.5 text-xs">src/lib/adapters/store.ts</code> expone{" "}
+            <Badge color="primary">getProduct</Badge> <Badge color="sky">checkStock</Badge> <Badge color="violet">reserveStock</Badge>{" "}
+            <Badge color="warning">syncProducts</Badge> idéntico para <code>mock/shopify/woocommerce/magento/custom</code>.
+          </p>
+          <p>
+            Crea <code className="rounded bg-background-gray-secondary px-1 py-0.5 text-xs">StoreConnection</code> en{" "}
+            <Link href="/store" className="font-bold text-brand-600 underline">
+              /store
+            </Link>{" "}
+            con <code>provider: shopify</code> + <code>domain/apiKey</code>, luego{" "}
+            <code className="rounded bg-background-gray-secondary px-1 py-0.5 text-xs">POST /api/store/sync</code> hará la sincronización real. Todo queda en una sola tabla <code>Product</code> sin duplicar pantallas.
+          </p>
         </CardContent>
       </Card>
     </div>

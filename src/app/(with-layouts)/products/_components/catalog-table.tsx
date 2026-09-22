@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronRight } from "@tailgrids/icons";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { Package } from "lucide-react";
 
 export type CatalogRow = {
   id: string;
@@ -45,20 +46,41 @@ export function CatalogTable({ rows }: Props) {
     <div className="relative">
       <div ref={scrollRef} className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-sm">
-          <thead className="text-xs text-text-tertiary border-b border-card-border">
-            <tr><th className="text-left p-2">SKU</th><th className="text-left p-2">Producto</th><th className="text-left p-2">Proveedor</th><th className="text-right p-2">Precio</th><th className="text-right p-2">Stock</th><th className="text-center p-2">Estado</th></tr>
+          <thead className="border-b border-card-border bg-background-gray-secondary/50 text-xs text-text-tertiary">
+            <tr><th className="p-2 text-left">SKU</th><th className="p-2 text-left">Producto</th><th className="p-2 text-left">Proveedor</th><th className="p-2 text-right">Precio</th><th className="p-2 text-right">Stock</th><th className="p-2 text-center">Estado</th></tr>
           </thead>
           <tbody>
-            {rows.map((p) => (
-              <tr key={p.id} className="border-b border-card-border/60 hover:bg-background-gray-secondary">
-                <td className="p-2 font-mono text-xs">{p.sku}</td>
-                <td className="p-2"><p className="font-medium">{p.title}</p><p className="text-xs text-text-tertiary truncate max-w-[320px]">{p.description}</p></td>
-                <td className="p-2"><Badge color="gray">{p.provider}</Badge></td>
-                <td className="p-2 text-right">${p.price.toLocaleString("es-CL")}</td>
-                <td className="p-2 text-right">{p.stock} <span className="text-xs text-text-tertiary">({p.reservedStock} reservados)</span></td>
-                <td className="p-2 text-center"><Badge color={p.isActive ? "success" : "gray"}>{p.isActive ? "Activo" : "Inactivo"}</Badge></td>
-              </tr>
-            ))}
+            {rows.map((p) => {
+              const stockColor = p.stock <= 0 ? "bg-red-500" : p.stock < 10 ? "bg-amber-500" : "bg-emerald-500";
+              const providerColor: "success" | "primary" | "warning" | "gray" | "sky" =
+                p.provider === "shopify" ? "success" : p.provider === "woocommerce" ? "primary" : p.provider === "magento" ? "warning" : p.provider === "custom" ? "sky" : "gray";
+              return (
+                <tr key={p.id} className="border-b border-card-border/60 transition hover:bg-background-gray-secondary/60">
+                  <td className="p-2 font-mono text-xs text-text-secondary">{p.sku}</td>
+                  <td className="p-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-3.5">
+                        <Package />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-text-primary">{p.title}</p>
+                        <p className="truncate text-xs text-text-tertiary max-w-[280px]">{p.description}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-2"><Badge color={providerColor}>{p.provider}</Badge></td>
+                  <td className="p-2 text-right font-bold text-brand-600">${p.price.toLocaleString("es-CL")}</td>
+                  <td className="p-2 text-right">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className={`size-2 rounded-full ${stockColor}`} />
+                      <span className="font-medium">{p.stock}</span>
+                      <span className="text-xs text-text-tertiary">({p.reservedStock} res.)</span>
+                    </span>
+                  </td>
+                  <td className="p-2 text-center"><Badge color={p.isActive ? "success" : "gray"}>{p.isActive ? "Activo" : "Inactivo"}</Badge></td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
