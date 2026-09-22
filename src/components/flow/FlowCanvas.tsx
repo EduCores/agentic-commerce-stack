@@ -31,6 +31,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card } from "@/components/tailgrids/core/card";
 import { cn } from "@/utils/cn";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { BaseNode } from "./nodes/BaseNode";
 import { NODE_PALETTE, FLOW_INTENTS, FLOW_MIN_PROMPT_LENGTH, FLOW_MODELS, FLOW_TOOLS, INTENT_LABEL_ES, type FlowGraph, type FlowNodeData, type FlowNodeType } from "./types";
 
@@ -208,6 +209,22 @@ const graphNodes = useMemo(() => {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const dragging = useRef<FlowNodeType | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Pantalla completa: escucha cambios del Fullscreen API (Esc sale solo)
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) el.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }, []);
 
   // Re-sincroniza cuando el server entrega otro grafo (cambio de workflow o reload)
   useEffect(() => {
@@ -409,7 +426,24 @@ const graphNodes = useMemo(() => {
         </Card>
 
         <Card className="min-h-0 flex-1 p-2">
-          <div className="h-[62vh] min-h-[440px] w-full overflow-hidden rounded-lg border border-card-border">
+          <div
+            ref={containerRef}
+            className={cn(
+              "relative w-full overflow-hidden rounded-lg border border-card-border bg-card-background",
+              isFullscreen ? "h-[100dvh] min-h-[100dvh] rounded-none border-0" : "h-[62vh] min-h-[440px]",
+            )}
+          >
+            <Button
+              size="sm"
+              variant="ghost"
+              appearance="outline"
+              onClick={toggleFullscreen}
+              className="absolute right-2 top-2 z-10 gap-1.5 bg-card-background/90 backdrop-blur hover:bg-card-background"
+              aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+            >
+              {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+              <span className="hidden sm:inline">{isFullscreen ? "Salir" : "Pantalla completa"}</span>
+            </Button>
             <ReactFlow<Node, Edge>
               nodes={nodes}
               edges={edges}
