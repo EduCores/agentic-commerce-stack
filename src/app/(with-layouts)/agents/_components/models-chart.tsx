@@ -6,14 +6,11 @@ import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core
 import { Pie, PieChart, Cell, Tooltip } from "recharts";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { sharePct } from "@/utils/period-stats";
+import { displayModelName } from "@/utils/model-display";
 
 const COLORS = ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6"];
 
 type ModelRow = { model: string; requests: number; cost: number; revenue: number };
-
-function shortName(model: string): string {
-  return model.split("/").pop() ?? model;
-}
 
 /** Distribución por modelo: dona limpia + ranking con costo e ingresos debajo. */
 export function AgentsModelsChart() {
@@ -79,7 +76,7 @@ export function AgentsModelsChart() {
               <div className="flex items-center gap-2 text-xs">
                 <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} aria-hidden="true" />
                 <span className="min-w-0 flex-1 truncate font-mono font-medium text-text-primary" title={r.model}>
-                  {shortName(r.model)}
+                  {displayModelName(r.model)}
                 </span>
                 <span className="shrink-0 font-bold text-text-primary">{r.requests.toLocaleString("es-CL")} sol.</span>
                 <Badge color={i === 0 ? "primary" : "gray"}>{sharePct(r.requests, total).toLocaleString("es-CL")}%</Badge>

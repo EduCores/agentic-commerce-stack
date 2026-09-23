@@ -1,7 +1,7 @@
 /**
  * ACS Agent — EVE core
  * Orquesta `ai` SDK + tools + system prompt desde DB
- * Modelo estable demo: qwen/qwen3-30b ($0.05/1M) + fallback openrouter/free
+ * Modelo estable demo: qwen/qwen3-30b-a3b-instruct-2507 ($0.05/1M) + fallback openrouter/free
  */
 import { generateText, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
@@ -105,7 +105,7 @@ function toModelMessages(input: string, history?: unknown[]): Array<{ role: "use
 // Si la base de datos no está disponible, el agente sigue funcionando con una
 // configuración por defecto (mismo prompt y modelo). La BD solo aporta
 // dashboard para editar prompts y persistir logs de conversaciones.
-const DEFAULT_MODEL = "qwen/qwen3-30b";
+const DEFAULT_MODEL = "qwen/qwen3-30b-a3b-instruct-2507";
 
 const DEFAULT_AGENT = {
   id: "builtin-default",
@@ -213,7 +213,7 @@ const KNOWN_TOOLS = Object.keys(ALL_TOOL_DEFS) as string[];
 
 // Allowlist de modelos: un typo en el editor jamas rompe el chat (se ignora el override)
 const ALLOWED_MODELS = [
-  "qwen/qwen3-30b",
+  "qwen/qwen3-30b-a3b-instruct-2507",
   "openai/gpt-4o",
   "google/gemini-2-0-flash-001",
 ] as const;

@@ -154,7 +154,7 @@ async function main() {
       name: "Sales Assistant",
       description: "Ayuda a vender, consulta stock y procesa compras",
       systemPrompt: SALES_SYSTEM_PROMPT,
-      model: "qwen/qwen3-30b",
+      model: "qwen/qwen3-30b-a3b-instruct-2507",
       isActive: true,
       storeId,
     },
@@ -180,7 +180,7 @@ async function main() {
   const welcomeAgent = await prisma.agent.upsert({
     where: { slug: "starshop-welcome" },
     update: { systemPrompt: STARSHOP_WELCOME_PROMPT, storeId, isActive: true },
-    create: { slug: "starshop-welcome", name: "StarShop Welcome Agent", description: "Greet y detecta intent (paso 1)", systemPrompt: STARSHOP_WELCOME_PROMPT, model: "qwen/qwen3-30b", isActive: true, storeId },
+    create: { slug: "starshop-welcome", name: "StarShop Welcome Agent", description: "Greet y detecta intent (paso 1)", systemPrompt: STARSHOP_WELCOME_PROMPT, model: "qwen/qwen3-30b-a3b-instruct-2507", isActive: true, storeId },
   });
 
   const crews = Object.values(STARSHOP_CREWS);

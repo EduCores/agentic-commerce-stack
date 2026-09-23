@@ -1,6 +1,6 @@
 import { prisma } from '../src/lib/adapters/prisma';
 async function main() {
-  const r = await prisma.agent.updateMany({ where: { slug: 'sales-assistant' }, data: { model: 'qwen/qwen3-30b' } });
+  const r = await prisma.agent.updateMany({ where: { slug: 'sales-assistant' }, data: { model: 'qwen/qwen3-30b-a3b-instruct-2507' } });
   console.log('modelo actualizado:', r.count);
 }
 main().finally(() => prisma.$disconnect());

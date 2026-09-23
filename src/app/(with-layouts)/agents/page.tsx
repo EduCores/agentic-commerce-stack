@@ -8,6 +8,7 @@ import { Bot, Wrench, Sparkles, Search, PackageCheck, Calculator, Navigation, Sh
 import { AgentsHero } from "./_components/agents-hero";
 import { AgentsRequestsChart } from "./_components/requests-chart";
 import { AgentsModelsChart } from "./_components/models-chart";
+import { displayModelName } from "@/utils/model-display";
 
 export const dynamic = "force-dynamic";
 
@@ -124,7 +125,7 @@ export default async function AgentsPage() {
                       </p>
                       <div className="mt-2 flex flex-wrap gap-1">
                         <Badge color={a.isActive ? "success" : "gray"}>{a.isActive ? "Activo" : "Inactivo"}</Badge>
-                        <Badge color="gray">{a.model}</Badge>
+                        <Badge color="gray" title={a.model}>{displayModelName(a.model)}</Badge>
                       </div>
                     </div>
                   </div>

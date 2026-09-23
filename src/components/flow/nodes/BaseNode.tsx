@@ -3,6 +3,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { cn } from "@/utils/cn";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { displayModelName } from "@/utils/model-display";
 import type { FlowNodeData } from "../types";
 import { NODE_LABEL_ES, NODE_STATUS_ES, NODE_TYPE_ES, INTENT_LABEL_ES } from "../types";
 
@@ -61,7 +62,7 @@ export function BaseNode({ data, selected }: NodeProps) {
               prompt propio
             </Badge>
           )}
-          {d.model && <Badge color="success" className="text-[10px]">{d.model.split("/").pop()}</Badge>}
+          {d.model && <Badge color="success" className="text-[10px]">{displayModelName(d.model)}</Badge>}
         </div>
       )}
       {!d.agent && d.type && <p className="mt-1 text-[10px] uppercase tracking-widest text-text-tertiary">{NODE_TYPE_ES[d.type] ?? d.type}</p>}

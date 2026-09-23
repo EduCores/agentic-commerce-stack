@@ -63,7 +63,7 @@ export function AiDashboard() {
               <p className="text-xs font-medium text-white/80">Costo total</p>
             </div>
             <p className="mt-2 text-2xl font-extrabold tracking-tight">${data.totals.cost.toLocaleString("es-CL")}</p>
-            <p className="text-xs text-white/70">${avgCost.toFixed(2)} por solicitud · modelo qwen3-30b</p>
+            <p className="text-xs text-white/70">${avgCost.toFixed(2)} por solicitud · modelo Qwen3-30B</p>
           </div>
           <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
             <div className="flex items-center gap-2">

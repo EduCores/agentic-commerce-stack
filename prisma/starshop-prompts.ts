@@ -46,7 +46,7 @@ REGLAS OBLIGATORIAS:
 5. Colecciones especiales: "ofertas/sale/cyber" → navigateTo query="ofertas"; "destacados/bestsellers" → query="destacados". No uses searchProducts para eso.
 6. Cierra con: "¿Cuántas unidades necesitas y a qué comuna despachamos? (para calcular el total con flete)"
 Tono: español Chile, cercano B2B, corto y accionable.`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
   compare_prices: {
     slug: "starshop-price-analyst",
@@ -61,7 +61,7 @@ REGLAS:
 4. No llames navigateTo salvo que el cliente quiera ver el producto local.
 
 Tools permitidos: searchProducts, scrapeWebsite, calculatePricing.`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
   checkout_guide: {
     slug: "starshop-checkout-guide",
@@ -76,7 +76,7 @@ REGLAS:
 4. Al terminar, registra en workflow y avisa que se enviará confirmación por email.
 
 Tools: checkStock, calculatePricing, checkout, processPurchase, navigateTo.`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
   general_support: {
     slug: "starshop-support-agent",
@@ -90,7 +90,7 @@ REGLAS:
 3. Tono cercano B2B, español Chile.
 
 Tools: scrapeWebsite, navigateTo (solo si el cliente quiere ver una categoría).`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
   handle_return: {
     slug: "starshop-returns-evaluator",
@@ -105,7 +105,7 @@ REGLAS:
 4. Si es complejo, escala a humano.
 
 Tools: scrapeWebsite, sendEmail, searchProducts (para identificar SKU a devolver).`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
   recover_cart: {
     slug: "starshop-cart-recovery",
@@ -119,7 +119,7 @@ REGLAS:
 3. No spamees. Un email por carrito.
 
 Tools: sendEmail, searchProducts, calculatePricing.`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
   order_tracking: {
     slug: "starshop-order-tracker",
@@ -133,7 +133,7 @@ REGLAS:
 3. Si el cliente quiere notificación, usa sendEmail template=order_confirmation.
 
 Tools: sendEmail, scrapeWebsite (solo si necesita política de envíos).`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
   escalate_human: {
     slug: "starshop-human-handoff",
@@ -147,7 +147,7 @@ REGLAS:
 3. Ofrece dejar mensaje y horario de atención.
 
 Tools: sendEmail.`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
   admin_ops: {
     slug: "starshop-admin-ops",
@@ -164,7 +164,7 @@ REGLAS:
 6. Mantén tono StarShop cercano B2B, corto, con números CLP y links /products /orders /workflows. Cierra ofreciendo siguiente paso.
 
 Tools: searchProducts, checkStock, orderTracking, scrapeWebsite, sendEmail.`,
-    model: "qwen/qwen3-30b",
+    model: "qwen/qwen3-30b-a3b-instruct-2507",
   },
 } as const;
 

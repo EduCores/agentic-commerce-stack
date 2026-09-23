@@ -3,7 +3,7 @@ import { prisma } from "../src/lib/adapters/prisma";
 async function main() {
   const updated = await prisma.agent.update({
     where: { slug: "sales-assistant" },
-    data: { model: "qwen/qwen3-30b" },
+    data: { model: "qwen/qwen3-30b-a3b-instruct-2507" },
     select: { slug: true, model: true },
   });
   console.log("UPDATED:", JSON.stringify(updated));

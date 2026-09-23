@@ -5,6 +5,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core/chart";
 import { Bar, BarChart, CartesianGrid, Cell, Tooltip, XAxis, YAxis } from "recharts";
 import { sharePct } from "@/utils/period-stats";
+import { displayModelName } from "@/utils/model-display";
 import type { AiStats } from "./types";
 
 const COLORS = ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6"];
@@ -44,7 +45,7 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
             <BarChart data={rows} layout="vertical" margin={{ top: 4, right: 24, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={false} />
               <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
-              <YAxis type="category" dataKey="model" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={140} tickFormatter={(v: string) => v.split("/").pop() ?? v} />
+              <YAxis type="category" dataKey="model" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={140} tickFormatter={(v: string) => displayModelName(v)} />
               <Tooltip content={<ChartTooltipContent />} />
               <Bar dataKey="requests" name="Solicitudes" radius={[0, 6, 6, 0]}>
                 {rows.map((_, i) => (
@@ -62,7 +63,7 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
                 <div className="flex items-center gap-2">
                   <span className="size-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                   <span className="truncate font-mono text-xs font-medium text-text-primary" title={r.model}>
-                    {r.model}
+                    {displayModelName(r.model)}
                   </span>
                   <Badge color="gray">{pct}%</Badge>
                 </div>
