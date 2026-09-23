@@ -38,12 +38,11 @@ const statusRing: Record<string, string> = {
   idle: "",
 };
 
-const statusDot: Record<string, string> = {
-  running: "bg-amber-400 animate-pulse",
-  completed: "bg-emerald-500",
-  failed: "bg-red-500",
-  pending: "bg-gray-300",
-  idle: "bg-gray-200",
+const statusColor: Record<string, "success" | "warning" | "error" | "gray"> = {
+  completed: "success",
+  running: "warning",
+  failed: "error",
+  pending: "gray",
 };
 
 type Accent = { bar: string; chip: string; icon: LucideIcon };
@@ -82,65 +81,87 @@ const FALLBACK: Accent = {
 };
 
 /**
- * Tarjeta de nodo compacta de ALTURA FIJA (h-[164px]): coincide con NODE_H del
- * auto-layout para que las filas nunca se solapen. El contenido variable
- * (descripción, tools, modelo) va truncado dentro de esa caja.
+ * Tarjeta de nodo con TODA la info original (título, estado, descripción,
+ * agente, tools, intent, tipo, prompt, modelo) en ALTURA FIJA (h-[216px]):
+ * coincide con NODE_H del auto-layout para que las filas nunca se solapen.
  */
 export function BaseNode({ data, selected }: NodeProps) {
   const d = data as unknown as FlowNodeData;
   const accent = (d.intent && INTENT_STYLE[d.intent]) || (d.type && TYPE_STYLE[d.type]) || FALLBACK;
   const Icon = accent.icon;
   const title = NODE_LABEL_ES[d.label] ?? d.label;
-  const sub = (d.intent && INTENT_LABEL_ES[d.intent]) || d.description || (d.type ? (NODE_TYPE_ES[d.type] ?? d.type) : "");
   const status = d.status ?? "idle";
+  const visibleTools = (d.tools ?? []).slice(0, 2);
+  const hiddenTools = Math.max(0, (d.tools ?? []).length - visibleTools.length);
 
   return (
     <div
       className={cn(
-        "h-[164px] w-48 overflow-hidden rounded-xl border bg-card-background shadow-sm transition",
+        "h-[216px] w-48 overflow-hidden rounded-xl border bg-card-background shadow-sm transition",
         selected ? "shadow-md ring-2 ring-brand-500" : "border-card-border",
         statusRing[status]
       )}
       title={title}
     >
       <div className={cn("h-1.5 w-full", accent.bar)} aria-hidden="true" />
-      <div className="flex h-[calc(100%-6px)] flex-col px-3 py-2.5">
+      <div className="flex h-[calc(100%-6px)] flex-col px-3 py-2">
         <div className="flex items-center gap-2">
           <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg [&>svg]:size-4", accent.chip)}>
             <Icon />
           </span>
           <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-text-primary">{title}</span>
-          <span
-            className={cn("size-2 shrink-0 rounded-full", statusDot[status])}
-            title={NODE_STATUS_ES[status] ?? status}
-            aria-label={NODE_STATUS_ES[status] ?? status}
-          />
-        </div>
-
-        {sub ? (
-          <p className="mt-1 truncate text-xs text-text-tertiary" title={typeof sub === "string" ? sub : undefined}>{sub}</p>
-        ) : (
-          <p className="mt-1 text-xs text-text-tertiary"> </p>
-        )}
-
-        <div className="mt-auto flex min-w-0 items-center justify-between gap-2 pt-2">
-          <span className="flex min-w-0 items-center gap-1 text-[11px] font-medium text-text-tertiary">
-            {d.agent ? (
-              <span className="truncate">🤖 {d.agent}</span>
-            ) : d.tools && d.tools.length > 0 ? (
-              <>
-                <Wrench className="size-3 shrink-0" />
-                <span className="truncate">{d.tools.length} tools</span>
-              </>
-            ) : (
-              <span className="truncate">{d.type ? (NODE_TYPE_ES[d.type] ?? d.type) : ""}</span>
-            )}
-          </span>
-          {d.model && (
-            <Badge color="success" className="max-w-[86px] shrink-0 truncate text-[10px]" title={d.model}>
-              {displayModelName(d.model)}
+          {d.status && d.status !== "idle" && (
+            <Badge color={statusColor[d.status] ?? "gray"} className="shrink-0 text-[10px]">
+              {NODE_STATUS_ES[d.status] ?? d.status}
             </Badge>
           )}
+        </div>
+
+        {d.description ? (
+          <p className="mt-1 line-clamp-2 text-xs leading-4 text-text-tertiary">{d.description}</p>
+        ) : (
+          <p className="mt-1 truncate text-xs text-text-tertiary">
+            {(d.intent && (INTENT_LABEL_ES[d.intent] ?? d.intent)) || ""}
+          </p>
+        )}
+
+        {d.agent && (
+          <p className="mt-1 truncate text-[11px] font-medium text-brand-600">🤖 {d.agent}</p>
+        )}
+
+        {d.tools && d.tools.length > 0 && (
+          <div className="mt-1.5 flex items-center gap-1 overflow-hidden">
+            <Wrench className="size-3 shrink-0 text-text-tertiary" />
+            {visibleTools.map((t) => (
+              <Badge key={t} color="primary" className="shrink-0 text-[10px]">
+                {t}
+              </Badge>
+            ))}
+            {hiddenTools > 0 && <span className="shrink-0 text-[10px] text-text-tertiary">+{hiddenTools}</span>}
+          </div>
+        )}
+
+        {d.intent && (
+          <p className="mt-1 truncate text-[10px] uppercase tracking-widest text-brand-500">
+            {INTENT_LABEL_ES[d.intent] ?? d.intent}
+          </p>
+        )}
+
+        <div className="mt-auto flex min-w-0 items-center gap-1 pt-1.5">
+          {d.prompt ? (
+            <Badge color="primary" className="shrink-0 text-[10px]">
+              prompt propio
+            </Badge>
+          ) : null}
+          {d.model ? (
+            <Badge color="success" className="min-w-0 flex-1 truncate text-[10px]" title={d.model}>
+              {displayModelName(d.model)}
+            </Badge>
+          ) : !d.agent && d.type ? (
+            <p className="truncate text-[10px] uppercase tracking-widest text-text-tertiary">
+              {NODE_TYPE_ES[d.type] ?? d.type}
+            </p>
+          ) : null}
         </div>
       </div>
       <Handle type="target" position={Position.Top} className="!bg-gray-400" />
