@@ -97,14 +97,14 @@ export function BaseNode({ data, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "h-[216px] w-48 overflow-hidden rounded-xl border bg-card-background shadow-sm transition",
+        "h-[216px] w-56 overflow-hidden rounded-xl border bg-card-background shadow-sm transition",
         selected ? "shadow-md ring-2 ring-brand-500" : "border-card-border",
         statusRing[status]
       )}
       title={title}
     >
       <div className={cn("h-1.5 w-full", accent.bar)} aria-hidden="true" />
-      <div className="flex h-[calc(100%-6px)] flex-col px-3 py-2">
+      <div className="flex h-[calc(100%-6px)] flex-col px-4 py-2.5">
         <div className="flex items-center gap-2">
           <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg [&>svg]:size-4", accent.chip)}>
             <Icon />

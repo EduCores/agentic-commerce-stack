@@ -33,9 +33,11 @@ import { Card } from "@/components/tailgrids/core/card";
 import { cn } from "@/utils/cn";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { BaseNode } from "./nodes/BaseNode";
+import { LabeledEdge } from "./edges/labeled-edge";
 import { NODE_PALETTE, FLOW_INTENTS, FLOW_MIN_PROMPT_LENGTH, FLOW_MODELS, FLOW_TOOLS, INTENT_LABEL_ES, type FlowGraph, type FlowNodeData, type FlowNodeType } from "./types";
 
 const nodeTypes = { base: BaseNode };
+const edgeTypes = { labeled: LabeledEdge };
 type RFInstance = ReactFlowInstance<Node, Edge>;
 
 const DRAG_MIME = "application/acs-node";
@@ -54,11 +56,11 @@ function Field({ label, children, className }: { label: string; children: ReactN
 }
 
 // ── Geometría del auto-layout (sin dependencias externas) ────────────────────
-// NODE_W/NODE_H coinciden con la tarjeta de altura fija en BaseNode (w-48/h-[216px]);
+// NODE_W/NODE_H coinciden con la tarjeta de altura fija en BaseNode (w-56/h-[216px]);
 // columnas y filas se separan con holgura para que nunca se solapen.
-const NODE_W = 192;
+const NODE_W = 224;
 const NODE_H = 216;
-const GAP_X = 64;
+const GAP_X = 72;
 const GAP_Y = 120;
 
 /** Posiciona los nodos en capas por profundidad (BFS tolerante a ciclos). */
@@ -127,14 +129,20 @@ function toFlowNodes(graph: FlowGraph): Node[] {
 }
 
 function toFlowEdges(graph: FlowGraph): Edge[] {
-  return graph.edges.map((e) => ({
-    id: e.id,
-    source: e.source,
-    target: e.target,
-    label: typeof e.label === "string" ? (INTENT_LABEL_ES[e.label] ?? e.label) : "",
-    type: "smoothstep",
-    markerEnd: { type: MarkerType.ArrowClosed },
-  }));
+  const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+  return graph.edges.map((e) => {
+    const target = byId.get(e.target);
+    const toneKey = target?.data?.intent || target?.data?.type || undefined;
+    const label = typeof e.label === "string" ? (INTENT_LABEL_ES[e.label] ?? e.label) : "";
+    return {
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      type: "labeled",
+      markerEnd: { type: MarkerType.ArrowClosed },
+      data: { label, toneKey },
+    };
+  });
 }
 
 function toFlowGraph(nodes: Node[], edges: Edge[]): FlowGraph {
@@ -145,12 +153,15 @@ function toFlowGraph(nodes: Node[], edges: Edge[]): FlowGraph {
       position: { x: Math.round(n.position.x), y: Math.round(n.position.y) },
       data: n.data as unknown as FlowNodeData,
     })),
-    edges: edges.map((e) => ({
-      id: e.id,
-      source: e.source,
-      target: e.target,
-      label: typeof e.label === "string" ? e.label : "",
-    })),
+    edges: edges.map((e) => {
+      const data = (e.data ?? {}) as { label?: unknown };
+      return {
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        label: typeof data.label === "string" ? data.label : typeof e.label === "string" ? e.label : "",
+      };
+    }),
   };
 }
 
@@ -472,6 +483,7 @@ const graphNodes = useMemo(() => {
               nodes={nodes}
               edges={edges}
               nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
               onNodesChange={(changes) => {
                 onNodesChange(changes);
                 if (changes.some((c) => c.type !== "select" && c.type !== "dimensions")) setDirty(true);
@@ -573,8 +585,8 @@ const graphNodes = useMemo(() => {
                           </Field>
                           <Field label={`Prompt (${promptLength}/${FLOW_MIN_PROMPT_LENGTH})`}>
                             <textarea
-                              rows={4}
-                              className={cn(inputCls, "h-auto resize-y font-mono text-[11px] leading-4")}
+                              rows={6}
+                              className={cn(inputCls, "h-auto resize-y font-mono text-xs leading-5")}
                               value={nodeData.prompt ?? ""}
                               disabled={readOnly}
                               placeholder="Prompt del crew..."
