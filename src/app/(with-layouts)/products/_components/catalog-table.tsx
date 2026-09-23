@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronRight, Copy1 } from "@tailgrids/icons";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Button } from "@/components/tailgrids/core/button";
-import { Ellipsis, Package } from "lucide-react";
+import { Package } from "lucide-react";
 import { toast } from "sonner";
 
 export type CatalogRow = {
@@ -26,7 +26,6 @@ type Props = {
 export function CatalogTable({ rows }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showHint, setShowHint] = useState(false);
-  const [expandedSku, setExpandedSku] = useState<string | null>(null);
 
   const copySku = async (sku: string) => {
     try {
@@ -69,40 +68,20 @@ export function CatalogTable({ rows }: Props) {
               return (
                 <tr key={p.id} className="border-b border-card-border/60 transition hover:bg-background-gray-secondary/60">
                   <td className="p-2">
-  <div className="flex max-w-[60px] flex-col gap-1">
-    <div className="flex items-center gap-1">
-      <span className="truncate font-mono text-xs text-text-secondary">{p.sku}</span>
-      <Button
-        type="button"
-        variant="ghost"
-        appearance="ghost"
-        iconOnly
-        size="xs"
-        className="h-5 w-5 shrink-0 rounded p-0"
-        aria-label={expandedSku === p.id ? "Ocultar SKU" : `Ver SKU completo ${p.sku}`}
-        aria-expanded={expandedSku === p.id}
-        onPress={() => setExpandedSku((cur) => (cur === p.id ? null : p.id))}
-      >
-        <Ellipsis className="size-3.5" />
-      </Button>
-    </div>
-    {expandedSku === p.id && (
-      <div className="flex min-w-[200px] items-center gap-1.5 rounded-lg border border-card-border bg-background-gray-secondary/60 px-2 py-1.5">
-        <span className="min-w-0 flex-1 break-all font-mono text-xs font-medium text-text-primary">{p.sku}</span>
-        <Button
-          type="button"
-          variant="ghost"
-          appearance="ghost"
-          iconOnly
-          size="xs"
-          className="h-5 w-5 shrink-0 rounded p-0"
-          aria-label={`Copiar SKU ${p.sku}`}
-          onPress={() => copySku(p.sku)}
-        >
-          <Copy1 className="size-3.5" />
-        </Button>
-      </div>
-    )}
+  <div className="flex max-w-[72px] items-center gap-1">
+    <span className="truncate font-mono text-xs text-text-secondary" title={p.sku}>{p.sku}</span>
+    <Button
+      type="button"
+      variant="ghost"
+      appearance="ghost"
+      iconOnly
+      size="xs"
+      className="h-5 w-5 shrink-0 rounded p-0"
+      aria-label={`Copiar SKU ${p.sku}`}
+      onPress={() => copySku(p.sku)}
+    >
+      <Copy1 className="size-3.5" />
+    </Button>
   </div>
 </td>
                   <td className="p-2">
