@@ -112,10 +112,12 @@ export function CrmDashboard() {
         <CardContent className="space-y-1.5">
           <div className="space-y-2">
             {data.recentActivities.map((a) => (
-              <div key={a.id} className="flex items-start gap-3 rounded-lg border border-card-border/60 px-3 py-2.5 text-sm transition hover:bg-background-gray-secondary/40">
-                <span className="mt-1.5 size-2 shrink-0 rounded-full bg-emerald-500" />
-                <span className="min-w-0 flex-1 break-words font-medium text-text-primary">{a.text}</span>
-                <span className="shrink-0 text-xs text-text-tertiary">{new Date(a.at).toLocaleDateString("es-CL")} · <Link href="/workflows" className="font-bold text-brand-600 underline">workflows</Link></span>
+              <div key={a.id} className="rounded-lg border border-card-border/60 px-3 py-2.5 text-sm transition hover:bg-background-gray-secondary/40">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="mt-1.5 size-2 shrink-0 rounded-full bg-emerald-500" />
+                  <p className="min-w-0 flex-1 font-medium text-text-primary">{a.text}</p>
+                </div>
+                <p className="mt-1 pl-5 text-xs text-text-tertiary">{new Date(a.at).toLocaleDateString("es-CL")} · <Link href="/workflows" className="font-bold text-brand-600 underline">workflows</Link></p>
               </div>
             ))}
           </div>

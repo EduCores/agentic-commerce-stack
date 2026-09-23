@@ -46,9 +46,9 @@ export function HomeOpsCard() {
             <p className="text-xs font-semibold text-text-secondary">Actividad reciente</p>
             <div className="mt-2 space-y-1.5">
               {recent.map((a) => (
-                <div key={a.id} className="flex items-start justify-between gap-2 text-xs">
-                  <span className="min-w-0 flex-1 break-words text-text-secondary">{a.text}</span>
-                  <span className="shrink-0 text-text-tertiary">{new Date(a.at).toLocaleDateString("es-CL")}</span>
+                <div key={a.id} className="text-xs">
+                  <p className="font-medium text-text-secondary">{a.text}</p>
+                  <p className="mt-0.5 text-[11px] text-text-tertiary">{new Date(a.at).toLocaleDateString("es-CL")}</p>
                 </div>
               ))}
             </div>
