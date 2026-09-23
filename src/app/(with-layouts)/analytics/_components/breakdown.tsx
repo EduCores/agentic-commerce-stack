@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { ChartContainer } from "@/components/tailgrids/core/chart";
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 import { BreakdownTooltip } from "./breakdown-tooltip";
 import { sharePct } from "@/utils/period-stats";
 import type { AnalyticsData } from "./types";
@@ -29,15 +29,42 @@ function sourceLabel(source: string): string {
   return source;
 }
 
+const STATUS_COLOR: Record<string, string> = {
+  PAID: "#22C55E",
+  FULFILLED: "#10B981",
+  PENDING: "#F59E0B",
+  RESERVED: "#FBBF24",
+  FAILED: "#EF4444",
+  CANCELLED: "#94A3B8",
+  REFUNDED: "#64748B",
+};
+
 export function AnalyticsStatusChart({ data, className }: { data: AnalyticsData | null; className?: string }) {
-  const byStatus = data?.byStatus ?? [];
+  const byStatus = [...(data?.byStatus ?? [])].sort((a, b) => a.count - b.count);
   const totalOrders = byStatus.reduce((a, s) => a + s.count, 0);
+  const totalRevenue = byStatus.reduce((a, s) => a + (s.revenue ?? 0), 0);
+  const paidOrders = byStatus.filter((s) => s.status === "PAID" || s.status === "FULFILLED").reduce((a, s) => a + s.count, 0);
+  const paidRate = totalOrders > 0 ? Math.round((paidOrders / totalOrders) * 1000) / 10 : 0;
+  const maxCount = Math.max(...byStatus.map((s) => s.count), 1);
   return (
     <Card className={className}>
-      <CardHeader><CardTitle className="text-sm">Por estado de pedido</CardTitle></CardHeader>
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <CardTitle className="text-sm">Por estado de pedido</CardTitle>
+            <p className="mt-1 text-xs text-text-tertiary">
+              {totalOrders.toLocaleString("es-CL")} pedidos ·{" "}
+              <span className="font-bold text-emerald-600">{paidRate.toLocaleString("es-CL")}% pagados</span>
+            </p>
+          </div>
+          <span className="rounded-full bg-background-gray-secondary px-2.5 py-1 text-xs font-bold text-text-primary">
+            ${totalRevenue.toLocaleString("es-CL")}
+          </span>
+        </div>
+      </CardHeader>
       <CardContent className="h-72 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
-          <BarChart data={byStatus} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+          <BarChart data={byStatus} margin={{ top: 16, right: 8, left: -12, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="status"
@@ -47,7 +74,7 @@ export function AnalyticsStatusChart({ data, className }: { data: AnalyticsData 
               interval={0}
               tickFormatter={(v: string) => STATUS_ES[v] ?? v}
             />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} allowDecimals={false} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} allowDecimals={false} domain={[0, Math.ceil(maxCount * 1.15)]} />
             <Tooltip
               content={
                 <BreakdownTooltip
@@ -57,13 +84,28 @@ export function AnalyticsStatusChart({ data, className }: { data: AnalyticsData 
               }
             />
             <Bar dataKey="count" name="Pedidos" radius={[6, 6, 0, 0]}>
-              {byStatus.map((_, i) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              {byStatus.map((s) => (
+                <Cell key={s.status} fill={STATUS_COLOR[s.status] ?? "#5750F1"} />
               ))}
+              <LabelList dataKey="count" position="top" style={{ fontSize: 11, fontWeight: 700 }} />
             </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-card-border px-5 py-3 text-xs text-text-tertiary">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
+          Pagado/Completado <strong className="text-text-primary">{paidOrders}</strong>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-amber-500" aria-hidden="true" />
+          Pendiente/Reservado <strong className="text-text-primary">{byStatus.filter((s) => s.status === "PENDING" || s.status === "RESERVED").reduce((a, s) => a + s.count, 0)}</strong>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-red-500" aria-hidden="true" />
+          Fallido/Cancelado <strong className="text-text-primary">{byStatus.filter((s) => ["FAILED", "CANCELLED", "REFUNDED"].includes(s.status)).reduce((a, s) => a + s.count, 0)}</strong>
+        </span>
+      </div>
     </Card>
   );
 }
