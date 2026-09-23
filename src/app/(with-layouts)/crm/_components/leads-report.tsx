@@ -8,7 +8,7 @@ import { Award, Users } from "lucide-react";
 export function CrmLeadsReport({ data }: { data: CrmData }) {
   const totalRevenue = data.leads.reduce((a, l) => a + (l.revenue ?? 0), 0);
   return (
-    <Card className="md:col-span-2">
+    <Card className="min-w-0 md:col-span-2">
       <CardHeader>
         <div className="flex items-center gap-2">
           <span className="flex size-8 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">

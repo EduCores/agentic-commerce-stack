@@ -79,13 +79,13 @@ export function CrmDashboard() {
       </div>
       <CrmGrowthChart data={data} days={days} onDays={setDays} month={month} year={year} onMonth={setMonth} onYear={setYear} />
       <CrmLeadsReport data={data} />
-      <Card>
+      <Card className="min-w-0">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
               <TrendingUp />
             </span>
-            <CardTitle className="text-sm">Próximas tareas y reuniones</CardTitle>
+            <CardTitle className="min-w-0 truncate text-sm">Próximas tareas y reuniones</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -100,13 +100,13 @@ export function CrmDashboard() {
           ))}
         </CardContent>
       </Card>
-      <Card className="md:col-span-3">
+      <Card className="min-w-0 md:col-span-3">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 [&>svg]:size-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 [&>svg]:size-4">
               <Users />
             </span>
-            <CardTitle className="text-sm">Actividad reciente — ligada a pedidos y agente</CardTitle>
+            <CardTitle className="min-w-0 truncate text-sm">Actividad reciente — ligada a pedidos y agente</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-1.5">
