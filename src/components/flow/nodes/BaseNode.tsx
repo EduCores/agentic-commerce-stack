@@ -164,8 +164,18 @@ export function BaseNode({ data, selected }: NodeProps) {
           ) : null}
         </div>
       </div>
-      <Handle type="target" position={Position.Top} className="!bg-gray-400" />
-      <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!h-3 !w-3 !border-2 !border-violet-500 !bg-white dark:!bg-zinc-900"
+        title="Entrada"
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!h-3 !w-3 !border-2 !border-violet-500 !bg-white dark:!bg-zinc-900"
+        title="Salida — arrastra para conectar"
+      />
     </div>
   );
 }

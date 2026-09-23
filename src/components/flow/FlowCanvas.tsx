@@ -509,7 +509,8 @@ const graphNodes = useMemo(() => {
                 setSelectedEdgeId(null);
               }}
               connectionLineType={ConnectionLineType.SmoothStep}
-              defaultEdgeOptions={{ type: "smoothstep", markerEnd: { type: MarkerType.ArrowClosed } }}
+              connectionLineStyle={{ stroke: "#8B5CF6", strokeWidth: 2 }}
+              defaultEdgeOptions={{ type: "smoothstep", markerEnd: { type: MarkerType.ArrowClosed }, style: { strokeWidth: 2 } }}
               deleteKeyCode={["Backspace", "Delete"]}
               nodesDraggable={!readOnly}
               nodesConnectable={!readOnly}

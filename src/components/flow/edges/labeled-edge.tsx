@@ -92,7 +92,7 @@ export function LabeledEdge({
         id={id}
         path={path}
         markerEnd={markerEnd}
-        style={selected ? { stroke: "#5750F1", strokeWidth: 2.5 } : undefined}
+        style={selected ? { stroke: "#5750F1", strokeWidth: 2.5 } : { strokeWidth: 2 }}
       />
       {label && (
         <EdgeLabelRenderer>
