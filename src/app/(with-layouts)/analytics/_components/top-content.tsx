@@ -1,11 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { sharePct } from "@/utils/period-stats";
 import type { AnalyticsData } from "./types";
 import Link from "next/link";
 import { FolderX, PackageX } from "lucide-react";
 
 export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
   const maxViews = Math.max(...data.topContent.map((t) => t.views), 1);
+  const totalRevenue = data.topContent.reduce((a, t) => a + (t.revenue ?? 0), 0);
   return (
     <>
       <Card className="min-w-0 md:col-span-2">
@@ -27,7 +29,10 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
                         {t.title} <span className="text-xs text-text-tertiary">{t.sku}</span>
                       </p>
                     </div>
-                    <span className="shrink-0 text-xs font-bold text-brand-600">${t.revenue.toLocaleString("es-CL")}</span>
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      <span className="text-xs font-bold text-brand-600">${t.revenue.toLocaleString("es-CL")}</span>
+                      <Badge color={i === 0 ? "primary" : "gray"}>{sharePct(t.revenue ?? 0, totalRevenue).toLocaleString("es-CL")}%</Badge>
+                    </span>
                   </div>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background-gray-secondary">
                     <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-indigo-500" style={{ width: `${Math.round((t.views / maxViews) * 100)}%` }} />

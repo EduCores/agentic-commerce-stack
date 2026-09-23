@@ -13,6 +13,8 @@ import {
 import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import type { AnalyticsData, AnalyticsRange } from "./types";
 import { ANALYTICS_RANGES } from "./types";
+import { halfDelta } from "@/utils/period-stats";
+import { DeltaChip } from "@/components/common/stat-helpers";
 
 const MONTHS = [
   { id: "all", label: "Mes" },
@@ -44,6 +46,9 @@ type Props = {
 export function AnalyticsSalesChart({ data, days, onDays, month, year, onMonth, onYear }: Props) {
   const rows = data?.salesByDay ?? [];
   const step = Math.max(1, Math.ceil(rows.length / 7));
+  const avg = rows.length > 0 ? Math.round(rows.reduce((a, r) => a + r.total, 0) / rows.length) : 0;
+  const best = rows.length > 0 ? rows.reduce((a, b) => (b.total > a.total ? b : a), rows[0]) : null;
+  const { delta, direction } = halfDelta(rows.map((r) => r.total));
 
   return (
     <Card className="min-w-0 md:col-span-3">
@@ -78,6 +83,16 @@ export function AnalyticsSalesChart({ data, days, onDays, month, year, onMonth, 
           </AreaChart>
         </ChartContainer>
       </CardContent>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 pt-3 text-xs text-text-tertiary">
+        <span>Promedio/día <strong className="text-text-primary">${avg.toLocaleString("es-CL")}</strong></span>
+        {best && (
+          <span>Mejor día <strong className="text-text-primary">{best.date.slice(5)} · ${best.total.toLocaleString("es-CL")}</strong></span>
+        )}
+        <span className="inline-flex items-center gap-1.5">
+          <DeltaChip delta={delta} direction={direction} />
+          <span>vs mitad anterior</span>
+        </span>
+      </div>
       <div className="flex flex-wrap items-center gap-2 border-t border-card-border px-5 py-3">
         <span className="text-xs text-text-tertiary">Rango:</span>
         {ANALYTICS_RANGES.map((r) => (

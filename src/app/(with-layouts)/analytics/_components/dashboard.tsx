@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/tailgrids/core/card";
 import { AnalyticsSalesChart } from "./sales-chart";
 import { AnalyticsStatusChart, AnalyticsSourceChart } from "./breakdown";
 import { AnalyticsTopContent } from "./top-content";
+import { AnalyticsInsights } from "./analytics-insights";
 import type { AnalyticsData, AnalyticsRange } from "./types";
 import { ANALYTICS_RANGES } from "./types";
 import Link from "next/link";
@@ -126,6 +127,8 @@ export function AnalyticsDashboard() {
       </div>
 
       <AnalyticsTopContent data={data} />
+
+      <AnalyticsInsights data={data} />
     </div>
   );
 }

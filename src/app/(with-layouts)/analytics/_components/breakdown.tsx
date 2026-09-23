@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { ChartContainer } from "@/components/tailgrids/core/chart";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 import { BreakdownTooltip } from "./breakdown-tooltip";
+import { sharePct } from "@/utils/period-stats";
 import type { AnalyticsData } from "./types";
 
 const COLORS = ["#5750F1", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"];
@@ -72,16 +73,21 @@ export function AnalyticsSourceChart({ data, className }: { data: AnalyticsData 
   const totalOrders = bySource.reduce((a, s) => a + s.count, 0);
   return (
     <Card className={className}>
-      <CardHeader><CardTitle className="text-sm">Por canal (source)</CardTitle></CardHeader>
-      <CardContent className="h-72 p-0">
+      <CardHeader>
+        <CardTitle className="text-sm">Por canal (source)</CardTitle>
+        <p className="text-xs text-text-tertiary">{totalOrders.toLocaleString("es-CL")} pedidos · participación real</p>
+      </CardHeader>
+      <CardContent className="relative h-64 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
           <PieChart>
             <Pie
               data={bySource}
               dataKey="count"
               nameKey="source"
+              innerRadius={52}
               outerRadius={80}
-              label={{ fontSize: 11 }}
+              paddingAngle={2}
+              strokeWidth={0}
             >
               {bySource.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -90,7 +96,24 @@ export function AnalyticsSourceChart({ data, className }: { data: AnalyticsData 
             <Tooltip content={<BreakdownTooltip totalOrders={totalOrders} />} />
           </PieChart>
         </ChartContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none">
+          <span className="text-2xl font-extrabold tracking-tight text-text-primary">{totalOrders.toLocaleString("es-CL")}</span>
+          <span className="mt-1 text-xs font-medium text-text-tertiary">pedidos</span>
+        </div>
       </CardContent>
+      <div className="space-y-1.5 border-t border-card-border px-5 py-3">
+        {bySource.map((s, i) => (
+          <div key={s.source} className="flex items-center justify-between gap-2 text-xs">
+            <span className="flex min-w-0 items-center gap-1.5 font-medium text-text-secondary">
+              <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} aria-hidden="true" />
+              <span className="min-w-0 truncate">{s.source}</span>
+            </span>
+            <span className="shrink-0 font-bold text-text-primary">
+              {s.count} <span className="font-medium text-text-tertiary">· {sharePct(s.count, totalOrders).toLocaleString("es-CL")}%</span>
+            </span>
+          </div>
+        ))}
+      </div>
     </Card>
   );
 }
