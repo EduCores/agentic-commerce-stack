@@ -134,7 +134,10 @@ export function BaseNode({ data, selected }: NodeProps) {
         )}
 
         {d.agent && (
-          <p className="mt-1 truncate text-[11px] font-medium text-brand-600">🤖 {d.agent}</p>
+          <p className="mt-1 flex items-center gap-1 truncate text-[11px] font-medium text-brand-600">
+            <Bot className="size-3.5 shrink-0" />
+            <span className="truncate">{d.agent}</span>
+          </p>
         )}
 
         {d.tools && d.tools.length > 0 && (
