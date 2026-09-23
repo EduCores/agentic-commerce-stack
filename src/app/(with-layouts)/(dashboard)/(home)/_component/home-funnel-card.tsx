@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Filter } from "lucide-react";
-import { Badge } from "@/components/tailgrids/core/badge";
+import { ProgressRing } from "@/components/common/stat-helpers";
 import { HomeCardLink } from "./home-card-link";
 
 type FunnelRow = { stage: string; value: number };
@@ -30,6 +30,9 @@ export function HomeFunnelCard() {
           </span>
           <h3 className="min-w-0 truncate text-sm font-semibold tracking-[-0.2px] text-text-primary">Embudo de conversión</h3>
         </div>
+        {rows.length > 0 && (
+          <ProgressRing value={totalConv} size={54} stroke={6} color="#8B5CF6" sub="conv" />
+        )}
       </div>
 
       {rows.length === 0 ? (
@@ -60,12 +63,9 @@ export function HomeFunnelCard() {
               );
             })}
           </div>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <Badge color="primary" className="whitespace-nowrap">{totalConv}% conversión total</Badge>
-            <HomeCardLink href="/marketing" className="mt-0 w-auto">
-              Ver marketing →
-            </HomeCardLink>
-          </div>
+          <HomeCardLink href="/marketing">
+            Ver marketing →
+          </HomeCardLink>
         </>
       )}
     </div>

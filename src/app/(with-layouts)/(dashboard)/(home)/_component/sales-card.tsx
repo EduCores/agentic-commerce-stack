@@ -10,6 +10,8 @@ import {
   SelectValue,
 } from "@/components/tailgrids/core/select";
 import { SALES_RANGES, formatCLP, type SalesRange } from "./home-types";
+import { halfDelta } from "@/utils/period-stats";
+import { DeltaChip } from "@/components/common/stat-helpers";
 
 const MONTHS = [
   { id: "all", label: "Mes" },
@@ -42,6 +44,9 @@ type Props = {
 export function SalesCard({ sales, days, onDays, month, year, onMonth, onYear }: Props) {
   const max = Math.max(...sales.map((x) => x.total), 1);
   const total = sales.reduce((a, x) => a + x.total, 0);
+  const avg = sales.length > 0 ? Math.round(total / sales.length) : 0;
+  const best = sales.length > 0 ? sales.reduce((a, b) => (b.total > a.total ? b : a), sales[0]) : null;
+  const { delta, direction } = halfDelta(sales.map((x) => x.total));
   // Eje de fechas aparte (máx ~8 etiquetas): nunca colisionan aunque crezcan los días.
   const step = Math.max(1, Math.ceil(sales.length / 7));
   const ticks = sales.filter((_, i) => i % step === 0);
@@ -82,6 +87,16 @@ export function SalesCard({ sales, days, onDays, month, year, onMonth, onYear }:
         {ticks.map((d) => (
           <span key={d.date} className="text-[10px] whitespace-nowrap text-text-tertiary">{d.date.slice(5)}</span>
         ))}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-tertiary">
+        <span>Promedio/día <strong className="text-text-primary">{formatCLP(avg)}</strong></span>
+        {best && (
+          <span>Mejor día <strong className="text-text-primary">{best.date.slice(5)} · {formatCLP(best.total)}</strong></span>
+        )}
+        <span className="inline-flex items-center gap-1.5">
+          <DeltaChip delta={delta} direction={direction} />
+          <span>vs mitad anterior</span>
+        </span>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-card-border pt-4">

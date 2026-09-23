@@ -11,6 +11,7 @@ import { RecentOrders } from "./recent-orders";
 import { HomeFunnelCard } from "./home-funnel-card";
 import { HomeChannelsCard } from "./home-channels-card";
 import { HomeLowStockCard } from "./home-lowstock-card";
+import { HomeInsights } from "./home-insights";
 import { HomeOpsCard } from "./home-ops-card";
 import type { HomeStats, SalesRange } from "./home-types";
 
@@ -67,7 +68,12 @@ export function RealStats() {
         <SiteSummaries />
       </div>
 
-      {/* 5 Detalle de oferta y demanda */}
+      {/* 5 Ideas clave generadas con datos reales */}
+      <div className="min-w-0 md:col-span-4">
+        <HomeInsights />
+      </div>
+
+      {/* 6 Detalle de oferta y demanda */}
       <div className="min-w-0 md:col-span-2">
         <TopProducts items={data.topProducts} />
       </div>
@@ -75,7 +81,7 @@ export function RealStats() {
         <RecentOrders orders={data.recentOrders} />
       </div>
 
-      {/* 6 Operación diaria — tareas y actividad */}
+      {/* 7 Operación diaria — tareas y actividad */}
       <div className="min-w-0 md:col-span-4">
         <HomeOpsCard />
       </div>

@@ -13,7 +13,7 @@ export type HomeStats = {
   stock: { total: number; reserved: number; availability: number };
   revenue: number;
   salesByDay: { date: string; total: number }[];
-  topProducts: { product: { title: string; sku: string } | null; quantity: number }[];
+  topProducts: { product: { title: string; sku: string; price?: string | number | null } | null; quantity: number }[];
   recentOrders: {
     id: string;
     total: unknown;
