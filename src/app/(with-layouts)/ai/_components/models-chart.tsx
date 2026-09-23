@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { Badge } from "@/components/tailgrids/core/badge";
 import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core/chart";
 import { Bar, BarChart, CartesianGrid, Cell, Tooltip, XAxis, YAxis } from "recharts";
+import { sharePct } from "@/utils/period-stats";
 import type { AiStats } from "./types";
 
 const COLORS = ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6"];
@@ -73,10 +74,12 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
                   <div>
                     <p className="text-text-tertiary">Costo</p>
                     <p className="font-bold text-text-primary">${r.cost.toLocaleString("es-CL")}</p>
+                    <p className="text-[11px] text-text-tertiary">{sharePct(r.cost, totalCost).toLocaleString("es-CL")}% del costo</p>
                   </div>
                   <div>
                     <p className="text-text-tertiary">Ingresos</p>
                     <p className="font-bold text-emerald-600">${r.revenue.toLocaleString("es-CL")}</p>
+                    <p className="text-[11px] text-text-tertiary">{sharePct(r.revenue, totalRev).toLocaleString("es-CL")}% del total</p>
                   </div>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background-gray-secondary">

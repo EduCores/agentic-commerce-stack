@@ -13,6 +13,8 @@ import {
 } from "@/components/tailgrids/core/select";
 import type { AiStats, AiRange } from "./types";
 import { AI_RANGES } from "./types";
+import { halfDelta } from "@/utils/period-stats";
+import { DeltaChip } from "@/components/common/stat-helpers";
 
 const MONTHS = [
   { id: "all", label: "Todos" },
@@ -58,6 +60,8 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
     }
     return r;
   });
+
+  const { delta, direction } = halfDelta(rows.map((r) => r.requests));
 
   const monthLabel = MONTHS.find((m) => m.id === month)?.label ?? "Todos";
   const yearLabel = year === "all" ? "" : year;
@@ -114,6 +118,12 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
           </BarChart>
         </ChartContainer>
       </CardContent>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 pt-3 text-xs text-text-tertiary">
+        <span className="inline-flex items-center gap-1.5">
+          Solicitudes <DeltaChip delta={delta} direction={direction} />
+        </span>
+        <span>vs mitad anterior</span>
+      </div>
       <div className="flex flex-wrap items-center gap-2 border-t border-card-border px-5 py-3">
         <span className="text-xs text-text-tertiary">Rango:</span>
         {AI_RANGES.map((r) => (
