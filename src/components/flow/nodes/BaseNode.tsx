@@ -176,7 +176,8 @@ export function BaseNode({ data, selected }: NodeProps) {
         type="target"
         position={Position.Top}
         title="Entrada"
-        className={cn("!h-4 !w-4 !border-2 !bg-white dark:!bg-zinc-900 [&>svg]:size-2.5", accent.handle)}
+        aria-label="Entrada"
+        className={cn("flex !h-7 !w-7 items-center justify-center !rounded-full !border-2 !bg-white !shadow-md dark:!bg-zinc-900 [&>svg]:size-4", accent.handle)}
       >
         <Icon />
       </Handle>
@@ -184,7 +185,8 @@ export function BaseNode({ data, selected }: NodeProps) {
         type="source"
         position={Position.Bottom}
         title="Salida — arrastra para conectar"
-        className={cn("!h-4 !w-4 !border-2 !bg-white dark:!bg-zinc-900 [&>svg]:size-2.5", accent.handle)}
+        aria-label="Salida — arrastra para conectar"
+        className={cn("flex !h-7 !w-7 items-center justify-center !rounded-full !border-2 !bg-white !shadow-md dark:!bg-zinc-900 [&>svg]:size-4", accent.handle)}
       >
         <Icon />
       </Handle>
