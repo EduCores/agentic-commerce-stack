@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from "@xyflow/react";
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, useViewport, type EdgeProps } from "@xyflow/react";
 import { HelpCircle, X } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { STARSHOP_CREWS, STARSHOP_CREW_TOOLS } from "@/../prisma/starshop-prompts";
@@ -81,6 +81,10 @@ export function LabeledEdge({
   const d = (data ?? {}) as LabeledEdgeData;
   const label = typeof d.label === "string" ? d.label : "";
   const info = infoFor(d.toneKey);
+  // Con zoom alejado las pastillas completas se solaparían: se colapsan al ?.
+  // Umbral 0.7: a ese zoom los nodos están a ~207px y la pastilla mide 200px.
+  const { zoom } = useViewport();
+  const expanded = zoom >= 0.7;
 
   return (
     <>
@@ -99,22 +103,40 @@ export function LabeledEdge({
               pointerEvents: "all",
             }}
           >
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen((v) => !v);
-              }}
-              title={info ? `${label} — clic para ver qué hace` : label}
-              className={cn(
-                "flex max-w-[200px] items-center gap-1.5 rounded border-4 px-4 py-1.5 shadow-md",
-                "text-xs font-bold",
-                pillFor(d.toneKey)
-              )}
-            >
-              <span className="min-w-0 flex-1 truncate">{label}</span>
-              <HelpCircle className="size-3.5 shrink-0 opacity-70" aria-hidden="true" />
-            </button>
+            {expanded ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen((v) => !v);
+                }}
+                title={info ? `${label} — clic para ver qué hace` : label}
+                className={cn(
+                  "flex max-w-[200px] items-center gap-1.5 rounded border-4 px-4 py-1.5 shadow-md",
+                  "text-xs font-bold",
+                  pillFor(d.toneKey)
+                )}
+              >
+                <span className="min-w-0 flex-1 truncate">{label}</span>
+                <HelpCircle className="size-3.5 shrink-0 opacity-70" aria-hidden="true" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen((v) => !v);
+                }}
+                title={info ? `${label} — clic para ver qué hace` : label}
+                aria-label={info ? `${label} — ver qué hace` : label}
+                className={cn(
+                  "flex size-7 items-center justify-center rounded-full border-2 shadow-md",
+                  pillFor(d.toneKey)
+                )}
+              >
+                <HelpCircle className="size-4 shrink-0" aria-hidden="true" />
+              </button>
+            )}
             {open && info && (
               <div
                 className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-xl border border-card-border bg-card-background p-3 text-left shadow-xl"
