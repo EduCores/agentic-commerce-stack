@@ -3,19 +3,32 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core/chart";
-import { Bar, BarChart, CartesianGrid, Cell, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, Tooltip, XAxis, YAxis } from "recharts";
+import { Badge } from "@/components/tailgrids/core/badge";
+import { sharePct } from "@/utils/period-stats";
 
 const COLORS = ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6", "#EF4444", "#10B981", "#3B82F6"];
+const PAUSED = "#CBD5E1";
 
+type AgentRow = { name: string; requests: number; active: boolean };
+
+/** Carga de trabajo por agente: gráfico limpio + ranking con nombres debajo. */
 export function AgentsRequestsChart() {
-  const { data } = useQuery<{ table: { name: string; requests: number; active: boolean }[] }>({
+  const { data } = useQuery<{ table: AgentRow[] }>({
     queryKey: ["agents-requests"],
     queryFn: async () => (await fetch("/api/ai/stats")).json(),
   });
 
-  const rows = (data?.table ?? []).slice(0, 8).map((a) => ({ name: a.name, solicitudes: a.requests, fill: a.active ? "#5750F1" : "#CBD5E1" }));
+  const agents = (data?.table ?? []).slice(0, 8);
+  const total = agents.reduce((a, x) => a + x.requests, 0);
+  const rows = agents.map((a, i) => ({
+    idx: String(i + 1),
+    solicitudes: a.requests,
+    fill: a.active ? COLORS[i % COLORS.length] : PAUSED,
+  }));
+  const max = Math.max(...rows.map((r) => r.solicitudes), 1);
 
-  if (rows.length === 0) {
+  if (agents.length === 0) {
     return (
       <Card>
         <CardHeader><CardTitle className="text-sm">Solicitudes por agente</CardTitle></CardHeader>
@@ -25,26 +38,82 @@ export function AgentsRequestsChart() {
   }
 
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader>
-        <CardTitle className="text-sm">Solicitudes por agente — carga de trabajo</CardTitle>
-        <p className="text-xs text-text-tertiary">Quién resuelve más · verde activo, gris pausado</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <CardTitle className="text-sm">Solicitudes por agente — carga de trabajo</CardTitle>
+            <p className="mt-1 text-xs text-text-tertiary">
+              {total.toLocaleString("es-CL")} solicitudes entre {agents.length} agentes · quién resuelve más
+            </p>
+          </div>
+          <span className="flex items-center gap-3 text-xs text-text-tertiary">
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-[#5750F1]" aria-hidden="true" /> Activo
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full" style={{ backgroundColor: PAUSED }} aria-hidden="true" /> Pausado
+            </span>
+          </span>
+        </div>
       </CardHeader>
-      <CardContent className="h-72 p-0">
+
+      <CardContent className="h-64 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">
-          <BarChart data={rows} layout="vertical" margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-            <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} allowDecimals={false} />
-            <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={120} />
-            <Tooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="solicitudes" radius={[0, 6, 6, 0]}>
-              {rows.map((r, i) => (
-                <Cell key={r.name} fill={COLORS[i % COLORS.length]} opacity={r.fill === "#CBD5E1" ? 0.5 : 1} />
+          <BarChart data={rows} margin={{ top: 16, right: 8, left: -8, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="idx"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11 }}
+              interval={0}
+              label={{ value: "Agente (ver ranking ↓)", position: "insideBottom", offset: -2, fontSize: 11, fill: "var(--color-text-tertiary)" }}
+              height={36}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11 }}
+              allowDecimals={false}
+              width={40}
+              domain={[0, Math.ceil(max * 1.15)]}
+              label={{ value: "Solicitudes", angle: -90, position: "insideLeft", fontSize: 11, fill: "var(--color-text-tertiary)" }}
+            />
+            <Tooltip
+              cursor={{ fill: "var(--color-card-border)", opacity: 0.15 }}
+              content={<ChartTooltipContent labelFormatter={(v) => `Agente ${v} · ${agents[Number(v) - 1]?.name ?? ""}`} />}
+            />
+            <Bar dataKey="solicitudes" name="Solicitudes" radius={[6, 6, 0, 0]}>
+              {rows.map((r) => (
+                <Cell key={r.idx} fill={r.fill} />
               ))}
+              <LabelList dataKey="solicitudes" position="top" style={{ fontSize: 11, fontWeight: 700 }} />
             </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
+
+      <div className="border-t border-card-border px-5 py-3">
+        <p className="text-xs font-semibold text-text-secondary">Ranking — nombres y participación</p>
+        <div className="mt-2 space-y-1.5">
+          {agents.map((a, i) => (
+            <div key={a.name} className="flex items-center gap-2 text-xs">
+              <span
+                className="flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                style={{ backgroundColor: a.active ? COLORS[i % COLORS.length] : PAUSED }}
+              >
+                {i + 1}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-medium text-text-primary" title={a.name}>
+                {a.name}
+              </span>
+              <span className="shrink-0 font-bold text-text-primary">{a.requests.toLocaleString("es-CL")}</span>
+              <Badge color={a.active ? "primary" : "gray"}>{sharePct(a.requests, total).toLocaleString("es-CL")}%</Badge>
+            </div>
+          ))}
+        </div>
+      </div>
     </Card>
   );
 }
