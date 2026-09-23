@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Facebook, Shop, Whatsapp } from "@tailgrids/icons";
+import { sharePct } from "@/utils/period-stats";
 import type { MarketingData } from "./types";
 
 const CHANNELS = ["Starshop", "Meta", "Whatsapp", "Tienda física"];
@@ -84,19 +85,28 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
           </span>
         </div>
         <div className="mt-2 space-y-1">
-          {rows.map((r) => (
-            <div key={r.name} className="flex items-center justify-between gap-3 border-b border-card-border/60 py-1.5">
-              <span className="flex min-w-0 items-center gap-2.5">
-                <ChannelIcon name={r.name} />
-                <span className="text-sm text-text-secondary">{r.name}</span>
-                {r.isLive && <span className="rounded-full bg-[#0866FF] px-1.5 py-0.5 text-xs font-bold text-white">Live</span>}
-              </span>
-              <span className="text-right">
-                <span className="block text-sm font-bold text-text-primary">${r.revenue.toLocaleString("es-CL")}</span>
-                {r.isLive && <span className="text-xs text-text-tertiary">${r.spend.toLocaleString("es-CL")} spend real</span>}
-              </span>
-            </div>
-          ))}
+          {rows.map((r) => {
+            const pct = sharePct(r.revenue, total);
+            return (
+              <div key={r.name} className="border-b border-card-border/60 py-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <ChannelIcon name={r.name} />
+                    <span className="truncate text-sm text-text-secondary">{r.name}</span>
+                    {r.isLive && <span className="shrink-0 rounded-full bg-[#0866FF] px-1.5 py-0.5 text-xs font-bold text-white">Live</span>}
+                  </span>
+                  <span className="shrink-0 text-right">
+                    <span className="block text-sm font-bold text-text-primary">${r.revenue.toLocaleString("es-CL")}</span>
+                    <span className="text-xs font-bold text-brand-600">{pct.toLocaleString("es-CL")}%</span>
+                    {r.isLive && <span className="block text-xs text-text-tertiary">${r.spend.toLocaleString("es-CL")} spend real</span>}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-background-gray-secondary">
+                  <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-indigo-500" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
-import { Badge } from "@/components/tailgrids/core/badge";
 import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core/chart";
+import { ProgressRing } from "@/components/common/stat-helpers";
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, Tooltip, XAxis, YAxis } from "recharts";
 import Link from "next/link";
 import type { MarketingData } from "./types";
@@ -28,8 +28,11 @@ export function MarketingFunnel({ data }: { data: MarketingData | null }) {
     <Card className="min-w-0 md:col-span-3">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-sm">Embudo de conversión</CardTitle>
-          <Badge color="primary">Conversión total: {pct(overall)}</Badge>
+          <div className="min-w-0">
+            <CardTitle className="text-sm">Embudo de conversión</CardTitle>
+            <p className="text-xs text-text-tertiary">Conversión total: {pct(overall)} de punta a punta</p>
+          </div>
+          <ProgressRing value={Math.round(overall * 1000) / 10} size={58} stroke={6} color="#5750F1" sub="conv" />
         </div>
       </CardHeader>
       <CardContent className="h-72 p-0">

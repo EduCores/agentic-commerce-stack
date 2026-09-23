@@ -5,6 +5,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { MarketingFunnel } from "./funnel";
 import { MarketingChannelTable } from "./channel-table";
+import { sharePct } from "@/utils/period-stats";
 import type { MarketingData } from "./types";
 import Link from "next/link";
 import { Megaphone, Package, Store, TrendingUp } from "lucide-react";
@@ -97,6 +98,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
       </Card>
     );
   }
+  const totalCampaignRevenue = data.campaigns.reduce((a, c) => a + (c.revenue ?? 0), 0);
   return (
     <Card className="min-w-0 md:col-span-3">
       <CardHeader>
@@ -117,10 +119,11 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
                 <th className="p-2 text-right">Productos</th>
                 <th className="p-2 text-right">Pedidos</th>
                 <th className="p-2 text-right">Ingresos</th>
+                <th className="p-2 text-right">Part.</th>
               </tr>
             </thead>
             <tbody>
-              {data.campaigns.map((c) => (
+              {data.campaigns.map((c, i) => (
                 <tr key={c.id} className="border-b border-card-border/60">
                   <td className="p-2 font-medium text-text-primary">{c.name}</td>
                   <td className="p-2"><Badge color="gray">{c.provider}</Badge></td>
@@ -128,6 +131,9 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
                   <td className="p-2 text-right">{c.products}</td>
                   <td className="p-2 text-right">{c.orders}</td>
                   <td className="p-2 text-right font-bold text-brand-600">${c.revenue.toLocaleString("es-CL")}</td>
+                  <td className="p-2 text-right">
+                    <Badge color={i === 0 ? "primary" : "gray"}>{sharePct(c.revenue ?? 0, totalCampaignRevenue).toLocaleString("es-CL")}%</Badge>
+                  </td>
                 </tr>
               ))}
             </tbody>
