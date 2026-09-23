@@ -2,7 +2,7 @@ import { z } from "zod";
 import { defineTool } from "@/lib/eve/defineTool";
 import { getStoreAdapterForStore } from "@/lib/adapters/store";
 import { prisma } from "@/lib/adapters/prisma";
-import { normalize } from "../lib/search/normalize";
+import { cleanProductQuery, normalize } from "../lib/search/normalize";
 import { rankProducts } from "../lib/search/rank";
 import { matchCategories, allCategories } from "../lib/search/categories";
 import type { CategorySuggestion } from "../lib/search/categories";
@@ -20,8 +20,11 @@ export default defineTool({
     const { adapter } = await getStoreAdapterForStore(sid);
     const products = await adapter.listProducts(sid);
 
-    const ranked = rankProducts(products, query);
-    const rawText = normalize(query);
+    // Query limpia determinística ("tienes alicates?" → "alicates"): el agente
+    // DEBE usar cleanQuery para navigateTo y para mencionar el producto.
+    const clean = cleanProductQuery(query);
+    const ranked = rankProducts(products, clean);
+    const rawText = normalize(clean);
     const matched = matchCategories(rawText, ranked.tokens);
 
     const hits = ranked.hits.slice(0, limit);
@@ -60,6 +63,7 @@ export default defineTool({
 
     return {
       query: rawText,
+      cleanQuery: clean,
       expandedTerms: ranked.expandedTerms,
       found: productsOut.length,
       products: productsOut,

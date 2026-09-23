@@ -32,6 +32,33 @@ export function meaningfulTokens(value: string): string[] {
   return tokenize(value).filter((token) => token.length > 1 && !STOPWORDS.has(token));
 }
 
+/** Muletillas de consulta que nunca son el producto (incluye faltas típicas). */
+const QUERY_FILLERS = new Set([
+  ...STOPWORDS,
+  "hola", "hey", "buenas", "dias", "tardes", "noches",
+  "tienes", "tiene", "tenga", "hay", "existe", "existen",
+  "buscas", "buscando", "buscano", "ando",
+  "quieres", "quiere", "quieren", "ver",
+  "muestrame", "muestranos", "dime", "dime?",
+  "vende", "venden", "vendes",
+  "tienen", "tendra", "habra", "conseguire",
+  "sabes", "sabe", "conoces", "conoce",
+  "cual", "cuales", "donde", "cuando",
+  "porfa", "porfavor", "favor", "gracias", "disculpa",
+  "estoy", "estoi", "ando", "estamos",
+]);
+
+/**
+ * Extrae el producto objetivo de una frase ("tienes alicates?" → "alicates").
+ * Determinístico: el agente debe usarlo en vez de la frase completa.
+ */
+export function cleanProductQuery(value: string): string {
+  const tokens = tokenize(value).filter((t) => t.length > 1 && !QUERY_FILLERS.has(t));
+  if (tokens.length > 0) return tokens.join(" ");
+  const fallback = normalize(value);
+  return fallback || value.trim();
+}
+
 /** Genera un slug URL desde un título (ej: "Proyector LED 200W" → "proyector-led-200w"). */
 export function slugify(value: string): string {
   return normalize(value)
