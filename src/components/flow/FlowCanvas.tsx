@@ -56,12 +56,12 @@ function Field({ label, children, className }: { label: string; children: ReactN
 }
 
 // ── Geometría del auto-layout (sin dependencias externas) ────────────────────
-// NODE_W/NODE_H coinciden con la tarjeta de altura fija en BaseNode (w-56/h-[216px]);
+// NODE_W/NODE_H coinciden con la tarjeta de altura fija en BaseNode (w-56/h-[224px]);
 // columnas y filas se separan con holgura para que nunca se solapen.
 const NODE_W = 224;
-const NODE_H = 216;
+const NODE_H = 224;
 const GAP_X = 72;
-const GAP_Y = 120;
+const GAP_Y = 130;
 
 /** Posiciona los nodos en capas por profundidad (BFS tolerante a ciclos). */
 function layeredLayout(nodes: Node[], edges: Edge[]): Node[] {

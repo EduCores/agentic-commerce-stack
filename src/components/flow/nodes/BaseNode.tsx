@@ -105,7 +105,7 @@ export function BaseNode({ data, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "h-[216px] w-56 overflow-hidden rounded-xl border bg-card-background shadow-sm transition",
+        "h-[224px] w-56 overflow-hidden rounded-xl border bg-card-background shadow-sm transition",
         selected ? "shadow-md ring-2 ring-brand-500" : "border-card-border",
         statusRing[status]
       )}
@@ -126,7 +126,7 @@ export function BaseNode({ data, selected }: NodeProps) {
         </div>
 
         {d.description ? (
-          <p className="mt-1 line-clamp-2 text-xs leading-4 text-text-tertiary">{d.description}</p>
+          <p className="mt-1 line-clamp-4 text-xs leading-4 text-text-tertiary">{d.description}</p>
         ) : (
           <p className="mt-1 truncate text-xs text-text-tertiary">
             {(d.intent && (INTENT_LABEL_ES[d.intent] ?? d.intent)) || ""}
@@ -149,27 +149,28 @@ export function BaseNode({ data, selected }: NodeProps) {
           </div>
         )}
 
-        {d.intent && (
-          <p className="mt-1 truncate text-[10px] uppercase tracking-widest text-brand-500">
-            {INTENT_LABEL_ES[d.intent] ?? d.intent}
-          </p>
-        )}
-
-        <div className="mt-auto flex min-w-0 items-center gap-1 pt-1.5">
-          {d.prompt ? (
-            <Badge color="primary" className="shrink-0 text-[10px]">
-              prompt propio
-            </Badge>
-          ) : null}
-          {d.model ? (
-            <Badge color="success" className="min-w-0 flex-1 truncate text-[10px]" title={d.model}>
-              {displayModelName(d.model)}
-            </Badge>
-          ) : !d.agent && d.type ? (
-            <p className="truncate text-[10px] uppercase tracking-widest text-text-tertiary">
-              {NODE_TYPE_ES[d.type] ?? d.type}
+        <div className="mt-auto pt-1.5">
+          {d.intent && (
+            <p className="truncate text-[10px] uppercase tracking-widest text-brand-500" title={INTENT_LABEL_ES[d.intent] ?? d.intent}>
+              {INTENT_LABEL_ES[d.intent] ?? d.intent}
             </p>
-          ) : null}
+          )}
+          <div className="mt-1 flex min-w-0 items-center gap-1">
+            {d.prompt ? (
+              <Badge color="primary" className="shrink-0 text-[10px]">
+                prompt propio
+              </Badge>
+            ) : null}
+            {d.model ? (
+              <Badge color="success" className="min-w-0 flex-1 truncate text-[10px]" title={d.model}>
+                {displayModelName(d.model)}
+              </Badge>
+            ) : !d.agent && d.type ? (
+              <p className="truncate text-[10px] uppercase tracking-widest text-text-tertiary">
+                {NODE_TYPE_ES[d.type] ?? d.type}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
       <Handle
