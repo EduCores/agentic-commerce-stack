@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core/chart";
-import { Bar, BarChart, CartesianGrid, Cell, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, Tooltip, XAxis, YAxis } from "recharts";
 import { sharePct } from "@/utils/period-stats";
 import { displayModelName } from "@/utils/model-display";
 import type { AiStats } from "./types";
@@ -15,6 +15,9 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
   const totalReq = rows.reduce((a, r) => a + r.requests, 0);
   const totalCost = rows.reduce((a, r) => a + r.cost, 0);
   const totalRev = rows.reduce((a, r) => a + r.revenue, 0);
+  const maxReq = Math.max(...rows.map((r) => r.requests), 1);
+  const topByRequests = rows.length > 0 ? rows.reduce((a, b) => (b.requests > a.requests ? b : a), rows[0]) : null;
+  const topByMargin = rows.length > 0 ? rows.reduce((a, b) => ((b.revenue - b.cost) > (a.revenue - a.cost) ? b : a), rows[0]) : null;
 
   if (rows.length === 0) {
     return (
@@ -40,20 +43,56 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
         </div>
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-5">
-        <div className="h-64 md:col-span-3 p-0">
-          <ChartContainer className="h-full w-full" height="100%" width="100%">
-            <BarChart data={rows} layout="vertical" margin={{ top: 4, right: 24, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-              <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
-              <YAxis type="category" dataKey="model" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={140} tickFormatter={(v: string) => displayModelName(v)} />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="requests" name="Solicitudes" radius={[0, 6, 6, 0]}>
-                {rows.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ChartContainer>
+        <div className="md:col-span-3 min-w-0">
+          <div className="h-64 p-0">
+            <ChartContainer className="h-full w-full" height="100%" width="100%">
+              <BarChart data={rows} margin={{ top: 16, right: 8, left: -8, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="model"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11 }}
+                  interval={0}
+                  angle={-20}
+                  dy={12}
+                  height={60}
+                  tickFormatter={(v: string) => displayModelName(v)}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11 }}
+                  allowDecimals={false}
+                  width={40}
+                  domain={[0, Math.ceil(maxReq * 1.15)]}
+                />
+                <Tooltip
+                  cursor={{ fill: "var(--color-card-border)", opacity: 0.15 }}
+                  content={<ChartTooltipContent labelFormatter={(v) => displayModelName(String(v))} />}
+                />
+                <Bar dataKey="requests" name="Solicitudes" radius={[6, 6, 0, 0]}>
+                  {rows.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                  <LabelList dataKey="requests" position="top" style={{ fontSize: 11, fontWeight: 700 }} />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          </div>
+          <p className="mt-1 text-xs text-text-tertiary">Eje X: modelo · Eje Y: solicitudes del período</p>
+          <div className="mt-2 flex flex-wrap gap-2 border-t border-card-border pt-3 text-xs">
+            {topByRequests && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-background-gray-secondary px-2.5 py-1 font-medium text-text-secondary">
+                🏆 Más usado: <strong className="text-text-primary">{displayModelName(topByRequests.model)} ({topByRequests.requests})</strong>
+              </span>
+            )}
+            {topByMargin && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-background-gray-secondary px-2.5 py-1 font-medium text-text-secondary">
+                💰 Mejor margen: <strong className="text-emerald-600">{displayModelName(topByMargin.model)} (${(topByMargin.revenue - topByMargin.cost).toLocaleString("es-CL")})</strong>
+              </span>
+            )}
+          </div>
         </div>
         <div className="md:col-span-2 space-y-2">
           {rows.map((r, i) => {
