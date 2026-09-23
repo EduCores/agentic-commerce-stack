@@ -69,7 +69,20 @@ export function AnalyticsStatusChart({ data, className }: { data: AnalyticsData 
 }
 
 export function AnalyticsSourceChart({ data, className }: { data: AnalyticsData | null; className?: string }) {
-  const bySource = (data?.bySource ?? []).map((s) => ({ ...s, source: sourceLabel(s.source) }));
+  // Fusiona fuentes que normalizan al mismo canal (ej. "eve" + "whatsapp" → "Whatsapp"):
+  // evita keys duplicadas y suma pedidos e ingresos reales.
+  const merged = new Map<string, { source: string; count: number; revenue: number }>();
+  for (const s of data?.bySource ?? []) {
+    const label = sourceLabel(s.source);
+    const prev = merged.get(label);
+    if (prev) {
+      prev.count += s.count;
+      prev.revenue += s.revenue ?? 0;
+    } else {
+      merged.set(label, { source: label, count: s.count, revenue: s.revenue ?? 0 });
+    }
+  }
+  const bySource = [...merged.values()];
   const totalOrders = bySource.reduce((a, s) => a + s.count, 0);
   return (
     <Card className={className}>
