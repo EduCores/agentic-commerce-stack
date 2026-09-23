@@ -59,7 +59,7 @@ export function AnalyticsDashboard() {
             <a href="/api/analytics?format=csv" download className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/20">
               Exportar CSV
             </a>
-            <Link href="/orders" className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-white/90">
+            <Link href="/orders" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
               Ver /orders →
             </Link>
           </div>

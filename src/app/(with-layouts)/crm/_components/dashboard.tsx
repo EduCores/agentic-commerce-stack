@@ -72,7 +72,7 @@ export function CrmDashboard() {
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/15 pt-4 text-xs text-white/70">
           <span>Datos vivos de tus pedidos y del agente StarShop</span>
-          <Link href="/orders" className="ml-auto rounded-lg bg-white px-3 py-1.5 font-bold text-emerald-700 hover:bg-white/90">
+          <Link href="/orders" className="ml-auto rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
             Ver /orders →
           </Link>
         </div>

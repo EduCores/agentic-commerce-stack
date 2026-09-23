@@ -31,7 +31,7 @@ function CampaignsHero({ data }: { data: MarketingData }) {
             <span className="size-1.5 rounded-full bg-amber-300" /> Modo mock — conecta para datos reales
           </span>
         </div>
-        <Link href="/store" className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-white/90">
+        <Link href="/store" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
           Gestionar tiendas →
         </Link>
       </div>

@@ -31,7 +31,7 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             {orders.toLocaleString("es-CL")} pedidos · {formatCLP(revenue)} ingresos reales · pedidos pagados y completados
           </p>
         </div>
-        <Link href="/orders" className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-white/90">
+        <Link href="/orders" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
           Ver /orders →
         </Link>
       </div>
@@ -92,7 +92,7 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             <span className="size-1.5 rounded-full bg-emerald-300" /> Sin alertas de pedidos
           </span>
         )}
-        <Link href="/analytics" className="ml-auto rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-white/90">
+        <Link href="/analytics" className="ml-auto rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
           Ver analítica →
         </Link>
       </div>
