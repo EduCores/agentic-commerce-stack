@@ -225,15 +225,16 @@ export default function AccountPage() {
     <div className="space-y-6">
       <Card>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex items-center gap-4">
-            <div className="relative size-16 rounded-full bg-primary-100 flex items-center justify-center">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="relative size-16 shrink-0 rounded-full bg-primary-100 flex items-center justify-center ring-2 ring-primary-500/20">
               <Avatar>
                 <AvatarFallback className="text-lg font-semibold text-primary-500">{initials}</AvatarFallback>
               </Avatar>
+              <span className="absolute -right-0.5 -bottom-0.5 size-4 rounded-full border-2 border-card-background bg-emerald-500" title="Cuenta activa" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary">{fields.fullName || "Usuario"}</h3>
-              <p className="text-sm text-text-secondary-alt">{fields.email}</p>
+            <div className="min-w-0">
+              <h3 className="truncate text-lg font-semibold text-text-primary">{fields.fullName || "Usuario"}</h3>
+              <p className="truncate text-sm text-text-secondary-alt">{fields.email}</p>
             </div>
           </div>
 
@@ -327,33 +328,56 @@ export default function AccountPage() {
               </TextField>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3 border-t border-card-border pt-4">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onPress={handleCancel}
-                isDisabled={saving}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" isDisabled={saving || !hasChanges}>
-                {saving ? "Guardando..." : "Guardar cambios"}
-              </Button>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-card-border pt-4">
+              <span className="inline-flex min-w-0 items-center gap-1.5 text-xs font-medium text-text-tertiary" aria-live="polite">
+                {saving ? (
+                  "Guardando…"
+                ) : hasChanges ? (
+                  <>
+                    <span className="size-1.5 shrink-0 rounded-full bg-amber-500" /> Cambios sin guardar
+                  </>
+                ) : (
+                  <>
+                    <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" /> Todo guardado
+                  </>
+                )}
+              </span>
+              <span className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onPress={handleCancel}
+                  isDisabled={saving}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" isDisabled={saving || !hasChanges}>
+                  {saving ? "Guardando..." : "Guardar cambios"}
+                </Button>
+              </span>
             </div>
           </Form>
 
-          <div className="border-t border-card-border pt-4">
+          <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-red-200 bg-red-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-red-900/40 dark:bg-red-950/20">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 [&>svg]:size-4">
+                <TrashIcon />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-text-primary">Zona de peligro</p>
+                <p className="truncate text-xs text-text-tertiary">Eliminar tu cuenta es permanente y no se puede deshacer</p>
+              </div>
+            </div>
             <Button
               type="button"
               variant="danger"
               appearance="outline"
-              iconOnly
+              size="sm"
               onPress={handleDeleteOpen}
-              className="self-start"
-              aria-label="Eliminar cuenta"
+              className="shrink-0"
             >
-              <TrashIcon />
+              Eliminar cuenta
             </Button>
           </div>
         </CardContent>

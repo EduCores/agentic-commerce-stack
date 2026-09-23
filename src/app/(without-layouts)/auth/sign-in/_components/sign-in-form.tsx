@@ -13,14 +13,35 @@ export function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<"password" | "code">("password");
+  const [code, setCode] = useState("");
+  const [codeMsg, setCodeMsg] = useState("");
+
+  async function requestCode(targetEmail: string) {
+    setCodeMsg("");
+    try {
+      const r = await fetch("/api/auth/2fa/request", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: targetEmail }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Error");
+      setCodeMsg(j.debugCode ? `Código de prueba (dev): ${j.debugCode}` : "Código enviado a tu correo (5 min).");
+    } catch (err) {
+      setCodeMsg(err instanceof Error ? err.message : "No se pudo enviar el código.");
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+      const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(step === "code" ? { email, password, code } : { email, password }) });
       const j = await r.json();
+      if (j.require2fa) {
+        setStep("code");
+        setCode("");
+        requestCode(email);
+        return;
+      }
       if (!r.ok) throw new Error(j.error || "Error");
       router.push("/");
       router.refresh();
@@ -46,12 +67,23 @@ export function SignInForm() {
         <Label>Contraseña *</Label>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full" />
       </div>
+      {step === "code" && (
+        <div className="space-y-1.5 rounded-xl border border-card-border bg-background-gray-secondary/40 p-3">
+          <Label>Código de verificación (2FA) *</Label>
+          <Input inputMode="numeric" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} required className="w-full text-center text-lg font-bold tracking-[0.3em]" placeholder="••••••" />
+          {codeMsg && <p className="text-xs text-text-secondary">{codeMsg}</p>}
+          <div className="flex items-center justify-between text-xs">
+            <button type="button" onClick={() => requestCode(email)} className="font-medium text-brand-600 underline">Reenviar código</button>
+            <button type="button" onClick={() => { setStep("password"); setCode(""); setCodeMsg(""); }} className="font-medium text-text-tertiary underline">Volver</button>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between text-xs">
         <label className="flex items-center gap-2 text-text-secondary"><input type="checkbox" className="rounded [color-scheme:light] dark:[color-scheme:dark]" />Mantener mi sesión iniciada</label>
         <Link href="/auth/reset-password" className="font-medium text-brand-600 underline">¿Olvidaste tu contraseña?</Link>
       </div>
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-600">{error}</p>}
-      <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Entrando..." : "Iniciar sesión"}</Button>
+      <Button type="submit" appearance="fill" className="w-full" isDisabled={loading}>{loading ? "Entrando..." : step === "code" ? "Verificar y entrar" : "Iniciar sesión"}</Button>
       <p className="text-center text-xs text-text-tertiary">¿Eres nuevo por acá? <Link href="/auth/sign-up" className="font-medium text-brand-600 underline">Crear cuenta</Link></p>
     </form>
   );

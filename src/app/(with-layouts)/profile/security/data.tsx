@@ -1,28 +1,24 @@
-import { ClockCircleIcon, DisplayIcon, LockIcon, ShieldCheckIcon } from "./icons";
+import { DisplayIcon, LockIcon, ShieldCheckIcon } from "./icons";
 
-export const securityItems = [
+export type SecurityItemKey = "password" | "2fa" | "session";
+
+export const securityItems: { key: SecurityItemKey; icon: typeof LockIcon; title: string; description: string }[] = [
   {
+    key: "password",
     icon: LockIcon,
-    title: "Contraseña actual",
+    title: "Contraseña",
     description: "Cambia la contraseña de tu cuenta para mantener tu perfil seguro",
-    actionLabel: "Cambiar",
   },
   {
+    key: "2fa",
     icon: ShieldCheckIcon,
     title: "Autenticación en dos pasos",
-    description: "Activa la verificación en dos pasos para mayor protección",
-    actionLabel: "Activar",
+    description: "Exige un código de tu correo al iniciar sesión",
   },
   {
+    key: "session",
     icon: DisplayIcon,
-    title: "Sesión activa",
-    description: "Ve y gestiona tus sesiones activas",
-    actionLabel: "3 activas",
+    title: "Sesión actual",
+    description: "Ve con qué cuenta y dispositivo estás conectado",
   },
-  {
-    icon: ClockCircleIcon,
-    title: "Actividad de inicio de sesión",
-    description: "Revisa tu actividad reciente y tu historial de accesos",
-    actionLabel: "Ver historial",
-  },
-] as const;
+];
