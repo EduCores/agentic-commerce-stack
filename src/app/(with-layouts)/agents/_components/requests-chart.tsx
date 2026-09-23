@@ -68,8 +68,6 @@ export function AgentsRequestsChart() {
               tickLine={false}
               tick={{ fontSize: 11 }}
               interval={0}
-              label={{ value: "Agente (ver ranking ↓)", position: "insideBottom", offset: -2, fontSize: 11, fill: "var(--color-text-tertiary)" }}
-              height={36}
             />
             <YAxis
               axisLine={false}
@@ -78,7 +76,6 @@ export function AgentsRequestsChart() {
               allowDecimals={false}
               width={40}
               domain={[0, Math.ceil(max * 1.15)]}
-              label={{ value: "Solicitudes", angle: -90, position: "insideLeft", fontSize: 11, fill: "var(--color-text-tertiary)" }}
             />
             <Tooltip
               cursor={{ fill: "var(--color-card-border)", opacity: 0.15 }}
@@ -95,7 +92,8 @@ export function AgentsRequestsChart() {
       </CardContent>
 
       <div className="border-t border-card-border px-5 py-3">
-        <p className="text-xs font-semibold text-text-secondary">Ranking — nombres y participación</p>
+        <p className="text-xs text-text-tertiary">Eje X: n.º de agente · Eje Y: solicitudes</p>
+        <p className="mt-2 text-xs font-semibold text-text-secondary">Ranking — nombres y participación</p>
         <div className="mt-2 space-y-1.5">
           {agents.map((a, i) => (
             <div key={a.name} className="flex items-center gap-2 text-xs">
