@@ -4,19 +4,34 @@ import { prisma } from "@/lib/adapters/prisma";
 import type { Prisma } from "../../src/generated/prisma/client";
 
 /**
- * Resumen REAL de ventas de hoy para el dueño (admin_ops).
- * Lee Prisma directo: ingresos y pedidos pagados/completados de hoy,
+ * Resumen REAL de ventas para el dueño (admin_ops): hoy, ayer o fecha exacta.
+ * Lee Prisma directo: ingresos y pedidos pagados/completados del día pedido,
  * top 3 productos por unidades con sus ingresos, y stock total/reservado.
  * Nunca inventa cifras: si no hay movimientos, devuelve ceros y listas vacías.
  */
 export default defineTool({
   description:
-    "Resumen real de ventas de HOY (ingresos CLP, pedidos pagados/completados, top 3 productos, stock total y reservado). Úsala SIEMPRE antes de responder preguntas del dueño sobre ventas/ingresos/cómo van las ventas. SOLO para admin_ops.",
-  inputSchema: z.object({}),
-  async execute() {
+    "Resumen real de ventas (ingresos CLP, pedidos pagados/completados, top 3 productos, stock total y reservado) de HOY por defecto. Acepta period=yesterday para ayer o date=AAAA-MM-DD para un día exacto. Úsala SIEMPRE antes de responder preguntas del dueño sobre ventas/ingresos/cómo van las ventas, eligiendo el período que pide. SOLO para admin_ops.",
+  inputSchema: z.object({
+    period: z.enum(["today", "yesterday"]).optional().default("today"),
+    date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "date debe ser AAAA-MM-DD")
+      .optional(),
+  }),
+  async execute({ period, date }) {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
-    const paidFilter: Prisma.OrderWhereInput = { status: { in: ["PAID", "FULFILLED"] }, createdAt: { gte: start } };
+    if (date) {
+      const [y, m, d] = date.split("-").map(Number);
+      start.setFullYear(y, m - 1, d);
+    } else if ((period ?? "today") === "yesterday") {
+      start.setDate(start.getDate() - 1);
+    }
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+    const label = date ?? ((period ?? "today") === "yesterday" ? "ayer" : "hoy");
+    const paidFilter: Prisma.OrderWhereInput = { status: { in: ["PAID", "FULFILLED"] }, createdAt: { gte: start, lt: end } };
 
     const [revenueAgg, ordersCount, topGroups, stockAgg] = await Promise.all([
       prisma.order.aggregate({ _sum: { total: true }, where: { ...paidFilter } }).catch(() => ({ _sum: { total: null } })),
@@ -53,6 +68,7 @@ export default defineTool({
 
     return {
       date: start.toISOString().slice(0, 10),
+      label,
       revenue: Math.round(Number(revenueAgg._sum.total ?? 0)),
       orders: ordersCount,
       topProducts,
