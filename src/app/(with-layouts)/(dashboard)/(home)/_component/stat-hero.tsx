@@ -27,13 +27,19 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             </span>
             Resumen financiero — negocio en tiempo real
           </h3>
-          <p className="mt-2 text-sm font-medium text-white">
-            <strong className="font-extrabold">{orders.toLocaleString("es-CL")} pedidos</strong>
-            <span className="mx-1.5 text-white/50">·</span>
-            <strong className="font-extrabold">{formatCLP(revenue)} ingresos reales</strong>
-            <span className="mx-1.5 text-white/50">·</span>
-            <span className="text-white/85">pedidos pagados y completados</span>
-          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+              <span className="size-1.5 rounded-full bg-emerald-300" />
+              {orders.toLocaleString("es-CL")} pedidos
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+              <span className="size-1.5 rounded-full bg-emerald-300" />
+              {formatCLP(revenue)} ingresos reales
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/85 backdrop-blur">
+              Pagados + completados
+            </span>
+          </div>
         </div>
         <Link href="/orders" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
           Ver /orders →
