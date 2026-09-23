@@ -133,7 +133,7 @@ function ChartTooltipContent({
         {payload
           .filter((item) => item.type !== "none")
           .map((item, index) => (
-            <li key={item.key}>
+            <li key={`${item.name ?? ""}-${item.dataKey ?? ""}-${index}`}>
               {formatter && item?.value !== undefined && item.name ? (
                 formatter(item.value, item.name, item, index, item.payload)
               ) : (
@@ -201,7 +201,7 @@ function ChartLegendContent({
         .filter((item) => item.type !== "none")
         .map((item, index) => {
           return (
-            <li key={item.dataKey?.toString()}>
+            <li key={`${item.value ?? ""}-${item.dataKey ?? ""}-${index}`}>
               <p
                 className={cn(
                   chartLegendContentVariants({

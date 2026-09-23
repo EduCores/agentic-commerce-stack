@@ -39,7 +39,7 @@ export const NAV_DATA: NavSection[] = [
         items: [],
       },
       {
-        title: "Slider principal",
+        title: "Sliders",
         icon: <Widget4Icon />,
         url: "/slider",
         items: [],
@@ -68,7 +68,7 @@ export const NAV_DATA: NavSection[] = [
         items: [],
       },
       {
-        title: "Flujos de trabajo",
+        title: "Flujos",
         icon: <Widget4Icon />,
         url: "/workflows",
         items: [],
@@ -79,7 +79,7 @@ export const NAV_DATA: NavSection[] = [
     label: "GESTIÓN",
     items: [
       {
-        title: "Gestionar el equipo",
+        title: "Equipo",
         icon: <TaskIcon />,
         url: "/manage-team",
         items: [],

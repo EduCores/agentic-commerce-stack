@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/tailgrids/core/button";
 import { Input } from "@/components/tailgrids/core/input";
-import { Badge } from "@/components/tailgrids/core/badge";
 import { toast } from "sonner";
+import { SliderThumb } from "./slider-thumb";
 
 export type Slide = {
   id: number;
@@ -230,7 +230,7 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
           </label>
         </div>
         <div className="flex items-center gap-2 pt-1">
-          <Button type="submit" appearance="fill" isDisabled={saving} className="flex-1">
+          <Button type="submit" id="slide-submit" appearance="fill" isDisabled={saving} className="flex-1">
             {saving ? "Guardando…" : editingId == null ? "Crear slide" : "Guardar cambios"}
           </Button>
           {editingId != null && (
@@ -238,30 +238,63 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
           )}
         </div>
       </form>
-      <div className="space-y-3 lg:col-span-3">
+
+      {/* Área derecha: lista de slides / vista previa en vivo */}
+      <div className="space-y-4 lg:col-span-3">
+        {/* VISTA PREVIA EN VIVO cuando no hay slides */}
         {slides.length === 0 && (
-          <p className="rounded-xl border-[0.5px] border-card-border bg-card-background p-5 text-sm text-text-tertiary">
-            Sin slides. Crea el primero con el formulario.
-          </p>
-        )}
-        {slides.map((s) => (
-          <div key={s.id} className="flex items-center gap-3 rounded-xl border-[0.5px] border-card-border bg-card-background p-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.image} alt={s.title} className="h-20 w-32 shrink-0 rounded-lg object-cover" />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <p className="truncate text-sm font-semibold text-text-primary">#{s.sortOrder} · {s.title}</p>
-                <Badge color={s.active ? "success" : "gray"}>{s.active ? "Activo" : "Oculto"}</Badge>
-              </div>
-              <p className="truncate text-xs text-text-tertiary">{s.subtitle} · CTA: {s.cta}</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button size="sm" appearance="outline" onClick={() => startEdit(s)}>Editar</Button>
-                <Button size="sm" appearance="outline" onClick={() => toggleActive(s)}>{s.active ? "Ocultar" : "Mostrar"}</Button>
-                <Button size="sm" variant="danger" appearance="outline" onClick={() => onDelete(s)}>Eliminar</Button>
+          <div className="space-y-3">
+            <p className="text-sm text-text-tertiary">
+              Sin slides aún. Completa el formulario y crea el primero: la vista previa se
+              actualiza en tiempo real.
+            </p>
+            <div className="w-max">
+              <SliderThumb
+                slide={{
+                  id: 0,
+                  title: form.title,
+                  subtitle: form.subtitle,
+                  description: form.description,
+                  cta: form.cta,
+                  image: form.image,
+                  bg: form.bg,
+                  sortOrder: form.sortOrder,
+                  active: form.active,
+                }}
+                onViewStore={() => {}}
+              />
+              <div className="mt-3 flex gap-2">
+                <Button
+                  appearance="fill"
+                  onClick={() => document.getElementById("slide-submit")?.click()}
+                >
+                  Crear slide con este diseño
+                </Button>
               </div>
             </div>
           </div>
-        ))}
+        )}
+
+        {/* LISTA DE SLIDES CON THUMBS INTERACTIVOS */}
+        {slides.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {slides.map((s) => (
+              <SliderThumb
+                key={s.id}
+                slide={s}
+                onViewStore={() =>
+                  window.open(
+                    `${(process.env.NEXT_PUBLIC_STARSHOP_ORIGIN ?? "https://starshop-rho.vercel.app").replace(/\/$/, "")}/`,
+                    "_blank",
+                  )
+                }
+                onEdit={() => startEdit(s)}
+                onTogglePublish={() => toggleActive(s)}
+                onDelete={() => onDelete(s)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

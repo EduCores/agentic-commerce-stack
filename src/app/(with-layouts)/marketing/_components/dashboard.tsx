@@ -79,7 +79,7 @@ function CampaignsHero({ data }: { data: MarketingData }) {
       </div>
 
       <p className="mt-4 border-t border-white/15 pt-3 text-xs text-white/60">
-        <span className="font-semibold text-white/90">¿Dónde se crean?</span> En <Link href="/store" className="underline">/store</Link> conectando Shopify / Woo / Magento o mock. <span className="font-semibold text-white/90">¿Meta?</span> Aún no integrado — hoy el catálogo alimenta el embudo y los canales (Starshop, Whatsapp, Tienda física). Meta se conectará como provider.
+        <span className="font-semibold text-white/90">¿Dónde se crean?</span> En <Link href="/store" className="underline">/store</Link> conecta Base de datos Cliente / Shopify / Woo / Magento / Cualquiera. <span className="font-semibold text-white/90">Meta</span> Integrado — hoy el catálogo alimenta el embudo y los canales (Starshop, Whatsapp, Tienda física). Meta se conecta como provider.
       </p>
     </div>
   );

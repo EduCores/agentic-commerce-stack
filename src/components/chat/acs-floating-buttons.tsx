@@ -237,7 +237,7 @@ export function ACSFloatingButtons() {
                 </a>
               ))}
             </div>
-            <p className="px-4 py-2 text-[11px] text-zinc-500 border-t">Se sincroniza con <a href="/manage-team" className="underline">Gestionar el equipo</a></p>
+            <p className="px-4 py-2 text-[11px] text-zinc-500 border-t">Se sincroniza con <a href="/manage-team" className="underline">Equipo</a></p>
           </motion.div>
         )}
       </AnimatePresence>

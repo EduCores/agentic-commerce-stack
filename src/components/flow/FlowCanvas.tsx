@@ -398,7 +398,7 @@ const graphNodes = useMemo(() => {
           <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Nodos</p>
           <p className="mt-1 text-[11px] leading-4 text-text-tertiary">Arrastra al lienzo o haz clic para agregar.</p>
         </div>
-        <div className="space-y-1.5">
+        <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-start">
           {NODE_PALETTE.map((item) => (
             <button
               key={item.type}
@@ -407,7 +407,7 @@ const graphNodes = useMemo(() => {
               disabled={readOnly}
               onDragStart={(e) => onDragStart(e, item.type)}
               onClick={() => addNode(item.type)}
-              className="flex w-full items-center gap-2 rounded-lg border border-card-border bg-card-background px-2.5 py-2 text-left transition hover:border-brand-500 hover:bg-background-gray-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full sm:w-auto items-center gap-2 rounded-lg border border-card-border bg-card-background px-2.5 py-2 text-left transition hover:border-brand-500 hover:bg-background-gray-secondary disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className={cn("h-2 w-2 shrink-0 rounded-full", item.color)} />
               <span className="min-w-0 flex-1">
