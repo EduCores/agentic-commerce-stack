@@ -30,11 +30,11 @@ export function CrmDashboard() {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <div className="overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-6 text-white md:col-span-3">
-        <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 text-white [&>svg]:size-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white [&>svg]:size-4">
             <Users />
           </span>
-          <h3 className="text-sm font-bold tracking-[-0.2px]">Clientes, tareas y actividad — ligada a pedidos y agente</h3>
+          <h3 className="min-w-0 text-sm font-bold tracking-[-0.2px]">Clientes, tareas y actividad — ligada a pedidos y agente</h3>
         </div>
         {/* Clientes se angosta a 0.7fr (su valor es corto: 34) para que "$38.925.600" quepa en Ingresos/Ticket.
             3 columnas solo desde xl: con el sidebar visible el contenedor (658-786px en 1024-1152) no alcanza. */}
@@ -45,7 +45,7 @@ export function CrmDashboard() {
             </span>
             <div className="min-w-0 text-left">
               <p className="text-sm font-medium text-white/80">Clientes</p>
-              <p className="text-3xl font-extrabold tracking-tight">{data.totals.customers.toLocaleString("es-CL")}</p>
+              <p className="break-words text-3xl font-extrabold tracking-tight">{data.totals.customers.toLocaleString("es-CL")}</p>
               <p className="text-xs text-white/70">{data.leads.length} leads reales</p>
             </div>
           </div>
@@ -55,7 +55,7 @@ export function CrmDashboard() {
             </span>
             <div className="min-w-0 text-left">
               <p className="text-sm font-medium text-white/80">Ingresos por clientes</p>
-              <p className="text-3xl font-extrabold tracking-tight">${data.totals.revenue.toLocaleString("es-CL")}</p>
+              <p className="break-words text-3xl font-extrabold tracking-tight">${data.totals.revenue.toLocaleString("es-CL")}</p>
               <p className="text-xs text-white/70">Acumulado real</p>
             </div>
           </div>
@@ -65,7 +65,7 @@ export function CrmDashboard() {
             </span>
             <div className="min-w-0 text-left">
               <p className="text-sm font-medium text-white/80">Ticket promedio</p>
-              <p className="text-3xl font-extrabold tracking-tight">${data.totals.avgTicket.toLocaleString("es-CL")}</p>
+              <p className="break-words text-3xl font-extrabold tracking-tight">${data.totals.avgTicket.toLocaleString("es-CL")}</p>
               <p className="text-xs text-white/70">Por pedido</p>
             </div>
           </div>
