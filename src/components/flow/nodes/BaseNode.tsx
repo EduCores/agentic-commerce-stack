@@ -45,45 +45,53 @@ const statusColor: Record<string, "success" | "warning" | "error" | "gray"> = {
   pending: "gray",
 };
 
-type Accent = { bar: string; chip: string; icon: LucideIcon };
+type Accent = {
+  bar: string;
+  chip: string;
+  icon: LucideIcon;
+  /** Borde + icono del conector con el color del nodo. */
+  handle: string;
+};
 
 /** Nodos IA (crews): barra degradada violeta + icono por intent. */
 const INTENT_STYLE: Record<string, Accent> = {
-  product_search: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: Search },
-  price_comparison: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: Tag },
-  checkout_support: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: ShoppingCart },
-  general_inquiry: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: HelpCircle },
-  abandoned_cart: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: ShoppingBag },
-  return_request: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: RotateCcw },
-  order_tracking: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: PackageCheck },
-  escalate_human: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: Headphones },
-  admin_ops: { bar: "bg-gradient-to-r from-amber-400 to-orange-500", chip: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300", icon: Crown },
+  product_search: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: Search, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  price_comparison: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: Tag, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  checkout_support: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: ShoppingCart, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  general_inquiry: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: HelpCircle, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  abandoned_cart: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: ShoppingBag, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  return_request: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: RotateCcw, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  order_tracking: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: PackageCheck, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  escalate_human: { bar: "bg-gradient-to-r from-violet-500 to-indigo-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: Headphones, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  admin_ops: { bar: "bg-gradient-to-r from-amber-400 to-orange-500", chip: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300", icon: Crown, handle: "!border-amber-500 text-amber-600 dark:text-amber-400" },
 };
 
 /** Nodos de proceso: barra sólida por tipo + icono. */
 const TYPE_STYLE: Record<string, Accent> = {
-  trigger: { bar: "bg-violet-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: Zap },
-  reserve_stock: { bar: "bg-blue-500", chip: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300", icon: Package },
-  payment: { bar: "bg-emerald-500", chip: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300", icon: CreditCard },
-  fulfill: { bar: "bg-orange-500", chip: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300", icon: Truck },
-  agent_decision: { bar: "bg-pink-500", chip: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300", icon: Bot },
-  condition: { bar: "bg-amber-500", chip: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300", icon: Split },
-  webhook: { bar: "bg-cyan-500", chip: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300", icon: Globe },
-  cancel: { bar: "bg-red-500", chip: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300", icon: XCircle },
-  email_send: { bar: "bg-indigo-500", chip: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300", icon: Mail },
-  whatsapp_send: { bar: "bg-green-500", chip: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300", icon: MessageCircle },
+  trigger: { bar: "bg-violet-500", chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300", icon: Zap, handle: "!border-violet-500 text-violet-600 dark:text-violet-400" },
+  reserve_stock: { bar: "bg-blue-500", chip: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300", icon: Package, handle: "!border-blue-500 text-blue-600 dark:text-blue-400" },
+  payment: { bar: "bg-emerald-500", chip: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300", icon: CreditCard, handle: "!border-emerald-500 text-emerald-600 dark:text-emerald-400" },
+  fulfill: { bar: "bg-orange-500", chip: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300", icon: Truck, handle: "!border-orange-500 text-orange-600 dark:text-orange-400" },
+  agent_decision: { bar: "bg-pink-500", chip: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300", icon: Bot, handle: "!border-pink-500 text-pink-600 dark:text-pink-400" },
+  condition: { bar: "bg-amber-500", chip: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300", icon: Split, handle: "!border-amber-500 text-amber-600 dark:text-amber-400" },
+  webhook: { bar: "bg-cyan-500", chip: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300", icon: Globe, handle: "!border-cyan-500 text-cyan-600 dark:text-cyan-400" },
+  cancel: { bar: "bg-red-500", chip: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300", icon: XCircle, handle: "!border-red-500 text-red-600 dark:text-red-400" },
+  email_send: { bar: "bg-indigo-500", chip: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300", icon: Mail, handle: "!border-indigo-500 text-indigo-600 dark:text-indigo-400" },
+  whatsapp_send: { bar: "bg-green-500", chip: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300", icon: MessageCircle, handle: "!border-green-500 text-green-600 dark:text-green-400" },
 };
 
 const FALLBACK: Accent = {
   bar: "bg-gradient-to-r from-violet-500 to-indigo-500",
   chip: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
   icon: Bot,
+  handle: "!border-violet-500 text-violet-600 dark:text-violet-400",
 };
 
 /**
  * Tarjeta de nodo con TODA la info original (título, estado, descripción,
  * agente, tools, intent, tipo, prompt, modelo) en ALTURA FIJA (h-[216px]):
  * coincide con NODE_H del auto-layout para que las filas nunca se solapen.
+ * Los conectores toman el color del nodo y su icono.
  */
 export function BaseNode({ data, selected }: NodeProps) {
   const d = data as unknown as FlowNodeData;
@@ -167,15 +175,19 @@ export function BaseNode({ data, selected }: NodeProps) {
       <Handle
         type="target"
         position={Position.Top}
-        className="!h-3 !w-3 !border-2 !border-violet-500 !bg-white dark:!bg-zinc-900"
         title="Entrada"
-      />
+        className={cn("!h-4 !w-4 !border-2 !bg-white dark:!bg-zinc-900 [&>svg]:size-2.5", accent.handle)}
+      >
+        <Icon />
+      </Handle>
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!h-3 !w-3 !border-2 !border-violet-500 !bg-white dark:!bg-zinc-900"
         title="Salida — arrastra para conectar"
-      />
+        className={cn("!h-4 !w-4 !border-2 !bg-white dark:!bg-zinc-900 [&>svg]:size-2.5", accent.handle)}
+      >
+        <Icon />
+      </Handle>
     </div>
   );
 }
