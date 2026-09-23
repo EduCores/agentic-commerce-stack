@@ -48,7 +48,7 @@ export default function Sidebar({
                 )}
             >
                 <Link href='/' suppressHydrationWarning aria-label="Ir al panel principal">
-                    <StarShopLogo compact={!isSidebarOpen} className={isMobileSheet ? "text-[22px] md:text-[26px]" : undefined} />
+                    <StarShopLogo compact={!isSidebarOpen} />
                 </Link>
 
                 <button

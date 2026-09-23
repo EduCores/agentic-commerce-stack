@@ -13,7 +13,7 @@ export function StarShopLogo({ compact = false, className }: { compact?: boolean
     <span
       translate="no"
       className={cn(
-        "starshop-logo notranslate relative inline-flex items-baseline text-[26px] leading-none font-black tracking-tight select-none md:text-[32px]",
+        "starshop-logo notranslate relative inline-flex items-baseline text-[18px] leading-none font-black tracking-tight select-none md:text-[22px]",
         className,
       )}
     >
