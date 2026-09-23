@@ -129,6 +129,7 @@ export const FLOW_TOOLS = [
   "sendEmail",
   "orderTracking",
   "cancelOrder",
+  "getSalesSummary",
 ] as const;
 
 /** crew-graph.ts solo aplica prompts de más de 40 caracteres. */
