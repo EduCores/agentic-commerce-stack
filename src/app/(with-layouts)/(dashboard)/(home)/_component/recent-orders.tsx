@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { formatCLP, ORDER_STATUS_ES, type HomeStats } from "./home-types";
+import { HomeCardLink } from "./home-card-link";
 
 const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
   PAID: "success",
@@ -15,17 +15,17 @@ const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
 /** Últimos pedidos del home, con enlace a /orders. */
 export function RecentOrders({ orders }: { orders: HomeStats["recentOrders"] }) {
   return (
-    <div className="rounded-xl border border-card-border bg-card-background p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">
+    <div className="min-w-0 rounded-xl border border-card-border bg-card-background p-5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">
             <ShoppingCart />
           </span>
-          <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Últimos pedidos</h3>
+          <h3 className="min-w-0 truncate text-sm font-semibold tracking-[-0.2px] text-text-primary">Últimos pedidos</h3>
         </div>
-        <Link href="/orders" className="text-xs font-medium text-brand-600 underline">
+        <HomeCardLink href="/orders" size="sm" className="mt-0 w-auto shrink-0">
           Ver todos →
-        </Link>
+        </HomeCardLink>
       </div>
       <div className="mt-3 space-y-2">
         {orders.length === 0 ? (

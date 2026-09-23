@@ -49,13 +49,13 @@ export function SalesCard({ sales, days, onDays, month, year, onMonth, onYear }:
   if (last && ticks[ticks.length - 1]?.date !== last.date) ticks.push(last);
 
   return (
-    <div className="rounded-xl border border-card-border bg-card-background p-5">
+    <div className="min-w-0 overflow-hidden rounded-xl border border-card-border bg-card-background p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-badge-primary-background text-badge-primary-text [&>svg]:size-4.5">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-primary-background text-badge-primary-text [&>svg]:size-4.5">
             <TrendingUp />
           </span>
-          <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">
+          <h3 className="min-w-0 truncate text-sm font-semibold tracking-[-0.2px] text-text-primary">
             Ventas de los últimos {days} días
           </h3>
         </div>
@@ -64,11 +64,11 @@ export function SalesCard({ sales, days, onDays, month, year, onMonth, onYear }:
         </p>
       </div>
 
-      <div className="mt-4 flex h-28 items-end gap-1">
+      <div className="mt-4 flex h-28 min-w-0 items-end gap-1">
         {sales.map((d) => {
           const h = Math.max(3, Math.round((d.total / max) * 100));
           return (
-            <div key={d.date} className="flex h-full flex-1 flex-col justify-end" title={`${d.date}: ${formatCLP(d.total)}`}>
+            <div key={d.date} className="flex h-full min-w-0 flex-1 flex-col justify-end" title={`${d.date}: ${formatCLP(d.total)}`}>
               {/* Barras: verde sólido (#00cf2f) con la clase especial .sales-bar-solid — sin gradiente. */}
               <div
                 className="sales-bar-solid w-full rounded-t"
@@ -78,7 +78,7 @@ export function SalesCard({ sales, days, onDays, month, year, onMonth, onYear }:
           );
         })}
       </div>
-      <div className="mt-1.5 flex items-center justify-between gap-1">
+      <div className="mt-1.5 flex min-w-0 items-center justify-between gap-1 overflow-hidden">
         {ticks.map((d) => (
           <span key={d.date} className="text-[10px] whitespace-nowrap text-text-tertiary">{d.date.slice(5)}</span>
         ))}

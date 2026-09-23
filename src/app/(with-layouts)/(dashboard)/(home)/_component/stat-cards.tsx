@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { Package, ShoppingCart, Users, Workflow } from "lucide-react";
 import { formatCLP, type HomeStats } from "./home-types";
+import { HomeCardLink } from "./home-card-link";
 
 type Props = {
   stats: HomeStats;
@@ -73,9 +73,7 @@ export function StatCards({ stats }: Props) {
                 <Icon />
               </span>
             </div>
-            <Link href={c.href} className="mt-3 inline-block text-xs font-bold text-brand-600 hover:underline">
-              {c.link} →
-            </Link>
+            <HomeCardLink href={c.href}>{c.link} →</HomeCardLink>
           </div>
         );
       })}

@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { ListChecks } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { HomeCardLink } from "./home-card-link";
 
 type CrmData = {
   tasks: { id: string; title: string; due: string; type: string }[];
@@ -21,12 +21,12 @@ export function HomeOpsCard() {
   const recent = (data?.recentActivities ?? []).slice(0, 3);
 
   return (
-    <div className="rounded-xl border border-card-border bg-card-background p-5">
+    <div className="min-w-0 rounded-xl border border-card-border bg-card-background p-5">
       <div className="flex items-center gap-2.5">
-        <span className="flex size-9 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4.5">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4.5">
           <ListChecks />
         </span>
-        <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Operación — tareas y actividad</h3>
+        <h3 className="min-w-0 truncate text-sm font-semibold tracking-[-0.2px] text-text-primary">Operación — tareas y actividad</h3>
       </div>
       <div className="mt-3 space-y-2">
         {tasks.length === 0 ? (
@@ -53,9 +53,7 @@ export function HomeOpsCard() {
               ))}
             </div>
           </div>
-          <Link href="/workflows" className="mt-3 inline-block text-xs font-bold text-brand-600 hover:underline">
-            Ver flujos →
-          </Link>
+          <HomeCardLink href="/workflows">Ver flujos →</HomeCardLink>
         </>
       )}
     </div>

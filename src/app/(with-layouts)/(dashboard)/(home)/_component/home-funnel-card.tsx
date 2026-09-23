@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { Filter } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { HomeCardLink } from "./home-card-link";
 
 type FunnelRow = { stage: string; value: number };
 
@@ -22,13 +22,13 @@ export function HomeFunnelCard() {
   const totalConv = Math.round((last / first) * 1000) / 10;
 
   return (
-    <div className="rounded-xl border border-card-border bg-card-background p-5">
+    <div className="min-w-0 rounded-xl border border-card-border bg-card-background p-5">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4.5">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4.5">
             <Filter />
           </span>
-          <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Embudo de conversión</h3>
+          <h3 className="min-w-0 truncate text-sm font-semibold tracking-[-0.2px] text-text-primary">Embudo de conversión</h3>
         </div>
       </div>
 
@@ -42,13 +42,13 @@ export function HomeFunnelCard() {
               const prev = i > 0 ? rows[i - 1].value : null;
               const stepConv = prev ? Math.round((r.value / prev) * 1000) / 10 : null;
               return (
-                <div key={r.stage} className="space-y-1">
+                <div key={r.stage} className="min-w-0 space-y-1">
                   <div className="flex items-center justify-between gap-2 text-xs">
-                    <span className="flex items-center gap-1.5 font-medium text-text-secondary">
-                      <span className="size-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                      {r.stage}
+                    <span className="flex min-w-0 items-center gap-1.5 font-medium text-text-secondary">
+                      <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                      <span className="min-w-0 truncate">{r.stage}</span>
                     </span>
-                    <span className="font-bold text-text-primary">
+                    <span className="shrink-0 font-bold text-text-primary">
                       {r.value.toLocaleString("es-CL")} <span className="font-medium text-text-tertiary">· {pct}%</span>
                       {stepConv !== null && <span className="ml-1 font-medium text-emerald-600">↘ {stepConv}%</span>}
                     </span>
@@ -62,9 +62,9 @@ export function HomeFunnelCard() {
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             <Badge color="primary" className="whitespace-nowrap">{totalConv}% conversión total</Badge>
-            <Link href="/marketing" className="text-xs font-bold text-brand-600 hover:underline">
+            <HomeCardLink href="/marketing" className="mt-0 w-auto">
               Ver marketing →
-            </Link>
+            </HomeCardLink>
           </div>
         </>
       )}

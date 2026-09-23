@@ -5,8 +5,8 @@ export default function Home() {
   const today = new Date().toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <div className="mt-4 space-y-5">
-      <div className="px-2 lg:px-6">
+    <div className="mt-4 min-w-0 space-y-5">
+      <div className="min-w-0 px-2 lg:px-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">Panel — Dueño de tienda</h2>
@@ -20,7 +20,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="space-y-5 px-2 lg:px-5">
+      <div className="min-w-0 space-y-5 overflow-x-clip px-2 lg:px-5">
         <RealStats />
         <LastTransactionsTable />
       </div>

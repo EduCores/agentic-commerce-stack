@@ -37,9 +37,9 @@ export function RealStats() {
   const alerts = data.recentOrders.filter((o) => o.status === "FAILED" || o.status === "PENDING").length;
 
   return (
-    <div className="grid gap-4 md:grid-cols-4">
+    <div className="grid min-w-0 gap-4 md:grid-cols-4">
       {/* 1 Hero financiero unificado — lo primero que quiere ver el dueño */}
-      <div className="md:col-span-4">
+      <div className="min-w-0 md:col-span-4">
         <StatHero
           orders={data.counts.orders}
           revenue={data.revenue}
@@ -51,32 +51,32 @@ export function RealStats() {
       </div>
 
       {/* 2 Ventas — tendencia clara, selector moderno */}
-      <div className="md:col-span-4">
+      <div className="min-w-0 md:col-span-4">
         <SalesCard sales={data.salesByDay} days={days} onDays={setDays} month={month} year={year} onMonth={setMonth} onYear={setYear} />
       </div>
 
       {/* 3 Operativa comercial — embudo, canales y stock comparten la fila clave */}
-      <div className="md:col-span-4 grid gap-4 md:grid-cols-3">
+      <div className="grid min-w-0 gap-4 md:col-span-4 md:grid-cols-3">
         <HomeFunnelCard />
         <HomeChannelsCard />
         <HomeLowStockCard />
       </div>
 
       {/* 4 Inteligencia y automatización — AI, marketing y carritos */}
-      <div className="md:col-span-4">
+      <div className="min-w-0 md:col-span-4">
         <SiteSummaries />
       </div>
 
       {/* 5 Detalle de oferta y demanda */}
-      <div className="md:col-span-2">
+      <div className="min-w-0 md:col-span-2">
         <TopProducts items={data.topProducts} />
       </div>
-      <div className="md:col-span-2">
+      <div className="min-w-0 md:col-span-2">
         <RecentOrders orders={data.recentOrders} />
       </div>
 
       {/* 6 Operación diaria — tareas y actividad */}
-      <div className="md:col-span-4">
+      <div className="min-w-0 md:col-span-4">
         <HomeOpsCard />
       </div>
     </div>

@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { TriangleAlert } from "lucide-react";
+import { HomeCardLink } from "./home-card-link";
 
 type LowStock = { title: string; sku: string; stock: number };
 
@@ -17,12 +17,12 @@ export function HomeLowStockCard() {
   const items = (data?.lowStock ?? []).slice(0, 5);
 
   return (
-    <div className="rounded-xl border border-card-border bg-card-background p-5">
+    <div className="min-w-0 rounded-xl border border-card-border bg-card-background p-5">
       <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
           <TriangleAlert />
         </span>
-        <h3 className="text-sm font-semibold tracking-[-0.2px] text-text-primary">Stock crítico — reponer</h3>
+        <h3 className="min-w-0 truncate text-sm font-semibold tracking-[-0.2px] text-text-primary">Stock crítico — reponer</h3>
       </div>
       <div className="mt-3 space-y-2">
         {items.length === 0 ? (
@@ -38,9 +38,7 @@ export function HomeLowStockCard() {
           ))
         )}
       </div>
-      <Link href="/products" className="mt-3 inline-block text-xs font-bold text-brand-600 hover:underline">
-        Gestionar stock →
-      </Link>
+      <HomeCardLink href="/products">Gestionar stock →</HomeCardLink>
     </div>
   );
 }

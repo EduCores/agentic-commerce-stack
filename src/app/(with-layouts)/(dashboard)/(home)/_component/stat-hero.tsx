@@ -18,9 +18,9 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
   const ticket = orders > 0 ? Math.round(revenue / orders) : 0;
 
   return (
-    <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-primary-500 to-[#328e8f] p-6 text-white">
+    <div className="min-w-0 overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-primary-500 to-[#328e8f] p-6 text-white">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h3 className="flex items-center gap-2 text-sm font-bold tracking-[-0.2px]">
             <span className="flex size-7 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
               <LayoutDashboard />
@@ -36,45 +36,45 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
         </Link>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+      <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="min-w-0 rounded-xl bg-white/10 p-4 backdrop-blur">
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
               <ShoppingCart />
             </span>
-            <p className="text-xs font-medium text-white/80">Pedidos totales</p>
+            <p className="min-w-0 truncate text-xs font-medium text-white/80">Pedidos totales</p>
           </div>
-          <p className="mt-2 text-2xl font-extrabold tracking-tight">{orders.toLocaleString("es-CL")}</p>
+          <p className="mt-2 break-words text-2xl font-extrabold tracking-tight">{orders.toLocaleString("es-CL")}</p>
           <p className="text-xs text-white/70">todos los estados del catálogo</p>
         </div>
-        <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+        <div className="min-w-0 rounded-xl bg-white/10 p-4 backdrop-blur">
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
               <Wallet />
             </span>
-            <p className="text-xs font-medium text-white/80">Ingresos totales</p>
+            <p className="min-w-0 truncate text-xs font-medium text-white/80">Ingresos totales</p>
           </div>
-          <p className="mt-2 text-2xl font-extrabold tracking-tight">{formatCLP(revenue)}</p>
+          <p className="mt-2 break-words text-2xl font-extrabold tracking-tight">{formatCLP(revenue)}</p>
           <p className="text-xs text-white/70">pedidos pagados + completados</p>
         </div>
-        <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+        <div className="min-w-0 rounded-xl bg-white/10 p-4 backdrop-blur">
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
               <ReceiptText />
             </span>
-            <p className="text-xs font-medium text-white/80">Ticket promedio</p>
+            <p className="min-w-0 truncate text-xs font-medium text-white/80">Ticket promedio</p>
           </div>
-          <p className="mt-2 text-2xl font-extrabold tracking-tight">{formatCLP(ticket)}</p>
+          <p className="mt-2 break-words text-2xl font-extrabold tracking-tight">{formatCLP(ticket)}</p>
           <p className="text-xs text-white/70">ingresos ÷ pedidos</p>
         </div>
-        <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+        <div className="min-w-0 rounded-xl bg-white/10 p-4 backdrop-blur">
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 [&>svg]:size-4">
               <PackageCheck />
             </span>
-            <p className="text-xs font-medium text-white/80">Stock disponible</p>
+            <p className="min-w-0 truncate text-xs font-medium text-white/80">Stock disponible</p>
           </div>
-          <p className="mt-2 text-2xl font-extrabold tracking-tight">{availability}%</p>
+          <p className="mt-2 break-words text-2xl font-extrabold tracking-tight">{availability}%</p>
           <p className="text-xs text-white/70">{stockTotal.toLocaleString("es-CL")} uds · {reserved.toLocaleString("es-CL")} reservadas</p>
         </div>
       </div>
@@ -92,7 +92,7 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             <span className="size-1.5 rounded-full bg-emerald-300" /> Sin alertas de pedidos
           </span>
         )}
-        <Link href="/analytics" className="ml-auto text-xs font-bold text-white/90 underline hover:text-white">
+        <Link href="/analytics" className="ml-auto rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-white/90">
           Ver analítica →
         </Link>
       </div>

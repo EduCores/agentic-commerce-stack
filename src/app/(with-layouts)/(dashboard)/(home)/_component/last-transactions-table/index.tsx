@@ -116,7 +116,7 @@ export default function LastTransactionsTable() {
   };
 
   return (
-    <Card>
+    <Card className="min-w-0 overflow-hidden">
       {/* Header */}
       <CardHeader className="mb-6 flex-col items-stretch justify-start">
         <CardTitle>Transacciones recientes</CardTitle>
@@ -168,8 +168,8 @@ export default function LastTransactionsTable() {
         </div>
       </CardHeader>
 
-      {/* Table */}
-      <div>
+      {/* Table — única sección del home con deslizamiento horizontal */}
+      <div className="min-w-0 overflow-x-auto">
         <TableRoot className="w-full min-w-200 rounded-none border-none">
           <TableHeader>
             <TableRow className="[&_th]:border-t">
