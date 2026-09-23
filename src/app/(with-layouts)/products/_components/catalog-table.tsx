@@ -79,7 +79,7 @@ export function CatalogTable({ rows }: Props) {
         size="xs"
         className="h-5 w-5 shrink-0 rounded p-0"
         aria-label={expandedSku === p.id ? "Contraer SKU" : `Ver SKU completo ${p.sku}`}
-        title={p.sku}
+        data-sku={p.sku}
         onPress={() => setExpandedSku((cur) => (cur === p.id ? null : p.id))}
       >
         <Barcode className="size-3.5" />
