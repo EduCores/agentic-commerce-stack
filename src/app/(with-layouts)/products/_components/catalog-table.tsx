@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronRight } from "@tailgrids/icons";
+import { ChevronRight, Copy1 } from "@tailgrids/icons";
 import { Badge } from "@/components/tailgrids/core/badge";
-import { Package } from "lucide-react";
+import { Button } from "@/components/tailgrids/core/button";
+import { Barcode, Package } from "lucide-react";
+import { toast } from "sonner";
 
 export type CatalogRow = {
   id: string;
@@ -24,6 +26,16 @@ type Props = {
 export function CatalogTable({ rows }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showHint, setShowHint] = useState(false);
+  const [expandedSku, setExpandedSku] = useState<string | null>(null);
+
+  const copySku = async (sku: string) => {
+    try {
+      await navigator.clipboard.writeText(sku);
+      toast.success("SKU copiado.");
+    } catch {
+      toast.error("No se pudo copiar el SKU.");
+    }
+  };
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -47,7 +59,7 @@ export function CatalogTable({ rows }: Props) {
       <div ref={scrollRef} className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-sm">
           <thead className="border-b border-card-border bg-background-gray-secondary/50 text-xs text-text-tertiary">
-            <tr><th className="p-2 text-left">SKU</th><th className="p-2 text-left">Producto</th><th className="p-2 text-left">Proveedor</th><th className="p-2 text-right">Precio</th><th className="p-2 text-right">Stock</th><th className="p-2 text-center">Estado</th></tr>
+            <tr><th className="p-2 text-left" style={{ width: "4%" }}>SKU</th><th className="p-2 text-left">Producto</th><th className="p-2 text-left">Proveedor</th><th className="p-2 text-right">Precio</th><th className="p-2 text-right">Stock</th><th className="p-2 text-center">Estado</th></tr>
           </thead>
           <tbody>
             {rows.map((p) => {
@@ -56,7 +68,38 @@ export function CatalogTable({ rows }: Props) {
                 p.provider === "shopify" ? "success" : p.provider === "woocommerce" ? "primary" : p.provider === "magento" ? "warning" : p.provider === "custom" ? "sky" : "gray";
               return (
                 <tr key={p.id} className="border-b border-card-border/60 transition hover:bg-background-gray-secondary/60">
-                  <td className="p-2 font-mono text-xs text-text-secondary">{p.sku}</td>
+                  <td className="p-2">
+  <div className={expandedSku === p.id ? "flex max-w-[220px] flex-col gap-1" : "flex max-w-[60px] flex-col gap-1"}>
+    <div className="flex items-center gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        appearance="ghost"
+        iconOnly
+        size="xs"
+        className="h-5 w-5 shrink-0 rounded p-0"
+        aria-label={expandedSku === p.id ? "Contraer SKU" : `Ver SKU completo ${p.sku}`}
+        title={p.sku}
+        onPress={() => setExpandedSku((cur) => (cur === p.id ? null : p.id))}
+      >
+        <Barcode className="size-3.5" />
+      </Button>
+      <span className={expandedSku === p.id ? "break-all font-mono text-xs font-medium text-text-primary" : "truncate font-mono text-xs text-text-secondary"}>{p.sku}</span>
+      <Button
+        type="button"
+        variant="ghost"
+        appearance="ghost"
+        iconOnly
+        size="xs"
+        className="h-5 w-5 shrink-0 rounded p-0"
+        aria-label={`Copiar SKU ${p.sku}`}
+        onPress={() => copySku(p.sku)}
+      >
+        <Copy1 className="size-3.5" />
+      </Button>
+    </div>
+  </div>
+</td>
                   <td className="p-2">
                     <div className="flex items-center gap-2">
                       <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-3.5">
