@@ -16,12 +16,12 @@ const CREW_INTENTS = new Set([
 
 function pillFor(toneKey?: string): string {
   if (toneKey === "admin_ops")
-    return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300";
+    return "border-amber-400 bg-amber-50 text-amber-800 dark:border-amber-600 dark:bg-amber-950/60 dark:text-amber-200";
   if (toneKey && CREW_INTENTS.has(toneKey))
-    return "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/60 dark:text-violet-300";
+    return "border-violet-400 bg-violet-50 text-violet-800 dark:border-violet-500 dark:bg-violet-950/60 dark:text-violet-200";
   if (toneKey)
-    return "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-300";
-  return "border-card-border bg-card-background text-text-secondary";
+    return "border-sky-400 bg-sky-50 text-sky-800 dark:border-sky-500 dark:bg-sky-950/60 dark:text-sky-200";
+  return "border-gray-300 bg-card-background text-text-secondary dark:border-gray-600";
 }
 
 export type LabeledEdgeData = {
@@ -73,7 +73,7 @@ export function LabeledEdge({
             <span
               title={label}
               className={cn(
-                "block max-w-[150px] truncate rounded-full border px-2 py-0.5 text-center text-[10px] font-semibold shadow-sm",
+                "block max-w-[190px] truncate rounded-full border-4 px-3 py-1 text-center text-xs font-bold shadow-md",
                 pillFor(d.toneKey)
               )}
             >
