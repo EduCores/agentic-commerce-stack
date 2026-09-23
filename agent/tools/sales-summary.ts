@@ -39,7 +39,8 @@ export default defineTool({
       : [];
     const topProducts = topGroups.map((g) => {
       const m = metas.find((x) => x.id === g.productId);
-      const imgs = Array.isArray(m?.images) ? (m.images as unknown[]).filter((u): u is string => typeof u === "string") : [];
+      const allImgs = Array.isArray(m?.images) ? (m.images as unknown[]).filter((u): u is string => typeof u === "string") : [];
+      const imgs = allImgs.filter((u) => /^https?:\/\//i.test(u));
       return {
         title: m?.title ?? "Producto",
         sku: m?.sku ?? g.productId.slice(0, 8),

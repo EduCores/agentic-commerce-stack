@@ -35,7 +35,8 @@ export default defineTool({
     const imgOf = (sku: string) => {
       const imgs = dbMeta.find((p) => p.sku === sku)?.images;
       const arr = Array.isArray(imgs) ? (imgs as unknown[]).filter((u): u is string => typeof u === "string") : [];
-      return arr[0] ?? "";
+      // Solo URLs https reales (los paths locales no resuelven en ningún frontend).
+      return arr.find((u) => /^https?:\/\//i.test(u)) ?? "";
     };
     const productsOut = hits.map((hit) => {
       const meta = (hit.product.metadata ?? {}) as Record<string, unknown>;
