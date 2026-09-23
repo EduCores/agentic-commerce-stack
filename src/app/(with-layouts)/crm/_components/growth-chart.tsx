@@ -14,6 +14,8 @@ import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts"
 import { GrowthTooltip } from "./growth-tooltip";
 import type { CrmData, CrmRange } from "./types";
 import { CRM_RANGES } from "./types";
+import { halfDelta } from "@/utils/period-stats";
+import { DeltaChip } from "@/components/common/stat-helpers";
 
 const MONTHS = [
   { id: "all", label: "Mes" },
@@ -47,6 +49,8 @@ export function CrmGrowthChart({ data, days, onDays, month, year, onMonth, onYea
   const newLeads = rows.reduce((a, r) => a + r.leads, 0);
   const revenue = rows.reduce((a, r) => a + (r.revenue ?? 0), 0);
   const step = Math.max(1, Math.ceil(rows.length / 7));
+  const leadsDelta = halfDelta(rows.map((r) => r.leads));
+  const revenueDelta = halfDelta(rows.map((r) => r.revenue ?? 0));
 
   const monthLabel = MONTHS.find((m) => m.id === month)?.label ?? "Mes";
   const yearLabel = year === "all" ? "" : year;
@@ -108,6 +112,17 @@ export function CrmGrowthChart({ data, days, onDays, month, year, onMonth, onYea
           </AreaChart>
         </ChartContainer>
       </CardContent>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 pt-3 text-xs text-text-tertiary">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2 rounded-full" style={{ backgroundColor: "#22C55E" }} aria-hidden="true" />
+          Clientes <DeltaChip delta={leadsDelta.delta} direction={leadsDelta.direction} />
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2 rounded-full" style={{ backgroundColor: "#8B5CF6" }} aria-hidden="true" />
+          Ingresos <DeltaChip delta={revenueDelta.delta} direction={revenueDelta.direction} />
+        </span>
+        <span>vs mitad anterior</span>
+      </div>
       <div className="flex flex-wrap items-center gap-2 border-t border-card-border px-5 py-3">
         <span className="text-xs text-text-tertiary">Rango:</span>
         {CRM_RANGES.map((r) => (

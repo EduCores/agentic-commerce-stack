@@ -1,10 +1,12 @@
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
+import { sharePct } from "@/utils/period-stats";
 import type { CrmData } from "./types";
 
 import { Award, Users } from "lucide-react";
 
 export function CrmLeadsReport({ data }: { data: CrmData }) {
+  const totalRevenue = data.leads.reduce((a, l) => a + (l.revenue ?? 0), 0);
   return (
     <Card className="md:col-span-2">
       <CardHeader>
@@ -22,7 +24,7 @@ export function CrmLeadsReport({ data }: { data: CrmData }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-card-border bg-background-gray-secondary/40 text-xs text-text-tertiary">
-                <tr><th className="p-2 text-left">Cliente</th><th className="p-2 text-right">Negocios</th><th className="p-2 text-right">Ingresos</th><th className="p-2 text-right">Nivel</th></tr>
+                <tr><th className="p-2 text-left">Cliente</th><th className="p-2 text-right">Negocios</th><th className="p-2 text-right">Ingresos</th><th className="p-2 text-right">Part.</th><th className="p-2 text-right">Nivel</th></tr>
               </thead>
               <tbody>
                 {data.leads.slice(0, 10).map((l, i) => (
@@ -40,6 +42,9 @@ export function CrmLeadsReport({ data }: { data: CrmData }) {
                     </td>
                     <td className="p-2 text-right font-medium">{l.deals}</td>
                     <td className="p-2 text-right font-bold text-white">${l.revenue.toLocaleString("es-CL")}</td>
+                    <td className="p-2 text-right">
+                      <Badge color={i === 0 ? "primary" : "gray"}>{sharePct(l.revenue ?? 0, totalRevenue).toLocaleString("es-CL")}%</Badge>
+                    </td>
                     <td className="p-2 text-right">
                       <Badge color={l.performance === "Alta" ? "success" : l.performance === "Media" ? "warning" : "gray"}>
                         {l.performance === "Alta" && <Award className="mr-1 size-3" />}
