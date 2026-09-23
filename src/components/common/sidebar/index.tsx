@@ -44,10 +44,10 @@ export default function Sidebar({
                     isSidebarOpen
                         ? 'justify-between'
                         : 'flex-col justify-center gap-4',
-                    isMobileSheet ? 'gap-2 pl-3 pr-1 pt-7' : 'px-4 pt-7',
+                    isMobileSheet ? 'gap-2 pl-4 pr-3 pt-7' : 'px-4 pt-7',
                 )}
             >
-                <Link href='/' suppressHydrationWarning aria-label="Ir al panel principal">
+                <Link href='/' suppressHydrationWarning aria-label="Ir al panel principal" className={isMobileSheet ? 'min-w-0 flex-1' : undefined}>
                     <StarShopLogo compact={!isSidebarOpen} className={isMobileSheet ? "text-[22px] md:text-[26px]" : undefined} />
                 </Link>
 
@@ -56,7 +56,7 @@ export default function Sidebar({
                     className={cn(
                         'transition-colors',
                         isMobileSheet
-                            ? 'shrink-0 rounded-lg p-3.5 text-icon-tertiary hover:bg-background-gray-primary hover:text-text-primary [&_svg]:size-8'
+                            ? 'shrink-0 rounded-lg p-2.5 text-icon-tertiary hover:bg-background-gray-primary hover:text-text-primary [&_svg]:size-6'
                             : 'p-1.5 text-icon-tertiary hover:text-text-secondary',
                     )}
                     aria-label={

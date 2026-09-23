@@ -20,8 +20,8 @@ export default function WithLayout({ children }: { children: ReactNode }) {
       {/*  Desktop sidebar (lg+) — always in DOM, toggles width  */}
       <aside
         style={{
-          width: isSidebarOpen ? "270px" : "72px",
-          minWidth: isSidebarOpen ? "270px" : "72px",
+          width: isSidebarOpen ? "200px" : "72px",
+          minWidth: isSidebarOpen ? "200px" : "72px",
           transition:
             "width 300ms cubic-bezier(0.4,0,0.2,1), min-width 300ms cubic-bezier(0.4,0,0.2,1)",
         }}
@@ -36,7 +36,7 @@ export default function WithLayout({ children }: { children: ReactNode }) {
         <SheetContent
           side="left"
           showCloseButton={false}
-          className="w-67.5! max-w-67.5! border-r border-card-border bg-card-surface-area p-0"
+          className="w-67.5! max-w-67.5! min-w-0! border-r border-card-border bg-card-surface-area p-0"
         >
           <SheetTitle className="sr-only">Sidebar</SheetTitle>
           <Sidebar
