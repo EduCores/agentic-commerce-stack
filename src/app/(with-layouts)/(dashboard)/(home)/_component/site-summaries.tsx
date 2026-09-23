@@ -124,8 +124,8 @@ export function SiteSummaries() {
           <p className="mt-2 break-words text-2xl font-extrabold tracking-tight text-text-primary">
             {carts.data.open} <span className="text-sm font-medium text-text-tertiary">abandonados</span>
           </p>
-          <p className="mt-1 flex items-center gap-2 text-xs text-text-tertiary">
-            {formatCLP(carts.data.total)} en juego <Badge color="warning">recupera</Badge>
+          <p className="mt-1 flex min-w-0 flex-wrap items-center gap-2 text-xs text-text-tertiary">
+            <span className="min-w-0 break-words">{formatCLP(carts.data.total)} en juego</span> <Badge color="warning">recupera</Badge>
           </p>
           <HomeCardLink href="/admin/emails">Recuperar →</HomeCardLink>
         </div>
