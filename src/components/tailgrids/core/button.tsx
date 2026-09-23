@@ -27,6 +27,10 @@ export const buttonStyles = cva(
         true: "",
         false: "",
       },
+      compact: {
+        true: "",
+        false: "",
+      },
       size: {
         xs: "[&>svg]:size-4",
         sm: "[&>svg]:size-5",
@@ -193,6 +197,35 @@ export const buttonStyles = cva(
         className: "h-12 gap-1 px-5 py-3 text-base",
       },
 
+      // Compact sizes (table actions)
+      {
+        iconOnly: false,
+        compact: true,
+        size: "sm",
+        className: "h-7 px-2 py-1 gap-1 text-xs [&>svg]:size-3.5",
+      },
+
+      // Compact + outline: ghost (Editar)
+      {
+        iconOnly: false,
+        compact: true,
+        appearance: "outline",
+        size: "sm",
+        className:
+          "h-7 px-2 py-1 gap-1 text-xs border-button-primary-outline-stroke bg-button-primary-outline-background text-button-primary-outline-text hover:bg-button-primary-outline-hover-background focus:ring-button-outline-focus-ring data-[focused=true]:ring-button-outline-focus-ring [&>svg]:size-3.5",
+      },
+
+      // Compact + outline: danger (Eliminar)
+      {
+        iconOnly: false,
+        compact: true,
+        variant: "danger",
+        appearance: "outline",
+        size: "sm",
+        className:
+          "h-7 px-2 py-1 gap-1 text-xs border-button-error-outline-stroke bg-button-error-outline-background text-button-error-outline-text hover:bg-button-error-outline-hover-background hover:text-button-error-outline-hover-text focus:ring-button-error-outline-focus-ring data-[focused=true]:ring-button-error-outline-focus-ring [&>svg]:size-3.5",
+      },
+
       // Outline sizes (Regular) - 2px taller
       {
         iconOnly: false,
@@ -283,6 +316,7 @@ export type ButtonProps = RACButtonProps & {
   appearance?: "fill" | "outline" | "ghost";
   iconOnly?: boolean;
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+  compact?: boolean;
   focused?: boolean;
 };
 
@@ -291,6 +325,7 @@ export function Button({
   appearance,
   iconOnly,
   size,
+  compact,
   focused,
   children,
   className,
@@ -314,6 +349,7 @@ export function Button({
             appearance: normalizedAppearance,
             iconOnly,
             size,
+            compact,
           }),
           className,
         ),

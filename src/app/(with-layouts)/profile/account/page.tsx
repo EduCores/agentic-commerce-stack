@@ -1,28 +1,32 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/tailgrids/core/avatar";
 import { Button } from "@/components/tailgrids/core/button";
-import { Card } from "@/components/tailgrids/core/card";
-import { Input } from "@/components/tailgrids/core/input";
+import { Card, CardContent } from "@/components/tailgrids/core/card";
+import { Form } from "react-aria-components";
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/tailgrids/core/input-group";
+  Dialog,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+  DialogClose,
+} from "@/components/tailgrids/core/dialog";
+import { TextField } from "@/components/tailgrids/core/text-field";
+import { Input } from "@/components/tailgrids/core/input";
 import { Label } from "@/components/tailgrids/core/label";
 import {
   Select,
   SelectContent,
-  SelectIndicator,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
+  SelectIndicator,
 } from "@/components/tailgrids/core/select";
 import { TextArea } from "@/components/tailgrids/core/text-area";
-import { TextField } from "@/components/tailgrids/core/text-field";
-import { FieldError, Form } from "react-aria-components";
-import { LogoutIcon, TrashIcon } from "./icons";
+import { TrashIcon } from "./icons";
 
 const countryOptions = [
   { value: "cl", label: "Chile" },
@@ -33,169 +37,362 @@ const countryOptions = [
   { value: "us", label: "Estados Unidos" },
 ];
 
+type FieldState = {
+  fullName: string;
+  email: string;
+  phone: string;
+  website: string;
+  address: string;
+  country: string;
+  bio: string;
+};
+
+const DEFAULT_FIELDS: FieldState = {
+  fullName: "",
+  email: "",
+  phone: "",
+  website: "",
+  address: "",
+  country: "cl",
+  bio: "",
+};
+
+type DeleteConfirmState = {
+  isOpen: boolean;
+  email: string;
+  confirmed: boolean;
+};
+
+function validateForm(fields: FieldState): string | null {
+  if (!fields.fullName.trim()) return "El nombre completo es obligatorio.";
+  if (!fields.email.trim()) return "El correo electrónico es obligatorio.";
+  if (fields.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email))
+    return "Ingresa un correo válido.";
+  if (fields.phone.trim() && !/^[\d\s\+\-\(\)]{7,20}$/.test(fields.phone))
+    return "Número de teléfono inválido.";
+  return null;
+}
+
+function makeInitials(fullName: string): string {
+  return fullName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 export default function AccountPage() {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [fields, setFields] = useState<FieldState>(DEFAULT_FIELDS);
+  const [originalFields, setOriginalFields] = useState<FieldState>(DEFAULT_FIELDS);
+  const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState>({
+    isOpen: false,
+    email: "",
+    confirmed: false,
+  });
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/profile");
+        if (!res.ok) {
+          toast.error("No se pudieron cargar los datos de la cuenta.");
+          return;
+        }
+        const data = await res.json();
+        const loaded: FieldState = {
+          fullName: data.fullName ?? "",
+          email: data.email ?? "",
+          phone: data.phone ?? "",
+          website: data.website ?? "",
+          address: data.address ?? "",
+          country: data.country ?? "cl",
+          bio: data.bio ?? "",
+        };
+        setFields(loaded);
+        setOriginalFields(loaded);
+      } catch {
+        const mock: FieldState = {
+          fullName: "Juan Pérez",
+          email: "juan.perez@starshop.cl",
+          phone: "+56 9 1234 5678",
+          website: "www.starshop.cl",
+          address: "Av. Providencia 1208, Providencia, Santiago",
+          country: "cl",
+          bio: "Dueño de StarShop en Santiago. Venta mayorista de herramientas e iluminación LED a lo largo de Chile.",
+        };
+        setFields(mock);
+        setOriginalFields(mock);
+      }
+    };
+    load();
+  }, []);
+
+  const hasChanges = useMemo(
+    () => JSON.stringify(fields) !== JSON.stringify(originalFields),
+    [fields, originalFields],
+  );
+
+  const handleFieldChange = useCallback(
+    (field: keyof FieldState) => (value: string) => {
+      setFields((prev) => ({ ...prev, [field]: value }));
+    },
+    [],
+  );
+
+  const handleCancel = useCallback(() => {
+    setFields(originalFields);
+    formRef.current?.reset();
+  }, [originalFields]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const error = validateForm(fields);
+    if (error) {
+      toast.error(error);
+      return;
+    }
+    if (!hasChanges) {
+      toast.info("No hay cambios para guardar.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fields),
+      });
+      if (!res.ok) throw new Error("Error al guardar");
+      const updated = await res.json();
+      setOriginalFields(updated);
+      toast.success("Cuenta actualizada correctamente.");
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      toast.error("No se pudieron guardar los cambios.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteOpen = useCallback(() => {
+    setDeleteConfirm((prev) => ({
+      ...prev,
+      isOpen: true,
+      email: "",
+      confirmed: false,
+    }));
+  }, []);
+
+  const handleDeleteClose = useCallback(() => {
+    setDeleteConfirm({
+      isOpen: false,
+      email: "",
+      confirmed: false,
+    });
+  }, []);
+
+  const handleDeleteSubmit = async () => {
+    if (deleteConfirm.email.toLowerCase() !== fields.email.toLowerCase()) {
+      toast.error("El correo no coincide. Por favor verifica e inténtalo de nuevo.");
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: deleteConfirm.email }),
+      });
+      if (!res.ok) throw new Error("Error al eliminar");
+      toast.success("Cuenta eliminada permanentemente.");
+      setFields(DEFAULT_FIELDS);
+      setOriginalFields(DEFAULT_FIELDS);
+      handleDeleteClose();
+    } catch {
+      toast.error("No se pudo eliminar la cuenta. Inténtalo de nuevo.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const initials = useMemo(() => makeInitials(fields.fullName || "Usuario"), [fields.fullName]);
+
   return (
     <div className="space-y-6">
-      {/* Account Details Card */}
-      <Card className="bg-transparent p-5">
-        <h2 className="mb-6 text-xl leading-7 font-semibold text-text-primary">Detalles de la cuenta</h2>
-
-        <Form
-          className="space-y-6"
-          onSubmit={(event) => {
-            event.preventDefault();
-          }}
-        >
+      <Card>
+        <CardContent className="flex flex-col gap-6">
           <div className="flex items-center gap-4">
-            <Avatar size="xxl">
-              <AvatarFallback>EN</AvatarFallback>
-            </Avatar>
-
-            <div className="flex flex-col gap-2.5">
-              <div className="flex items-center gap-3">
-                <Button appearance="outline" size="sm">
-                  Cambiar avatar
-                </Button>
-                <Button appearance="outline" variant="danger" size="sm">
-                  Eliminar
-                </Button>
-              </div>
-              <p className="text-xs leading-4 text-text-tertiary">
-                Acepta PNG, JPEG, GIF; tamaño máximo 2 MB.
-              </p>
+            <div className="relative size-16 rounded-full bg-primary-100 flex items-center justify-center">
+              <Avatar>
+                <AvatarFallback className="text-lg font-semibold text-primary-500">{initials}</AvatarFallback>
+              </Avatar>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-text-primary">{fields.fullName || "Usuario"}</h3>
+              <p className="text-sm text-text-secondary-alt">{fields.email}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <TextField className="w-full gap-2.5">
-              <Label>Nombre completo</Label>
-              <Input name="fullName" placeholder="Eduardo Navarro Cores" className="w-full" required />
-              <FieldError />
-            </TextField>
+          <Form ref={formRef} onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <TextField className="flex flex-col gap-1.5">
+                <Label htmlFor="fullName">Nombre completo</Label>
+                <Input
+                  id="fullName"
+                  value={fields.fullName}
+                  onChange={(e) => handleFieldChange("fullName")(e.target.value)}
+                  placeholder="Ej. Juan Pérez"
+                  required
+                />
+              </TextField>
 
-            <TextField className="w-full gap-2.5">
-              <Label>Correo electrónico</Label>
-              <Input
-                name="email"
-                type="email"
-                placeholder="eduardonavarrocores@gmail.com"
-                className="w-full"
-                required
-              />
-              <FieldError />
-            </TextField>
+              <TextField className="flex flex-col gap-1.5">
+                <Label htmlFor="email">Correo electrónico</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={fields.email}
+                  onChange={(e) => handleFieldChange("email")(e.target.value)}
+                  placeholder="ejemplo@dominio.com"
+                  required
+                />
+              </TextField>
 
-            <TextField className="w-full gap-2.5">
-              <Label>Número de teléfono</Label>
-              <Input name="phone" placeholder="+56 9 3747 9835" className="w-full" />
-            </TextField>
+              <TextField className="flex flex-col gap-1.5">
+                <Label htmlFor="phone">Teléfono</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={fields.phone}
+                  onChange={(e) => handleFieldChange("phone")(e.target.value)}
+                  placeholder="+56 9 1234 5678"
+                />
+              </TextField>
 
-            <TextField className="w-full gap-2.5">
-              <Label>Sitio web</Label>
-              <InputGroup>
-                <InputGroupAddon className="after h-full border-r border-card-border text-input-placeholder-text-color">
-                  https://
-                </InputGroupAddon>
-                <InputGroupInput name="website" placeholder="www.starshop.cl" className="pl-2" />
-              </InputGroup>
-            </TextField>
+              <TextField className="flex flex-col gap-1.5">
+                <Label htmlFor="website">Sitio web</Label>
+                <Input
+                  id="website"
+                  type="url"
+                  value={fields.website}
+                  onChange={(e) => handleFieldChange("website")(e.target.value)}
+                  placeholder="www.ejemplo.cl"
+                />
+              </TextField>
 
-            <TextField className="w-full gap-2.5">
-              <Label>Dirección</Label>
-              <Input
-                name="address"
-                placeholder="Av. Providencia 1208, Providencia, Santiago"
-                className="w-full"
-              />
-            </TextField>
+              <TextField className="md:col-span-2 flex flex-col gap-1.5">
+                <Label htmlFor="address">Dirección</Label>
+                <Input
+                  id="address"
+                  value={fields.address}
+                  onChange={(e) => handleFieldChange("address")(e.target.value)}
+                  placeholder="Av. Providencia 1208, Santiago"
+                />
+              </TextField>
 
-            <div>
-              <Select name="country" defaultSelectedKey="cl" className="h-full">
-                <SelectLabel>País</SelectLabel>
-                <SelectTrigger className="h-full w-full border-input-border">
-                  <SelectValue className="flex items-center gap-2" />
-                  <SelectIndicator />
-                </SelectTrigger>
-                <SelectContent>
-                  {countryOptions.map((option) => (
-                    <SelectItem key={option.value} id={option.value} textValue={option.label}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="country">País</Label>
+                <Select
+                  value={fields.country}
+                  onChange={(v) => handleFieldChange("country")(String(v))}
+                  aria-label="País"
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                    <SelectIndicator />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countryOptions.map((option) => (
+                      <SelectItem key={option.value} id={option.value} textValue={option.label}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <TextField className="md:col-span-2 flex flex-col gap-1.5">
+                <Label htmlFor="bio">Biografía</Label>
+                <TextArea
+                  id="bio"
+                  value={fields.bio}
+                  onChange={(e) => handleFieldChange("bio")(e.target.value)}
+                  placeholder="Cuéntanos sobre ti..."
+                  rows={4}
+                />
+              </TextField>
             </div>
 
-            <TextField className="col-span-1 w-full gap-2.5 md:col-span-2">
-              <Label>Biografía</Label>
-              <TextArea
-                name="bio"
-                className="h-25 shadow-xs"
-                placeholder="Dueño de StarShop en Santiago. Venta mayorista de herramientas e iluminación LED a lo largo de Chile."
-              />
-            </TextField>
-
-            <div className="col-span-1 flex items-center justify-end gap-3 md:col-span-2">
+            <div className="mt-6 flex justify-end gap-3 border-t border-card-border pt-4">
               <Button
-                appearance="outline"
-                variant="primary"
-                size="lg"
                 type="button"
-                className="px-3.5 text-sm"
+                variant="ghost"
+                size="sm"
+                onPress={handleCancel}
+                isDisabled={saving}
               >
                 Cancelar
               </Button>
-              <Button variant="primary" size="lg" type="submit" className="px-3.5 text-sm">
-                Guardar cambios
+              <Button type="submit" isDisabled={saving || !hasChanges}>
+                {saving ? "Guardando..." : "Guardar cambios"}
               </Button>
             </div>
+          </Form>
+
+          <div className="border-t border-card-border pt-4">
+            <Button
+              type="button"
+              variant="danger"
+              appearance="outline"
+              iconOnly
+              onPress={handleDeleteOpen}
+              className="self-start"
+              aria-label="Eliminar cuenta"
+            >
+              <TrashIcon />
+            </Button>
           </div>
-        </Form>
+        </CardContent>
       </Card>
 
-      <Card className="bg-transparent p-5">
-        {/* Sign Out */}
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <p className="mb-1 text-sm leading-5 font-medium text-text-primary">
-              Cerrar sesión en todos los dispositivos
-            </p>
-            <p className="text-xs leading-4 text-text-tertiary">
-              Termina todas las sesiones activas en tus dispositivos.
-            </p>
-          </div>
-
-          <Button
-            appearance="outline"
-            variant="primary"
-            size="lg"
-            className="gap-2 px-3.5 py-2 text-sm [&>svg]:size-5"
-          >
-            <LogoutIcon />
-            Cerrar sesión
-          </Button>
-        </div>
-        <hr className="my-4 border-border-secondary-alt" />
-        {/* Delete Account */}
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <p className="mb-1 text-sm leading-5 font-medium text-text-primary">Eliminar cuenta</p>
-            <p className="text-xs leading-4 text-text-tertiary">
-              Elimina tu cuenta de forma permanente junto con todos los datos asociados.
-            </p>
-          </div>
-
-          <Button
-            appearance="outline"
-            variant="danger"
-            size="lg"
-            className="gap-2 px-3.5 text-sm [&>svg]:size-5"
-          >
-            <TrashIcon />
-            Eliminar cuenta
-          </Button>
-        </div>
-      </Card>
+      <Dialog
+        isOpen={deleteConfirm.isOpen}
+        onOpenChange={(open) =>
+          setDeleteConfirm((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
+        <form onSubmit={(e) => { e.preventDefault(); handleDeleteSubmit(); }}>
+          <DialogTitle>Eliminar cuenta</DialogTitle>
+          <DialogDescription>
+            Esta acción eliminará permanentemente tu cuenta. Introduce tu correo para confirmar.
+          </DialogDescription>
+          <DialogBody>
+            <TextField className="flex flex-col gap-1.5">
+              <Label htmlFor="delete-email">Correo electrónico</Label>
+              <Input
+                id="delete-email"
+                type="email"
+                value={deleteConfirm.email}
+                onChange={(e) => setDeleteConfirm((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="tu@email.com"
+                required
+              />
+            </TextField>
+          </DialogBody>
+          <DialogFooter>
+            <DialogClose variant="ghost" size="lg">
+              Cancelar
+            </DialogClose>
+            <Button type="submit" variant="danger" appearance="fill" size="lg" isDisabled={deleting}>
+              {deleting ? "Eliminando..." : "Eliminar cuenta"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Dialog>
     </div>
   );
 }
