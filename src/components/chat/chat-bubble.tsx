@@ -2,6 +2,7 @@
 
 import { cn } from "@/utils/cn";
 import { useTypewriter, TypingIndicator } from "./use-typewriter";
+import { AgentMarkdown } from "./agent-markdown";
 
 type BubbleProps = {
   role: "user" | "assistant";
@@ -35,10 +36,16 @@ export function ChatBubble({ role, text, streaming, isTyping, className }: Bubbl
           role === "user" ? "bg-[rgb(255_216_20)] text-black rounded-br-md" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-bl-md"
         )}
       >
-        <p className="whitespace-pre-wrap break-words">
-          {shown}
-          {!done && isAssistant && <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-[rgb(255_216_20)] align-middle" />}
-        </p>
+        {isAssistant ? (
+          <div className="break-words">
+            <AgentMarkdown text={shown} />
+            {!done && <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-[rgb(255_216_20)] align-middle" />}
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap break-words">
+            {shown}
+          </p>
+        )}
       </div>
     </div>
   );

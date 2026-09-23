@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { defineTool } from "@/lib/eve/defineTool";
 import { getStoreAdapterForStore } from "@/lib/adapters/store";
+import { prisma } from "@/lib/adapters/prisma";
 import { normalize } from "../lib/search/normalize";
 import { rankProducts } from "../lib/search/rank";
 import { matchCategories, allCategories } from "../lib/search/categories";
@@ -23,7 +24,20 @@ export default defineTool({
     const rawText = normalize(query);
     const matched = matchCategories(rawText, ranked.tokens);
 
-    const productsOut = ranked.hits.slice(0, limit).map((hit) => {
+    const hits = ranked.hits.slice(0, limit);
+    // Enriquece con imagen real desde Prisma (best-effort: el mock puede no estar en BD).
+    const dbMeta = await prisma.product
+      .findMany({
+        where: { storeId: sid, sku: { in: hits.map((h) => h.product.sku) } },
+        select: { sku: true, images: true },
+      })
+      .catch(() => []);
+    const imgOf = (sku: string) => {
+      const imgs = dbMeta.find((p) => p.sku === sku)?.images;
+      const arr = Array.isArray(imgs) ? (imgs as unknown[]).filter((u): u is string => typeof u === "string") : [];
+      return arr[0] ?? "";
+    };
+    const productsOut = hits.map((hit) => {
       const meta = (hit.product.metadata ?? {}) as Record<string, unknown>;
       return {
         sku: hit.product.sku,
@@ -32,6 +46,7 @@ export default defineTool({
         price: hit.product.price,
         currency: hit.product.currency ?? "CLP",
         stock: hit.product.stock,
+        image: imgOf(hit.product.sku),
         category: String(meta.categoria ?? ""),
         categorySlug: String(meta.categorySlug ?? ""),
         url: `/producto/${hit.product.sku}`,

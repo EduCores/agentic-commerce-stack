@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { ArrowUp, Bot, X, Send, Sparkles, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getTeamWhatsAppLink, memberWaLink } from "@/lib/whatsapp";
+import { AgentMarkdown } from "./agent-markdown";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -197,7 +198,7 @@ export function ACSFloatingButtons() {
               {agentMessages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm flex items-end gap-1 ${m.role === "user" ? "bg-[rgb(255_216_20)] text-black" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100"}`}>
-                    <span className="flex-1 whitespace-pre-wrap break-words">{m.text}</span>
+                    <span className="flex-1 break-words">{m.role === "user" ? <span className="whitespace-pre-wrap">{m.text}</span> : <AgentMarkdown text={m.text} />}</span>
                     {m.role === "agent" && m.text && (
                       <button onClick={() => (speakingId === i ? stopSpeak() : speak(m.text, i))} title={speakingId === i ? "Detener voz" : "Escuchar"} className={`ml-1 shrink-0 rounded-full p-1 ${speakingId === i ? "bg-red-500 text-white animate-pulse" : "bg-white/70 hover:bg-white text-zinc-600"}`}><Volume2 className="h-3 w-3" /></button>
                     )}

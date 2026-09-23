@@ -40,7 +40,7 @@ export function detectIntentHeuristic(message: string, isAdmin?: boolean): StarS
   const t = normalize(message);
   if (isAdmin) {
     if (/^(hola|hola!|hey|buenas|buenos dias|buenas tardes)\b/.test(t.trim())) return "admin_ops";
-    if (/(cuanto vendi|cuan vend|ventas hoy|ingresos|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow|cuanto se vendio|vendimos)/.test(t)) return "admin_ops";
+    if (/(cuanto vendi|cuan vend|ventas(?!@)|vendidos?|ingresos|facturacion|reporte|resumen.*ventas|como andan|como van|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow|cuanto se vendio|vendimos)/.test(t)) return "admin_ops";
   }
   if (/(devol|devoluci|cambio.*producto|garant.*falla|no me sirve.*devolver)/.test(t)) return "return_request";
   if (/(carrito abandon|deje.*carrito|carrito.*abandon|retomar compr|abandon.*cart|carrito.*no pude pagar|quedo.*carrito)/.test(t)) return "abandoned_cart";

@@ -8,7 +8,7 @@ import { z } from "zod";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
-import { STARSHOP_CREWS, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
+import { STARSHOP_CREWS, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
 import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type GraphCrewOverride } from "./lib/crew-graph";
 import { detectIntent } from "@/lib/eve/detect-intent";
 import processPurchase from "./tools/process-purchase";
@@ -21,6 +21,7 @@ import checkout from "./tools/checkout";
 import scrapeWebsite from "./tools/scrape-website";
 import sendEmail from "./tools/send-email";
 import orderTracking from "./tools/order-tracking";
+import getSalesSummary from "./tools/sales-summary";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -160,6 +161,7 @@ export const acsTools = {
   scrapeWebsite,
   sendEmail,
   orderTracking,
+  getSalesSummary,
 };
 
 const ALL_TOOL_DEFS: Record<string, { description: string; inputSchema: z.ZodTypeAny; execute: unknown }> = {
@@ -173,6 +175,7 @@ const ALL_TOOL_DEFS: Record<string, { description: string; inputSchema: z.ZodTyp
   scrapeWebsite: { description: scrapeWebsite.description, inputSchema: scrapeWebsite.inputSchema as z.ZodTypeAny, execute: scrapeWebsite.execute as never },
   sendEmail: { description: sendEmail.description, inputSchema: sendEmail.inputSchema as z.ZodTypeAny, execute: sendEmail.execute as never },
   orderTracking: { description: orderTracking.description, inputSchema: orderTracking.inputSchema as z.ZodTypeAny, execute: orderTracking.execute as never },
+  getSalesSummary: { description: getSalesSummary.description, inputSchema: getSalesSummary.inputSchema as z.ZodTypeAny, execute: getSalesSummary.execute as never },
 };
 
 // Tools compilados UNA vez al cargar el módulo (evita reconstruir wrappers en cada request)
@@ -301,7 +304,7 @@ async function resolveAgent(params: { agentSlug: string; storeId?: string; _over
   if (params._override) {
     return {
       agent: { id: `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt },
-      system: `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}`,
+      system: `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}\n\n${STARSHOP_TRUTH_RULE}`,
       modelId: params._override.model,
       allowedTools: params._override.allowedTools,
     };
@@ -309,7 +312,7 @@ async function resolveAgent(params: { agentSlug: string; storeId?: string; _over
   const agent = (await getAgentConfig(params.agentSlug)) as ResolvedAgentConfig["agent"];
   return {
     agent,
-    system: `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}`,
+    system: `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}\n\n${STARSHOP_TRUTH_RULE}`,
     modelId: agent.model ?? DEFAULT_MODEL,
     allowedTools: undefined,
   };
@@ -466,10 +469,24 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
     input: params.input,
     storeId: params.storeId,
     history: params.history,
-    _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools: crew.tools },
+    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin), model: crew.model, allowedTools: crew.tools },
   } as never)) {
     yield chunk;
   }
+}
+
+/**
+ * Quién habla en ESTA conversación (el modelo no lo sabe si no se lo dices).
+ * Sin esto, admin_ops declina métricas creyendo que habla con un cliente.
+ */
+function audienceNote(detectedIntent: StarShopIntent, isAdmin?: boolean): string {
+  if (detectedIntent === "admin_ops" && isAdmin) {
+    return "\n\nCONTEXTO DE ESTA CONVERSACIÓN: hablas con el DUEÑO autenticado de la tienda. Tienes permiso total: llama a getSalesSummary y entrega las cifras reales con el formato indicado. Nada de declinar.";
+  }
+  if (!isAdmin) {
+    return "\n\nCONTEXTO DE ESTA CONVERSACIÓN: hablas con un CLIENTE de la tienda StarShop (NO es el dueño). Nunca reveles ingresos ni métricas internas; ayuda con catálogo, stock y su compra.";
+  }
+  return "";
 }
 
 // Wrapper non-streaming de runAgent con el flow StarShop (para compat con chat endpoint)
@@ -484,7 +501,7 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
     input: params.input,
     storeId: params.storeId,
     history: params.history,
-    _override: { systemPrompt: crew.prompt, model: crew.model, allowedTools: crew.tools },
+    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin), model: crew.model, allowedTools: crew.tools },
   } as never);
   return {
     ...(agentResult as { text: string; toolCalls?: unknown[] }),
