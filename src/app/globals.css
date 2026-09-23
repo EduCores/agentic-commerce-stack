@@ -653,11 +653,6 @@
   }
 }
 
-.text-text-primary {
-  padding-left: 6px;
-  padding-top: 6px;
-}
-
 /* .p-5 global -> calc(var(--spacing) * 3). Sin capa: gana a la utilidad de Tailwind en todos los tamaños. */
 .p-5 {
   padding: calc(var(--spacing) * 3);
