@@ -27,8 +27,12 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             </span>
             Resumen financiero — negocio en tiempo real
           </h3>
-          <p className="mt-1 text-xs text-white/75">
-            {orders.toLocaleString("es-CL")} pedidos · {formatCLP(revenue)} ingresos reales · pedidos pagados y completados
+          <p className="mt-2 text-sm font-medium text-white">
+            <strong className="font-extrabold">{orders.toLocaleString("es-CL")} pedidos</strong>
+            <span className="mx-1.5 text-white/50">·</span>
+            <strong className="font-extrabold">{formatCLP(revenue)} ingresos reales</strong>
+            <span className="mx-1.5 text-white/50">·</span>
+            <span className="text-white/85">pedidos pagados y completados</span>
           </p>
         </div>
         <Link href="/orders" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
