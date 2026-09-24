@@ -118,7 +118,7 @@ export default async function StorePage() {
             {products.length === 0 ? (
               <p className="text-sm text-text-tertiary">Sin productos. Ejecuta <code>prisma/seed.ts</code> o conecta tu tienda y sincroniza.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {products.map((p) => {
                   const stockState =
                     p.stock <= 0
@@ -133,7 +133,7 @@ export default async function StorePage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={thumb} alt={p.title} className="h-24 w-full object-cover" loading="lazy" />
                       ) : null}
-                      <div className="p-3">
+                      <div className="p-2">
                       <div className="flex items-center justify-between gap-2.5">
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text">
                           <Package size={18} />
