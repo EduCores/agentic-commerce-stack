@@ -16,7 +16,6 @@
  */
 export const STARSHOP_CREW_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
 
-
 export const STARSHOP_WELCOME_PROMPT = `Eres Star, asistente de bienvenida de StarShop (B2B Chile). Detecta intención del cliente o del admin dueño.
 
 INTENCIONES VÁLIDAS (responde SOLO con una de estas, en detected_intent):
