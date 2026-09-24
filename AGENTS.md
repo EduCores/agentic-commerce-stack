@@ -72,3 +72,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Don't overwrite primitives in `src/components/tailgrids/core/` without asking.
 - Don't create new CSS utility classes — use existing tokens.
 - Don't place pages outside the `(with-layouts)` route group unless intentional.
+
+## Related project: StarShop (storefront frontend)
+
+When the user says **"StarShop" / "proyecto StarShop"**, they mean this sibling folder (NOT this repo's internal `starshop` modules, and NOT `demostarshop`):
+
+- Path: sibling folder of this workspace, named `StarShop` (Laragon-style setups: `C:\Users\<user>\Local Sites\StarShop`) — separate git repo, branch `main`.
+  Remotes: `origin` → `github.com/EduCores/starshop`, plus `demostarshop` and `origin_demo` (demo variants — don't confuse them).
+- Stack: Next.js 14 (App Router, `src/app`), React 18, Tailwind, Prisma + Supabase, Playwright tests.
+- Deployed at `https://starshop-rho.vercel.app`; product images are served from that same domain.
+- Integration with this repo: StarShop's chat widget calls this backend at `POST /api/chat` (and `/api/chat/stream`) sending `Origin: https://starshop-rho.vercel.app` (allowlisted in `src/lib/api/chat-guard.ts`).
+- Agent behavior for StarShop lives **here**, not in that repo: personas/prompts in `prisma/starshop-prompts.ts`, intent router in `src/lib/eve/detect-intent.ts`, crews/tools in `agent/`. After editing prompts, republish the DB graph with `npx tsx scripts/sync-router-graph.ts` (published `WorkflowDefinition` overrides code prompts at runtime, cached ~60s).
