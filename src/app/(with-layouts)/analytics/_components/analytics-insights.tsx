@@ -73,7 +73,7 @@ export function AnalyticsInsights({ data }: { data: AnalyticsData }) {
       <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs leading-4 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300">
         <strong>Recomendación:</strong>{" "}
         {lowCount > 0 ? (
-          <>reponé los <strong>{lowCount} productos en quiebre</strong> antes del próximo pico. <Link href="/products" className="font-bold underline">Ver stock →</Link></>
+          <>reponé los <strong>{lowCount} productos en quiebre</strong> antes del próximo peak de ventas. <Link href="/products" className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-button-primary-background px-3 py-1.5 text-xs font-bold text-button-primary-text hover:bg-button-primary-hover-background">Ver stock →</Link></>
         ) : bestShare >= 60 ? (
           <>diversificá canales: <strong>{bestSource?.source}</strong> concentra el {bestShare.toLocaleString("es-CL")}%. <Link href="/marketing" className="font-bold underline">Ver canales →</Link></>
         ) : (
