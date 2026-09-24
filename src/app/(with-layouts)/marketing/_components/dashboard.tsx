@@ -5,6 +5,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { MarketingFunnel } from "./funnel";
 import { MarketingChannelTable } from "./channel-table";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { sharePct } from "@/utils/period-stats";
 import type { MarketingData } from "./types";
 import Link from "next/link";
@@ -79,9 +80,11 @@ function CampaignsHero({ data }: { data: MarketingData }) {
         </div>
       </div>
 
-      <p className="mt-4 border-t border-white/15 pt-3 text-xs text-white/60">
-        <span className="font-semibold text-white/90">¿Dónde se crean?</span> En <Link href="/store" className="underline">/store</Link> conecta Base de datos Cliente / Shopify / Woo / Magento / Cualquiera. <span className="font-semibold text-white/90">Meta</span> Integrado — hoy el catálogo alimenta el embudo y los canales (Starshop, Whatsapp, Tienda física). Meta se conecta como provider.
-      </p>
+      <div className="mt-4 flex items-start gap-2 border-t border-white/15 pt-3">
+        <InfoTip tone="dark" label="¿Dónde se crean las campañas?">
+          <span className="font-semibold text-white/90">¿Dónde se crean?</span> En <Link href="/store" className="underline">/store</Link> conecta Base de datos Cliente / Shopify / Woo / Magento / Cualquiera. <span className="font-semibold text-white/90">Meta</span> Integrado — hoy el catálogo alimenta el embudo y los canales (Starshop, Whatsapp, Tienda física). Meta se conecta como provider.
+        </InfoTip>
+      </div>
     </div>
   );
 }
@@ -139,7 +142,11 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-text-tertiary">Próximo paso: conectar Meta como provider para traer campañas pagas y ROAS. Hoy puedes medir qué tienda convierte mejor y reforzarla desde /admin/emails.</p>
+        <div className="mt-3 flex items-start gap-2">
+          <InfoTip label="Próximo paso sugerido">
+            Conectar Meta como provider para traer campañas pagas y ROAS. Hoy puedes medir qué tienda convierte mejor y reforzarla desde /admin/emails.
+          </InfoTip>
+        </div>
       </CardContent>
     </Card>
   );

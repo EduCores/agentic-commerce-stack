@@ -5,6 +5,7 @@ import { prisma } from "@/lib/adapters/prisma";
 import { SyncButton } from "./_components/sync-button";
 import { ConnectButton } from "./_components/connect-button";
 import { Globe, Package, Store, Workflow } from "lucide-react";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { resolveProductImage } from "@/utils/product-image";
 
 export const dynamic = "force-dynamic";
@@ -80,7 +81,7 @@ export default async function StorePage() {
                         )}
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col gap-2 lg:w-52">
+                    <div className="flex shrink-0 flex-col gap-2 lg:w-72">
                       <SyncButton storeId={s.id} storeName={s.name} />
                       <p className="text-center text-xs text-text-tertiary lg:text-right">
                         {lastSync ? (
@@ -157,10 +158,14 @@ export default async function StorePage() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Adaptador universal</CardTitle></CardHeader>
-          <CardContent className="text-sm text-text-secondary break-words">
-          <p><code>src/lib/adapters/store.ts</code> expone <code>getProduct/checkStock/reserveStock/syncProducts</code> idéntico para cualquier provider. Agrega Shopify/Woo heredando <code>mockAdapter</code>.</p>
-        </CardContent>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <CardTitle>Adaptador universal</CardTitle>
+            <InfoTip label="Cómo funciona el adaptador">
+              <code>src/lib/adapters/store.ts</code> expone <code>getProduct/checkStock/reserveStock/syncProducts</code> idéntico para cualquier provider. Agrega Shopify/Woo heredando <code>mockAdapter</code>.
+            </InfoTip>
+          </div>
+        </CardHeader>
       </Card>
     </div>
   );

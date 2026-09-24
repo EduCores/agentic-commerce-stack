@@ -15,6 +15,7 @@ import type { AnalyticsData, AnalyticsRange } from "./types";
 import { ANALYTICS_RANGES } from "./types";
 import { halfDelta } from "@/utils/period-stats";
 import { DeltaChip } from "@/components/common/stat-helpers";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 
 const MONTHS = [
   { id: "all", label: "Mes" },
@@ -63,7 +64,10 @@ export function AnalyticsSalesChart({ data, days, onDays, month, year, onMonth, 
             · {rows.length} días
           </p>
         </div>
-        <p className="text-xs text-text-tertiary">Ventas en $ y pedidos · rango de días o filtra por mes/año</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-xs text-text-tertiary">Ventas en $ y pedidos</p>
+          <InfoTip label="Cómo leer este gráfico">El área sólida es ventas en pesos, la línea discontinua es cantidad de pedidos. Usa el rango o filtra por mes/año para comparar períodos.</InfoTip>
+        </div>
       </CardHeader>
       <CardContent className="h-72 p-0">
         <ChartContainer className="h-full w-full" height="100%" width="100%">

@@ -6,6 +6,7 @@ import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, Tooltip, XAxis, YAxis } from "recharts";
 import { sharePct } from "@/utils/period-stats";
 import { displayModelName } from "@/utils/model-display";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import type { AiStats } from "./types";
 
 const COLORS = ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6"];
@@ -128,9 +129,11 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
               </div>
             );
           })}
-          <p className="text-xs text-text-tertiary">
-            Ingresos = solicitudes del modelo × ticket promedio real del período. Te dice qué modelo te deja más margen.
-          </p>
+          <div className="flex items-start gap-1.5">
+            <InfoTip label="Cómo se calculan los ingresos">
+              Ingresos = solicitudes del modelo × ticket promedio real del período. Te dice qué modelo te deja más margen.
+            </InfoTip>
+          </div>
         </div>
       </CardContent>
     </Card>

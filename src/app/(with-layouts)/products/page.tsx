@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { prisma } from "@/lib/adapters/prisma";
 import Link from "next/link";
 import { CatalogTable, type CatalogRow } from "./_components/catalog-table";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { Boxes, Package, Store, Box, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -120,24 +121,12 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
             <span className="flex size-8 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">
               <Sparkles size={16} />
             </span>
-            <CardTitle>Híbrido — cómo agregar tu proveedor real</CardTitle>
+            <CardTitle>Híbrido — proveedor real</CardTitle>
+            <InfoTip label="Cómo agregar tu proveedor real">
+              <code>src/lib/adapters/store.ts</code> expone getProduct, checkStock, reserveStock y syncProducts idéntico para mock/shopify/woocommerce/magento/custom. Crea un StoreConnection en /store con provider + domain/apiKey y sincroniza: todo queda en una sola tabla Product.
+            </InfoTip>
           </div>
         </CardHeader>
-        <CardContent className="text-sm text-text-secondary space-y-3">
-          <p>
-            <code className="rounded bg-background-gray-secondary px-1.5 py-0.5 text-xs">src/lib/adapters/store.ts</code> expone{" "}
-            <Badge color="primary">getProduct</Badge> <Badge color="sky">checkStock</Badge> <Badge color="violet">reserveStock</Badge>{" "}
-            <Badge color="warning">syncProducts</Badge> idéntico para <code>mock/shopify/woocommerce/magento/custom</code>.
-          </p>
-          <p>
-            Crea <code className="rounded bg-background-gray-secondary px-1 py-0.5 text-xs">StoreConnection</code> en{" "}
-            <Link href="/store" className="font-bold text-brand-600 underline">
-              /store
-            </Link>{" "}
-            con <code>provider: shopify</code> + <code>domain/apiKey</code>, luego{" "}
-            <code className="rounded bg-background-gray-secondary px-1 py-0.5 text-xs">POST /api/store/sync</code> hará la sincronización real. Todo queda en una sola tabla <code>Product</code> sin duplicar pantallas.
-          </p>
-        </CardContent>
       </Card>
     </div>
   );
