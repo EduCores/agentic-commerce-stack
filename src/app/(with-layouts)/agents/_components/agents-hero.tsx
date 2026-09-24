@@ -20,7 +20,8 @@ export function AgentsHero({ fallbackCount }: { fallbackCount: number }) {
   const success = data?.totals.successRate ?? 0;
   const cost = data?.totals.cost ?? 0;
   const agentsLen = data?.table.length ?? fallbackCount;
-  const models = [...new Set((data?.table ?? []).map((t) => t.model).filter((m): m is string => !!m))];
+  // Agrupa por modelo base (sin variante :free de OpenRouter) para no duplicar.
+  const models = [...new Set((data?.table ?? []).map((t) => (t.model ?? "").replace(/:(free|paid)$/i, "").trim()).filter(Boolean))];
 
   return (
     <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-primary-600 p-6 text-white">

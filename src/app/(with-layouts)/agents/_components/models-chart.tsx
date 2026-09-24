@@ -79,7 +79,7 @@ export function AgentsModelsChart() {
                 <span className="min-w-0 flex-1 truncate font-mono font-medium text-text-primary" title={r.model}>
                   {displayModelName(r.model)}
                 </span>
-                <span className="shrink-0 font-bold text-text-primary">{r.requests.toLocaleString("es-CL")} sol.</span>
+                <span className="shrink-0 font-bold text-text-primary">{r.requests.toLocaleString("es-CL")} solicitudes</span>
                 <Badge color={i === 0 ? "primary" : "gray"}>{sharePct(r.requests, total).toLocaleString("es-CL")}%</Badge>
               </div>
               <div className="mt-1 flex items-center gap-3 pl-[18px] text-xs text-text-tertiary">
