@@ -75,7 +75,9 @@ export default async function AgentsPage() {
             </span>
             <CardTitle className="min-w-0">Herramientas registradas — caja de herramientas del agente</CardTitle>
           </div>
-          <p className="mt-1 text-xs text-text-tertiary">{tools.length} tools validadas con zod · cada agente ve solo sus herramientas</p>
+          <p className="mt-1 text-xs text-text-tertiary">
+            <InfoTip label="Detalle de herramientas">{tools.length} tools validadas con zod · cada agente ve solo sus herramientas</InfoTip>
+          </p>
         </CardHeader>
           <CardContent className="space-y-2">
             {tools.map((t) => {
@@ -103,45 +105,47 @@ export default async function AgentsPage() {
                 <Bot />
               </span>
               <CardTitle className="min-w-0">Agentes ({agents.length}) — quién hace qué</CardTitle>
+              <InfoTip label="{agents.length} agentes (Bienvenida + 8 equipos) · cada equipo ve solo sus herramientas · prompts en prisma/starshop-prompts.ts">&nbsp;</InfoTip>
             </div>
-            <p className="mt-1 text-xs text-text-tertiary">Bienvenida + 8 equipos · verde activo, gris pausado · modelo y prompt visibles</p>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {agents.length === 0 ? (
-              <p className="text-sm text-text-tertiary">Todavía no hay agentes. Ejecuta el seed o crea uno. Demo: slug <code>sales-assistant</code>.</p>
-            ) : (
-              agents.map((a, i) => (
-                <div key={a.id} className="rounded-lg border border-card-border p-3 transition hover:border-violet-400/40 hover:bg-background-gray-secondary/20">
-                  <div className="flex items-start gap-3">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-sm font-bold text-white">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="flex flex-wrap items-center gap-1.5 font-semibold text-text-primary">
+<CardContent className="space-y-2">
+              {agents.length === 0 ? (
+                <p className="text-sm text-text-tertiary">Todavía no hay agentes. Ejecuta el seed o crea uno. Demo: slug <code>sales-assistant</code>.</p>
+              ) : (
+                agents.map((a, i) => (
+                  <div key={a.id} className="rounded-lg border border-card-border p-3 transition hover:border-violet-400/40 hover:bg-background-gray-secondary/20">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-sm font-bold text-white">
+                        {i + 1}
+                      </span>
+                      <p className="font-semibold text-text-primary truncate flex-1">
                         {a.name}
-                        <span className="font-mono text-xs font-normal text-text-tertiary">/{a.slug}</span>
-                        {a.storeId && <Badge color="sky">híbrido</Badge>}
                       </p>
-                      <p className="mt-1 line-clamp-2 text-xs leading-4 text-text-tertiary">
+                    </div>
+                    <p className={`ml-12 flex min-w-0 items-center gap-1.5 text-xs font-mono text-text-tertiary truncate ${a.slug.includes("admin-ops") ? "" : "mt-2"}`}>
+                      <span>/{a.slug}</span>
+                    </p>
+                    <div className="mt-3 flex flex-col gap-1.5 text-xs leading-4">
+                      <p className="text-text-tertiary whitespace-pre-wrap break-words">
                         {a.description ?? "Sin descripción"} · <span className="font-mono">{(a.systemPrompt ?? "").slice(0, 110)}...</span>
                       </p>
-                      <div className="mt-2 flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5">
                         <Badge color={a.isActive ? "success" : "gray"}>{a.isActive ? "Activo" : "Inactivo"}</Badge>
-                        <Badge color="gray" title={a.model}>{displayModelName(a.model)}</Badge>
+                        {a.storeId && <Badge color="sky">híbrido</Badge>}
+                        <Badge color="success" title={a.model}>{displayModelName(a.model)}</Badge>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
-          </CardContent>
+                ))
+              )}
+            </CardContent>
         </Card>
       </div>
       <Card className="min-w-0">
         <CardHeader>
           <div className="flex items-center gap-2">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
-              <Sparkles />
+              <Bot />
             </span>
             <CardTitle className="min-w-0">Cómo crear un agente — en 3 pasos</CardTitle>
           </div>

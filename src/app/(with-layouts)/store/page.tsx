@@ -56,47 +56,45 @@ export default async function StorePage() {
               return (
                 <div key={s.id} className="rounded-xl border border-card-border bg-card-background p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex min-w-0 flex-1 items-start gap-3">
-                      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-sm [&>svg]:size-5">
-                        <Store />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-semibold text-text-primary">{s.name}</p>
-                          <Badge color="gray">{s.provider}</Badge>
-                          <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activo" : "Inactivo"}</Badge>
-                          {health && (
-                            <Badge color={health.ok ? "success" : "error"}>
-                              {health.ok ? `Conectada · ${health.total ?? "—"} prod · ${health.latencyMs}ms` : `Sin conexión`}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-text-tertiary">
-                          <Globe className="size-3.5 shrink-0" />
-                          {s.domain ? (
-                            <a href={s.domain} target="_blank" rel="noreferrer" className="min-w-0 truncate underline hover:text-text-primary">{s.domain}</a>
-                          ) : (
-                            <span>—</span>
-                          )}
-                          {s.domain?.includes("localhost") && <Badge color="gray">desarrollo local</Badge>}
-                        </p>
-                        {health && !health.ok && (
-                          <p className="mt-1 text-xs text-red-600">{health.error ?? "Error desconocido"}</p>
-                        )}
+                    <div className="flex flex-col min-w-0 flex-1 gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-sm [&>svg]:size-5">
+                          <Store />
+                        </span>
+                        <p className="font-semibold text-text-primary truncate">{s.name}</p>
                       </div>
+                      {s.domain && (
+                        <p className="flex min-w-0 items-center gap-1.5 text-sm text-text-secondary">
+                          <Globe className="size-4 shrink-0" />
+                          <a href={s.domain} target="_blank" rel="noreferrer" className="min-w-0 truncate underline hover:text-text-primary">{s.domain}</a>
+                        </p>
+                      )}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge color="gray">{s.provider}</Badge>
+                        <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "Activo" : "Inactivo"}</Badge>
+                        {health && (
+                          <Badge color={health.ok ? "success" : "error"}>
+                            {health.ok ? `Conectada · ${health.total ?? "—"} prod · ${health.latencyMs}ms` : `Sin conexión`}
+                          </Badge>
+                        )}
+                        {s.domain?.includes("localhost") && <Badge color="gray">desarrollo local</Badge>}
+                      </div>
+                      {health && !health.ok && (
+                        <p className="text-xs text-red-600">{health.error ?? "Error desconocido"}</p>
+                      )}
                     </div>
                     <div className="flex shrink-0 flex-col gap-2 lg:w-72">
                       <SyncButton storeId={s.id} storeName={s.name} />
-                      <p className="text-center text-xs text-text-tertiary lg:text-right">
-                        {lastSync ? (
-                          <>
-                            Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
-                            {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error</span>}
-                          </>
-                        ) : (
-                          "Sin sincronizar todavía"
-                        )}
-                      </p>
+                      {lastSync ? (
+                        <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs leading-4 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 text-center lg:text-right">
+                          Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
+                          {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error</span>}
+                        </p>
+                      ) : (
+                        <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs leading-4 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 text-center lg:text-right">
+                          Sin sincronizar todavía
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

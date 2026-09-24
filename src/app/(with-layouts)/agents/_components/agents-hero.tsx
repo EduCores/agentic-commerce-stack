@@ -31,10 +31,7 @@ export function AgentsHero({ fallbackCount }: { fallbackCount: number }) {
             </span>
             Flota de agentes — StarShop
           </h3>
-          <p className="mt-1 text-xs text-white/75 [&_code]:break-all">
-            {agentsLen} agentes (Bienvenida + 8 equipos) · cada equipo ve solo sus herramientas · prompts en{" "}
-            <code className="rounded bg-white/15 px-1 py-0.5">prisma/starshop-prompts.ts</code>
-          </p>
+          
         </div>
         <Link href="/workflows" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
           Ver flujos →

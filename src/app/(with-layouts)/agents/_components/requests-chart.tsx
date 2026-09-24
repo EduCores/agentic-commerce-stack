@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { ChartContainer } from "@/components/tailgrids/core/chart";
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
+import { Users, MessageSquare } from "lucide-react";
 import { sharePct } from "@/utils/period-stats";
 
 const COLORS = ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6", "#EF4444", "#10B981", "#3B82F6"];
@@ -46,11 +48,17 @@ export function AgentsRequestsChart() {
     <Card className="min-w-0">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
+          <div className="flex items-center gap-2">
             <CardTitle className="text-sm">Solicitudes por agente — carga de trabajo</CardTitle>
-            <p className="mt-1 text-xs text-text-tertiary">
-              {total.toLocaleString("es-CL")} solicitudes entre {agents.length} agentes · quién resuelve más
-            </p>
+            <InfoTip label="Detalle de carga">
+              <div className="flex items-center gap-1.5">
+                <MessageSquare className="size-3.5 text-text-tertiary" />
+                <span>{total.toLocaleString("es-CL")} solicitudes</span>
+                <span className="text-text-tertiary">entre</span>
+                <Users className="size-3.5 text-text-tertiary" />
+                <span>{agents.length} agentes</span>
+              </div>
+            </InfoTip>
           </div>
           <span className="flex items-center gap-3 text-xs text-text-tertiary">
             <span className="flex items-center gap-1.5">
@@ -93,7 +101,9 @@ export function AgentsRequestsChart() {
       </CardContent>
 
       <div className="border-t border-card-border px-0 py-3">
-        <p className="text-xs text-text-tertiary">Eje X: n.º de agente · Eje Y: solicitudes</p>
+        <p className="text-xs text-text-tertiary">
+          <InfoTip label="Ejes del gráfico">Eje X: n.º de agente · Eje Y: solicitudes</InfoTip>
+        </p>
         <p className="mt-2 text-xs font-semibold text-text-secondary">Ranking — nombres y participación</p>
         <div className="mt-2 space-y-1.5">
           {agents.map((a, i) => (

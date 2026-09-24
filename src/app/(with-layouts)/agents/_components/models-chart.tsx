@@ -44,7 +44,7 @@ export function AgentsModelsChart() {
         </p>
       </CardHeader>
       <CardContent className="relative h-64 p-0">
-        <ChartContainer className="h-full w-full" height="100%" width="100%">
+        <ChartContainer className="h-full w-full relative z-10" height="100%" width="100%">
           <PieChart>
             <Pie
               data={rows}
@@ -64,7 +64,7 @@ export function AgentsModelsChart() {
             <Tooltip content={<ModelsChartTooltip total={total} />} />
           </PieChart>
         </ChartContainer>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none z-0">
           <span className="text-2xl font-extrabold tracking-tight text-text-primary">{total.toLocaleString("es-CL")}</span>
           <span className="mt-1 text-xs font-medium text-text-tertiary">solicitudes</span>
         </div>
