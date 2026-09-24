@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
+import { Badge } from "@/components/tailgrids/core/badge";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { prisma } from "@/lib/adapters/prisma";
 import { ROUTER_SLUG } from "@/../agent/lib/crew-graph";
 import type { FlowGraph } from "@/components/flow/types";
@@ -30,17 +32,17 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
         ]}
       />
 
-      <div className="rounded-sm border border-card-border bg-card-background p-6 shadow-sm">
-        <h2 className="mb-1 text-xl font-bold text-text-primary">Editor de flujos del agente</h2>
-        <p className="mb-4 text-sm text-text-tertiary">
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl font-bold text-black dark:text-white">Editor de flujos del agente</h2>
+        <InfoTip label="Acerca del editor">
           El grafo publicado es la configuración del router del agente: prompt, modelo y tools por intent.
-          {workflow && (
-            <span className={workflow.isActive ? "ml-2 font-medium text-green-600" : "ml-2 font-medium text-text-tertiary"}>
-              {workflow.isActive ? " este flujo está publicado" : "⚪ este flujo es borrador"}
-            </span>
-          )}
-        </p>
+        </InfoTip>
+        {workflow && (
+          <Badge color={workflow.isActive ? "success" : "gray"}>{workflow.isActive ? "publicado" : "borrador"}</Badge>
+        )}
+      </div>
 
+      <div className="rounded-sm border border-card-border bg-card-background p-6 shadow-sm">
         {all.length > 1 && (
           <div className="mb-4 flex flex-wrap gap-2">
             {all.map((w) => (
