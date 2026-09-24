@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/tailgrids/core/button";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { Card, CardContent } from "@/components/tailgrids/core/card";
 import {
   Dialog,
   DialogBody,
@@ -201,14 +202,16 @@ export default function SecurityTabContent() {
       <h2 className="text-xl leading-7 font-semibold text-text-primary">Seguridad</h2>
       <p className="mt-1 text-sm text-text-tertiary">Contraseña, segundo factor y tu sesión actual — todo funcional.</p>
 
-      <div className="mt-6 space-y-2 divide-y divide-card-border">
-        {securityItems.map(({ key, icon: Icon, title, description }) => (
+      <Card className="mt-6">
+        <CardContent className="!py-2">
+          <div className="divide-y divide-card-border">
+        {securityItems.map(({ key, icon: Icon, title, description, color }) => (
           <div
             key={key}
-            className="flex min-w-0 flex-col gap-3 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+            className="flex min-w-0 flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-background-gray-secondary_alt text-icon-secondary">
+              <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${color}`}>
                 <Icon />
               </div>
               <div className="min-w-0">
@@ -245,7 +248,9 @@ export default function SecurityTabContent() {
             )}
           </div>
         ))}
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Cambiar contraseña — real vía PATCH /api/profile */}
       <OverlayWrapper isOpen={pwdOpen} onOpenChange={setPwdOpen}>

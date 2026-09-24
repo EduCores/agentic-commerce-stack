@@ -222,7 +222,11 @@ export default function AccountPage() {
   const initials = useMemo(() => makeInitials(fields.fullName || "Usuario"), [fields.fullName]);
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
+      <div className="min-w-0">
+        <h2 className="text-xl leading-7 font-semibold text-text-primary">Cuenta</h2>
+        <p className="mt-1 text-sm text-text-tertiary">Tus datos personales y de contacto — se guardan en tu cuenta.</p>
+      </div>
       <Card>
         <CardContent className="flex flex-col gap-6">
           <div className="flex min-w-0 items-center gap-4">

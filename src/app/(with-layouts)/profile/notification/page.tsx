@@ -15,12 +15,12 @@ type Prefs = {
 
 const DEFAULTS: Prefs = { email: true, push: false, productUpdates: true, marketing: false, security: true };
 
-const DEFS: { key: keyof Prefs; label: string; desc: string; icon: typeof Bell }[] = [
-  { key: "email", label: "Notificación por correo", desc: "Pedidos, carros abandonados y avisos a tu email", icon: Mail },
-  { key: "push", label: "Notificación push", desc: "Alertas instantáneas en este dispositivo", icon: Bell },
-  { key: "productUpdates", label: "Actualización de productos", desc: "Stock bajo, precios y catálogo sincronizado", icon: Package },
-  { key: "marketing", label: "Correo de marketing", desc: "Campañas, novedades y consejos de venta", icon: Megaphone },
-  { key: "security", label: "Alerta de seguridad", desc: "Accesos nuevos y cambios en tu cuenta", icon: ShieldCheck },
+const DEFS: { key: keyof Prefs; label: string; desc: string; icon: typeof Bell; color: string }[] = [
+  { key: "email", label: "Notificación por correo", desc: "Pedidos, carros abandonados y avisos a tu email", icon: Mail, color: "bg-badge-sky-background text-badge-sky-text" },
+  { key: "push", label: "Notificación push", desc: "Alertas instantáneas en este dispositivo", icon: Bell, color: "bg-badge-violet-background text-badge-violet-text" },
+  { key: "productUpdates", label: "Actualización de productos", desc: "Stock bajo, precios y catálogo sincronizado", icon: Package, color: "bg-badge-warning-background text-badge-warning-text" },
+  { key: "marketing", label: "Correo de marketing", desc: "Campañas, novedades y consejos de venta", icon: Megaphone, color: "bg-badge-pink-background text-badge-pink-text" },
+  { key: "security", label: "Alerta de seguridad", desc: "Accesos nuevos y cambios en tu cuenta", icon: ShieldCheck, color: "bg-badge-success-background text-badge-success-text" },
 ];
 
 const GROUPS: { title: string; desc: string; keys: (keyof Prefs)[] }[] = [
@@ -100,7 +100,7 @@ export default function NotificationPage() {
                 return (
                   <div key={k} className="flex min-w-0 items-center justify-between gap-4 py-4">
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-background-gray-secondary_alt text-icon-secondary [&>svg]:size-4">
+                      <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${def.color} [&>svg]:size-4`}>
                         <Icon />
                       </span>
                       <div className="min-w-0">

@@ -106,7 +106,11 @@ export default function BillingPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
+      <div className="min-w-0">
+        <h2 className="text-xl leading-7 font-semibold text-text-primary">Facturación</h2>
+        <p className="mt-1 text-sm text-text-tertiary">Tu plan, método de pago e historial de facturas.</p>
+      </div>
       {/* Plan actual */}
       <Card>
         <CardHeader>
