@@ -8,6 +8,7 @@ import { formatCLP, type HomeStats } from "./home-types";
 /** Productos con más demanda: unidades, ingresos estimados y participación. */
 export function TopProducts({ items }: { items: HomeStats["topProducts"] }) {
   const totalQty = items.reduce((a, tp) => a + (tp.quantity ?? 0), 0);
+  const RANK = ["success", "warning", "blue", "violet", "cyan"] as const;
   return (
     <div className="min-w-0 rounded-xl border border-card-border bg-card-background p-5">
       <div className="flex items-center gap-2.5">
@@ -32,7 +33,7 @@ export function TopProducts({ items }: { items: HomeStats["topProducts"] }) {
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   <span className="text-xs font-bold text-text-primary">{formatCLP(revenue)}</span>
-                  <Badge color={i === 0 ? "success" : i === 1 ? "warning" : "gray"}>{tp.quantity} uds · {sharePct(tp.quantity ?? 0, totalQty).toLocaleString("es-CL")}%</Badge>
+                  <Badge color={RANK[i % RANK.length]}>{tp.quantity} uds · {sharePct(tp.quantity ?? 0, totalQty).toLocaleString("es-CL")}%</Badge>
                 </span>
               </div>
             );

@@ -35,7 +35,7 @@ export function HomeOpsCard() {
           tasks.map((t) => (
             <div key={t.id} className="flex items-center justify-between gap-2 rounded-lg border border-card-border/60 px-3 py-2 text-sm">
               <span className="line-clamp-1 min-w-0 text-text-primary">{t.title}</span>
-              <Badge color={t.type === "order" ? "warning" : "gray"}>{t.due}</Badge>
+              <Badge color={t.type === "order" ? "warning" : t.type === "email" ? "sky" : t.type === "call" ? "success" : "violet"}>{t.due}</Badge>
             </div>
           ))
         )}

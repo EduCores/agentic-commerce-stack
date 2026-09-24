@@ -142,13 +142,12 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
               <p className="mt-2 line-clamp-1 text-text-primary" title={formatItems(latestOrder)}>
                 {formatItems(latestOrder) || "Sin productos"}
               </p>
-              <p className="mt-2 text-xs text-text-tertiary">
-                Traza del flujo (OrderStepLog, intentos y errores) en{" "}
-                <Link href={`/orders/${latestOrder.id}`} className="font-medium text-brand-600 underline">
-                  el detalle del pedido
-                </Link>
-                .
-              </p>
+              <Link
+                href={`/orders/${latestOrder.id}`}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-bold text-button-primary-text hover:bg-brand-600"
+              >
+                Ver detalle del pedido →
+              </Link>
             </CardContent>
           </Card>
         )}

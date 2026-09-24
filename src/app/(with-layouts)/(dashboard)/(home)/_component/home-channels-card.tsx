@@ -18,6 +18,7 @@ export function HomeChannelsCard() {
   const channels = (data?.channels ?? []).slice().sort((a, b) => b.revenue - a.revenue).slice(0, 4);
   const totalRev = channels.reduce((a, c) => a + c.revenue, 0);
   const best = channels[0];
+  const RANK = ["success", "warning", "blue", "violet"] as const;
 
   return (
     <div className="min-w-0 rounded-xl border border-card-border bg-card-background p-5">
@@ -39,7 +40,7 @@ export function HomeChannelsCard() {
               <span className="min-w-0 truncate text-sm font-medium text-text-primary">{c.channel}</span>
               <span className="flex shrink-0 items-center gap-2">
                 <span className="text-xs font-bold text-brand-600">${c.revenue.toLocaleString("es-CL")}</span>
-                <Badge color={i === 0 ? "success" : i === 1 ? "warning" : "gray"}>{sharePct(c.revenue, totalRev).toLocaleString("es-CL")}%</Badge>
+                <Badge color={RANK[i % RANK.length]}>{sharePct(c.revenue, totalRev).toLocaleString("es-CL")}%</Badge>
               </span>
             </div>
           ))
