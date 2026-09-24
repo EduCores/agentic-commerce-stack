@@ -16,6 +16,31 @@
  */
 export const STARSHOP_CREW_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
 
+/**
+ * Cadena de respaldo: si el modelo principal falla (402 sin créditos, 429
+ * saturado, 5xx, red caída), el runtime reintenta EN ORDEN con estos modelos
+ * gratis antes de rendirse. Verificados con tool-calling en OpenRouter
+ * (free tier: 50 req/día por cuenta, 20/min).
+ */
+export const STARSHOP_CREW_FALLBACKS = [
+  "nvidia/nemotron-3.5-lightning:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+] as const;
+
+/**
+ * Orden de intentos de modelo para una request: el preferido (override del grafo,
+ * env o BD) primero, luego el principal del código y los respaldos, sin duplicados.
+ * Ej: buildModelChain("openai/gpt-4o") → [gpt-4o, ultra:free, lightning:free, super:free]
+ */
+export function buildModelChain(preferred?: string | null): string[] {
+  const chain: string[] = [];
+  for (const item of [preferred, STARSHOP_CREW_MODEL, ...STARSHOP_CREW_FALLBACKS]) {
+    const id = (item ?? "").trim();
+    if (id && !chain.includes(id)) chain.push(id);
+  }
+  return chain;
+}
+
 export const STARSHOP_WELCOME_PROMPT = `Eres Star, asistente de bienvenida de StarShop (B2B Chile). Detecta intención del cliente o del admin dueño.
 
 INTENCIONES VÁLIDAS (responde SOLO con una de estas, en detected_intent):

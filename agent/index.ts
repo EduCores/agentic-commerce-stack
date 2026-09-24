@@ -1,14 +1,14 @@
 /**
  * ACS Agent — EVE core
  * Orquesta `ai` SDK + tools + system prompt desde DB
- * Modelo estable demo: qwen/qwen3-30b-a3b-instruct-2507 ($0.05/1M) + fallback openrouter/free
+ * Modelos StarShop: cadena gratis de Nemotron con respaldo automático (prisma/starshop-prompts.ts)
  */
 import { generateText, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
-import { STARSHOP_CREWS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
+import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, buildModelChain, type StarShopIntent } from "../prisma/starshop-prompts";
 import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type GraphCrewOverride } from "./lib/crew-graph";
 import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
@@ -40,43 +40,47 @@ function getOpenRouter(isAdmin?: boolean) {
 // Llamada directa a OpenRouter como respaldo: genera respuesta conversacional real
 // (el generateText con tools a veces corta en tool calls sin texto final).
 // Recibe los mensajes ya construidos (historial + input) para NO perder el contexto.
+// Usa la cadena de respaldo: si el modelo 1 falla, prueba el siguiente.
 async function directChat(
   apiKey: string,
   modelId: string,
   system: string,
   messages: Array<{ role: "user" | "assistant"; content: string }>
 ): Promise<string> {
-  try {
-    const body = {
-      model: modelId,
-      messages: [
-        { role: "system", content: system },
-        ...messages,
-      ],
-      temperature: 0.7,
-      max_tokens: 500,
-    };
-    const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://agentic-commerce-stack.vercel.app",
-        "X-Title": "ACS Sales Agent",
-      },
-      body: JSON.stringify(body),
-    });
-    if (!r.ok) {
-      const t = await r.text().catch(() => "");
-      console.log("[ACS-AGENT] directChat HTTP", r.status, t.slice(0, 200));
-      return "";
+  for (const attemptModel of buildModelChain(modelId)) {
+    try {
+      const body = {
+        model: attemptModel,
+        messages: [
+          { role: "system", content: system },
+          ...messages,
+        ],
+        temperature: 0.7,
+        max_tokens: 500,
+      };
+      const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://agentic-commerce-stack.vercel.app",
+          "X-Title": "ACS Sales Agent",
+        },
+        body: JSON.stringify(body),
+      });
+      if (!r.ok) {
+        const t = await r.text().catch(() => "");
+        console.log("[ACS-AGENT] directChat HTTP", r.status, attemptModel, t.slice(0, 200));
+        continue;
+      }
+      const j = await r.json();
+      const text = (j?.choices?.[0]?.message?.content ?? "").trim();
+      if (text) return text;
+    } catch (e) {
+      console.log("[ACS-AGENT] directChat error", attemptModel, e instanceof Error ? e.message : e);
     }
-    const j = await r.json();
-    return (j?.choices?.[0]?.message?.content ?? "").trim();
-  } catch (e) {
-    console.log("[ACS-AGENT] directChat error", e instanceof Error ? e.message : e);
-    return "";
   }
+  return "";
 }
 
 /**
@@ -216,12 +220,21 @@ const intentToCrewKey: Record<StarShopIntent, keyof typeof STARSHOP_CREWS> = {
 const KNOWN_TOOLS = Object.keys(ALL_TOOL_DEFS) as string[];
 
 // Allowlist de modelos: un typo en el editor jamas rompe el chat (se ignora el override)
-const ALLOWED_MODELS = [
+const ALLOWED_MODELS: readonly string[] = [
   "qwen/qwen3-30b-a3b-instruct-2507",
   STARSHOP_CREW_MODEL,
+  ...STARSHOP_CREW_FALLBACKS,
   "openai/gpt-4o",
   "google/gemini-2-0-flash-001",
-] as const;
+];
+
+/** Errores de "no disponible" del LLM (no bugs): sin créditos, saturado, red, 5xx. */
+function isLlmUnavailable(msg: string): boolean {
+  return /credits|402|429|rate.?limit|too many requests|max_tokens|no endpoints|overloaded|unavailable|timeout|timed out|ECONNRESET|ECONNREFUSED|ETIMEDOUT|fetch failed|\b5\d\d\b/i.test(msg);
+}
+
+/** Respuesta al cliente cuando toda la cadena de modelos falla (nunca un error crudo). */
+const FALLBACK_TEXT = "Ahora mismo tengo mucha demanda en el servicio de IA y no pude generar la respuesta. Intenta de nuevo en unos minutos: te ayudo con catálogo, stock, precios y despacho. Si es urgente, escríbenos a ventas@starshop.cl.";
 
 // Cache local de overrides del grafo (60s) compartido por getCrewConfig y el endpoint de chat
 const OVERRIDES_TTL_MS = 60_000;
@@ -357,37 +370,54 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   // useAdminKey: usa OPENROUTER_ADMIN_KEY (créditos separados de tienda)
   const { agent, system, modelId, allowedTools } = await resolveAgent(params);
 
-  const model = getOpenRouter(params.useAdminKey).chat(modelId as never) as never;
-
   // El historial se envía como mensajes previos con roles (user/assistant) para
   // que el modelo sepa exactamente quién dijo qué. El input actual siempre va al final.
   const messages = toModelMessages(params.input, params.history);
 
-  let result: Awaited<ReturnType<typeof generateText>>;
-  try {
-    result = await generateText({
-      model,
-      system,
-      messages,
-      tools: toAISDKTools(allowedTools),
-      stopWhen: stepCountIs(4) as never,
-      maxOutputTokens: 700,
-    } as never);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    // Fallback amigable si es límite de créditos OpenRouter
-    if (msg.includes("credits") || msg.includes("max_tokens") || msg.includes("402")) {
-      console.log("[ACS-AGENT] LLM credit/max_tokens fallback", msg.slice(0, 200));
+  // Cadena de respaldo: si el modelo configurado falla (402/429/red), se reintenta
+  // con los siguientes modelos gratis ANTES de rendirse (ver buildModelChain).
+  const chain = buildModelChain(modelId);
+  let result: Awaited<ReturnType<typeof generateText>> | null = null;
+  let usedModel = chain[0];
+  let lastErr: unknown = null;
+  for (const attemptModel of chain) {
+    try {
+      result = await generateText({
+        model: getOpenRouter(params.useAdminKey).chat(attemptModel as never) as never,
+        system,
+        messages,
+        tools: toAISDKTools(allowedTools),
+        stopWhen: stepCountIs(4) as never,
+        maxOutputTokens: 700,
+      } as never);
+      usedModel = attemptModel;
+      break;
+    } catch (e) {
+      lastErr = e;
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log(`[ACS-AGENT] runAgent modelo ${attemptModel} falló, probando siguiente`, msg.slice(0, 160));
+    }
+  }
+
+  if (!result) {
+    const msg = lastErr instanceof Error ? lastErr.message : String(lastErr);
+    // Cadena agotada: si fue un problema de disponibilidad -> respuesta amigable;
+    // si fue otra cosa (bug real) se propaga el error como antes.
+    if (isLlmUnavailable(msg)) {
+      console.log("[ACS-AGENT] runAgent sin modelos disponibles", msg.slice(0, 200));
       return {
-        text: "Estoy con límite de créditos del LLM en este momento. Puedo seguir ayudándote con datos reales: revisa /products, /orders o /workflows, o dime qué buscas y te muestro resultados del catálogo.",
+        text: FALLBACK_TEXT,
         toolCalls: [],
         directFallback: false,
         rawText: "",
+        modelUsed: null,
         agentSlug: agent.slug,
       };
     }
-    throw e;
+    throw lastErr;
   }
+
+  if (usedModel !== chain[0]) console.log(`[ACS-AGENT] runAgent respondió con respaldo ${usedModel}`);
 
   // Agrega los tool calls de TODOS los pasos (result.toolCalls solo refleja el último)
   const stepToolCalls = ((result as unknown as { steps?: Array<{ toolCalls?: unknown[] }> }).steps ?? [])
@@ -416,45 +446,70 @@ export async function runAgent(params: { agentSlug: string; input: string; store
     status: "COMPLETED",
   });
 
-  return { ...result, text: finalText, rawText: result.text, directFallback: direct, toolCalls: stepToolCalls, agentSlug: agent.slug };
+  return { ...result, text: finalText, rawText: result.text, directFallback: direct, toolCalls: stepToolCalls, modelUsed: usedModel, agentSlug: agent.slug };
 }
 
 // ── Streaming: mismo router pero con streamText para efecto tipeo IA ──
 export async function* streamAgent(params: { agentSlug: string; input: string; storeId?: string; history?: unknown[]; useAdminKey?: boolean; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }) {
   const { agent, system, modelId, allowedTools } = await resolveAgent(params);
 
-  const model = getOpenRouter(params.useAdminKey).chat(modelId as never) as never;
-
   // Historial como mensajes con roles nativos (igual que en runAgent)
   const messages = toModelMessages(params.input, params.history);
 
-  const result = streamText({
-    model,
-    system,
-    messages,
-    tools: toAISDKTools(allowedTools) as never,
-    stopWhen: stepCountIs(4) as never,
-    maxOutputTokens: 700,
-  } as never);
+  // Cadena de respaldo: solo se reintenta si el modelo falla ANTES de emitir texto
+  // (una vez enviado el primer chunk no se puede repetir sin duplicar la respuesta).
+  const chain = buildModelChain(modelId);
+  let lastErr: unknown = null;
+  for (const attemptModel of chain) {
+    let yielded = false;
+    try {
+      const model = getOpenRouter(params.useAdminKey).chat(attemptModel as never) as never;
+      const result = streamText({
+        model,
+        system,
+        messages,
+        tools: toAISDKTools(allowedTools) as never,
+        stopWhen: stepCountIs(4) as never,
+        maxOutputTokens: 700,
+      } as never);
 
-  // Stream text chunks como IA que escribe
-  for await (const chunk of result.textStream) {
-    yield { type: "text" as const, text: chunk };
-  }
+      // Stream text chunks como IA que escribe
+      for await (const chunk of result.textStream) {
+        yielded = true;
+        yield { type: "text" as const, text: chunk };
+      }
 
-  // Al final, emite toolCalls + meta (para que el frontend sepa navegar)
-  const toolCalls = ((await result.toolCalls) ?? []) as unknown as Array<Record<string, unknown>>;
-  let finalText = (await result.text) ?? "";
-  // Si el LLM cortó sin texto (solo tool calls), genera respuesta conversacional
-  // real vía llamada directa (misma lógica que runAgent, con contexto completo).
-  if (!finalText.trim() && toolCalls.length > 0) {
-    const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
-    if (apiKey) {
-      const directReply = await directChat(apiKey, modelId, system, messages);
-      if (directReply) finalText = directReply;
+      // Al final, emite toolCalls + meta (para que el frontend sepa navegar)
+      const toolCalls = ((await result.toolCalls) ?? []) as unknown as Array<Record<string, unknown>>;
+      let finalText = (await result.text) ?? "";
+      // Si el LLM cortó sin texto (solo tool calls), genera respuesta conversacional
+      // real vía llamada directa (misma lógica que runAgent, con contexto completo).
+      if (!finalText.trim() && toolCalls.length > 0) {
+        const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
+        if (apiKey) {
+          const directReply = await directChat(apiKey, attemptModel, system, messages);
+          if (directReply) finalText = directReply;
+        }
+      }
+      if (attemptModel !== chain[0]) console.log(`[ACS-AGENT] streamAgent respondió con respaldo ${attemptModel}`);
+      yield { type: "done" as const, text: finalText, toolCalls, agentSlug: agent.slug };
+      return;
+    } catch (e) {
+      lastErr = e;
+      if (yielded) throw e; // ya se envió texto al cliente: no reintentar (evita duplicar)
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log(`[ACS-AGENT] streamAgent modelo ${attemptModel} falló, probando siguiente`, msg.slice(0, 160));
     }
   }
-  yield { type: "done" as const, text: finalText, toolCalls, agentSlug: agent.slug };
+
+  // Cadena agotada: saturación/sin cupo -> mensaje amigable en vez de error crudo.
+  const lastMsg = lastErr instanceof Error ? lastErr.message : String(lastErr);
+  if (isLlmUnavailable(lastMsg)) {
+    console.log("[ACS-AGENT] streamAgent sin modelos disponibles", lastMsg.slice(0, 200));
+    yield { type: "done" as const, text: FALLBACK_TEXT, toolCalls: [], agentSlug: agent.slug };
+    return;
+  }
+  throw lastErr;
 }
 
 export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
