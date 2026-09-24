@@ -183,7 +183,9 @@ export function BaseNode({ data, selected }: NodeProps) {
         aria-label="Entrada"
         className={cn("flex !h-7 !w-7 items-center justify-center !rounded-full !border-2 !bg-white !shadow-md dark:!bg-zinc-900 [&>svg]:size-4", accent.handle)}
       >
-        <Icon />
+        <span className={cn("flex items-center justify-center transition-transform", d.handleIconFlip && "rotate-180")}>
+          <Icon />
+        </span>
       </Handle>
       <Handle
         type="source"
@@ -192,7 +194,9 @@ export function BaseNode({ data, selected }: NodeProps) {
         aria-label="Salida — arrastra para conectar"
         className={cn("flex !h-7 !w-7 items-center justify-center !rounded-full !border-2 !bg-white !shadow-md dark:!bg-zinc-900 [&>svg]:size-4", accent.handle)}
       >
-        <Icon />
+        <span className={cn("flex items-center justify-center transition-transform", d.handleIconFlip && "rotate-180")}>
+          <Icon />
+        </span>
       </Handle>
     </div>
   );

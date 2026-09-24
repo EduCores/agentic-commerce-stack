@@ -23,6 +23,8 @@ export type FlowNodeData = {
   tools?: string[];
   intent?: string;
   model?: string;
+  /** Gira 180° el icono dentro de los conectores (solo visual). */
+  handleIconFlip?: boolean;
   prompt?: string; // system prompt del crew — si está vacío se usa el del código (fallback)
 };
 
