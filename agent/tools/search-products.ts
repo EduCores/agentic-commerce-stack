@@ -24,6 +24,24 @@ export default defineTool({
     // Query limpia determinística ("tienes alicates?" → "alicates"): el agente
     // DEBE usar cleanQuery para navigateTo y para mencionar el producto.
     const clean = cleanProductQuery(query);
+
+    // Charla/saludo sin producto objetivo ("estamos de vuelta?", "hola"):
+    // no se busca nada y se le indica al agente que responda conversando.
+    if (!clean) {
+      return {
+        query: normalize(query),
+        cleanQuery: "",
+        expandedTerms: [],
+        found: 0,
+        products: [],
+        categorySuggestions: allCategories(),
+        noResults: true,
+        notAProductQuery: true,
+        message:
+          "La consulta no nombra ningún producto (parece saludo o charla). No busques ni navegues: responde conversando y pregunta qué producto necesita.",
+      };
+    }
+
     const ranked = rankProducts(products, clean);
     const rawText = normalize(clean);
     const matched = matchCategories(rawText, ranked.tokens);
@@ -65,6 +83,7 @@ export default defineTool({
       products: productsOut,
       categorySuggestions,
       noResults: productsOut.length === 0,
+      notAProductQuery: false,
       message:
         productsOut.length === 0
           ? `No encontramos productos para "${query}". Puedes revisar estas categorías: ${categorySuggestions.map((c) => c.name).join(", ")}.`

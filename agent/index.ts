@@ -11,6 +11,7 @@ import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
 import { STARSHOP_CREWS, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
 import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type GraphCrewOverride } from "./lib/crew-graph";
 import { detectIntent } from "@/lib/eve/detect-intent";
+import { isSmallTalk } from "./lib/search/normalize";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
 import searchProducts from "./tools/search-products";
@@ -303,8 +304,14 @@ type ResolvedAgentConfig = {
  */
 async function resolveAgent(params: { agentSlug: string; storeId?: string; _override?: { systemPrompt: string; model: string; allowedTools: string[] } }): Promise<ResolvedAgentConfig> {
   if (params._override) {
+    // El id sintético `crew-<slug>` no existe en Agent y rompía la FK de AgentRun:
+    // los logs de las conversaciones reales de StarShop se perdían. Se resuelve el
+    // id real por slug; si la BD no responde, cae al id sintético (mismo fallback).
+    const dbAgent = await prisma.agent
+      .findUnique({ where: { slug: params.agentSlug }, select: { id: true } })
+      .catch(() => null);
     return {
-      agent: { id: `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt },
+      agent: { id: dbAgent?.id ?? `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt },
       system: `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}\n\n${STARSHOP_TRUTH_RULE}`,
       modelId: params._override.model,
       allowedTools: params._override.allowedTools,
@@ -453,6 +460,8 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
 export async function* streamStarShopFlow(params: { input: string; storeId?: string; history?: unknown[]; isAdmin?: boolean }) {
   const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
   const detectedIntent = detected.intent;
+  // Charla social: sin tools (no hay nada que buscar/navegar); el crew de soporte responde.
+  const smallTalk = isSmallTalk(params.input);
 
   // Usar cache de overrides si ya fue refresheado, o refrescarlo
   if (!crewOverridesCache) {
@@ -470,7 +479,7 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
     input: params.input,
     storeId: params.storeId,
     history: params.history,
-    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin), model: crew.model, allowedTools: crew.tools },
+    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin), model: crew.model, allowedTools: smallTalk ? [] : crew.tools },
   } as never)) {
     yield chunk;
   }
@@ -495,6 +504,8 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
   const detected = await detectIntent(params.input, { isAdmin: params.isAdmin, history: params.history });
   const detectedIntent = detected.intent;
   const crew = await getCrewConfig(detectedIntent);
+  // Charla social: sin tools (no hay nada que buscar/navegar); el crew de soporte responde.
+  const smallTalk = isSmallTalk(params.input);
   // Override validado del grafo (o config del código como fallback)
   logRouterWorkflow(params.input, detectedIntent, "ACS-ROUTER");
   const agentResult = await runAgent({
@@ -502,7 +513,7 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
     input: params.input,
     storeId: params.storeId,
     history: params.history,
-    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin), model: crew.model, allowedTools: crew.tools },
+    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin), model: crew.model, allowedTools: smallTalk ? [] : crew.tools },
   } as never);
   return {
     ...(agentResult as { text: string; toolCalls?: unknown[] }),

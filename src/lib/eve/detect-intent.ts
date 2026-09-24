@@ -3,6 +3,7 @@
  * Sin datos reales: funciona sin DB y sin API key (cae a heurística).
  */
 import { STARSHOP_INTENTS, STARSHOP_WELCOME_PROMPT, type StarShopIntent } from "../../../prisma/starshop-prompts";
+import { isSmallTalk } from "../../../agent/lib/search/normalize";
 
 export type IntentSource = "llm" | "heuristic";
 
@@ -42,6 +43,9 @@ export function detectIntentHeuristic(message: string, isAdmin?: boolean): StarS
     if (/^(hola|hola!|hey|buenas|buenos dias|buenas tardes)\b/.test(t.trim())) return "admin_ops";
     if (/(cuanto vendi|cuan vend|ventas(?!@)|vendidos?|ingresos|facturacion|reporte|resumen.*ventas|como andan|como van|stock bajo|bajo stock|crea producto|productos con alerta|pedidos con alerta|agente.*fall|workflow|cuanto se vendio|vendimos)/.test(t)) return "admin_ops";
   }
+  // Charla social ("hola", "estamos de vuelta?", "gracias") nunca es búsqueda:
+  // va al crew de soporte, que responde conversando y reencauza.
+  if (isSmallTalk(message)) return "general_inquiry";
   if (/(devol|devoluci|cambio.*producto|garant.*falla|no me sirve.*devolver)/.test(t)) return "return_request";
   if (/(carrito abandon|deje.*carrito|carrito.*abandon|retomar compr|abandon.*cart|carrito.*no pude pagar|quedo.*carrito)/.test(t)) return "abandoned_cart";
   if (/(donde esta|seguimiento|estado.*pedido|track.*order|rastrear|wismo|donde va.*pedido)/.test(t)) return "order_tracking";
@@ -103,6 +107,12 @@ export async function detectIntent(message: string, opts?: { isAdmin?: boolean; 
     // admin_ops solo en contexto admin: si el LLM lo devuelve en tienda, corrige a heurística
     if (viaLLM.intent === "admin_ops" && !opts?.isAdmin) {
       return { intent: detectIntentHeuristic(message, opts?.isAdmin), confidence: 0.6, source: "heuristic" };
+    }
+    // El router LLM tiende a mandar charla social ("estamos de vuelta?") a
+    // product_search con confianza alta; se corrige ANTES de que el crew de
+    // productos ejecute searchProducts y anuncie una búsqueda que no corresponde.
+    if (viaLLM.intent === "product_search" && isSmallTalk(message)) {
+      return { intent: "general_inquiry", confidence: 0.9, source: "heuristic" };
     }
     return viaLLM;
   }
