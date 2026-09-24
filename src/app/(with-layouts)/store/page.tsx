@@ -118,7 +118,7 @@ export default async function StorePage() {
             {products.length === 0 ? (
               <p className="text-sm text-text-tertiary">Sin productos. Ejecuta <code>prisma/seed.ts</code> o conecta tu tienda y sincroniza.</p>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {products.map((p) => {
                   const stockState =
                     p.stock <= 0
@@ -131,7 +131,7 @@ export default async function StorePage() {
                     <div key={p.id} className="overflow-hidden rounded-lg border border-card-border bg-card-background transition hover:border-brand-500 hover:shadow-sm">
                       {thumb ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={thumb} alt={p.title} className="h-28 w-full object-cover" loading="lazy" />
+                        <img src={thumb} alt={p.title} className="h-24 w-full object-cover" loading="lazy" />
                       ) : null}
                       <div className="p-3">
                       <div className="flex items-center justify-between gap-2.5">
@@ -147,8 +147,8 @@ export default async function StorePage() {
                         <span className="min-w-0 break-words">{p.title}</span>
                       </p>
                       <p className="mt-0.5 text-xs text-text-tertiary">{p.sku}</p>
-                      <div className="mt-2.5 flex items-center justify-between border-t border-card-border/60 pt-2 text-xs text-text-tertiary">
-                        <span>Stock {p.stock} · Reservado {p.reservedStock}</span>
+                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1 border-t border-card-border/60 pt-2 text-xs text-text-tertiary">
+                        <span className="min-w-0">Stock {p.stock} · Reservado {p.reservedStock}</span>
                         <Badge color={stockState.color}>{stockState.badge}</Badge>
                       </div>
                       </div>
