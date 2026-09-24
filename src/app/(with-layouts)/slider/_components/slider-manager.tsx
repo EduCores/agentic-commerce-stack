@@ -275,9 +275,9 @@ export function SliderManager({ initialSlides }: { initialSlides: Slide[] }) {
           </div>
         )}
 
-        {/* LISTA DE SLIDES CON THUMBS INTERACTIVOS */}
+        {/* LISTA DE SLIDES EN COLUMNA: uno abajo del otro */}
         {slides.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4">
             {slides.map((s) => (
               <SliderThumb
                 key={s.id}

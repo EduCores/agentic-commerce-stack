@@ -22,7 +22,7 @@ export function SliderThumb({ slide, onViewStore, onEdit, onTogglePublish, onDel
   const storeHref = `${origin}/`;
 
   return (
-    <div className="flex w-full max-w-sm shrink-0 flex-col gap-2 overflow-hidden rounded-xl border border-card-border bg-card-background">
+    <div className="flex w-full shrink-0 flex-col gap-2 overflow-hidden rounded-xl border border-card-border bg-card-background">
       {/* Imagen / gradiente de fondo */}
       <div
         className={`relative aspect-[16/9] w-full overflow-hidden rounded-t-xl bg-gradient-to-r ${slide.bg || "from-slate-700 to-slate-900"}`}
