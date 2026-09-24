@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/tailgrids/core/button";
+import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 export function SyncButton({ storeId, storeName }: { storeId: string; storeName: string }) {
@@ -29,7 +30,8 @@ export function SyncButton({ storeId, storeName }: { storeId: string; storeName:
 
   return (
     <div className="space-y-2">
-      <Button appearance="fill" onClick={onSync} isDisabled={loading} className="h-auto min-h-9 w-full py-2.5 leading-snug">
+      <Button appearance="fill" onClick={onSync} isDisabled={loading} className="h-auto min-h-14 w-full gap-2 py-4 text-base font-bold leading-snug">
+        <RefreshCw className={`size-5 shrink-0 ${loading ? "animate-spin" : ""}`} />
         {loading ? "Sincronizando..." : `Sincronizar ${shortName}`}
       </Button>
       {loading && <div className="h-2 w-full overflow-hidden rounded-full bg-background-gray-secondary"><div className="h-full w-1/2 animate-pulse bg-brand-500" /></div>}

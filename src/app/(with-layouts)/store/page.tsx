@@ -4,7 +4,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
 import { SyncButton } from "./_components/sync-button";
 import { ConnectButton } from "./_components/connect-button";
-import { Globe, Package, Store } from "lucide-react";
+import { Globe, Package, Store, Workflow } from "lucide-react";
 import { resolveProductImage } from "@/utils/product-image";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +36,7 @@ export default async function StorePage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-lg bg-badge-primary-background text-badge-primary-text [&>svg]:size-4">
-                <Store size={16} />
+                <Workflow size={16} />
               </span>
               <CardTitle>Conexiones ({stores.length})</CardTitle>
             </div>
@@ -75,23 +75,23 @@ export default async function StorePage() {
                           )}
                           {s.domain?.includes("localhost") && <Badge color="gray">desarrollo local</Badge>}
                         </p>
-                        <p className="mt-1 text-xs text-text-tertiary">
-                          {lastSync ? (
-                            <>
-                              Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
-                              {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error</span>}
-                            </>
-                          ) : (
-                            "Sin sincronizar todavía"
-                          )}
-                        </p>
                         {health && !health.ok && (
                           <p className="mt-1 text-xs text-red-600">{health.error ?? "Error desconocido"}</p>
                         )}
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col gap-2 lg:w-44">
+                    <div className="flex shrink-0 flex-col gap-2 lg:w-52">
                       <SyncButton storeId={s.id} storeName={s.name} />
+                      <p className="text-center text-xs text-text-tertiary lg:text-right">
+                        {lastSync ? (
+                          <>
+                            Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
+                            {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error</span>}
+                          </>
+                        ) : (
+                          "Sin sincronizar todavía"
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>
