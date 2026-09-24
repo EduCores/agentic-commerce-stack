@@ -123,7 +123,7 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
             <span className="rounded-full bg-badge-primary-background px-2.5 py-1 text-xs font-bold text-badge-primary-text">
               {total} en período
             </span>
-            <span className="rounded-full bg-background-gray-secondary px-2.5 py-1 text-xs font-medium text-text-tertiary">
+            <span className="rounded-full bg-badge-warning-background px-2.5 py-1 text-xs font-bold text-badge-warning-text">
               ~${(total * 0.9).toFixed(1)} costo estimado
             </span>
           </div>
