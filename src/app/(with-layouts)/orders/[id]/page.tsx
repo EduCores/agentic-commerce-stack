@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
+import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import { prisma } from "@/lib/adapters/prisma";
 import Link from "next/link";
 import { STATUS_COLOR, STATUS_LABEL } from "../page";
@@ -73,7 +74,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <Card className="min-w-0 md:col-span-2">
           <CardHeader><CardTitle className="text-sm">Productos ({order.items.length})</CardTitle></CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
+            <ScrollHint>
               <table className="w-full min-w-[520px] text-sm">
                 <thead className="border-b border-card-border text-xs text-text-tertiary">
                   <tr><th className="p-2 text-left">Producto</th><th className="p-2 text-left">SKU</th><th className="p-2 text-right">Cant.</th><th className="p-2 text-right">Precio</th></tr>
@@ -89,7 +90,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollHint>
           </CardContent>
         </Card>
       </div>

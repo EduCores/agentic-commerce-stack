@@ -1,5 +1,6 @@
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
+import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import type { AiStats } from "./types";
 import Link from "next/link";
 
@@ -11,7 +12,7 @@ export function AiAgentsTable({ data }: { data: AiStats }) {
         {data.table.length === 0 ? (
           <p className="text-sm text-text-tertiary">Sin agentes. Ejecuta el seed.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <ScrollHint>
             <table className="w-full min-w-[680px] text-sm">
               <thead className="border-b border-card-border text-xs text-text-tertiary">
                 <tr><th className="p-2 text-left">Nombre</th><th className="p-2 text-left">Estado</th><th className="p-2 text-right">Solicitudes</th><th className="p-2 text-right">Éxito</th></tr>
@@ -27,7 +28,7 @@ export function AiAgentsTable({ data }: { data: AiStats }) {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollHint>
         )}
         <Link href="/agents" className="mt-2 inline-block text-xs font-medium text-brand-600 underline">Gestionar en /agents</Link>
       </CardContent>

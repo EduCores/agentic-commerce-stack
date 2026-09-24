@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
+import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import { RoleSelect } from "./role-select";
 import type { TeamMember } from "./types";
 
@@ -74,7 +75,7 @@ export function TeamTable() {
         <CardHeader><CardTitle className="text-sm">Miembros ({members.length})</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <p className="text-sm text-text-tertiary">Cargando...</p> : (
-            <div className="overflow-x-auto">
+            <ScrollHint>
               <table className="w-full text-sm">
                 <thead className="border-b border-card-border text-xs text-text-tertiary">
                   <tr><th className="p-2 text-left">Nombre</th><th className="p-2 text-left">Correo</th><th className="p-2 text-left">WhatsApp</th><th className="p-2 text-left">Rol</th><th className="p-2 text-left">Ingreso</th><th className="p-2 text-right">Acción</th></tr>
@@ -96,7 +97,7 @@ export function TeamTable() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollHint>
           )}
         </CardContent>
       </Card>

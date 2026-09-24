@@ -26,6 +26,7 @@ import {
   TableRoot,
   TableRow,
 } from "@/components/tailgrids/core/table";
+import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import { getLastTransactionsData } from "@/services/api/home";
 import { MenuDotsIcon } from "@/utils/icon";
 import { downloadCsv } from "@/utils/download-csv";
@@ -169,7 +170,7 @@ export default function LastTransactionsTable() {
       </CardHeader>
 
       {/* Table — única sección del home con deslizamiento horizontal */}
-      <div className="min-w-0 overflow-x-auto">
+      <ScrollHint>
         <TableRoot className="w-full min-w-200 rounded-none border-none">
           <TableHeader>
             <TableRow className="[&_th]:border-t">
@@ -258,7 +259,7 @@ export default function LastTransactionsTable() {
                 ))}
           </TableBody>
         </TableRoot>
-      </div>
+      </ScrollHint>
     </Card>
   );
 }

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { MarketingFunnel } from "./funnel";
 import { MarketingChannelTable } from "./channel-table";
 import { InfoTip } from "@/components/tailgrids/core/info-tip";
+import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import { sharePct } from "@/utils/period-stats";
 import type { MarketingData } from "./types";
 import Link from "next/link";
@@ -107,7 +108,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
         <p className="text-xs text-text-tertiary">Cada fila es una tienda conectada. Productos y pedidos vienen por <code>storeId</code>; ingresos = suma de <code>Order.total</code> de esa tienda.</p>
       </CardHeader>
       <CardContent className="!px-3">
-        <div className="overflow-x-auto">
+        <ScrollHint>
           <table className="w-full min-w-[720px] text-sm">
             <thead className="border-b border-card-border text-xs text-text-tertiary">
               <tr>
@@ -136,7 +137,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollHint>
         <div className="mt-3 flex items-start gap-2">
           <InfoTip label="Próximo paso sugerido">
             Conectar Meta como provider para traer campañas pagas y ROAS. Hoy puedes medir qué tienda convierte mejor y reforzarla desde /admin/emails.

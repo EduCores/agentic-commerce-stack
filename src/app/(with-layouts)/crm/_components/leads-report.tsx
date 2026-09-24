@@ -1,5 +1,6 @@
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
+import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import { sharePct } from "@/utils/period-stats";
 import type { CrmData } from "./types";
 
@@ -21,7 +22,7 @@ export function CrmLeadsReport({ data }: { data: CrmData }) {
         {data.leads.length === 0 ? (
           <p className="text-sm text-text-tertiary">Aún no hay clientes. Se crean con cada pedido.</p>
         ) : (
-          <div className="min-w-0 overflow-x-auto">
+          <ScrollHint>
             <table className="w-full min-w-[600px] text-sm">
               <thead className="border-b border-card-border bg-background-gray-secondary/40 text-xs text-text-tertiary">
                 <tr><th className="p-2 text-left">Cliente</th><th className="p-2 text-right">Negocios</th><th className="p-2 text-right">Ingresos</th><th className="p-2 text-right">Part.</th><th className="p-2 text-right">Nivel</th></tr>
@@ -55,7 +56,7 @@ export function CrmLeadsReport({ data }: { data: CrmData }) {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollHint>
         )}
       </CardContent>
     </Card>

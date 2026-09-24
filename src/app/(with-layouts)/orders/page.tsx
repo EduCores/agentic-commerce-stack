@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { InfoTip } from "@/components/tailgrids/core/info-tip";
+import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
@@ -89,7 +90,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
           {orders.length === 0 ? (
             <p className="text-sm text-text-tertiary">Sin pedidos todavía. Crea uno vía <code>POST /api/orders</code> o desde el checkout del agente.</p>
           ) : (
-            <div className="overflow-x-auto">
+            <ScrollHint>
               <table className="w-full text-sm">
                 <thead className="text-xs text-text-tertiary border-b border-card-border">
                   <tr><th className="text-left p-2">Pedido</th><th className="text-left p-2">Cliente</th><th className="text-left p-2">Tienda</th><th className="text-right p-2">Total</th><th className="text-center p-2">Estado</th><th className="text-center p-2">Pago</th></tr>
@@ -107,7 +108,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollHint>
           )}
         </CardContent>
       </Card>

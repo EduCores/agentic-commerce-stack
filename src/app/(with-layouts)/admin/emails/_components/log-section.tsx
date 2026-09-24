@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/tailgrids/core/card";
 import { Button } from "@/components/tailgrids/core/button";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import type { LogDTO } from "./types";
 
 type Props = {
@@ -36,7 +37,7 @@ export function LogSection({ logs, onReload }: Props) {
           </CardContent>
         </Card>
       ) : (
-        <div className="min-w-0 overflow-x-auto">
+        <ScrollHint>
           <table className="w-full min-w-[640px] text-sm">
             <thead className="border-b border-card-border text-xs text-text-tertiary">
               <tr>
@@ -69,7 +70,7 @@ export function LogSection({ logs, onReload }: Props) {
               })}
             </tbody>
           </table>
-        </div>
+        </ScrollHint>
       )}
     </div>
   );
