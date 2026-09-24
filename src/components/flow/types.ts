@@ -23,9 +23,6 @@ export type FlowNodeData = {
   tools?: string[];
   intent?: string;
   model?: string;
-  /** Posición de los conectores (por defecto: entrada arriba, salida abajo). */
-  targetHandlePos?: "top" | "bottom" | "left" | "right";
-  sourceHandlePos?: "top" | "bottom" | "left" | "right";
   prompt?: string; // system prompt del crew — si está vacío se usa el del código (fallback)
 };
 
