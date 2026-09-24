@@ -80,11 +80,6 @@ function CampaignsHero({ data }: { data: MarketingData }) {
         </div>
       </div>
 
-      <div className="mt-4 flex items-start gap-2 border-t border-white/15 pt-3">
-        <InfoTip tone="dark" label="¿Dónde se crean las campañas?">
-          <span className="font-semibold text-white/90">¿Dónde se crean?</span> En <Link href="/store" className="underline">/store</Link> conecta Base de datos Cliente / Shopify / Woo / Magento / Cualquiera. <span className="font-semibold text-white/90">Meta</span> Integrado — hoy el catálogo alimenta el embudo y los canales (Starshop, Whatsapp, Tienda física). Meta se conecta como provider.
-        </InfoTip>
-      </div>
     </div>
   );
 }
@@ -171,9 +166,9 @@ export function MarketingDashboard() {
 
       {/* 3. Título de página */}
       <div className="flex items-center gap-2 pt-2">
-        <h2 className="text-xl font-bold text-black dark:text-white">Marketing</h2>
-        <InfoTip label="Acerca de marketing">
-          Canales, funnel y campañas ligadas a tus tiendas y pedidos reales.
+        <h2 className="text-xl font-bold text-black dark:text-white">Campañas de Marketing</h2>
+        <InfoTip label="¿Dónde se crean las campañas?">
+          En <Link href="/store" className="underline">/store</Link> conecta Base de datos Cliente / Shopify / Woo / Magento / Cualquiera. Meta Integrado — hoy el catálogo alimenta el embudo y los canales (Starshop, Whatsapp, Tienda física). Meta se conecta como provider.
         </InfoTip>
       </div>
 
