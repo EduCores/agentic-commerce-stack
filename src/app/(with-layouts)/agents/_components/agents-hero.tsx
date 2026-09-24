@@ -40,20 +40,27 @@ export function AgentsHero({ fallbackCount }: { fallbackCount: number }) {
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white [&>svg]:size-6">
-            <Bot />
-          </span>
-          <div>
-            <p className="text-xs font-medium text-white/80">Agentes</p>
-            <p className="text-2xl font-extrabold tracking-tight">{agentsLen}</p>
-            <p className="text-xs text-white/70">{active} activos · {agentsLen - active} pausados</p>
-            {models.length > 0 && (
-              <p className="mt-1 truncate font-mono text-[11px] leading-4 text-white/70" title={models.join(", ")}>
+        <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white [&>svg]:size-6">
+              <Bot />
+            </span>
+            <div>
+              <p className="text-xs font-medium text-white/80">Agentes</p>
+              <p className="text-2xl font-extrabold tracking-tight">{agentsLen}</p>
+              <p className="text-xs text-white/70">{active} activos · {agentsLen - active} pausados</p>
+            </div>
+          </div>
+          {models.length > 0 && (
+            <div className="mt-3 flex items-center gap-2 border-t border-white/15 pt-3">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white [&>svg]:size-4">
+                <Cpu />
+              </span>
+              <p className="min-w-0 flex-1 break-all font-mono text-[11px] leading-4 text-white/80" title={models.join(", ")}>
                 {models.join(" · ")}
               </p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur">
           <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white [&>svg]:size-6">
