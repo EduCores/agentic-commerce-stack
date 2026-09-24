@@ -105,7 +105,9 @@ export default async function AgentsPage() {
                 <Bot />
               </span>
               <CardTitle className="min-w-0">Agentes ({agents.length}) — quién hace qué</CardTitle>
-              <InfoTip label="{agents.length} agentes (Bienvenida + 8 equipos) · cada equipo ve solo sus herramientas · prompts en prisma/starshop-prompts.ts">&nbsp;</InfoTip>
+              <InfoTip label="Detalle de agentes">
+                {agents.length} agentes (Bienvenida + 8 equipos) · cada equipo ve solo sus herramientas · prompts en prisma/starshop-prompts.ts
+              </InfoTip>
             </div>
           </CardHeader>
 <CardContent className="space-y-2">
