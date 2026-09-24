@@ -13,17 +13,17 @@ export function AiAgentsTable({ data }: { data: AiStats }) {
           <p className="text-sm text-text-tertiary">Sin agentes. Ejecuta el seed.</p>
         ) : (
           <ScrollHint>
-            <table className="w-full min-w-[680px] text-sm">
+            <table className="w-full text-sm">
               <thead className="border-b border-card-border text-xs text-text-tertiary">
-                <tr><th className="p-2 text-left">Nombre</th><th className="p-2 text-left">Estado</th><th className="p-2 text-right">Solicitudes</th><th className="p-2 text-right">Éxito</th></tr>
+                <tr><th className="px-1.5 py-2 text-left">Nombre</th><th className="px-1.5 py-2 text-left">Estado</th><th className="px-1.5 py-2 text-right">Solicitudes</th><th className="px-1.5 py-2 text-right">Éxito</th></tr>
               </thead>
               <tbody>
                 {data.table.slice(0, 9).map((a) => (
                   <tr key={a.id} className="border-b border-card-border/60">
-                      <td className="whitespace-nowrap p-2">{a.name}<p className="font-mono text-xs text-text-tertiary">{a.slug}</p></td>
-                    <td className="p-2"><Badge color={a.active ? "success" : "gray"}>{a.active ? "Activo" : "Pausado"}</Badge></td>
-                    <td className="p-2 text-right">{a.requests}</td>
-                    <td className="p-2 text-right">{a.success}%</td>
+                      <td className="min-w-0 px-1.5 py-2">{a.name}<p className="font-mono text-xs text-text-tertiary">{a.slug}</p></td>
+                    <td className="px-1.5 py-2"><Badge color={a.active ? "success" : "gray"}>{a.active ? "Activo" : "Pausado"}</Badge></td>
+                    <td className="px-1.5 py-2 text-right">{a.requests}</td>
+                    <td className="px-1.5 py-2 text-right">{a.success}%</td>
                   </tr>
                 ))}
               </tbody>
