@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core/chart";
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, Tooltip, XAxis, YAxis } from "recharts";
+import { ChartContainer } from "@/components/tailgrids/core/chart";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { sharePct } from "@/utils/period-stats";
 
@@ -11,6 +11,11 @@ const COLORS = ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6", "#EF4444"
 const PAUSED = "#CBD5E1";
 
 type AgentRow = { name: string; requests: number; active: boolean };
+
+/** "StarShop Admin Ops" → "Admin Ops" (solo display, la BD queda intacta). */
+function shortAgentName(name: string): string {
+  return name.replace(/^starshop\s+/i, "").trim() || name;
+}
 
 /** Carga de trabajo por agente: gráfico limpio + ranking con nombres debajo. */
 export function AgentsRequestsChart() {
@@ -77,10 +82,6 @@ export function AgentsRequestsChart() {
               width={40}
               domain={[0, Math.ceil(max * 1.15)]}
             />
-            <Tooltip
-              cursor={{ fill: "var(--color-card-border)", opacity: 0.15 }}
-              content={<ChartTooltipContent labelFormatter={(v) => `Agente ${v} · ${agents[Number(v) - 1]?.name ?? ""}`} />}
-            />
             <Bar dataKey="solicitudes" name="Solicitudes" radius={[6, 6, 0, 0]}>
               {rows.map((r) => (
                 <Cell key={r.idx} fill={r.fill} />
@@ -104,7 +105,7 @@ export function AgentsRequestsChart() {
                 {i + 1}
               </span>
               <span className="min-w-0 flex-1 truncate font-medium text-text-primary" title={a.name}>
-                {a.name}
+                {shortAgentName(a.name)}
               </span>
               <span className="shrink-0 font-bold text-text-primary">{a.requests.toLocaleString("es-CL")}</span>
               <Badge color={a.active ? "primary" : "gray"}>{sharePct(a.requests, total).toLocaleString("es-CL")}%</Badge>
