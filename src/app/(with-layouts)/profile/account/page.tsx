@@ -27,6 +27,7 @@ import {
 } from "@/components/tailgrids/core/select";
 import { TextArea } from "@/components/tailgrids/core/text-area";
 import { TrashIcon } from "./icons";
+import { formatPhoneCL, normalizeEmail, sanitizeText, validPhoneCL } from "@/utils/contact-format";
 
 const countryOptions = [
   { value: "cl", label: "Chile" },
@@ -68,8 +69,9 @@ function validateForm(fields: FieldState): string | null {
   if (!fields.email.trim()) return "El correo electrónico es obligatorio.";
   if (fields.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email))
     return "Ingresa un correo válido.";
-  if (fields.phone.trim() && !/^[\d\s\+\-\(\)]{7,20}$/.test(fields.phone))
-    return "Número de teléfono inválido.";
+  if (fields.phone.trim() && !validPhoneCL(fields.phone))
+    return "Número de teléfono inválido (8–9 dígitos).";
+  if (fields.bio.trim().length > 280) return "La biografía no puede superar 280 caracteres.";
   return null;
 }
 
@@ -104,13 +106,13 @@ export default function AccountPage() {
         }
         const data = await res.json();
         const loaded: FieldState = {
-          fullName: data.fullName ?? "",
-          email: data.email ?? "",
-          phone: data.phone ?? "",
-          website: data.website ?? "",
-          address: data.address ?? "",
+          fullName: sanitizeText(data.fullName ?? "", 120),
+          email: normalizeEmail(data.email ?? ""),
+          phone: formatPhoneCL(data.phone ?? ""),
+          website: sanitizeText(data.website ?? "", 200),
+          address: sanitizeText(data.address ?? "", 200),
           country: data.country ?? "cl",
-          bio: data.bio ?? "",
+          bio: sanitizeText(data.bio ?? "", 280),
         };
         setFields(loaded);
         setOriginalFields(loaded);
@@ -250,6 +252,7 @@ export default function AccountPage() {
                   id="fullName"
                   value={fields.fullName}
                   onChange={(e) => handleFieldChange("fullName")(e.target.value)}
+                  onBlur={(e) => handleFieldChange("fullName")(sanitizeText(e.target.value, 120))}
                   placeholder="Ej. Juan Pérez"
                   required
                 />
@@ -262,6 +265,7 @@ export default function AccountPage() {
                   type="email"
                   value={fields.email}
                   onChange={(e) => handleFieldChange("email")(e.target.value)}
+                  onBlur={(e) => handleFieldChange("email")(normalizeEmail(e.target.value))}
                   placeholder="ejemplo@dominio.com"
                   required
                 />
@@ -273,7 +277,7 @@ export default function AccountPage() {
                   id="phone"
                   type="tel"
                   value={fields.phone}
-                  onChange={(e) => handleFieldChange("phone")(e.target.value)}
+                  onChange={(e) => handleFieldChange("phone")(formatPhoneCL(e.target.value))}
                   placeholder="+56 9 1234 5678"
                 />
               </TextField>
@@ -285,6 +289,7 @@ export default function AccountPage() {
                   type="url"
                   value={fields.website}
                   onChange={(e) => handleFieldChange("website")(e.target.value)}
+                  onBlur={(e) => handleFieldChange("website")(sanitizeText(e.target.value, 200))}
                   placeholder="www.ejemplo.cl"
                 />
               </TextField>
@@ -295,6 +300,7 @@ export default function AccountPage() {
                   id="address"
                   value={fields.address}
                   onChange={(e) => handleFieldChange("address")(e.target.value)}
+                  onBlur={(e) => handleFieldChange("address")(sanitizeText(e.target.value, 200))}
                   placeholder="Av. Providencia 1208, Santiago"
                 />
               </TextField>
@@ -326,8 +332,10 @@ export default function AccountPage() {
                   id="bio"
                   value={fields.bio}
                   onChange={(e) => handleFieldChange("bio")(e.target.value)}
+                  onBlur={(e) => handleFieldChange("bio")(sanitizeText(e.target.value, 280))}
                   placeholder="Cuéntanos sobre ti..."
                   rows={4}
+                  maxLength={280}
                 />
               </TextField>
             </div>

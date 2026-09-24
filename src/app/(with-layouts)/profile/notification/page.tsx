@@ -17,11 +17,11 @@ type Prefs = {
 const DEFAULTS: Prefs = { email: true, push: false, productUpdates: true, marketing: false, security: true };
 
 const DEFS: { key: keyof Prefs; label: string; desc: string; icon: typeof Bell; color: string }[] = [
-  { key: "email", label: "Notificación por correo", desc: "Pedidos, carros abandonados y avisos a tu email", icon: Mail, color: "bg-badge-sky-background text-badge-sky-text" },
-  { key: "push", label: "Notificación push", desc: "Alertas instantáneas en este dispositivo", icon: Bell, color: "bg-badge-violet-background text-badge-violet-text" },
+  { key: "email", label: "Notificación por correo", desc: "Pedidos, carros abandonados y avisos a tu email", icon: Mail, color: "bg-badge-warning-background text-badge-warning-text" },
+  { key: "push", label: "Notificación push", desc: "Alertas instantáneas en este dispositivo", icon: Bell, color: "bg-badge-warning-background text-badge-warning-text" },
   { key: "productUpdates", label: "Actualización de productos", desc: "Stock bajo, precios y catálogo sincronizado", icon: Package, color: "bg-badge-warning-background text-badge-warning-text" },
-  { key: "marketing", label: "Correo de marketing", desc: "Campañas, novedades y consejos de venta", icon: Megaphone, color: "bg-badge-pink-background text-badge-pink-text" },
-  { key: "security", label: "Alerta de seguridad", desc: "Accesos nuevos y cambios en tu cuenta", icon: ShieldCheck, color: "bg-badge-success-background text-badge-success-text" },
+  { key: "marketing", label: "Correo de marketing", desc: "Campañas, novedades y consejos de venta", icon: Megaphone, color: "bg-badge-warning-background text-badge-warning-text" },
+  { key: "security", label: "Alerta de seguridad", desc: "Accesos nuevos y cambios en tu cuenta", icon: ShieldCheck, color: "bg-badge-warning-background text-badge-warning-text" },
 ];
 
 const GROUPS: { title: string; desc: string; keys: (keyof Prefs)[] }[] = [

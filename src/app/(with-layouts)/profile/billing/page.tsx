@@ -179,7 +179,7 @@ export default function BillingPage() {
         <CardHeader><CardTitle className="text-sm">Método de pago</CardTitle></CardHeader>
         <CardContent>
           <div className="flex items-center gap-3 rounded-lg border border-card-border p-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-success-background text-badge-success-text [&>svg]:size-4">
               <CreditCard />
             </span>
             <div className="min-w-0">

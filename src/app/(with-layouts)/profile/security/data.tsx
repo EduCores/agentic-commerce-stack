@@ -8,7 +8,7 @@ export const securityItems: { key: SecurityItemKey; icon: typeof LockIcon; title
     icon: LockIcon,
     title: "Contraseña",
     description: "Cambia la contraseña de tu cuenta para mantener tu perfil seguro",
-    color: "bg-badge-sky-background text-badge-sky-text",
+    color: "bg-badge-violet-background text-badge-violet-text",
   },
   {
     key: "2fa",
@@ -22,6 +22,6 @@ export const securityItems: { key: SecurityItemKey; icon: typeof LockIcon; title
     icon: DisplayIcon,
     title: "Sesión actual",
     description: "Ve con qué cuenta y dispositivo estás conectado",
-    color: "bg-badge-success-background text-badge-success-text",
+    color: "bg-badge-violet-background text-badge-violet-text",
   },
 ];
