@@ -4,7 +4,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
 import { SyncButton } from "./_components/sync-button";
 import { ConnectButton } from "./_components/connect-button";
-import { Package, Store } from "lucide-react";
+import { Globe, Package, Store, Plug } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +35,7 @@ export default async function StorePage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-lg bg-badge-primary-background text-badge-primary-text [&>svg]:size-4">
-                <Store size={16} />
+                <Plug size={16} />
               </span>
               <CardTitle>Conexiones ({stores.length})</CardTitle>
             </div>
@@ -52,7 +52,7 @@ export default async function StorePage() {
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex min-w-0 flex-1 items-start gap-3">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-sm [&>svg]:size-5">
-                        <Store />
+                        <Plug />
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
@@ -65,7 +65,15 @@ export default async function StorePage() {
                             </Badge>
                           )}
                         </div>
-                        <p className="mt-1 truncate text-xs text-text-tertiary">{s.domain ?? "—"}</p>
+                        <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-text-tertiary">
+                          <Globe className="size-3.5 shrink-0" />
+                          {s.domain ? (
+                            <a href={s.domain} target="_blank" rel="noreferrer" className="min-w-0 truncate underline hover:text-text-primary">{s.domain}</a>
+                          ) : (
+                            <span>—</span>
+                          )}
+                          {s.domain?.includes("localhost") && <Badge color="gray">desarrollo local</Badge>}
+                        </p>
                         <p className="mt-1 text-xs text-text-tertiary">
                           {lastSync ? (
                             <>
@@ -112,8 +120,15 @@ export default async function StorePage() {
                       : p.stock < 10
                         ? { dot: "bg-teal-500", badge: "Bajo stock" as const, color: "success" as const }
                         : { dot: "bg-emerald-500", badge: "Disponible" as const, color: "success" as const };
+                  const imgs = Array.isArray(p.images) ? (p.images as unknown[]).filter((u): u is string => typeof u === "string") : [];
+                  const thumb = imgs.find((u) => /^https?:\/\//i.test(u) || u.startsWith("/")) ?? "";
                   return (
-                    <div key={p.id} className="rounded-lg border border-card-border bg-card-background p-3 transition hover:border-brand-500 hover:shadow-sm">
+                    <div key={p.id} className="overflow-hidden rounded-lg border border-card-border bg-card-background transition hover:border-brand-500 hover:shadow-sm">
+                      {thumb ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={thumb} alt={p.title} className="h-28 w-full object-cover" loading="lazy" />
+                      ) : null}
+                      <div className="p-3">
                       <div className="flex items-center justify-between gap-2.5">
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text">
                           <Package size={18} />
@@ -130,6 +145,7 @@ export default async function StorePage() {
                       <div className="mt-2.5 flex items-center justify-between border-t border-card-border/60 pt-2 text-xs text-text-tertiary">
                         <span>Stock {p.stock} · Reservado {p.reservedStock}</span>
                         <Badge color={stockState.color}>{stockState.badge}</Badge>
+                      </div>
                       </div>
                     </div>
                   );

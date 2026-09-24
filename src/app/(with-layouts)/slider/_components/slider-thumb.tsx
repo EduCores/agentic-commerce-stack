@@ -22,7 +22,7 @@ export function SliderThumb({ slide, onViewStore, onEdit, onTogglePublish, onDel
   const storeHref = `${origin}/`;
 
   return (
-    <div className="group relative flex w-full max-w-sm shrink-0 flex-col gap-3 overflow-hidden rounded-xl border border-card-border bg-card-background">
+    <div className="flex w-full max-w-sm shrink-0 flex-col gap-2 overflow-hidden rounded-xl border border-card-border bg-card-background">
       {/* Imagen / gradiente de fondo */}
       <div
         className={`relative aspect-[16/9] w-full overflow-hidden rounded-t-xl bg-gradient-to-r ${slide.bg || "from-slate-700 to-slate-900"}`}
@@ -65,11 +65,14 @@ export function SliderThumb({ slide, onViewStore, onEdit, onTogglePublish, onDel
           )}
         </div>
 
-        {/* Acciones flotantes */}
-        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <Badge color={slide.active ? "success" : "gray"} size="sm">
-            {slide.active ? "Publicado" : "Borrador"}
-          </Badge>
+      </div>
+
+      {/* Acciones siempre visibles encima de los nombres */}
+      <div className="flex items-center gap-1 px-3">
+        <Badge color={slide.active ? "success" : "gray"} size="sm">
+          {slide.active ? "Publicado" : "Borrador"}
+        </Badge>
+        <span className="ml-auto flex items-center gap-1">
           <Button
             size="xs"
             appearance="ghost"
@@ -110,11 +113,11 @@ export function SliderThumb({ slide, onViewStore, onEdit, onTogglePublish, onDel
           >
             <Trash1 />
           </Button>
-        </div>
+        </span>
       </div>
 
       {/* Footer con info resumida */}
-      <div className="px-1 pb-2">
+      <div className="px-3 pb-3">
         <p className="truncate text-sm font-semibold text-text-primary">#{slide.sortOrder} · {slide.title || "Sin título"}</p>
         <p className="truncate text-xs text-text-secondary">Orden: {slide.sortOrder}</p>
         <a
