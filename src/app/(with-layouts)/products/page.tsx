@@ -39,7 +39,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         </InfoTip>
       </div>
 
-      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 via-blue-600 to-primary-600 p-6 text-white">
+      <div className="mt-2.5 overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 via-blue-600 to-primary-600 p-6 text-white">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="flex items-center gap-2 text-sm font-bold tracking-[-0.2px]">

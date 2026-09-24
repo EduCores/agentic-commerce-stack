@@ -29,7 +29,7 @@ export function CrmDashboard() {
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-6 text-white md:col-span-3">
+      <div className="mt-2.5 overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-6 text-white md:col-span-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white [&>svg]:size-4">
             <Users />
