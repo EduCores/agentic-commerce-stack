@@ -53,7 +53,7 @@ export function HomeFunnelCard() {
                     </span>
                     <span className="shrink-0 font-bold text-text-primary">
                       {r.value.toLocaleString("es-CL")} <span className="font-medium text-text-tertiary">· {pct}%</span>
-                      {stepConv !== null && <span className="ml-1 font-medium text-emerald-600">↘ {stepConv}%</span>}
+                      {stepConv !== null && <span className="ml-1 font-medium text-emerald-600">↗ {stepConv}%</span>}
                     </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-background-gray-secondary">
