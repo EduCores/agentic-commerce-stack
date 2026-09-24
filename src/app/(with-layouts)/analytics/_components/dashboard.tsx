@@ -49,7 +49,12 @@ export function AnalyticsDashboard() {
       <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-primary-500 to-[#328e8f] p-6 text-white md:col-span-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="mt-2.5 text-sm font-bold tracking-[-0.2px]">Tendencias reales de tu tienda</h3>
+            <h3 className="mt-2.5 flex items-center gap-2 text-sm font-bold tracking-[-0.2px]">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-white/15 text-white [&>svg]:size-4">
+                <TrendingUp />
+              </span>
+              Tendencias reales de tu tienda
+            </h3>
           </div>
           <div className="flex items-center gap-2">
             <a href="/api/analytics?format=csv" download className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/20">

@@ -102,9 +102,13 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-sm">Campañas por tienda — desglose real</CardTitle>
-          <Link href="/store" className="text-xs font-medium text-brand-600 underline">Gestionar en /store →</Link>
+          <div className="flex items-center gap-2">
+            <Link href="/store" className="text-xs font-medium text-brand-600 underline">Gestionar en /store →</Link>
+            <InfoTip label="Cómo se calculan los datos">
+              Cada fila es una tienda conectada. Productos y pedidos vienen por <code>storeId</code>; ingresos = suma de <code>Order.total</code> de esa tienda.
+            </InfoTip>
+          </div>
         </div>
-        <p className="text-xs text-text-tertiary">Cada fila es una tienda conectada. Productos y pedidos vienen por <code>storeId</code>; ingresos = suma de <code>Order.total</code> de esa tienda.</p>
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 sm:grid-cols-2">
