@@ -653,14 +653,14 @@
   }
 }
 
-/* .p-5 global -> calc(var(--spacing) * 3). Sin capa: gana a la utilidad de Tailwind en todos los tamaños. */
+/* .p-5 global -> calc(var(--spacing) * 2): mínimo con ritmo para ocupar ancho. Sin capa: gana a la utilidad de Tailwind en todos los tamaños. */
 .p-5 {
-  padding: calc(var(--spacing) * 3);
+  padding: calc(var(--spacing) * 2);
 }
 
-/* .p-6 global -> calc(var(--spacing) * 2). Sin capa: gana a la utilidad de Tailwind en todos los tamaños. */
+/* .p-6 global -> calc(var(--spacing) * 1): mínimo con ritmo para ocupar ancho. Sin capa: gana a la utilidad de Tailwind en todos los tamaños. */
 .p-6 {
-  padding: calc(var(--spacing) * 2);
+  padding: calc(var(--spacing) * 1);
 }
 
 /* .border-[0.5px]: ancho hairline comentado — sin borde visible (se conserva la clase). Sin capa: gana a la utilidad de Tailwind. */
