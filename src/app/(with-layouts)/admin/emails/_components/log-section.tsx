@@ -19,9 +19,9 @@ const STATUS_META: Record<LogDTO["status"], { color: "success" | "gray" | "error
 
 export function LogSection({ logs, onReload }: Props) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-text-tertiary">
+    <div className="min-w-0 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 text-sm text-text-tertiary">
           {logs.length} envíos recientes · incluye agente, secuencias y pruebas.
         </p>
         <Button appearance="outline" onClick={onReload}>
@@ -36,8 +36,8 @@ export function LogSection({ logs, onReload }: Props) {
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="min-w-0 overflow-x-auto">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="border-b border-card-border text-xs text-text-tertiary">
               <tr>
                 <th className="p-2 text-left">Fecha</th>

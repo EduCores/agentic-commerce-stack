@@ -154,9 +154,9 @@ export function SequenceSection({ sequences, templates, onReload }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-text-tertiary">
+    <div className="min-w-0 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 text-sm text-text-tertiary">
           Flujos automáticos: espera → correo → espera → correo. El cron los envía solos cada hora.
         </p>
         <Button appearance="fill" onClick={openNew}>
@@ -165,10 +165,10 @@ export function SequenceSection({ sequences, templates, onReload }: Props) {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {sequences.map((s) => (
-          <Card key={s.id}>
+          <Card key={s.id} className="min-w-0">
             <CardHeader>
               <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
-                <span>{s.name}</span>
+                <span className="min-w-0 break-words">{s.name}</span>
                 <Badge color="primary">{TRIGGER_LABEL[s.trigger] ?? s.trigger}</Badge>
                 <Badge color={s.isActive ? "success" : "gray"}>{s.isActive ? "activa" : "pausada"}</Badge>
               </CardTitle>

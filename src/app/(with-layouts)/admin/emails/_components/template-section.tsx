@@ -64,9 +64,9 @@ export function TemplateSection({ templates, onReload }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-text-tertiary">
+    <div className="min-w-0 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 text-sm text-text-tertiary">
           {templates.length} plantillas · las del sistema no se eliminan, se desactivan.
         </p>
         <Button appearance="fill" onClick={openNew}>
@@ -75,10 +75,10 @@ export function TemplateSection({ templates, onReload }: Props) {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {templates.map((t) => (
-          <Card key={t.id}>
+          <Card key={t.id} className="min-w-0">
             <CardHeader>
               <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
-                <span>{t.name}</span>
+                <span className="min-w-0 break-words">{t.name}</span>
                 {t.builtin && <Badge color="primary">sistema</Badge>}
                 <Badge color={t.isActive ? "success" : "gray"}>{t.isActive ? "activa" : "inactiva"}</Badge>
               </CardTitle>

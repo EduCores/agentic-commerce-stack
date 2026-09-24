@@ -44,8 +44,8 @@ export function CartSection({ carts, counts, onReload }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <Card>
+    <div className="min-w-0 space-y-4">
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle className="text-sm">Recuperación automática</CardTitle>
         </CardHeader>
@@ -72,8 +72,8 @@ export function CartSection({ carts, counts, onReload }: Props) {
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="min-w-0 overflow-x-auto">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="border-b border-card-border text-xs text-text-tertiary">
               <tr>
                 <th className="p-2 text-left">Cliente</th>

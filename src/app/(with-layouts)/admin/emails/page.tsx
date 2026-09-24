@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function AdminEmailsPage() {
   return (
-    <div className="space-y-6 p-3 sm:p-6">
+    <div className="min-w-0 space-y-6 overflow-x-clip p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Admin", href: "/admin" }, { label: "Correos electrónicos", href: "/admin/emails" }]} />
       <div>
         <h2 className="text-xl font-bold text-black dark:text-white">Correos electrónicos</h2>
