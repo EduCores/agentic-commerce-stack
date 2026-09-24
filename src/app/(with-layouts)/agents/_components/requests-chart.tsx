@@ -92,7 +92,7 @@ export function AgentsRequestsChart() {
         </ChartContainer>
       </CardContent>
 
-      <div className="border-t border-card-border px-3 py-3">
+      <div className="border-t border-card-border px-0 py-3">
         <p className="text-xs text-text-tertiary">Eje X: n.º de agente · Eje Y: solicitudes</p>
         <p className="mt-2 text-xs font-semibold text-text-secondary">Ranking — nombres y participación</p>
         <div className="mt-2 space-y-1.5">
