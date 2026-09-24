@@ -87,7 +87,7 @@ function CampaignsHero({ data }: { data: MarketingData }) {
 function CampaignsDetail({ data }: { data: MarketingData }) {
   if (data.campaigns.length === 0) {
     return (
-      <Card className="min-w-0 md:col-span-2">
+      <Card className="min-w-0">
         <CardHeader><CardTitle className="text-sm">Campañas por tienda — catálogo híbrido</CardTitle></CardHeader>
         <CardContent>
           <p className="text-sm text-text-tertiary">Aún no hay campañas. Conecta una tienda en /store para crear la primera (mock para demo, shopify con dominio/apiKey para real).</p>
@@ -98,7 +98,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
   }
   const totalCampaignRevenue = data.campaigns.reduce((a, c) => a + (c.revenue ?? 0), 0);
   return (
-    <Card className="min-w-0 md:col-span-2">
+    <Card className="min-w-0">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-sm">Campañas por tienda — desglose real</CardTitle>
@@ -180,10 +180,10 @@ export function MarketingDashboard() {
       <MarketingFunnel data={data} />
 
       {/* 4-6. Resto: campañas por tienda, Meta Ads, canales + audiencia */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <CampaignsDetail data={data} />
         <MetaConnectCard />
-        <div className="grid gap-4 md:col-span-3 md:grid-cols-2">
+        <div className="grid gap-4 md:col-span-2 md:grid-cols-2">
           <MarketingChannelTable data={data} />
           <Card className="min-w-0">
             <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
