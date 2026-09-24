@@ -31,8 +31,8 @@ function isToolCallObject(value: unknown): boolean {
   return rec.type === "tool_call" || rec.type === "function_call";
 }
 
-/** ¿Este JSON (ya parseado) tiene forma de llamada a herramienta? */
-export function looksLikeToolCallJson(value: unknown): boolean {
+/** ¿Este JSON (ya parseado) tiene forma de llamada a herramienta? (interno) */
+function looksLikeToolCallJson(value: unknown): boolean {
   if (Array.isArray(value)) return value.length > 0 && value.every(isToolCallObject);
   if (!value || typeof value !== "object") return false;
   const rec = value as Record<string, unknown>;

@@ -49,3 +49,6 @@ next-env.d.ts
 acs-dev-*.log
 
 dev-server.log
+
+# Scripts temporales de diagnóstico (prefijo _ → nunca se commitean)
+scripts/_*.ts

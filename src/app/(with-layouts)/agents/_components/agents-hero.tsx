@@ -6,7 +6,7 @@ import { Bot, Activity, BadgeCheck, Cpu } from "lucide-react";
 
 type Stats = {
   totals: { requests: number; cost: number; successRate: number; activeAgents: number };
-  table: { active: boolean }[];
+  table: { active: boolean; model?: string }[];
 };
 
 export function AgentsHero({ fallbackCount }: { fallbackCount: number }) {
@@ -20,6 +20,7 @@ export function AgentsHero({ fallbackCount }: { fallbackCount: number }) {
   const success = data?.totals.successRate ?? 0;
   const cost = data?.totals.cost ?? 0;
   const agentsLen = data?.table.length ?? fallbackCount;
+  const models = [...new Set((data?.table ?? []).map((t) => t.model).filter((m): m is string => !!m))];
 
   return (
     <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-primary-600 p-6 text-white">
@@ -47,6 +48,11 @@ export function AgentsHero({ fallbackCount }: { fallbackCount: number }) {
             <p className="text-xs font-medium text-white/80">Agentes</p>
             <p className="text-2xl font-extrabold tracking-tight">{agentsLen}</p>
             <p className="text-xs text-white/70">{active} activos · {agentsLen - active} pausados</p>
+            {models.length > 0 && (
+              <p className="mt-1 truncate font-mono text-[11px] leading-4 text-white/70" title={models.join(", ")}>
+                {models.join(" · ")}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur">
