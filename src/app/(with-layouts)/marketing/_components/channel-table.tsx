@@ -36,7 +36,7 @@ function ChannelIcon({ name }: { name: string }) {
   const chip = "flex size-9 items-center justify-center rounded-lg [&>svg]:size-5";
   if (name === "Starshop") {
     return (
-      <span className={`${chip} bg-badge-primary-background`}>
+      <span className={chip}>
         <span className="starshop-logo flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/star2.svg" alt="StarShop" className="star-anim-show size-5" />
@@ -46,20 +46,20 @@ function ChannelIcon({ name }: { name: string }) {
   }
   if (name === "Meta") {
     return (
-      <span className={`${chip} bg-badge-blue-background text-badge-blue-text`}>
+      <span className={`${chip} text-badge-blue-text`}>
         <Facebook size={20} />
       </span>
     );
   }
   if (name === "Whatsapp") {
     return (
-      <span className={`${chip} bg-badge-success-background text-badge-success-text`}>
+      <span className={`${chip} text-badge-success-text`}>
         <Whatsapp size={20} />
       </span>
     );
   }
   return (
-    <span className={`${chip} bg-badge-warning-background text-badge-warning-text`}>
+    <span className={`${chip} text-badge-warning-text`}>
       <Shop size={20} />
     </span>
   );
