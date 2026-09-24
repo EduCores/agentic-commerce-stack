@@ -59,7 +59,7 @@ function isValidIntent(v: unknown): v is StarShopIntent {
 async function detectIntentLLM(message: string, history?: unknown[]): Promise<DetectIntentResult | null> {
   const apiKey = process.env.OPENROUTER_API_KEY || "";
   if (!apiKey) return null;
-  const model = process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra";
+  const model = process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b";
   try {
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
