@@ -71,8 +71,11 @@ export default function Sidebar({
             <nav
                 className={cn(
                     'scrollbar-thin flex-1 overflow-y-auto',
-                    isSidebarOpen ? 'mt-7 space-y-6 px-4' : 'mt-5 px-2',
-                    isMobileSheet && 'sidebar-sheet-nav',
+                    isMobileSheet
+                        ? 'mt-0.5 space-y-6 px-4 sidebar-sheet-nav'
+                        : isSidebarOpen
+                            ? 'mt-7 space-y-6 px-4'
+                            : 'mt-5 px-2',
                 )}
             >
                 <CollapsibleGroup
