@@ -6,7 +6,7 @@ async function main() {
     where: { slug: "sales-assistant" },
     data: {
       systemPrompt: SALES_SYSTEM_PROMPT,
-      model: "qwen/qwen3-30b-a3b-instruct-2507",
+      model: "nvidia/nemotron-3-ultra",
     },
   });
   console.log(`prompt + modelo actualizados para ${result.count} agente(s) ("sales-assistant")`);

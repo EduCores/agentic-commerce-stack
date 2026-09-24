@@ -148,13 +148,13 @@ async function main() {
   // 4) Agente: actualizar SOLO el prompt anti-alucinación; respeta el modelo configurado
   const agent = await prisma.agent.upsert({
     where: { slug: "sales-assistant" },
-    update: { systemPrompt: SALES_SYSTEM_PROMPT, storeId, isActive: true },
+    update: { systemPrompt: SALES_SYSTEM_PROMPT, model: "nvidia/nemotron-3-ultra", storeId, isActive: true },
     create: {
       slug: "sales-assistant",
       name: "Sales Assistant",
       description: "Ayuda a vender, consulta stock y procesa compras",
       systemPrompt: SALES_SYSTEM_PROMPT,
-      model: "qwen/qwen3-30b-a3b-instruct-2507",
+      model: "nvidia/nemotron-3-ultra",
       isActive: true,
       storeId,
     },
@@ -179,15 +179,15 @@ async function main() {
   // 6) Crews StarShop — 8 agents (Welcome + 6 + OrderTracking + Escalate) + Confirm
   const welcomeAgent = await prisma.agent.upsert({
     where: { slug: "starshop-welcome" },
-    update: { systemPrompt: STARSHOP_WELCOME_PROMPT, storeId, isActive: true },
-    create: { slug: "starshop-welcome", name: "StarShop Welcome Agent", description: "Greet y detecta intent (paso 1)", systemPrompt: STARSHOP_WELCOME_PROMPT, model: "qwen/qwen3-30b-a3b-instruct-2507", isActive: true, storeId },
+    update: { systemPrompt: STARSHOP_WELCOME_PROMPT, model: "nvidia/nemotron-3-ultra", storeId, isActive: true },
+    create: { slug: "starshop-welcome", name: "StarShop Welcome Agent", description: "Greet y detecta intent (paso 1)", systemPrompt: STARSHOP_WELCOME_PROMPT, model: "nvidia/nemotron-3-ultra", isActive: true, storeId },
   });
 
   const crews = Object.values(STARSHOP_CREWS);
   for (const crew of crews) {
     await prisma.agent.upsert({
       where: { slug: crew.slug },
-      update: { systemPrompt: crew.prompt, name: crew.name, description: crew.description, isActive: true, storeId },
+      update: { systemPrompt: crew.prompt, name: crew.name, description: crew.description, model: crew.model, isActive: true, storeId },
       create: { slug: crew.slug, name: crew.name, description: crew.description, systemPrompt: crew.prompt, model: crew.model, isActive: true, storeId },
     });
   }

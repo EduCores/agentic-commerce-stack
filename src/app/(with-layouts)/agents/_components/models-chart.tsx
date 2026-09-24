@@ -2,9 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/tailgrids/core/chart";
+import { ChartContainer } from "@/components/tailgrids/core/chart";
 import { Pie, PieChart, Cell, Tooltip } from "recharts";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { ModelsChartTooltip } from "./models-chart-tooltip";
 import { sharePct } from "@/utils/period-stats";
 import { displayModelName } from "@/utils/model-display";
 
@@ -60,7 +61,7 @@ export function AgentsModelsChart() {
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip content={<ChartTooltipContent />} />
+            <Tooltip content={<ModelsChartTooltip total={total} />} />
           </PieChart>
         </ChartContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none">

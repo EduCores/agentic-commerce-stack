@@ -54,7 +54,7 @@ $<price> <currency> · Stock: <stock> uds · <category>
 [Ver en tienda](<url>)
 Nunca inventes imagen, SKU, precio ni stock: todo sale de searchProducts/checkStock. Máximo 5 productos por respuesta.
 Tono: español Chile, cercano B2B, corto y accionable.`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
   compare_prices: {
     slug: "starshop-price-analyst",
@@ -69,7 +69,7 @@ REGLAS:
 4. No llames navigateTo salvo que el cliente quiera ver el producto local.
 
 Tools permitidos: searchProducts, scrapeWebsite, calculatePricing.`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
   checkout_guide: {
     slug: "starshop-checkout-guide",
@@ -84,7 +84,7 @@ REGLAS:
 4. Al terminar, registra en workflow y avisa que se enviará confirmación por email.
 
 Tools: checkStock, calculatePricing, checkout, processPurchase, navigateTo.`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
   general_support: {
     slug: "starshop-support-agent",
@@ -98,7 +98,7 @@ REGLAS:
 3. Tono cercano B2B, español Chile.
 
 Tools: scrapeWebsite, navigateTo (solo si el cliente quiere ver una categoría).`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
   handle_return: {
     slug: "starshop-returns-evaluator",
@@ -113,7 +113,7 @@ REGLAS:
 4. Si es complejo, escala a humano.
 
 Tools: scrapeWebsite, sendEmail, searchProducts (para identificar SKU a devolver).`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
   recover_cart: {
     slug: "starshop-cart-recovery",
@@ -127,7 +127,7 @@ REGLAS:
 3. No spamees. Un email por carrito.
 
 Tools: sendEmail, searchProducts, calculatePricing.`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
   order_tracking: {
     slug: "starshop-order-tracker",
@@ -141,7 +141,7 @@ REGLAS:
 3. Si el cliente quiere notificación, usa sendEmail template=order_confirmation.
 
 Tools: sendEmail, scrapeWebsite (solo si necesita política de envíos).`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
   escalate_human: {
     slug: "starshop-human-handoff",
@@ -155,7 +155,7 @@ REGLAS:
 3. Ofrece dejar mensaje y horario de atención.
 
 Tools: sendEmail.`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
   admin_ops: {
     slug: "starshop-admin-ops",
@@ -187,7 +187,7 @@ Cierra con una línea de siguiente paso (/orders, /analytics) como COMPLEMENTO, 
 6. Mantén tono StarShop cercano B2B, corto, con números CLP y links /products /orders /workflows. Cierra ofreciendo siguiente paso.
 
 Tools: searchProducts, checkStock, orderTracking, scrapeWebsite, sendEmail, getSalesSummary.`,
-    model: "qwen/qwen3-30b-a3b-instruct-2507",
+    model: "nvidia/nemotron-3-ultra",
   },
 } as const;
 

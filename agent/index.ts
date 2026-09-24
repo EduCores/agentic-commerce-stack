@@ -106,7 +106,7 @@ function toModelMessages(input: string, history?: unknown[]): Array<{ role: "use
 // Si la base de datos no está disponible, el agente sigue funcionando con una
 // configuración por defecto (mismo prompt y modelo). La BD solo aporta
 // dashboard para editar prompts y persistir logs de conversaciones.
-const DEFAULT_MODEL = "qwen/qwen3-30b-a3b-instruct-2507";
+const DEFAULT_MODEL = "nvidia/nemotron-3-ultra";
 
 const DEFAULT_AGENT = {
   id: "builtin-default",
@@ -217,6 +217,7 @@ const KNOWN_TOOLS = Object.keys(ALL_TOOL_DEFS) as string[];
 // Allowlist de modelos: un typo en el editor jamas rompe el chat (se ignora el override)
 const ALLOWED_MODELS = [
   "qwen/qwen3-30b-a3b-instruct-2507",
+  "nvidia/nemotron-3-ultra",
   "openai/gpt-4o",
   "google/gemini-2-0-flash-001",
 ] as const;

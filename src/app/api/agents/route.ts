@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, slug, systemPrompt, model } = body;
     if (!name || !slug) return NextResponse.json({ error: "name and slug required" }, { status: 400 });
-    const created = await prisma.agent.create({ data: { name, slug, systemPrompt, model: model ?? "qwen/qwen3-30b-a3b-instruct-2507", description: body.description, storeId: body.storeId } });
+    const created = await prisma.agent.create({ data: { name, slug, systemPrompt, model: model ?? "nvidia/nemotron-3-ultra", description: body.description, storeId: body.storeId } });
     return NextResponse.json(created, { status: 201 });
   } catch (e) {
     console.error("[API-AGENTS] POST error:", e);
