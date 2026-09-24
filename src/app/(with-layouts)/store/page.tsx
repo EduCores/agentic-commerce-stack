@@ -121,7 +121,7 @@ export default async function StorePage() {
                         ? { dot: "bg-teal-500", badge: "Bajo stock" as const, color: "success" as const }
                         : { dot: "bg-emerald-500", badge: "Disponible" as const, color: "success" as const };
                   const imgs = Array.isArray(p.images) ? (p.images as unknown[]).filter((u): u is string => typeof u === "string") : [];
-                  const thumb = imgs.find((u) => /^https?:\/\//i.test(u) || u.startsWith("/")) ?? "";
+                  const thumb = imgs.find((u) => /^https?:\/\//i.test(u)) ?? "";
                   return (
                     <div key={p.id} className="overflow-hidden rounded-lg border border-card-border bg-card-background transition hover:border-brand-500 hover:shadow-sm">
                       {thumb ? (
