@@ -3,6 +3,7 @@
 import { Button } from "@/components/tailgrids/core/button";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent } from "@/components/tailgrids/core/card";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import {
   Dialog,
   DialogBody,
@@ -199,8 +200,10 @@ export default function SecurityTabContent() {
 
   return (
     <div className="min-w-0">
-      <h2 className="text-xl leading-7 font-semibold text-text-primary">Seguridad</h2>
-      <p className="mt-1 text-sm text-text-tertiary">Contraseña, segundo factor y tu sesión actual — todo funcional.</p>
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl leading-7 font-semibold text-text-primary">Seguridad</h2>
+        <InfoTip label="Acerca de seguridad">Contraseña, segundo factor y tu sesión actual — todo funcional.</InfoTip>
+      </div>
 
       <Card className="mt-6">
         <CardContent className="!py-2">
@@ -226,14 +229,14 @@ export default function SecurityTabContent() {
             </div>
 
             {key === "password" && (
-              <Button type="button" appearance="outline" size="sm" className="shrink-0" onClick={() => setPwdOpen(true)}>
+              <Button type="button" appearance="fill" size="sm" className="shrink-0" onClick={() => setPwdOpen(true)}>
                 Cambiar
               </Button>
             )}
             {key === "2fa" && (
               <Button
                 type="button"
-                appearance="outline"
+                appearance="fill"
                 size="sm"
                 className="shrink-0"
                 onClick={() => openTwofa(twoFactorEnabled ? "disable" : "enable")}
@@ -242,7 +245,7 @@ export default function SecurityTabContent() {
               </Button>
             )}
             {key === "session" && (
-              <Button type="button" appearance="outline" size="sm" className="shrink-0" onClick={() => setSessionOpen(true)}>
+              <Button type="button" appearance="fill" size="sm" className="shrink-0" onClick={() => setSessionOpen(true)}>
                 Ver
               </Button>
             )}

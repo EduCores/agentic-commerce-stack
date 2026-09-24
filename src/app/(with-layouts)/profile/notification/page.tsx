@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Toggle } from "@/components/tailgrids/core/toggle";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { Bell, Mail, Megaphone, Package, ShieldCheck, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -72,8 +73,10 @@ export default function NotificationPage() {
     <div className="min-w-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-xl leading-7 font-semibold text-text-primary">Notificaciones</h2>
-          <p className="mt-1 text-sm text-text-tertiary">Elige qué avisos recibes — se guardan en tu cuenta.</p>
+          <h2 className="flex items-center gap-2 text-xl leading-7 font-semibold text-text-primary">
+            Notificaciones
+            <InfoTip label="Acerca de notificaciones">Elige qué avisos recibes — se guardan en tu cuenta.</InfoTip>
+          </h2>
         </div>
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-text-tertiary" aria-live="polite">
           {savingKey ? (
