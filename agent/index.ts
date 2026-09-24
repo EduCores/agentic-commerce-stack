@@ -12,6 +12,7 @@ import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_
 import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type GraphCrewOverride } from "./lib/crew-graph";
 import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
+import { sanitizeReplyText, createToolCallTextFilter } from "./lib/sanitize-reply";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
 import searchProducts from "./tools/search-products";
@@ -41,6 +42,10 @@ function getOpenRouter(isAdmin?: boolean) {
 // (el generateText con tools a veces corta en tool calls sin texto final).
 // Recibe los mensajes ya construidos (historial + input) para NO perder el contexto.
 // Usa la cadena de respaldo: si el modelo 1 falla, prueba el siguiente.
+// Regla extra: los modelos de razonamiento (Nemotron) a veces escriben su
+// chain-of-thought como respuesta final; con esto entregan SOLO la respuesta.
+const DIRECT_REPLY_RULE =
+  "\n\nFORMATO DE RESPUESTA: entrega DIRECTAMENTE la respuesta final al cliente, en español y en 1-3 frases. No muestres tu razonamiento, análisis, pasos internos ni texto en inglés.";
 async function directChat(
   apiKey: string,
   modelId: string,
@@ -52,11 +57,11 @@ async function directChat(
       const body = {
         model: attemptModel,
         messages: [
-          { role: "system", content: system },
+          { role: "system", content: system + DIRECT_REPLY_RULE },
           ...messages,
         ],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 700,
       };
       const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -74,7 +79,9 @@ async function directChat(
         continue;
       }
       const j = await r.json();
-      const text = (j?.choices?.[0]?.message?.content ?? "").trim();
+      // Sanea pseudo tool-calls y dumps de razonamiento (agent/lib/sanitize-reply.ts):
+      // si el modelo solo devolvió eso, se intenta con el siguiente de la cadena.
+      const text = sanitizeReplyText((j?.choices?.[0]?.message?.content ?? "").trim());
       if (text) return text;
     } catch (e) {
       console.log("[ACS-AGENT] directChat error", attemptModel, e instanceof Error ? e.message : e);
@@ -423,11 +430,13 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   const stepToolCalls = ((result as unknown as { steps?: Array<{ toolCalls?: unknown[] }> }).steps ?? [])
     .flatMap((s) => s.toolCalls ?? []);
 
-  // Si el LLM cortó sin texto (solo tool calls o respuesta vacía), genera respuesta
+  // Si el LLM cortó sin texto (solo tool calls) o solo escribió un pseudo
+  // tool-call como texto (Nemotron a veces lo hace), genera respuesta
   // conversacional real vía llamada directa a OpenRouter.
-  let finalText = (result.text ?? "").trim();
+  const rawText = (result.text ?? "").trim();
+  let finalText = sanitizeReplyText(rawText);
   let direct = false;
-  if (!finalText && stepToolCalls.length > 0) {
+  if (!finalText && (rawText || stepToolCalls.length > 0)) {
     const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
     if (apiKey) {
       const directReply = await directChat(apiKey, modelId, system, messages);
@@ -436,13 +445,15 @@ export async function runAgent(params: { agentSlug: string; input: string; store
         direct = true;
       }
     }
+    // La cadena tampoco dio texto usable: mensaje amigable antes que devolver JSON crudo.
+    if (!finalText && rawText) finalText = FALLBACK_TEXT;
   }
 
   // Log run (no bloquea la respuesta si la BD falla)
   await logRunSafe({
     agentId: agent.id,
     input: { text: params.input, storeId: params.storeId, crew: params.agentSlug } as object,
-    output: { text: finalText || result.text, toolCalls: stepToolCalls } as object,
+    output: { text: finalText || rawText, toolCalls: stepToolCalls } as object,
     status: "COMPLETED",
   });
 
@@ -473,23 +484,35 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
         maxOutputTokens: 700,
       } as never);
 
-      // Stream text chunks como IA que escribe
+      // Stream text chunks como IA que escribe. El filtro retiene los pseudo
+      // tool-calls escritos como texto para que no lleguen al usuario.
+      const textFilter = createToolCallTextFilter();
       for await (const chunk of result.textStream) {
+        const emit = textFilter.push(chunk);
+        if (!emit) continue;
         yielded = true;
-        yield { type: "text" as const, text: chunk };
+        yield { type: "text" as const, text: emit };
+      }
+      const tail = textFilter.flush();
+      if (tail) {
+        yielded = true;
+        yield { type: "text" as const, text: tail };
       }
 
       // Al final, emite toolCalls + meta (para que el frontend sepa navegar)
       const toolCalls = ((await result.toolCalls) ?? []) as unknown as Array<Record<string, unknown>>;
-      let finalText = (await result.text) ?? "";
-      // Si el LLM cortó sin texto (solo tool calls), genera respuesta conversacional
-      // real vía llamada directa (misma lógica que runAgent, con contexto completo).
-      if (!finalText.trim() && toolCalls.length > 0) {
+      const rawFinal = ((await result.text) ?? "").trim();
+      let finalText = sanitizeReplyText(rawFinal);
+      // Si el LLM cortó sin texto (solo tool calls) o solo escribió un pseudo
+      // tool-call como texto, genera la respuesta conversacional de respaldo
+      // (misma lógica que runAgent, con contexto completo).
+      if (!finalText && (rawFinal || toolCalls.length > 0)) {
         const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
         if (apiKey) {
           const directReply = await directChat(apiKey, attemptModel, system, messages);
           if (directReply) finalText = directReply;
         }
+        if (!finalText && rawFinal) finalText = FALLBACK_TEXT;
       }
       if (attemptModel !== chain[0]) console.log(`[ACS-AGENT] streamAgent respondió con respaldo ${attemptModel}`);
       yield { type: "done" as const, text: finalText, toolCalls, agentSlug: agent.slug };

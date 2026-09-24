@@ -7,6 +7,7 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
+        "test:sanitize": "tsx scripts/test-sanitize-reply.ts",
         "clean": "node scripts/clean.mjs",
         "clean:cache": "node scripts/clean.mjs --cache-only",
         "acs:dev": "node scripts/check-env.mjs && prisma generate && next dev",
