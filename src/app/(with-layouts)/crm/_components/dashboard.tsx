@@ -36,36 +36,35 @@ export function CrmDashboard() {
           </span>
           <h3 className="min-w-0 text-sm font-bold tracking-[-0.2px]">Clientes, tareas y actividad — ligada a pedidos y agente</h3>
         </div>
-        {/* Clientes se angosta a 0.7fr (su valor es corto: 34) para que "$38.925.600" quepa en Ingresos/Ticket.
-            3 columnas solo desde xl: con el sidebar visible el contenedor (658-786px en 1024-1152) no alcanza. */}
-        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-[0.7fr_1.15fr_1.15fr]">
+        {/* 3 columnas iguales desde md: una línea en tablet y notebook. */}
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
           <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0">
-            <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-8">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-6 xl:size-16 xl:[&>svg]:size-8">
               <Users />
             </span>
             <div className="min-w-0 text-left">
               <p className="text-sm font-medium text-white/80">Clientes</p>
-              <p className="break-words text-3xl font-extrabold tracking-tight">{data.totals.customers.toLocaleString("es-CL")}</p>
+              <p className="break-words text-2xl font-extrabold tracking-tight xl:text-3xl">{data.totals.customers.toLocaleString("es-CL")}</p>
               <p className="text-xs text-white/70">{data.leads.length} leads reales</p>
             </div>
           </div>
           <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0">
-            <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-8">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-6 xl:size-16 xl:[&>svg]:size-8">
               <Wallet />
             </span>
             <div className="min-w-0 text-left">
               <p className="text-sm font-medium text-white/80">Ingresos por clientes</p>
-              <p className="break-words text-3xl font-extrabold tracking-tight">${data.totals.revenue.toLocaleString("es-CL")}</p>
+              <p className="break-words text-2xl font-extrabold tracking-tight xl:text-3xl">${data.totals.revenue.toLocaleString("es-CL")}</p>
               <p className="text-xs text-white/70">Acumulado real</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0 md:col-span-2 xl:col-span-1">
-            <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-8">
+          <div className="flex items-center gap-4 rounded-xl bg-white/10 p-4 backdrop-blur min-w-0">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-sm [&>svg]:size-6 xl:size-16 xl:[&>svg]:size-8">
               <TrendingUp />
             </span>
             <div className="min-w-0 text-left">
               <p className="text-sm font-medium text-white/80">Ticket promedio</p>
-              <p className="break-words text-3xl font-extrabold tracking-tight">${data.totals.avgTicket.toLocaleString("es-CL")}</p>
+              <p className="break-words text-2xl font-extrabold tracking-tight xl:text-3xl">${data.totals.avgTicket.toLocaleString("es-CL")}</p>
               <p className="text-xs text-white/70">Por pedido</p>
             </div>
           </div>

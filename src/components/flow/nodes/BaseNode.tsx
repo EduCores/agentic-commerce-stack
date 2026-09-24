@@ -87,6 +87,13 @@ const FALLBACK: Accent = {
   handle: "!border-violet-500 text-violet-600 dark:text-violet-400",
 };
 
+const HANDLE_POS: Record<string, Position> = {
+  top: Position.Top,
+  bottom: Position.Bottom,
+  left: Position.Left,
+  right: Position.Right,
+};
+
 /**
  * Tarjeta de nodo con TODA la info original (título, estado, descripción,
  * agente, tools, intent, tipo, prompt, modelo) en ALTURA FIJA (h-[216px]):
@@ -178,7 +185,7 @@ export function BaseNode({ data, selected }: NodeProps) {
       </div>
       <Handle
         type="target"
-        position={Position.Top}
+        position={HANDLE_POS[d.targetHandlePos ?? "top"]}
         title="Entrada"
         aria-label="Entrada"
         className={cn("flex !h-7 !w-7 items-center justify-center !rounded-full !border-2 !bg-white !shadow-md dark:!bg-zinc-900 [&>svg]:size-4", accent.handle)}
@@ -187,7 +194,7 @@ export function BaseNode({ data, selected }: NodeProps) {
       </Handle>
       <Handle
         type="source"
-        position={Position.Bottom}
+        position={HANDLE_POS[d.sourceHandlePos ?? "bottom"]}
         title="Salida — arrastra para conectar"
         aria-label="Salida — arrastra para conectar"
         className={cn("flex !h-7 !w-7 items-center justify-center !rounded-full !border-2 !bg-white !shadow-md dark:!bg-zinc-900 [&>svg]:size-4", accent.handle)}
