@@ -7,7 +7,7 @@ export default function Home() {
 
   return (
     <div className="mt-4 min-w-0 space-y-5">
-      <div className="min-w-0 px-2 lg:px-6">
+      <div className="min-w-0 px-3 sm:px-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">Panel — Dueño de tienda</h2>
@@ -21,7 +21,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="min-w-0 space-y-5 overflow-x-clip px-2 lg:px-5">
+      <div className="min-w-0 space-y-5 overflow-x-clip px-3 sm:px-6">
         <RealStats />
         <LastTransactionsTable />
       </div>

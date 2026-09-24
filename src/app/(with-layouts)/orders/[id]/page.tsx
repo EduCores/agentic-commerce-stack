@@ -59,10 +59,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="min-w-0">
           <CardHeader><CardTitle className="text-sm">Resumen</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p><span className="font-medium">Cliente:</span> {order.customer?.name ?? "—"} <span className="text-xs text-text-tertiary">{order.customer?.email ?? ""}</span></p>
+            <p className="break-words"><span className="font-medium">Cliente:</span> {order.customer?.name ?? "—"} <span className="text-xs text-text-tertiary">{order.customer?.email ?? ""}</span></p>
             <p><span className="font-medium">Total:</span> ${Number(order.total).toLocaleString("es-CL")} {order.currency}</p>
             <div className="flex flex-wrap gap-2">
               <Badge color={STATUS_COLOR[order.status] ?? "gray"}>{STATUS_LABEL[order.status] ?? order.status}</Badge>

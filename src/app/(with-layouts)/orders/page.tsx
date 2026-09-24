@@ -116,13 +116,13 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Informativo: el pedido más reciente real, sin importar el filtro activo. */}
         {latestOrder && (
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
                   <ReceiptText />
                 </span>
-                <CardTitle className="text-sm">Último pedido — sin filtro</CardTitle>
+                <CardTitle className="min-w-0 truncate text-sm">Último pedido — sin filtro</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-sm">
@@ -154,13 +154,13 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
         {/* Accionable: el último pedido con alerta, con el motivo del flujo y acceso directo. */}
         {reviewOrder && (
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-badge-warning-background text-badge-warning-text [&>svg]:size-4">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-warning-background text-badge-warning-text [&>svg]:size-4">
                   <TriangleAlert />
                 </span>
-                <CardTitle className="text-sm">Pedido a revisar — último con alerta</CardTitle>
+                <CardTitle className="min-w-0 truncate text-sm">Pedido a revisar — último con alerta</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-sm">
@@ -168,7 +168,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                 <Badge color={STATUS_COLOR[reviewOrder.status] ?? "gray"}>{STATUS_LABEL[reviewOrder.status] ?? reviewOrder.status}</Badge>
                 <span className="font-medium text-text-primary">{reviewOrder.customer?.name ?? "Sin cliente"}</span>
                 {reviewOrder.customer?.email && (
-                  <a href={`mailto:${reviewOrder.customer.email}`} className="text-xs text-brand-600 underline">
+                  <a href={`mailto:${reviewOrder.customer.email}`} className="min-w-0 break-all text-xs text-brand-600 underline">
                     {reviewOrder.customer.email}
                   </a>
                 )}
