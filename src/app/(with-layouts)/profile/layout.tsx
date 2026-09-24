@@ -38,7 +38,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                   data-active={isActive}
                   className="flex w-full items-start justify-start gap-3 rounded-xl p-2 hover:bg-background-gray-secondary_alt/45 data-[active=true]:border-none data-[active=true]:bg-background-gray-secondary_alt"
                 >
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-border-secondary-alt bg-background-gray-secondary_alt text-icon-secondary">
+                  <div className={`flex size-11 shrink-0 items-center justify-center rounded-lg border border-card-border ${item.color}`}>
                     {item.icon}
                   </div>
                   <div className="flex flex-col items-start gap-1">

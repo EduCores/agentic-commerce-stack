@@ -44,12 +44,12 @@ export function UserProfileButton() {
       label: "Ver perfil",
     },
     {
-      href: "#",
+      href: "/profile/account",
       icon: <GearIcon />,
       label: "Ajustes de cuenta",
     },
     {
-      href: "#",
+      href: "/profile/billing",
       icon: <BillingIcon />,
       label: "Facturación y plan",
     },
@@ -96,7 +96,7 @@ export function UserProfileButton() {
                 "href" in domProps ? <Link {...domProps} /> : <div {...domProps} />
               }
             >
-              <span className="shrink-0 text-icon-secondary group-hover:text-text-primary">
+              <span className="shrink-0 text-icon-tertiary group-hover:text-text-primary">
                 {item.icon}
               </span>
               <span className="leading-5 font-medium">{item.label}</span>
