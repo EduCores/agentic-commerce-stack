@@ -27,15 +27,25 @@ export async function POST(req: Request) {
   try {
     if (store.provider === "starshop") {
       const base = process.env.STARSHOP_API_URL ?? "http://localhost:3000";
-      const res = await fetch(
-        `${base}/api/tenant/catalog?tenant=${encodeURIComponent(store.id)}`,
-        { cache: "no-store", signal: AbortSignal.timeout(8_000) },
-      );
-      if (!res.ok) throw new Error(`StarShop respondió HTTP ${res.status}`);
-      const json = (await res.json()) as { total?: number; products?: unknown[] };
-      total = json.total ?? json.products?.length ?? 0;
-      if (!total) throw new Error("Catálogo vacío (0 productos)");
-      ok = true;
+      const url = `${base}/api/tenant/catalog?tenant=${encodeURIComponent(store.id)}`;
+      // Reintentos con backoff: el DNS hacia Supabase puede flaquear un intento suelto.
+      let lastErr: unknown = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(8_000) });
+          if (!res.ok) throw new Error(`StarShop respondió HTTP ${res.status}`);
+          const json = (await res.json()) as { total?: number; products?: unknown[] };
+          total = json.total ?? json.products?.length ?? 0;
+          if (!total) throw new Error("Catálogo vacío (0 productos)");
+          ok = true;
+          lastErr = null;
+          break;
+        } catch (e) {
+          lastErr = e;
+          if (attempt < 3) await new Promise((r) => setTimeout(r, 1500 * attempt));
+        }
+      }
+      if (!ok) throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
     } else if (store.provider === "mock") {
       ok = true;
       total = null;
