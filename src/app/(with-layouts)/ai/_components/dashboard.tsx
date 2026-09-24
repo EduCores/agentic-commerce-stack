@@ -113,11 +113,15 @@ export function AiDashboard() {
       <AiAgentsTable data={data} />
       <Card className="min-w-0 overflow-hidden md:col-span-3">
         <CardHeader><CardTitle className="text-sm">Actividad del Agente</CardTitle></CardHeader>
-        <CardContent className="min-w-0 space-y-1.5 break-words">
+        <CardContent className="min-w-0 space-y-2">
           {data.recent.length === 0 ? <p className="text-sm text-text-tertiary">Sin ejecuciones aún.</p> : data.recent.map((r) => (
-            <div key={r.id} className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
-              <span className="min-w-0 break-words">{r.agent}</span>
-              <span className="shrink-0 text-xs text-text-tertiary">{AGENT_STATUS_ES[r.status] ?? r.status} · {new Date(r.at).toLocaleString("es-CL")} · <Link href="/workflows" className="underline">workflows</Link></span>
+            <div key={r.id} className="min-w-0 rounded-lg border border-card-border/60 px-3 py-2">
+              <p className="flex min-w-0 items-center gap-2 text-sm font-medium text-text-primary">
+                <span className={`size-2 shrink-0 rounded-full ${r.status === "COMPLETED" ? "bg-emerald-500" : r.status === "FAILED" ? "bg-red-500" : r.status === "RUNNING" ? "bg-amber-500" : "bg-gray-300"}`} aria-hidden="true" />
+                <span className="min-w-0 flex-1 truncate">{r.agent}</span>
+                <span className="shrink-0 text-xs font-bold text-text-secondary">{AGENT_STATUS_ES[r.status] ?? r.status}</span>
+              </p>
+              <p className="mt-1 pl-4 text-xs text-text-tertiary">{new Date(r.at).toLocaleString("es-CL")} · <Link href="/workflows" className="font-medium text-brand-600 underline">workflows</Link></p>
             </div>
           ))}
         </CardContent>

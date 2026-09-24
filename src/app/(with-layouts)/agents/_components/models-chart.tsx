@@ -69,7 +69,7 @@ export function AgentsModelsChart() {
           <span className="mt-1 text-xs font-medium text-text-tertiary">solicitudes</span>
         </div>
       </CardContent>
-      <div className="border-t border-card-border px-5 py-3">
+      <div className="border-t border-card-border px-3 py-3">
         <p className="text-xs font-semibold text-text-secondary">Ranking — costo e ingresos por modelo</p>
         <div className="mt-2 space-y-2">
           {rows.map((r, i) => (

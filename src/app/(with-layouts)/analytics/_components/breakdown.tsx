@@ -92,7 +92,7 @@ export function AnalyticsStatusChart({ data, className }: { data: AnalyticsData 
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-card-border px-5 py-3 text-xs text-text-tertiary">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-card-border px-3 py-3 text-xs text-text-tertiary">
         <span className="inline-flex items-center gap-1.5">
           <span className="size-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
           Pagado/Completado <strong className="text-text-primary">{paidOrders}</strong>
@@ -156,7 +156,7 @@ export function AnalyticsSourceChart({ data, className }: { data: AnalyticsData 
           <span className="mt-1 text-xs font-medium text-text-tertiary">pedidos</span>
         </div>
       </CardContent>
-      <div className="space-y-1.5 border-t border-card-border px-5 py-3">
+      <div className="space-y-1.5 border-t border-card-border px-3 py-3">
         {bySource.map((s, i) => (
           <div key={s.source} className="flex items-center justify-between gap-2 text-xs">
             <span className="flex min-w-0 items-center gap-1.5 font-medium text-text-secondary">

@@ -106,7 +106,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
         </div>
         <p className="text-xs text-text-tertiary">Cada fila es una tienda conectada. Productos y pedidos vienen por <code>storeId</code>; ingresos = suma de <code>Order.total</code> de esa tienda.</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="!px-3">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-sm">
             <thead className="border-b border-card-border text-xs text-text-tertiary">

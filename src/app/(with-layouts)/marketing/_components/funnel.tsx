@@ -56,7 +56,7 @@ export function MarketingFunnel({ data }: { data: MarketingData | null }) {
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <div className="flex flex-wrap items-center gap-2 border-t border-card-border px-5 py-3">
+      <div className="flex flex-wrap items-center gap-2 border-t border-card-border px-3 py-3">
         {steps.map((s, i) => (
           <span key={s.stage} className="flex items-center gap-1.5 rounded-lg bg-background-gray-secondary px-2.5 py-1 text-xs text-text-secondary">
             <span

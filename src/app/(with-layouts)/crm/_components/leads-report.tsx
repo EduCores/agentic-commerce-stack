@@ -8,16 +8,16 @@ import { Award, Users } from "lucide-react";
 export function CrmLeadsReport({ data }: { data: CrmData }) {
   const totalRevenue = data.leads.reduce((a, l) => a + (l.revenue ?? 0), 0);
   return (
-    <Card className="min-w-0 md:col-span-2">
-      <CardHeader>
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">
-            <Users />
-          </span>
-          <CardTitle className="min-w-0 text-sm">Reporte de leads — por cliente real</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
+      <Card className="min-w-0 md:col-span-2">
+        <CardHeader>
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">
+              <Users />
+            </span>
+            <CardTitle className="min-w-0 truncate text-sm">Reporte de leads — por cliente real</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="!px-3">
         {data.leads.length === 0 ? (
           <p className="text-sm text-text-tertiary">Aún no hay clientes. Se crean con cada pedido.</p>
         ) : (

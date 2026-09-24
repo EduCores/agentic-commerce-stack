@@ -123,7 +123,7 @@ export function CrmGrowthChart({ data, days, onDays, month, year, onMonth, onYea
         </span>
         <span>vs mitad anterior</span>
       </div>
-      <div className="flex flex-wrap items-center gap-2 border-t border-card-border px-5 py-3">
+      <div className="flex flex-wrap items-center gap-2 border-t border-card-border px-3 py-3">
         <span className="text-xs text-text-tertiary">Rango:</span>
         {CRM_RANGES.map((r) => (
           <button
