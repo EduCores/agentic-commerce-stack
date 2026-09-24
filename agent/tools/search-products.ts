@@ -3,6 +3,7 @@ import { defineTool } from "@/lib/eve/defineTool";
 import { getStoreAdapterForStore } from "@/lib/adapters/store";
 import { prisma } from "@/lib/adapters/prisma";
 import { cleanProductQuery, normalize } from "../lib/search/normalize";
+import { resolveProductImage } from "@/utils/product-image";
 import { rankProducts } from "../lib/search/rank";
 import { matchCategories, allCategories } from "../lib/search/categories";
 import type { CategorySuggestion } from "../lib/search/categories";
@@ -35,12 +36,7 @@ export default defineTool({
         select: { sku: true, images: true },
       })
       .catch(() => []);
-    const imgOf = (sku: string) => {
-      const imgs = dbMeta.find((p) => p.sku === sku)?.images;
-      const arr = Array.isArray(imgs) ? (imgs as unknown[]).filter((u): u is string => typeof u === "string") : [];
-      // Solo URLs https reales (los paths locales no resuelven en ningún frontend).
-      return arr.find((u) => /^https?:\/\//i.test(u)) ?? "";
-    };
+    const imgOf = (sku: string) => resolveProductImage(dbMeta.find((p) => p.sku === sku)?.images);
     const productsOut = hits.map((hit) => {
       const meta = (hit.product.metadata ?? {}) as Record<string, unknown>;
       return {

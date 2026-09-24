@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { defineTool } from "@/lib/eve/defineTool";
 import { prisma } from "@/lib/adapters/prisma";
+import { resolveProductImage } from "@/utils/product-image";
 import type { Prisma } from "../../src/generated/prisma/client";
 
 /**
@@ -54,15 +55,14 @@ export default defineTool({
       : [];
     const topProducts = topGroups.map((g) => {
       const m = metas.find((x) => x.id === g.productId);
-      const allImgs = Array.isArray(m?.images) ? (m.images as unknown[]).filter((u): u is string => typeof u === "string") : [];
-      const imgs = allImgs.filter((u) => /^https?:\/\//i.test(u));
+      const imgs = Array.isArray(m?.images) ? m.images : [];
       return {
         title: m?.title ?? "Producto",
         sku: m?.sku ?? g.productId.slice(0, 8),
         quantity: g._sum.quantity ?? 0,
         revenue: Math.round(Number(g._sum.total ?? 0)),
         price: m?.price != null ? Math.round(Number(m.price)) : 0,
-        image: imgs[0] ?? "",
+        image: resolveProductImage(imgs),
       };
     });
 
