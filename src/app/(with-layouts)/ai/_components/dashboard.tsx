@@ -123,8 +123,9 @@ export function AiDashboard() {
       </div>
       <AiActivityChart data={data} days={days} onDays={setDays} month={month} year={year} onMonth={setMonth} onYear={setYear} />
       <AiModelsChart data={data} />
+      <div className="grid gap-4 md:col-span-3 md:grid-cols-2">
       <AiAgentsTable data={data} />
-      <Card className="min-w-0 overflow-hidden md:col-span-3">
+      <Card className="min-w-0 overflow-hidden">
         <CardHeader><CardTitle className="text-sm">Actividad del Agente</CardTitle></CardHeader>
         <CardContent className="min-w-0 space-y-2">
           {data.recent.length === 0 ? <p className="text-sm text-text-tertiary">Sin ejecuciones aún.</p> : data.recent.map((r) => (
@@ -139,6 +140,7 @@ export function AiDashboard() {
           ))}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
