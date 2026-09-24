@@ -119,11 +119,16 @@ export default function LastTransactionsTable() {
   return (
     <Card className="min-w-0 overflow-hidden">
       {/* Header */}
-      <CardHeader className="mb-6 flex-col items-stretch justify-start">
-        <CardTitle>Transacciones recientes</CardTitle>
+      <CardHeader className="mb-4 flex-col items-stretch justify-start gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle>Transacciones recientes</CardTitle>
+          <span className="text-xs font-medium text-text-tertiary">
+            {filtered.length} de {transactions.length} mostradas
+          </span>
+        </div>
 
-        <div className="flex items-center gap-2">
-          <InputGroup className="min-w-0 flex-[4] py-1.5">
+        <div className="flex flex-col gap-2">
+          <InputGroup className="h-9 min-w-0 w-full items-center py-0">
             <InputGroupAddon align="inline-start" className="pr-0 text-icon-tertiary">
               <SearchIcon className="size-4" />
             </InputGroupAddon>
@@ -135,37 +140,39 @@ export default function LastTransactionsTable() {
             />
           </InputGroup>
 
-          <div className="min-w-0 flex-[4]">
-          <Select value={statusFilter} onChange={(v) => setStatusFilter(String(v))} aria-label="Filtrar por estado">
-            <SelectTrigger className="h-8 w-full px-2.5 text-xs">
-              <SelectValue />
-              <SelectIndicator />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem id="all" textValue="Todos">Todos</SelectItem>
-              {statuses.map((s) => (
-                <SelectItem key={s} id={s} textValue={s}>{s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          </div>
-          <Button
-            appearance="outline"
-            onClick={handleDownload}
-            isDisabled={isPending || filtered.length === 0}
-            aria-label={selectedTransactions.length > 0 ? `Descargar ${selectedTransactions.length} seleccionadas en CSV` : "Descargar filtradas en CSV"}
-            className="h-8 min-w-0 flex-[2] p-1.5 text-icon-tertiary"
-          >
-            <DownloadIcon />
-          </Button>
-          {selectedTransactions.length > 0 && (
-            <button
-              onClick={() => setSelectedTransactions([])}
-              className="text-xs font-medium text-text-secondary underline hover:text-text-primary"
+          <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <Select value={statusFilter} onChange={(v) => setStatusFilter(String(v))} aria-label="Filtrar por estado">
+                <SelectTrigger className="h-9 w-full px-2.5 text-xs">
+                  <SelectValue />
+                  <SelectIndicator />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem id="all" textValue="Todos">Todos</SelectItem>
+                  {statuses.map((s) => (
+                    <SelectItem key={s} id={s} textValue={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              appearance="outline"
+              onClick={handleDownload}
+              isDisabled={isPending || filtered.length === 0}
+              aria-label={selectedTransactions.length > 0 ? `Descargar ${selectedTransactions.length} seleccionadas en CSV` : "Descargar filtradas en CSV"}
+              className="h-9 min-w-0 shrink-0 p-2 text-icon-tertiary"
             >
-              Limpiar ({selectedTransactions.length})
-            </button>
-          )}
+              <DownloadIcon />
+            </Button>
+            {selectedTransactions.length > 0 && (
+              <button
+                onClick={() => setSelectedTransactions([])}
+                className="shrink-0 text-xs font-medium text-text-secondary underline hover:text-text-primary"
+              >
+                Limpiar ({selectedTransactions.length})
+              </button>
+            )}
+          </div>
         </div>
       </CardHeader>
 

@@ -46,10 +46,10 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="grid min-w-0 gap-4 md:grid-cols-3">
-      <div className="mt-2.5 overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-primary-500 to-[#328e8f] p-6 text-white md:col-span-3">
+      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-primary-500 to-[#328e8f] p-6 text-white md:col-span-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold tracking-[-0.2px]">Tendencias reales de tu tienda</h3>
+            <h3 className="mt-2.5 text-sm font-bold tracking-[-0.2px]">Tendencias reales de tu tienda</h3>
             <p className="text-xs text-white/75">
               {data.totals.orders.toLocaleString("es-CL")} pedidos en {periodLabel} · {data.totals.revenue.toLocaleString("es-CL")} ingresos
               {data.totals.growth > 0 ? ` · +${data.totals.growth}% vs período anterior` : ""}

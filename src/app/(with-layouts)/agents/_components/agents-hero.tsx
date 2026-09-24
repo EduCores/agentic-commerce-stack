@@ -22,10 +22,10 @@ export function AgentsHero({ fallbackCount }: { fallbackCount: number }) {
   const agentsLen = data?.table.length ?? fallbackCount;
 
   return (
-    <div className="mt-2.5 overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-primary-600 p-6 text-white">
+    <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-primary-600 p-6 text-white">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-bold tracking-[-0.2px]">
+          <h3 className="mt-2.5 flex items-center gap-2 text-sm font-bold tracking-[-0.2px]">
             <span className="flex size-7 items-center justify-center rounded-lg bg-white/15 text-white [&>svg]:size-4">
               <Bot />
             </span>
