@@ -58,7 +58,7 @@ export function SliderThumb({ slide, onViewStore, onEdit, onTogglePublish, onDel
             <button
               type="button"
               onClick={() => onViewStore?.(slide)}
-              className="mt-3 w-fit rounded-full border border-white bg-white px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-gray-200"
+              className="mt-3 w-fit rounded-[4px] border border-white bg-white px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-gray-200"
             >
               {slide.cta}
             </button>

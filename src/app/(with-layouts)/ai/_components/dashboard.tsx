@@ -109,7 +109,7 @@ export function AiDashboard() {
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/15 pt-4">
           <span className="text-xs font-medium text-white/80">Proveedores</span>
           {data.providers.map((p) => (
-            <span key={p.name} className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 font-mono text-xs font-bold text-white backdrop-blur">
+            <span key={p.name} className="inline-flex items-center gap-1.5 rounded-[4px] bg-white/15 px-2.5 py-1 font-mono text-xs font-bold text-white backdrop-blur">
               <span className="size-2 rounded-full bg-white/90" />
               {p.name} {p.pct}%
             </span>

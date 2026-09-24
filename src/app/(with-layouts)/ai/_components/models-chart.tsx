@@ -84,12 +84,12 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
           <p className="mt-1 text-xs text-text-tertiary">Eje X: modelo · Eje Y: solicitudes del período</p>
           <div className="mt-2 flex flex-wrap gap-2 border-t border-card-border pt-3 text-xs">
             {topByRequests && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-background-gray-secondary px-2.5 py-1 font-medium text-text-secondary">
+              <span className="inline-flex items-center gap-1.5 rounded-[4px] bg-background-gray-secondary px-2.5 py-1 font-medium text-text-secondary">
                 🏆 Más usado: <strong className="text-text-primary">{displayModelName(topByRequests.model)} ({topByRequests.requests})</strong>
               </span>
             )}
             {topByMargin && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-background-gray-secondary px-2.5 py-1 font-medium text-text-secondary">
+              <span className="inline-flex items-center gap-1.5 rounded-[4px] bg-background-gray-secondary px-2.5 py-1 font-medium text-text-secondary">
                 💰 Mejor margen: <strong className="text-emerald-600">{displayModelName(topByMargin.model)} (${(topByMargin.revenue - topByMargin.cost).toLocaleString("es-CL")})</strong>
               </span>
             )}

@@ -57,7 +57,7 @@ export function AnalyticsStatusChart({ data, className }: { data: AnalyticsData 
               <span className="font-bold text-emerald-600">{paidRate.toLocaleString("es-CL")}% pagados</span>
             </p>
           </div>
-          <span className="rounded-full bg-background-gray-secondary px-2.5 py-1 text-xs font-bold text-text-primary">
+          <span className="rounded-[4px] bg-background-gray-secondary px-2.5 py-1 text-xs font-bold text-text-primary">
             ${totalRevenue.toLocaleString("es-CL")}
           </span>
         </div>

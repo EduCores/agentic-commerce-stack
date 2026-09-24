@@ -113,7 +113,7 @@ export function AnalyticsDashboard() {
           <span className="flex items-center gap-1.5 text-xs font-medium text-white/80">
             <TrendingUp className="size-3.5" /> Mejor día:
           </span>
-          <span className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold text-white backdrop-blur">
+          <span className="rounded-[4px] bg-white/15 px-2.5 py-1 text-xs font-bold text-white backdrop-blur">
             {data.totals.bestDay ? `${data.totals.bestDay.date} — ${formatCLP(data.totals.bestDay.total)} (${data.totals.bestDay.orders} pedidos)` : "sin datos"}
           </span>
           <span className="text-xs text-white/60">· Datos reales de {periodLabel} · cierre diario</span>

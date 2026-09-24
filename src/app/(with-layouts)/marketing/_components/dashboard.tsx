@@ -28,7 +28,7 @@ function CampaignsHero({ data }: { data: MarketingData }) {
               Catálogo híbrido: cada tienda conectada es una campaña. Datos compartidos por StoreConnection (productos + pedidos por tienda).
             </InfoTip>
           </h3>
-          <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
+          <span className="mt-2 inline-flex items-center gap-1.5 rounded-[4px] bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
             <span className="size-1.5 rounded-full bg-amber-300" /> Modo mock — conecta para datos reales
           </span>
         </div>

@@ -22,7 +22,7 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
                 <span className="font-bold text-brand-600">${totalRevenue.toLocaleString("es-CL")}</span>
               </p>
             </div>
-            <span className="rounded-full bg-background-gray-secondary px-2.5 py-1 text-xs font-bold text-text-primary">
+            <span className="rounded-[4px] bg-background-gray-secondary px-2.5 py-1 text-xs font-bold text-text-primary">
               Top {data.topContent.length}
             </span>
           </div>

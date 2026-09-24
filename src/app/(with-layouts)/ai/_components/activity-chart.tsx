@@ -49,7 +49,7 @@ function ActivityDayBadge({ active, payload }: { active?: boolean; payload?: { v
   if (!active || !payload?.length) return null;
   const v = Number(payload[0].value ?? 0);
   return (
-    <div className="rounded-full bg-button-primary-background px-3 py-1.5 text-xs font-extrabold whitespace-nowrap text-button-primary-text shadow-lg">
+    <div className="rounded-[4px] bg-button-primary-background px-3 py-1.5 text-xs font-extrabold whitespace-nowrap text-button-primary-text shadow-lg">
       {v.toLocaleString("es-CL")} solicitudes
     </div>
   );
@@ -120,10 +120,10 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded-full bg-badge-primary-background px-2.5 py-1 text-xs font-bold text-badge-primary-text">
+            <span className="rounded-[4px] bg-badge-primary-background px-2.5 py-1 text-xs font-bold text-badge-primary-text">
               {total} en período
             </span>
-            <span className="rounded-full bg-badge-warning-background px-2.5 py-1 text-xs font-bold text-badge-warning-text">
+            <span className="rounded-[4px] bg-badge-warning-background px-2.5 py-1 text-xs font-bold text-badge-warning-text">
               ~${(total * 0.9).toFixed(1)} costo estimado
             </span>
           </div>

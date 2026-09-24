@@ -15,7 +15,7 @@ export default function Home() {
               Todo tu ACS en un vistazo: ventas, stock, clientes, marketing y automatización.
             </InfoTip>
           </div>
-          <p className="rounded-full border border-card-border bg-card-background px-3 py-1.5 text-xs font-medium capitalize text-text-tertiary">
+          <p className="rounded-[4px] border border-card-border bg-card-background px-3 py-1.5 text-xs font-medium capitalize text-text-tertiary">
             {today}
           </p>
         </div>

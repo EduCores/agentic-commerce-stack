@@ -94,7 +94,7 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
                   <span className="flex min-w-0 items-center gap-2.5">
                     <ChannelIcon name={r.name} />
                     <span className="truncate text-sm text-text-secondary">{r.name}</span>
-                    {r.isLive && <span className="shrink-0 rounded-full bg-[#0866FF] px-1.5 py-0.5 text-xs font-bold text-white">Live</span>}
+                    {r.isLive && <span className="shrink-0 rounded-[4px] bg-[#0866FF] px-1.5 py-0.5 text-xs font-bold text-white">Live</span>}
                   </span>
                   <span className="shrink-0 text-right">
                     <span className="block text-sm font-bold text-text-primary">${r.revenue.toLocaleString("es-CL")}</span>

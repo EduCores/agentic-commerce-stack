@@ -28,15 +28,15 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             Resumen financiero — negocio en tiempo real
           </h3>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+            <span className="inline-flex items-center gap-1.5 rounded-[4px] bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">
               <span className="size-1.5 rounded-full bg-emerald-300" />
               {orders.toLocaleString("es-CL")} pedidos
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+            <span className="inline-flex items-center gap-1.5 rounded-[4px] bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">
               <span className="size-1.5 rounded-full bg-emerald-300" />
               {formatCLP(revenue)} ingresos reales
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/85 backdrop-blur">
+            <span className="inline-flex items-center gap-1.5 rounded-[4px] bg-white/10 px-3 py-1 text-xs font-medium text-white/85 backdrop-blur">
               Pagados + completados
             </span>
           </div>
@@ -93,12 +93,12 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
         {alerts > 0 ? (
           <Link
             href="/orders?status=FAILED"
-            className="inline-flex items-center gap-1.5 rounded-full bg-red-400/20 px-2.5 py-1 text-xs font-bold text-white backdrop-blur hover:bg-red-400/30"
+            className="inline-flex items-center gap-1.5 rounded-[4px] bg-red-400/20 px-2.5 py-1 text-xs font-bold text-white backdrop-blur hover:bg-red-400/30"
           >
             <TriangleAlert className="size-3.5" /> {alerts} pedidos requieren atención
           </Link>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold text-white backdrop-blur">
+          <span className="inline-flex items-center gap-1.5 rounded-[4px] bg-white/15 px-2.5 py-1 text-xs font-bold text-white backdrop-blur">
             <span className="size-1.5 rounded-full bg-emerald-300" /> Sin alertas de pedidos
           </span>
         )}
