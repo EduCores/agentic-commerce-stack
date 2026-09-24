@@ -146,7 +146,7 @@ export function MetaConnectCard() {
   const active = conns.find((c) => c.isActive);
 
   return (
-    <Card className="min-w-0">
+    <Card className="min-w-0 md:col-span-3">
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
           <CardTitle className="flex min-w-0 flex-1 items-center gap-2 text-sm">
@@ -205,14 +205,19 @@ export function MetaConnectCard() {
               SDK: <code>src/lib/adapters/meta.ts</code> expone <code>getMetaMarketingData()</code> usado por /api/marketing. Endpoints: <code>GET /api/meta</code>, <code>POST /api/meta</code>, <code>POST /api/meta/test</code>, <code>POST /api/meta/sync</code>.
             </InfoTip>
           </p>
-          <p className="text-xs text-text-tertiary">
-            1) Crea un token de usuario del sistema en{" "}
-            <a href="https://business.facebook.com/settings/system-users" target="_blank" rel="noreferrer" className="underline">
-              Business Settings → System Users
-            </a>{" "}
-            con permisos <code>ads_read</code>, <code>ads_management</code>. 2) Copia Ad Account ID (solo dígitos, sin act_). 3) Prueba y conecta.
-          </p>
-          <div className="mt-3 grid gap-3">
+          <p className="text-xs text-text-tertiary">Sigue estos pasos para conectar:</p>
+          <ol className="mt-1 list-decimal space-y-1 pl-4 text-xs text-text-tertiary">
+            <li>
+              Crea un token de usuario del sistema en{" "}
+              <a href="https://business.facebook.com/settings/system-users" target="_blank" rel="noreferrer" className="underline">
+                Business Settings → System Users
+              </a>{" "}
+              con permisos <code>ads_read</code>, <code>ads_management</code>.
+            </li>
+            <li>Copia Ad Account ID (solo dígitos, sin act_).</li>
+            <li>Prueba y conecta.</li>
+          </ol>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1 text-xs">
               Nombre
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="StarShop Meta" className={inputCls} />
@@ -221,7 +226,7 @@ export function MetaConnectCard() {
               Ad Account ID *
               <input value={form.adAccountId} onChange={(e) => setForm({ ...form, adAccountId: e.target.value })} placeholder="123456789012345" className={inputCls} />
             </label>
-            <label className="flex flex-col gap-1 text-xs">
+            <label className="flex flex-col gap-1 text-xs sm:col-span-2">
               Access Token * (se guarda cifrado en prod)
               <input
                 value={form.accessToken}
