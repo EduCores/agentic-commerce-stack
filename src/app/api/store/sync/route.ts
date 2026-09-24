@@ -99,8 +99,12 @@ export async function POST(req: Request) {
       }
     }
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const hint = /ENOTFOUND|ECONNREFUSED|fetch failed|network/i.test(msg)
+      ? " (red/DNS intermitente entre ACS, StarShop o su base: reintenta en unos segundos)"
+      : "";
     return NextResponse.json(
-      { error: `No se pudo leer el catálogo del tenant en StarShop: ${err instanceof Error ? err.message : String(err)}` },
+      { error: `No se pudo leer el catálogo del tenant en StarShop: ${msg}${hint}` },
       { status: 502 },
     );
   }

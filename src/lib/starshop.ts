@@ -104,15 +104,31 @@ export function normalizeTenantProduct(p: NonNullable<TenantCatalogPayload["prod
  * Lee el catálogo del tenant (slug = storeId) desde StarShop.
  * Idempotente del lado ACS: el upsert del sync es por (storeId, sku).
  */
-export async function fetchTenantCatalog(storeId: string): Promise<{ products: StarshopProductRow[]; syncedAt?: string; provider?: string }> {
-  const res = await fetch(`${starshopBase()}/api/tenant/catalog?tenant=${encodeURIComponent(storeId)}`, { cache: "no-store" });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`StarShop tenant catalog ${res.status}: ${body.slice(0, 200)}`);
+export async function fetchTenantCatalog(
+  storeId: string,
+  opts?: { tries?: number }
+): Promise<{ products: StarshopProductRow[]; syncedAt?: string; provider?: string }> {
+  const url = `${starshopBase()}/api/tenant/catalog?tenant=${encodeURIComponent(storeId)}`;
+  const tries = Math.max(1, opts?.tries ?? 3);
+  let lastErr: unknown = null;
+  // Reintentos con backoff: la red/DNS hacia StarShop o su DB puede flaquear
+  // un intento suelto (ENOTFOUND/ECONNREFUSED intermitente).
+  for (let attempt = 1; attempt <= tries; attempt++) {
+    try {
+      const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(25000) });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(`StarShop tenant catalog ${res.status}: ${body.slice(0, 200)}`);
+      }
+      const json = (await res.json()) as TenantCatalogPayload;
+      const products = (json.products ?? []).map(normalizeTenantProduct);
+      return { products, syncedAt: json.syncedAt, provider: json.provider };
+    } catch (e) {
+      lastErr = e;
+      if (attempt < tries) await new Promise((r) => setTimeout(r, 1500 * attempt));
+    }
   }
-  const json = (await res.json()) as TenantCatalogPayload;
-  const products = (json.products ?? []).map(normalizeTenantProduct);
-  return { products, syncedAt: json.syncedAt, provider: json.provider };
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 }
 
 export interface HeroSlideRow {
