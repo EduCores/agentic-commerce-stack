@@ -154,6 +154,41 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
   );
 }
 
+function AudienceCard({ data }: { data: MarketingData }) {
+  return (
+    <Card className="min-w-0">
+      <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
+      <CardContent className="text-sm text-text-secondary">
+        <p>
+          <strong className="text-2xl font-extrabold tracking-tight text-text-primary">
+            {(data.audience?.customers ?? 0).toLocaleString("es-CL")}
+          </strong>{" "}
+          <span className="text-text-tertiary">compradores únicos</span>
+        </p>
+        <div className="mt-3 space-y-1.5">
+          {(data.audience?.byChannel ?? []).slice(0, 4).map((a) => (
+            <div key={a.channel} className="flex items-center justify-between gap-2 text-sm">
+              <span>{a.channel}</span>
+              <Badge color="gray">{a.customers} personas</Badge>
+            </div>
+          ))}
+        </div>
+        {(() => {
+          const best = [...data.channels].sort((a, b) => b.convRate - a.convRate)[0];
+          return best ? (
+            <p className="mt-3 border-t border-card-border pt-3 text-xs text-text-tertiary">
+              Tu mejor canal es <strong className="text-text-primary">{best.channel}</strong> con{" "}
+              <strong className="text-text-primary">{best.convRate}% conversión</strong>. Refuérzalo y
+              recupera carritos desde /admin/emails.
+            </p>
+          ) : null;
+        })()}
+        <Link href="/admin/emails" className="mt-1 inline-block text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</Link>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function MarketingDashboard() {
   const { data, isLoading } = useQuery<MarketingData>({
     queryKey: ["marketing"],
@@ -179,42 +214,15 @@ export function MarketingDashboard() {
       {/* 3. Embudo de conversión */}
       <MarketingFunnel data={data} />
 
-      {/* 4-6. Resto: campañas por tienda, Meta Ads, canales + audiencia */}
+      {/* 4-6. Resto: campañas, Meta + audiencia 50/50, canales */}
       <div className="grid gap-4 md:grid-cols-3">
         <CampaignsDetail data={data} />
-        <MetaConnectCard />
         <div className="grid gap-4 md:col-span-3 md:grid-cols-2">
+          <MetaConnectCard />
+          <AudienceCard data={data} />
+        </div>
+        <div className="md:col-span-3">
           <MarketingChannelTable data={data} />
-          <Card className="min-w-0">
-            <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
-            <CardContent className="text-sm text-text-secondary">
-              <p>
-                <strong className="text-2xl font-extrabold tracking-tight text-text-primary">
-                  {(data.audience?.customers ?? 0).toLocaleString("es-CL")}
-                </strong>{" "}
-                <span className="text-text-tertiary">compradores únicos</span>
-              </p>
-              <div className="mt-3 space-y-1.5">
-                {(data.audience?.byChannel ?? []).slice(0, 4).map((a) => (
-                  <div key={a.channel} className="flex items-center justify-between gap-2 text-sm">
-                    <span>{a.channel}</span>
-                    <Badge color="gray">{a.customers} personas</Badge>
-                  </div>
-                ))}
-              </div>
-              {(() => {
-                const best = [...data.channels].sort((a, b) => b.convRate - a.convRate)[0];
-                return best ? (
-                  <p className="mt-3 border-t border-card-border pt-3 text-xs text-text-tertiary">
-                    Tu mejor canal es <strong className="text-text-primary">{best.channel}</strong> con{" "}
-                    <strong className="text-text-primary">{best.convRate}% conversión</strong>. Refuérzalo y
-                    recupera carritos desde /admin/emails.
-                  </p>
-                ) : null;
-              })()}
-              <Link href="/admin/emails" className="mt-1 inline-block text-xs font-medium text-brand-600 underline">Ir a correos electrónicos</Link>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
