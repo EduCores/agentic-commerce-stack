@@ -87,6 +87,7 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
         <div className="mt-2 space-y-1">
           {rows.map((r) => {
             const pct = sharePct(r.revenue, total);
+            const barColor = r.name === "Starshop" ? "#5750F1" : r.name === "Meta" ? "#1877F2" : r.name === "Whatsapp" ? "#22C55E" : "#F59E0B";
             return (
               <div key={r.name} className="border-b border-card-border/60 py-1.5">
                 <div className="flex items-center justify-between gap-3">
@@ -102,7 +103,7 @@ export function MarketingChannelTable({ data }: { data: MarketingData }) {
                   </span>
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-background-gray-secondary">
-                  <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-indigo-500" style={{ width: `${pct}%` }} />
+                  <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: barColor }} />
                 </div>
               </div>
             );

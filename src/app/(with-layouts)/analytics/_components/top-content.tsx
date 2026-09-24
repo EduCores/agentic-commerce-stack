@@ -47,7 +47,7 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
                     </span>
                   </div>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background-gray-secondary">
-                    <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-indigo-500" style={{ width: `${Math.round((t.views / maxViews) * 100)}%` }} />
+                    <div className="h-full rounded-full" style={{ width: `${Math.round((t.views / maxViews) * 100)}%`, backgroundColor: ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6", "#EC4899"][i % 6] }} />
                   </div>
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-tertiary">
                     <span><strong className="text-text-primary">{t.views.toLocaleString("es-CL")}</strong> visitas</span>
