@@ -663,6 +663,11 @@
   padding: calc(var(--spacing) * 1);
 }
 
+/* .px-6 global -> padding-inline calc(var(--spacing) * 2): horizontal mínimo para ocupar ancho. Sin capa: gana a la utilidad de Tailwind en todos los tamaños. */
+.px-6 {
+  padding-inline: calc(var(--spacing) * 2);
+}
+
 /* .border-[0.5px]: ancho hairline comentado — sin borde visible (se conserva la clase). Sin capa: gana a la utilidad de Tailwind. */
 .border-\[0\.5px\] {
   /* border-width: .5px; */
