@@ -4,7 +4,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
 import { SyncButton } from "./_components/sync-button";
 import { ConnectButton } from "./_components/connect-button";
-import { Globe, Package, Store, Plug } from "lucide-react";
+import { Globe, Package, Store } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +35,7 @@ export default async function StorePage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-lg bg-badge-primary-background text-badge-primary-text [&>svg]:size-4">
-                <Plug size={16} />
+                <Store size={16} />
               </span>
               <CardTitle>Conexiones ({stores.length})</CardTitle>
             </div>
@@ -52,7 +52,7 @@ export default async function StorePage() {
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex min-w-0 flex-1 items-start gap-3">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-sm [&>svg]:size-5">
-                        <Plug />
+                        <Store />
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
