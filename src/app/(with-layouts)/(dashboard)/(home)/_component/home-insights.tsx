@@ -67,7 +67,7 @@ export function HomeInsights() {
         </div>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+      <div className="mt-3 grid gap-2 xl:grid-cols-2">
         {best && (
           <div className="flex min-w-0 items-start gap-2.5 rounded-lg border border-card-border/60 p-3">
             <Trophy className="mt-0.5 size-4 shrink-0 text-emerald-600" />

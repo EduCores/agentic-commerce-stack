@@ -68,9 +68,12 @@ export function RealStats() {
         <SiteSummaries />
       </div>
 
-      {/* 5 Ideas clave generadas con datos reales */}
-      <div className="min-w-0 md:col-span-4">
+      {/* 5 Ideas clave + operación diaria en la misma fila */}
+      <div className="min-w-0 md:col-span-2">
         <HomeInsights />
+      </div>
+      <div className="min-w-0 md:col-span-2">
+        <HomeOpsCard />
       </div>
 
       {/* 6 Detalle de oferta y demanda */}
@@ -81,10 +84,6 @@ export function RealStats() {
         <RecentOrders orders={data.recentOrders} />
       </div>
 
-      {/* 7 Operación diaria — tareas y actividad */}
-      <div className="min-w-0 md:col-span-4">
-        <HomeOpsCard />
-      </div>
     </div>
   );
 }
