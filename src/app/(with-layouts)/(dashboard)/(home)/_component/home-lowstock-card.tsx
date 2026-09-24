@@ -33,7 +33,7 @@ export function HomeLowStockCard() {
               <span className="min-w-0 truncate text-text-primary">
                 {p.title} <span className="text-xs text-text-tertiary">{p.sku}</span>
               </span>
-              <Badge color={p.stock <= 3 ? "error" : p.stock < 10 ? "warning" : "gray"}>{p.stock} uds</Badge>
+              <Badge color={p.stock < 10 ? "error" : p.stock <= 30 ? "warning" : "success"}>{p.stock} uds</Badge>
             </div>
           ))
         )}

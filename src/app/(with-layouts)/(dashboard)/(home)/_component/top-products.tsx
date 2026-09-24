@@ -32,7 +32,7 @@ export function TopProducts({ items }: { items: HomeStats["topProducts"] }) {
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   <span className="text-xs font-bold text-text-primary">{formatCLP(revenue)}</span>
-                  <Badge color={i === 0 ? "primary" : "gray"}>{tp.quantity} uds · {sharePct(tp.quantity ?? 0, totalQty).toLocaleString("es-CL")}%</Badge>
+                  <Badge color={i === 0 ? "success" : i === 1 ? "warning" : "gray"}>{tp.quantity} uds · {sharePct(tp.quantity ?? 0, totalQty).toLocaleString("es-CL")}%</Badge>
                 </span>
               </div>
             );

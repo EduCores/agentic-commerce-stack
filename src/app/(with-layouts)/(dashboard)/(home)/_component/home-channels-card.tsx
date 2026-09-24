@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Share2 } from "lucide-react";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { sharePct } from "@/utils/period-stats";
 import { HomeCardLink } from "./home-card-link";
 
 type Channel = { channel: string; revenue: number; convRate: number; count?: number };
@@ -14,8 +15,9 @@ export function HomeChannelsCard() {
     refetchInterval: 60000,
   });
 
-  const channels = (data?.channels ?? []).slice(0, 4);
-  const best = [...channels].sort((a, b) => b.convRate - a.convRate)[0];
+  const channels = (data?.channels ?? []).slice().sort((a, b) => b.revenue - a.revenue).slice(0, 4);
+  const totalRev = channels.reduce((a, c) => a + c.revenue, 0);
+  const best = channels[0];
 
   return (
     <div className="min-w-0 rounded-xl border border-card-border bg-card-background p-5">
@@ -32,12 +34,12 @@ export function HomeChannelsCard() {
         {channels.length === 0 ? (
           <p className="text-xs text-text-tertiary">Sin canales aún.</p>
         ) : (
-          channels.map((c) => (
+          channels.map((c, i) => (
             <div key={c.channel} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-card-border/60 px-3 py-2">
               <span className="min-w-0 truncate text-sm font-medium text-text-primary">{c.channel}</span>
               <span className="flex shrink-0 items-center gap-2">
                 <span className="text-xs font-bold text-brand-600">${c.revenue.toLocaleString("es-CL")}</span>
-                <Badge color={c.channel === best?.channel ? "success" : "gray"}>{c.convRate}%</Badge>
+                <Badge color={i === 0 ? "success" : i === 1 ? "warning" : "gray"}>{sharePct(c.revenue, totalRev).toLocaleString("es-CL")}%</Badge>
               </span>
             </div>
           ))
