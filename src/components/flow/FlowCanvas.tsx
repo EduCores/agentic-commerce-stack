@@ -30,8 +30,10 @@ import "@xyflow/react/dist/style.css";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card } from "@/components/tailgrids/core/card";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
+import { AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/tailgrids/core/accordion";
 import { cn } from "@/utils/cn";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, ScanSearch } from "lucide-react";
 import { BaseNode } from "./nodes/BaseNode";
 import { LabeledEdge } from "./edges/labeled-edge";
 import { NODE_PALETTE, FLOW_INTENTS, FLOW_MIN_PROMPT_LENGTH, FLOW_MODELS, FLOW_TOOLS, INTENT_LABEL_ES, type FlowGraph, type FlowNodeData, type FlowNodeType } from "./types";
@@ -428,26 +430,13 @@ const graphNodes = useMemo(() => {
             </button>
           ))}
         </div>
-        <div className="rounded-lg bg-background-gray-secondary p-2.5 text-[10px] leading-4 text-text-tertiary">
-          <p className="font-semibold text-text-secondary">Reglas que aplica el agente</p>
-          <p>• Prompt: mínimo {FLOW_MIN_PROMPT_LENGTH} caracteres.</p>
-          <p>• Modelo: solo de la allowlist.</p>
-          <p>• Tools: solo las del registry.</p>
-          <p>• Publicado = el agente usa este grafo (~60 s de caché).</p>
-        </div>
       </Card>
 
       {/* ── Lienzo ─────────────────────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <Card className="flex flex-wrap items-center gap-2 py-3">
-          <Badge color={isLoading ? "gray" : isLive ? "success" : "gray"}>
-            {isLoading ? "Cargando" : isLive ? "Publicado" : "Borrador"}
-          </Badge>
-          <span className="text-[11px] text-text-tertiary">
-            {isLive ? "El agente lee prompt/modelo/tools de estos nodos." : "El agente usa la configuración del código hasta que publiques."}
-          </span>
           {dirty && <Badge color="warning">Cambios sin guardar</Badge>}
-          <div className="ml-auto flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="ghost" appearance="outline" isDisabled={readOnly} onClick={handleAutoLayout}>
               Auto-orden
             </Button>
@@ -465,7 +454,7 @@ const graphNodes = useMemo(() => {
             ref={containerRef}
             className={cn(
               "relative w-full overflow-hidden rounded-lg border border-card-border bg-card-background",
-              isFullscreen ? "h-[100dvh] min-h-[100dvh] rounded-none border-0" : "h-[62vh] min-h-[440px]",
+              isFullscreen ? "h-[100dvh] min-h-[100dvh] rounded-none border-0" : "h-[85vh] min-h-[760px]",
             )}
           >
             <Button
@@ -521,8 +510,8 @@ const graphNodes = useMemo(() => {
               className="bg-background-gray-secondary"
             >
               <Background />
-              <Controls />
-              <MiniMap className="!bg-card-background" pannable zoomable />
+              <Controls className="!bg-card-background !border !border-card-border !rounded-xl !shadow-md overflow-hidden [&_button]:!bg-badge-sky-background [&_button]:!text-badge-sky-text [&_button]:!border-card-border hover:[&_button]:!brightness-95 dark:!bg-card-background dark:[&_button]:!bg-badge-sky-background/20 dark:[&_button]:!text-badge-sky-text [&_button]:!rounded-none first:[&_button]:!rounded-t-xl last:[&_button]:!rounded-b-xl" />
+              <MiniMap className="!bg-card-background !border !border-card-border !rounded-xl !shadow-md overflow-hidden !p-1 [&_svg]:!rounded-lg" pannable zoomable maskColor="rgba(87,80,241,0.08)" style={{ backgroundColor: "var(--badge-sky-background, #f0f9ff)" }} />
             </ReactFlow>
             {isFullscreen && (
               <div
@@ -791,40 +780,49 @@ const graphNodes = useMemo(() => {
             </Button>
           </>
             ) : (
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Inspector</p>
-                <p className="mt-1 text-[11px] leading-4 text-text-secondary">
-                  Selecciona un nodo crew o una conexión para editar sus valores.
-                </p>
-              </div>
+              <AccordionRoot variant="style_one" className="w-full">
+                <AccordionItem className="border-card-border bg-card-background">
+                  <AccordionTrigger className="text-text-primary">
+                    <span className="flex items-center gap-2">
+                      <span className="flex size-8 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+                        <ScanSearch />
+                      </span>
+                      Inspector de Nodos
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2">
+                      <p className="text-[11px] leading-4 text-text-secondary">Selecciona un nodo crew o una conexión para editar sus valores.</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Cómo funciona</p>
+                      <p className="text-[11px] leading-4 text-text-secondary">
+                        Este grafo es la configuración del router del agente cuando está <strong>publicado</strong>.
+                      </p>
+                      <ol className="space-y-1.5 text-[11px] leading-4 text-text-tertiary">
+                        <li>1. Selecciona un nodo crew y edita su <strong>prompt</strong>, <strong>modelo</strong> y <strong>tools</strong>.</li>
+                        <li>2. El campo <strong>Intent</strong> decide a qué conversación aplica el nodo.</li>
+                        <li>3. <strong>Guardar cambios</strong> persiste el borrador (no afecta al agente).</li>
+                        <li>4. <strong>Publicar</strong> activa el grafo: el agente lo usa en ~60 s.</li>
+                        <li>5. Si algo queda inválido, el agente ignora ese campo y usa el código.</li>
+                      </ol>
+                      {workflowSlug && (
+                        <div className="flex items-center gap-2">
+                          <InfoTip label="Detalle del flujo">Flujo: StarShop Intent Router (starshop-intent-router) — v5 · trigger eve_tool</InfoTip>
+                        </div>
+                      )}
+                      {dirty && (
+                        <p className="rounded-lg bg-amber-100 p-2 text-[10px] leading-4 font-semibold text-amber-700">
+                          Tienes cambios sin guardar: guarda antes de publicar para que el agente los reciba.
+                        </p>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </AccordionRoot>
             )}
           </div>
         </Card>
       </div>
       </div>
-
-      {/* ── Cómo funciona ───────────────────────────────────────────────────── */}
-      <Card className="w-full shrink-0 space-y-2 p-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Cómo funciona</p>
-          <p className="mt-1 text-[11px] leading-4 text-text-secondary">
-            Este grafo es la configuración del router del agente cuando está <strong>publicado</strong>.
-          </p>
-        </div>
-        <ol className="space-y-1.5 text-[11px] leading-4 text-text-tertiary">
-          <li>1. Selecciona un nodo crew y edita su <strong>prompt</strong>, <strong>modelo</strong> y <strong>tools</strong>.</li>
-          <li>2. El campo <strong>Intent</strong> decide a qué conversación aplica el nodo.</li>
-          <li>3. <strong>Guardar cambios</strong> persiste el borrador (no afecta al agente).</li>
-          <li>4. <strong>Publicar</strong> activa el grafo: el agente lo usa en ~60 s.</li>
-          <li>5. Si algo queda inválido, el agente ignora ese campo y usa el código.</li>
-        </ol>
-        {dirty && (
-          <p className="rounded-lg bg-amber-100 p-2 text-[10px] leading-4 font-semibold text-amber-700">
-            Tienes cambios sin guardar: guarda antes de publicar para que el agente los reciba.
-          </p>
-        )}
-        {workflowSlug && <p className="text-[10px] text-text-tertiary">Flujo: {workflowSlug}</p>}
-      </Card>
     </div>
   );
 }

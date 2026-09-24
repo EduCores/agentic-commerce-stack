@@ -86,12 +86,12 @@ export default async function StorePage() {
                     <div className="flex shrink-0 flex-col gap-2 lg:w-72">
                       <SyncButton storeId={s.id} storeName={s.name} />
                       {lastSync ? (
-                        <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs leading-4 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 text-center lg:text-right">
+                        <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs leading-4 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 text-center">
                           Último sync: {new Date(lastSync.at).toLocaleString("es-CL")} · {lastSync.synced}/{lastSync.total}
                           {lastSync.errors > 0 && <span className="font-medium text-amber-700"> · {lastSync.errors} con error</span>}
                         </p>
                       ) : (
-                        <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs leading-4 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 text-center lg:text-right">
+                        <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs leading-4 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 text-center">
                           Sin sincronizar todavía
                         </p>
                       )}

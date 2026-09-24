@@ -34,9 +34,7 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
 
       <div className="flex items-center gap-2">
         <h2 className="text-xl font-bold text-black dark:text-white">Editor de flujos del agente</h2>
-        <InfoTip label="Acerca del editor">
-          El grafo publicado es la configuración del router del agente: prompt, modelo y tools por intent.
-        </InfoTip>
+        <InfoTip label="Acerca del editor">El agente lee prompt/modelo/tools de estos nodos.</InfoTip>
         {workflow && (
           <Badge color={workflow.isActive ? "success" : "gray"}>{workflow.isActive ? "publicado" : "borrador"}</Badge>
         )}
@@ -70,11 +68,7 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
           <p className="text-sm text-text-tertiary">Sin flujos de trabajo en la base de datos.</p>
         )}
 
-        {workflow && (
-          <p className="mt-3 text-xs text-text-tertiary">
-            Flujo: <span className="font-medium">{workflow.name}</span> ({workflow.slug}) — v{workflow.version} · trigger {workflow.trigger}
-          </p>
-        )}
+
       </div>
     </div>
   );
