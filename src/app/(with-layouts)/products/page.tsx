@@ -47,10 +47,10 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                 <Package />
               </span>
               Catálogo universal
+              <InfoTip tone="dark" label="Detalle del catálogo">
+                {providers.join(" · ") || "mock"} · {products.length} productos · Stock total {totalStock.toLocaleString("es-CL")} · Actualizado desde Prisma
+              </InfoTip>
             </h3>
-            <p className="mt-1 text-xs text-white/75">
-              {providers.join(" · ") || "mock"} · {products.length} productos · Stock total {totalStock.toLocaleString("es-CL")} · Actualizado desde Prisma
-            </p>
           </div>
           <Badge color="success" className="border-white/20 bg-white/15 text-white backdrop-blur">Híbrido activo</Badge>
         </div>

@@ -50,10 +50,6 @@ export function AnalyticsDashboard() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="mt-2.5 text-sm font-bold tracking-[-0.2px]">Tendencias reales de tu tienda</h3>
-            <p className="text-xs text-white/75">
-              {data.totals.orders.toLocaleString("es-CL")} pedidos en {periodLabel} · {data.totals.revenue.toLocaleString("es-CL")} ingresos
-              {data.totals.growth > 0 ? ` · +${data.totals.growth}% vs período anterior` : ""}
-            </p>
           </div>
           <div className="flex items-center gap-2">
             <a href="/api/analytics?format=csv" download className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/20">

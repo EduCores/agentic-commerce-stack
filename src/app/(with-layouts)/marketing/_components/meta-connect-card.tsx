@@ -197,7 +197,12 @@ export function MetaConnectCard() {
 
         {/* Formulario plug & play */}
         <div className="rounded-xl border border-card-border bg-background-gray-secondary/30 p-4">
-          <p className="text-xs font-semibold text-text-primary">Conectar Meta — SDK listo</p>
+          <p className="flex items-center gap-2 text-xs font-semibold text-text-primary">
+            Conectar Meta — SDK listo
+            <InfoTip label="Detalle técnico del SDK">
+              SDK: <code>src/lib/adapters/meta.ts</code> expone <code>getMetaMarketingData()</code> usado por /api/marketing. Endpoints: <code>GET /api/meta</code>, <code>POST /api/meta</code>, <code>POST /api/meta/test</code>, <code>POST /api/meta/sync</code>.
+            </InfoTip>
+          </p>
           <p className="text-xs text-text-tertiary">
             1) Crea un token de usuario del sistema en{" "}
             <a href="https://business.facebook.com/settings/system-users" target="_blank" rel="noreferrer" className="underline">
@@ -247,10 +252,6 @@ export function MetaConnectCard() {
             )}
             <span className="text-xs text-text-tertiary">Requiere login admin en /login</span>
           </div>
-          <p className="mt-2 text-xs text-text-tertiary">
-            SDK: <code>src/lib/adapters/meta.ts</code> expone <code>getMetaMarketingData()</code> usado por /api/marketing. Endpoints:{" "}
-            <code>GET /api/meta</code>, <code>POST /api/meta</code>, <code>POST /api/meta/test</code>, <code>POST /api/meta/sync</code>.
-          </p>
         </div>
       </CardContent>
     </Card>

@@ -15,14 +15,14 @@ export const dynamic = "force-dynamic";
 
 const TOOL_META: Record<string, { icon: typeof Search; color: string }> = {
   searchProducts: { icon: Search, color: "bg-badge-sky-background text-badge-sky-text" },
-  checkStock: { icon: PackageCheck, color: "bg-badge-sky-background text-badge-sky-text" },
-  calculatePricing: { icon: Calculator, color: "bg-badge-sky-background text-badge-sky-text" },
-  navigateTo: { icon: Navigation, color: "bg-badge-sky-background text-badge-sky-text" },
-  checkout: { icon: ShoppingCart, color: "bg-badge-sky-background text-badge-sky-text" },
-  processPurchase: { icon: CreditCard, color: "bg-badge-sky-background text-badge-sky-text" },
+  checkStock: { icon: PackageCheck, color: "bg-badge-success-background text-badge-success-text" },
+  calculatePricing: { icon: Calculator, color: "bg-badge-warning-background text-badge-warning-text" },
+  navigateTo: { icon: Navigation, color: "bg-badge-violet-background text-badge-violet-text" },
+  checkout: { icon: ShoppingCart, color: "bg-badge-primary-background text-badge-primary-text" },
+  processPurchase: { icon: CreditCard, color: "bg-badge-primary-background text-badge-primary-text" },
   scrapeWebsite: { icon: Globe, color: "bg-badge-sky-background text-badge-sky-text" },
-  sendEmail: { icon: Mail, color: "bg-badge-sky-background text-badge-sky-text" },
-  orderTracking: { icon: Truck, color: "bg-badge-sky-background text-badge-sky-text" },
+  sendEmail: { icon: Mail, color: "bg-badge-warning-background text-badge-warning-text" },
+  orderTracking: { icon: Truck, color: "bg-badge-success-background text-badge-success-text" },
 };
 
 export default async function AgentsPage() {

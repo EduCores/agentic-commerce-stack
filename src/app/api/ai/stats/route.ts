@@ -109,12 +109,22 @@ export async function GET(req: Request) {
     }
     byModel.sort((a, b) => b.requests - a.requests);
 
-    const providers = [
-      { name: "openrouter/qwen", pct: 72 },
-      { name: "openai", pct: 14 },
-      { name: "anthropic", pct: 9 },
-      { name: "otros", pct: 5 },
-    ];
+    /** Proveedores derivados de los modelos reales (byModel): aparece Nemotron y todo modelo con uso. */
+    function providerOf(model: string): string {
+      const m = model.toLowerCase();
+      if (m.includes("qwen")) return "openrouter/qwen";
+      if (m.includes("gpt") || m.startsWith("openai")) return "openai";
+      if (m.includes("claude") || m.includes("anthropic")) return "anthropic";
+      if (m.includes("nemotron") || m.includes("nvidia")) return "nvidia/nemotron";
+      if (m.includes("gemini") || m.includes("google")) return "google/gemini";
+      return "otros";
+    }
+    const provReq: Record<string, number> = {};
+    for (const m of byModel) provReq[providerOf(m.model)] = (provReq[providerOf(m.model)] ?? 0) + m.requests;
+    const provTotal = Object.values(provReq).reduce((a, b) => a + b, 0) || 1;
+    const providers = Object.entries(provReq)
+      .map(([name, req]) => ({ name, pct: Math.round((req / provTotal) * 1000) / 10 }))
+      .sort((a, b) => b.pct - a.pct);
 
     // DEMO_MOCK: AI activo sin ejecuciones reales
     if (DEMO_MODE && runs.length === 0) {

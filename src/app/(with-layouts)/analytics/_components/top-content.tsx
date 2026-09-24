@@ -75,7 +75,7 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
             data.lowStock.slice(0, 6).map((p) => (
               <div key={p.sku} className="flex items-center justify-between gap-2 rounded-lg border border-card-border p-2.5 text-sm">
                 <span className="min-w-0 truncate">{p.title} <span className="text-xs text-text-tertiary">{p.sku}</span></span>
-                <Badge color={p.stock < 10 ? "error" : "gray"}>stock {p.stock}</Badge>
+                <Badge color={p.stock < 10 ? "error" : p.stock <= 30 ? "warning" : "success"}>stock {p.stock}</Badge>
               </div>
             ))
           )}

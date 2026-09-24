@@ -133,7 +133,7 @@ export function AnalyticsSourceChart({ data, className }: { data: AnalyticsData 
         <p className="text-xs text-text-tertiary">{totalOrders.toLocaleString("es-CL")} pedidos · participación real</p>
       </CardHeader>
       <CardContent className="relative h-64 p-0">
-        <ChartContainer className="h-full w-full" height="100%" width="100%">
+        <ChartContainer className="h-full w-full relative z-10" height="100%" width="100%">
           <PieChart>
             <Pie
               data={bySource}
@@ -151,7 +151,7 @@ export function AnalyticsSourceChart({ data, className }: { data: AnalyticsData 
             <Tooltip content={<BreakdownTooltip totalOrders={totalOrders} />} />
           </PieChart>
         </ChartContainer>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none z-0">
           <span className="text-2xl font-extrabold tracking-tight text-text-primary">{totalOrders.toLocaleString("es-CL")}</span>
           <span className="mt-1 text-xs font-medium text-text-tertiary">pedidos</span>
         </div>

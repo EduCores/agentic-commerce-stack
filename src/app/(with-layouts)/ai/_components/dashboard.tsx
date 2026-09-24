@@ -8,8 +8,9 @@ import { AiAgentsTable } from "./agents-table";
 import { AiModelsChart } from "./models-chart";
 import type { AiStats, AiRange } from "./types";
 import { AGENT_STATUS_ES } from "./types";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import Link from "next/link";
-import { Activity, BadgeCheck, Bot, Wallet } from "lucide-react";
+import { Activity, BadgeCheck, Bot, Sparkles, Wallet } from "lucide-react";
 
 export function AiDashboard() {
   const [days, setDays] = useState<AiRange>(21);
@@ -44,10 +45,18 @@ export function AiDashboard() {
       <div className="overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-primary-500 to-[#328e8f] p-6 text-white md:col-span-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="mt-2.5 text-sm font-bold tracking-[-0.2px]">Analítica de costos de AI</h3>
-            <p className="text-xs text-white/75">
-              OpenRouter · {data.totals.requests.toLocaleString("es-CL")} solicitudes en {periodLabel} · {providerMain?.name ?? "openrouter/qwen"} lidera con {providerMain?.pct ?? 72}%
-            </p>
+            <h3 className="mt-2.5 flex items-center gap-2 text-sm font-bold tracking-[-0.2px]">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-white/15 text-white [&>svg]:size-4">
+                <Sparkles />
+              </span>
+              Analítica de costos de AI
+              <InfoTip
+                tone="dark"
+                label="Detalle del período"
+              >
+                OpenRouter · {data.totals.requests.toLocaleString("es-CL")} solicitudes en {periodLabel} · {providerMain?.name ?? "openrouter/qwen"} lidera con {providerMain?.pct ?? 72}%
+              </InfoTip>
+            </h3>
           </div>
           <Link href="/admin" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/20">
             Probar en /admin →
@@ -105,7 +114,11 @@ export function AiDashboard() {
               {p.name} {p.pct}%
             </span>
           ))}
-          <span className="ml-auto hidden text-xs text-white/60 sm:inline">Costo fijo $0.90 por ejecución · Resend en prod</span>
+          <span className="ml-auto hidden items-center gap-1.5 text-xs text-white/60 sm:inline-flex">
+            <InfoTip tone="dark" label="Detalle de costos">
+              Costo fijo $0.90 por ejecución · Resend en prod
+            </InfoTip>
+          </span>
         </div>
       </div>
       <AiActivityChart data={data} days={days} onDays={setDays} month={month} year={year} onMonth={setMonth} onYear={setYear} />

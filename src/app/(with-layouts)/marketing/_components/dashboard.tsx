@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { MarketingFunnel } from "./funnel";
 import { MarketingChannelTable } from "./channel-table";
 import { InfoTip } from "@/components/tailgrids/core/info-tip";
-import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
 import { sharePct } from "@/utils/period-stats";
 import type { MarketingData } from "./types";
 import Link from "next/link";
@@ -25,10 +24,10 @@ function CampaignsHero({ data }: { data: MarketingData }) {
               <Megaphone />
             </span>
             Rendimiento de campañas
+            <InfoTip tone="dark" label="Cómo se arman las campañas">
+              Catálogo híbrido: cada tienda conectada es una campaña. Datos compartidos por StoreConnection (productos + pedidos por tienda).
+            </InfoTip>
           </h3>
-          <p className="mt-1 text-xs text-white/75">
-            Catálogo híbrido: cada tienda conectada es una campaña. Datos compartidos por <span className="font-semibold text-white">StoreConnection</span> (productos + pedidos por tienda).
-          </p>
           <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
             <span className="size-1.5 rounded-full bg-amber-300" /> Modo mock — conecta para datos reales
           </span>
@@ -107,37 +106,40 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
         </div>
         <p className="text-xs text-text-tertiary">Cada fila es una tienda conectada. Productos y pedidos vienen por <code>storeId</code>; ingresos = suma de <code>Order.total</code> de esa tienda.</p>
       </CardHeader>
-      <CardContent className="!px-3">
-        <ScrollHint>
-          <table className="w-full min-w-[720px] text-sm">
-            <thead className="border-b border-card-border text-xs text-text-tertiary">
-              <tr>
-                <th className="p-2 text-left">Tienda / Campaña</th>
-                <th className="p-2 text-left">Proveedor</th>
-                <th className="p-2 text-center">Estado</th>
-                <th className="p-2 text-right">Productos</th>
-                <th className="p-2 text-right">Pedidos</th>
-                <th className="p-2 text-right">Ingresos</th>
-                <th className="p-2 text-right">Part.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.campaigns.map((c, i) => (
-                <tr key={c.id} className="border-b border-card-border/60">
-                  <td className="p-2 font-medium text-text-primary">{c.name}</td>
-                  <td className="p-2"><Badge color="gray">{c.provider}</Badge></td>
-                  <td className="p-2 text-center"><Badge color={c.active ? "success" : "gray"}>{c.active ? "Activa" : "Pausada"}</Badge></td>
-                  <td className="p-2 text-right">{c.products}</td>
-                  <td className="p-2 text-right">{c.orders}</td>
-                  <td className="p-2 text-right font-bold text-brand-600">${c.revenue.toLocaleString("es-CL")}</td>
-                  <td className="p-2 text-right">
-                    <Badge color={i === 0 ? "primary" : "gray"}>{sharePct(c.revenue ?? 0, totalCampaignRevenue).toLocaleString("es-CL")}%</Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </ScrollHint>
+      <CardContent>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {data.campaigns.map((c, i) => {
+            const pct = sharePct(c.revenue ?? 0, totalCampaignRevenue);
+            return (
+              <div key={c.id} className="rounded-xl border border-card-border p-4 transition hover:border-brand-500/40 hover:shadow-sm">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-badge-violet-background text-badge-violet-text [&>svg]:size-5">
+                    <Store />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-text-primary">{c.name}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      <Badge color="gray">{c.provider}</Badge>
+                      <Badge color={c.active ? "success" : "gray"}>{c.active ? "Activa" : "Pausada"}</Badge>
+                    </div>
+                  </div>
+                  <Badge color={i === 0 ? "primary" : "gray"}>{pct.toLocaleString("es-CL")}%</Badge>
+                </div>
+                <p className="mt-3 text-2xl font-extrabold tracking-tight text-brand-600">
+                  ${c.revenue.toLocaleString("es-CL")}
+                  <span className="ml-2 align-middle text-xs font-medium text-text-tertiary">ingresos</span>
+                </p>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background-gray-secondary">
+                  <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500" style={{ width: `${pct}%` }} />
+                </div>
+                <div className="mt-2.5 flex items-center gap-4 border-t border-card-border/60 pt-2 text-xs text-text-tertiary">
+                  <span><strong className="text-text-primary">{c.products}</strong> productos</span>
+                  <span><strong className="text-text-primary">{c.orders}</strong> pedidos</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
         <div className="mt-3 flex items-start gap-2">
           <InfoTip label="Próximo paso sugerido">
             Conectar Meta como provider para traer campañas pagas y ROAS. Hoy puedes medir qué tienda convierte mejor y reforzarla desde /admin/emails.
