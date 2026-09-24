@@ -18,7 +18,7 @@ function formatCLP(n: number): string {
 }
 
 export function AnalyticsDashboard() {
-  const [days, setDays] = useState<AnalyticsRange>(7);
+  const [days, setDays] = useState<AnalyticsRange>(21);
   const [month, setMonth] = useState("all");
   const [year, setYear] = useState("all");
   const { data, isLoading } = useQuery<AnalyticsData>({

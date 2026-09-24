@@ -11,7 +11,7 @@ import Link from "next/link";
 import { TrendingUp, Users, Wallet } from "lucide-react";
 
 export function CrmDashboard() {
-  const [days, setDays] = useState<CrmRange>(7);
+  const [days, setDays] = useState<CrmRange>(21);
   const [month, setMonth] = useState("all");
   const [year, setYear] = useState("all");
   const { data, isLoading } = useQuery<CrmData>({

@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const rawDays = Number(url.searchParams.get("days"));
-  const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
+  const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 21;
   const rawMonth = Number(url.searchParams.get("month"));
   const rawYear = Number(url.searchParams.get("year"));
   const month = rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;

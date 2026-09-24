@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Activity, BadgeCheck, Bot, Wallet } from "lucide-react";
 
 export function AiDashboard() {
-  const [days, setDays] = useState<AiRange>(7);
+  const [days, setDays] = useState<AiRange>(21);
   const [month, setMonth] = useState("all");
   const [year, setYear] = useState("all");
   const { data, isLoading } = useQuery<AiStats>({

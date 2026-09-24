@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const format = searchParams.get("format");
     const rawDays = Number(searchParams.get("days"));
-    const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
+    const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 21;
     const rawMonth = Number(searchParams.get("month"));
     const rawYear = Number(searchParams.get("year"));
     const month = rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;

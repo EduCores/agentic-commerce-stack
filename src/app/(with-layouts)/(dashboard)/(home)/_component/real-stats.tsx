@@ -17,7 +17,7 @@ import type { HomeStats, SalesRange } from "./home-types";
 
 /** Home Hub: lo más relevante del ACS ordenado por valor para el dueño. */
 export function RealStats() {
-  const [days, setDays] = useState<SalesRange>(7);
+  const [days, setDays] = useState<SalesRange>(21);
   const [month, setMonth] = useState("all");
   const [year, setYear] = useState("all");
   const { data, isLoading } = useQuery<HomeStats>({

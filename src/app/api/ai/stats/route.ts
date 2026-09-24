@@ -5,6 +5,7 @@ import { DEMO_MODE } from "@/lib/demo";
 export const dynamic = "force-dynamic";
 
 const COST_PER_RUN: Record<string, number> = {
+  "nvidia/nemotron-3-ultra": 0.0,
   "qwen/qwen3-30b-a3b-instruct-2507": 0.9,
   // Fake para demo (quitar en entrega): Gemini, Claude, Chat-GPT
   "google/gemini-pro": 1.2,
@@ -16,7 +17,7 @@ const COST_PER_RUN: Record<string, number> = {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const rawDays = Number(url.searchParams.get("days"));
-  const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 7;
+  const days = [7, 14, 21, 28].includes(rawDays) ? rawDays : 21;
   const rawMonth = Number(url.searchParams.get("month"));
   const rawYear = Number(url.searchParams.get("year"));
   const month = rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;
@@ -133,12 +134,12 @@ export async function GET(req: Request) {
         totals: { requests: 42, cost: 37.8, successRate: 96.4, activeAgents: 8 },
         byDay: demoByDay,
         table: [
-          { id: "1", name: "Asistente Ventas", slug: "sales-assistant", model: "qwen/qwen3-30b-a3b-instruct-2507", active: true, requests: 12, success: 96.4, cost: 10.8, revenue: 420000 },
-          { id: "2", name: "Soporte Checkout", slug: "checkout-support", model: "qwen/qwen3-30b-a3b-instruct-2507", active: true, requests: 8, success: 96.4, cost: 7.2, revenue: 280000 },
+          { id: "1", name: "Asistente Ventas", slug: "sales-assistant", model: "nvidia/nemotron-3-ultra", active: true, requests: 12, success: 96.4, cost: 10.8, revenue: 420000 },
+          { id: "2", name: "Soporte Checkout", slug: "checkout-support", model: "nvidia/nemotron-3-ultra", active: true, requests: 8, success: 96.4, cost: 7.2, revenue: 280000 },
         ],
         // Fake demo (quitar en entrega)
         byModel: [
-          { model: "qwen/qwen3-30b-a3b-instruct-2507", requests: 32, cost: 28.8, revenue: 890000 },
+          { model: "nvidia/nemotron-3-ultra", requests: 32, cost: 28.8, revenue: 890000 },
           { model: "openai/gpt-4", requests: 22, cost: 44.0, revenue: 680000 },
           { model: "google/gemini-pro", requests: 18, cost: 21.6, revenue: 540000 },
           { model: "anthropic/claude-3-5-sonnet", requests: 14, cost: 21.0, revenue: 420000 },
