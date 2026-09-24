@@ -158,19 +158,19 @@ export function MarketingDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* 1. Rendimiento de campañas — abre la página por encima del título */}
-      <CampaignsHero data={data} />
-
-      {/* 2. Embudo de conversión — justo debajo del hero */}
-      <MarketingFunnel data={data} />
-
-      {/* 3. Título de página */}
-      <div className="flex items-center gap-2 pt-2">
+      {/* 1. Título de página — arriba como las demás secciones */}
+      <div className="flex items-center gap-2">
         <h2 className="text-xl font-bold text-black dark:text-white">Campañas de Marketing</h2>
         <InfoTip label="¿Dónde se crean las campañas?">
           En <Link href="/store" className="underline">/store</Link> conecta Base de datos Cliente / Shopify / Woo / Magento / Cualquiera. Meta Integrado — hoy el catálogo alimenta el embudo y los canales (Starshop, Whatsapp, Tienda física). Meta se conecta como provider.
         </InfoTip>
       </div>
+
+      {/* 2. Rendimiento de campañas */}
+      <CampaignsHero data={data} />
+
+      {/* 3. Embudo de conversión */}
+      <MarketingFunnel data={data} />
 
       {/* 4-6. Resto: campañas por tienda, Meta Ads, canales + audiencia */}
       <div className="grid gap-4 md:grid-cols-3">

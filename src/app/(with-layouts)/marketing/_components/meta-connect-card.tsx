@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { Button } from "@/components/tailgrids/core/button";
 import { Facebook } from "@tailgrids/icons";
 import { toast } from "sonner";
@@ -155,10 +156,10 @@ export function MetaConnectCard() {
             Meta Ads — plug & play SDK
           </CardTitle>
           {active ? <Badge color="success">Conectado · datos reales</Badge> : <Badge color="gray">Modo mock — conecta para datos reales</Badge>}
+          <InfoTip label="Cómo funciona Meta Ads">
+            Conecta tu Ad Account y trae <strong>spend, impresiones, clics y conversiones reales</strong> al canal Meta de /marketing. Sin credenciales, el sistema usa mock y no se rompe.
+          </InfoTip>
         </div>
-        <p className="text-xs text-text-tertiary">
-          Conecta tu Ad Account y trae <strong>spend, impresiones, clics y conversiones reales</strong> al canal Meta de /marketing. Sin credenciales, el sistema usa mock y no se rompe.
-        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Estado actual */}
