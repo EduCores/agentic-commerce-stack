@@ -2,7 +2,7 @@
  * ACS Intent Detection — LLM primero, heurística como fallback mock.
  * Sin datos reales: funciona sin DB y sin API key (cae a heurística).
  */
-import { STARSHOP_INTENTS, STARSHOP_WELCOME_PROMPT, type StarShopIntent } from "../../../prisma/starshop-prompts";
+import { STARSHOP_INTENTS, STARSHOP_WELCOME_PROMPT, STARSHOP_CREW_MODEL, type StarShopIntent } from "../../../prisma/starshop-prompts";
 import { isSmallTalk } from "../../../agent/lib/search/normalize";
 
 export type IntentSource = "llm" | "heuristic";
@@ -63,7 +63,7 @@ function isValidIntent(v: unknown): v is StarShopIntent {
 async function detectIntentLLM(message: string, history?: unknown[]): Promise<DetectIntentResult | null> {
   const apiKey = process.env.OPENROUTER_API_KEY || "";
   if (!apiKey) return null;
-  const model = process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b";
+  const model = process.env.OPENROUTER_MODEL || STARSHOP_CREW_MODEL;
   try {
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",

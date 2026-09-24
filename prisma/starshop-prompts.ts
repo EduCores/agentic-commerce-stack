@@ -6,6 +6,17 @@
  * cada crew tiene su prompt aislado y su whitelist de tools.
  */
 
+/**
+ * Modelo único de todos los crews StarShop y del router de intención.
+ * Se usa el endpoint :free de OpenRouter (mismo Nemotron 3 Ultra, coste $0)
+ * porque la cuenta no tiene créditos comprados: el endpoint de pago responde
+ * 402 "requires payment" en cuanto el request pide tokens de salida reales.
+ * Si se cambia aquí: añadir el id también a ALLOWED_MODELS (agent/index.ts)
+ * y republicar el grafo con `npx tsx scripts/sync-router-graph.ts`.
+ */
+export const STARSHOP_CREW_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
+
+
 export const STARSHOP_WELCOME_PROMPT = `Eres Star, asistente de bienvenida de StarShop (B2B Chile). Detecta intención del cliente o del admin dueño.
 
 INTENCIONES VÁLIDAS (responde SOLO con una de estas, en detected_intent):
@@ -58,7 +69,7 @@ $<price> <currency> · Stock: <stock> uds · <category>
 [Ver en tienda](<url>)
 Nunca inventes imagen, SKU, precio ni stock: todo sale de searchProducts/checkStock. Máximo 5 productos por respuesta.
 Tono: español Chile, cercano B2B, corto y accionable.`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
   compare_prices: {
     slug: "starshop-price-analyst",
@@ -73,7 +84,7 @@ REGLAS:
 4. No llames navigateTo salvo que el cliente quiera ver el producto local.
 
 Tools permitidos: searchProducts, scrapeWebsite, calculatePricing.`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
   checkout_guide: {
     slug: "starshop-checkout-guide",
@@ -88,7 +99,7 @@ REGLAS:
 4. Al terminar, registra en workflow y avisa que se enviará confirmación por email.
 
 Tools: checkStock, calculatePricing, checkout, processPurchase, navigateTo.`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
   general_support: {
     slug: "starshop-support-agent",
@@ -103,7 +114,7 @@ REGLAS:
 4. Tono cercano B2B, español Chile.
 
 Tools: scrapeWebsite, navigateTo (solo si el cliente quiere ver una categoría).`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
   handle_return: {
     slug: "starshop-returns-evaluator",
@@ -118,7 +129,7 @@ REGLAS:
 4. Si es complejo, escala a humano.
 
 Tools: scrapeWebsite, sendEmail, searchProducts (para identificar SKU a devolver).`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
   recover_cart: {
     slug: "starshop-cart-recovery",
@@ -132,7 +143,7 @@ REGLAS:
 3. No spamees. Un email por carrito.
 
 Tools: sendEmail, searchProducts, calculatePricing.`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
   order_tracking: {
     slug: "starshop-order-tracker",
@@ -146,7 +157,7 @@ REGLAS:
 3. Si el cliente quiere notificación, usa sendEmail template=order_confirmation.
 
 Tools: sendEmail, scrapeWebsite (solo si necesita política de envíos).`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
   escalate_human: {
     slug: "starshop-human-handoff",
@@ -160,7 +171,7 @@ REGLAS:
 3. Ofrece dejar mensaje y horario de atención.
 
 Tools: sendEmail.`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
   admin_ops: {
     slug: "starshop-admin-ops",
@@ -192,7 +203,7 @@ Cierra con una línea de siguiente paso (/orders, /analytics) como COMPLEMENTO, 
 6. Mantén tono StarShop cercano B2B, corto, con números CLP y links /products /orders /workflows. Cierra ofreciendo siguiente paso.
 
 Tools: searchProducts, checkStock, orderTracking, scrapeWebsite, sendEmail, getSalesSummary.`,
-    model: "nvidia/nemotron-3-ultra-550b-a55b",
+    model: STARSHOP_CREW_MODEL,
   },
 } as const;
 

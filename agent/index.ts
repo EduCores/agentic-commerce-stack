@@ -8,7 +8,7 @@ import { z } from "zod";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
-import { STARSHOP_CREWS, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
+import { STARSHOP_CREWS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, type StarShopIntent } from "../prisma/starshop-prompts";
 import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type GraphCrewOverride } from "./lib/crew-graph";
 import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
@@ -107,7 +107,7 @@ function toModelMessages(input: string, history?: unknown[]): Array<{ role: "use
 // Si la base de datos no está disponible, el agente sigue funcionando con una
 // configuración por defecto (mismo prompt y modelo). La BD solo aporta
 // dashboard para editar prompts y persistir logs de conversaciones.
-const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b";
+const DEFAULT_MODEL = STARSHOP_CREW_MODEL;
 
 const DEFAULT_AGENT = {
   id: "builtin-default",
@@ -218,7 +218,7 @@ const KNOWN_TOOLS = Object.keys(ALL_TOOL_DEFS) as string[];
 // Allowlist de modelos: un typo en el editor jamas rompe el chat (se ignora el override)
 const ALLOWED_MODELS = [
   "qwen/qwen3-30b-a3b-instruct-2507",
-  "nvidia/nemotron-3-ultra-550b-a55b",
+  STARSHOP_CREW_MODEL,
   "openai/gpt-4o",
   "google/gemini-2-0-flash-001",
 ] as const;

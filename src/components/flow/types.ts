@@ -111,7 +111,8 @@ export const FLOW_INTENTS = STARSHOP_INTENTS;
  * y sigue usando el modelo del código (comportamiento seguro, no rompe el chat).
  */
 export const FLOW_MODELS: Array<{ id: string; label: string }> = [
-  { id: "nvidia/nemotron-3-ultra-550b-a55b", label: "Nemotron 3 Ultra (razonamiento)" },
+  { id: "nvidia/nemotron-3-ultra-550b-a55b:free", label: "Nemotron 3 Ultra (gratis $0)" },
+  { id: "nvidia/nemotron-3-ultra-550b-a55b", label: "Nemotron 3 Ultra (pago)" },
   { id: "qwen/qwen3-30b-a3b-instruct-2507", label: "Qwen3 30B (estable, barato)" },
   { id: "openai/gpt-4o", label: "GPT-4o (mejor calidad, más caro)" },
   { id: "google/gemini-2-0-flash-001", label: "Gemini 2.0 Flash (rápido)" },
