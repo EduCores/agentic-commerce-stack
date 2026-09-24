@@ -27,6 +27,7 @@ import {
 } from "@/components/tailgrids/core/select";
 import { TextArea } from "@/components/tailgrids/core/text-area";
 import { TrashIcon } from "./icons";
+import { Mail, User } from "lucide-react";
 import { formatPhoneCL, normalizeEmail, sanitizeText, validPhoneCL } from "@/utils/contact-format";
 
 const countryOptions = [
@@ -239,8 +240,14 @@ export default function AccountPage() {
               <span className="absolute -right-0.5 -bottom-0.5 size-4 rounded-full border-2 border-card-background bg-emerald-500" title="Cuenta activa" />
             </div>
             <div className="min-w-0">
-              <h3 className="truncate text-lg font-semibold text-text-primary">{fields.fullName || "Usuario"}</h3>
-              <p className="truncate text-sm text-text-secondary-alt">{fields.email}</p>
+              <h3 className="flex items-center gap-2 truncate text-lg font-semibold text-text-primary">
+                <User className="size-5 shrink-0 text-badge-sky-text" />
+                <span className="min-w-0 truncate">{fields.fullName || "Usuario"}</span>
+              </h3>
+              <p className="flex items-center gap-2 truncate text-sm text-text-secondary-alt">
+                <Mail className="size-4 shrink-0 text-badge-sky-text" />
+                <span className="min-w-0 truncate">{fields.email}</span>
+              </p>
             </div>
           </div>
 
