@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
@@ -43,11 +44,12 @@ export default async function AgentsPage() {
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Agentes", href: "/agents" }]} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1">
-          <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">Agentes — equipo StarShop</h2>
-          <p className="text-sm text-text-tertiary">
-            {agents.length} agentes orquestados · Bienvenida → 8 equipos especializados · cada uno ve solo sus herramientas · edítalos en{" "}
-            <code className="rounded bg-background-gray-secondary px-1 py-0.5">prisma/starshop-prompts.ts</code>
-          </p>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">Agentes — equipo StarShop</h2>
+            <InfoTip label="Acerca de agentes">
+              {agents.length} agentes orquestados · Bienvenida → 8 equipos especializados · cada uno ve solo sus herramientas · edítalos en prisma/starshop-prompts.ts
+            </InfoTip>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/workflows" className="rounded-lg border border-card-border bg-card-background px-4 py-2 text-sm font-medium hover:bg-background-gray-secondary">

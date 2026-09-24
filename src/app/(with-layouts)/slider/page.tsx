@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { prisma } from "@/lib/adapters/prisma";
 import { SliderManager } from "./_components/slider-manager";
@@ -25,14 +26,14 @@ export default async function SliderPage() {
   return (
     <div className="space-y-6 p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Slider principal", href: "/slider" }]} />
-      <div>
+      <div className="flex items-center gap-2">
         <h2 className="text-xl font-bold text-black dark:text-white">Slider principal del frontend</h2>
-        <p className="text-sm text-text-tertiary">
+        <InfoTip label="Acerca del slider">
           Administra el carrusel del home de StarShop ({rows.length} slides, {activeCount} publicados).{" "}
           <a href={`${storeOrigin}/`} target="_blank" rel="noopener noreferrer" className="underline hover:text-text-primary">
             Ver en la tienda →
           </a>
-        </p>
+        </InfoTip>
       </div>
 
       <Card>

@@ -32,9 +32,11 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="min-w-0 space-y-6 overflow-hidden p-3 sm:p-6">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Productos", href: "/products" }]} />
-      <div>
+      <div className="flex items-center gap-2">
         <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">Productos — Catálogo híbrido</h2>
-        <p className="text-sm text-text-tertiary">Unifica Shopify, WooCommerce, Magento y mock en una sola fuente Prisma. Busca, filtra y opera sin duplicar pantallas.</p>
+        <InfoTip label="Acerca del catálogo">
+          Unifica Shopify, WooCommerce, Magento y mock en una sola fuente Prisma. Busca, filtra y opera sin duplicar pantallas.
+        </InfoTip>
       </div>
 
       <div className="overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 via-blue-600 to-primary-600 p-6 text-white">

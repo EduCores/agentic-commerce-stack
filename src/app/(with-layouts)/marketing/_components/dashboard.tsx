@@ -170,9 +170,11 @@ export function MarketingDashboard() {
       <MarketingFunnel data={data} />
 
       {/* 3. Título de página */}
-      <div className="pt-2">
+      <div className="flex items-center gap-2 pt-2">
         <h2 className="text-xl font-bold text-black dark:text-white">Marketing</h2>
-        <p className="text-sm text-text-tertiary">Canales, funnel y campañas ligadas a tus tiendas y pedidos reales.</p>
+        <InfoTip label="Acerca de marketing">
+          Canales, funnel y campañas ligadas a tus tiendas y pedidos reales.
+        </InfoTip>
       </div>
 
       {/* 4-6. Resto: campañas por tienda, Meta Ads, canales + audiencia */}

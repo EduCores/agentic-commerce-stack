@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { AdminChat } from "@/components/chat/admin-chat";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import Link from "next/link";
@@ -9,9 +10,11 @@ export default function AdminAgentPage() {
   return (
     <div className="space-y-6 p-3 sm:p-6 max-w-3xl mx-auto">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Admin", href: "/admin" }]} />
-      <div>
+      <div className="flex items-center gap-2">
         <h2 className="text-xl font-bold text-black dark:text-white">Admin Ops — Dueño StarShop</h2>
-        <p className="text-sm text-text-tertiary">Mismo estilo StarShop (amarillo #FFD814, tipeo 35ms, voz Edge) pero para operar tu tienda.</p>
+        <InfoTip label="Acerca de este chat">
+          Mismo estilo StarShop (amarillo #FFD814, tipeo 35ms, voz Edge) pero para operar tu tienda.
+        </InfoTip>
       </div>
       <Card>
         <CardHeader><CardTitle className="text-sm">Prueba admin — mismo funcionamiento que StarShop</CardTitle></CardHeader>

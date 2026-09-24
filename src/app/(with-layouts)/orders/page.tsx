@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
+import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { prisma } from "@/lib/adapters/prisma";
@@ -67,9 +68,11 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         </div>
       )}
       <div className="space-y-3">
-        <div>
+        <div className="flex items-center gap-2">
           <h2 className="text-xl font-bold text-black dark:text-white">Pedidos</h2>
-          <p className="text-sm text-text-tertiary">Híbrido: {orders.length} pedidos · Filtra por estado · Fuente Prisma (igual para mock/Shopify).</p>
+          <InfoTip label="Acerca de pedidos">
+            Híbrido: {orders.length} pedidos · Filtra por estado · Fuente Prisma (igual para mock/Shopify).
+          </InfoTip>
         </div>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           <Link href="/orders" className={`rounded-lg px-3 py-2 text-center text-sm font-medium ${!status ? "bg-brand-500 text-button-primary-text" : "border border-card-border bg-card-background hover:bg-background-gray-secondary"}`}>Todos</Link>

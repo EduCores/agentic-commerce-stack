@@ -26,8 +26,12 @@ export default async function StorePage() {
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Almacenar", href: "/store" }]} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1">
-          <h2 className="text-xl font-bold text-black dark:text-white">Conexiones de tienda</h2>
-          <p className="text-sm text-text-tertiary">Conecta tu tienda — Shopify, WooCommerce, Magento o personalizada. Un solo sistema para vender.</p>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-black dark:text-white">Conexiones de tienda</h2>
+            <InfoTip label="Acerca de conexiones">
+              Conecta tu tienda — Shopify, WooCommerce, Magento o personalizada. Un solo sistema para vender.
+            </InfoTip>
+          </div>
         </div>
         <ConnectButton storeId={primary?.id} storeName={primary?.name ?? "tienda"} initial={primaryHealth} />
       </div>
