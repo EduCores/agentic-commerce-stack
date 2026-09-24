@@ -20,7 +20,7 @@ const BALLOON_W = 288;
 /**
  * Icono ⓘ con globo de ayuda: aparece ARRIBA del icono al hover o clic,
  * se eleva suavemente y se desvanece al salir, con Escape o tocando fuera.
- * Portal a body: nunca lo recorta ningún contenedor.
+ * Clic = fija el globo (pin); hover = vista temporal. Portal a body.
  */
 export function InfoTip({ children, label = "Ver ayuda", className, tone = "light" }: Props) {
   const [open, setOpen] = useState(false);
@@ -29,6 +29,7 @@ export function InfoTip({ children, label = "Ver ayuda", className, tone = "ligh
   const btnRef = useRef<HTMLButtonElement>(null);
   const balloonRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<number | null>(null);
+  const pinnedRef = useRef(false);
   const uid = useId();
   const dark = tone === "dark";
 
@@ -36,12 +37,15 @@ export function InfoTip({ children, label = "Ver ayuda", className, tone = "ligh
     const el = btnRef.current;
     if (!el || typeof window === "undefined") return;
     const r = el.getBoundingClientRect();
-    const w = Math.min(BALLOON_W, window.innerWidth - 16);
-    const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
-    if (r.top >= 280) {
-      setPos({ bottom: Math.max(8, window.innerHeight - r.top + 10), left });
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const w = Math.min(BALLOON_W, Math.max(200, vw - 16));
+    // Centrado en el icono, sujetado a los márgenes laterales
+    const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, vw - w - 8));
+    if (r.top >= 300) {
+      setPos({ bottom: Math.max(8, vh - r.top + 10), left });
     } else {
-      setPos({ top: Math.max(8, Math.min(r.bottom + 10, window.innerHeight - 90)), left });
+      setPos({ top: Math.max(8, Math.min(r.bottom + 10, vh - 100)), left });
     }
   }, []);
 
@@ -52,16 +56,18 @@ export function InfoTip({ children, label = "Ver ayuda", className, tone = "ligh
     }
   }, []);
 
-  const openTip = useCallback(() => {
+  const doOpen = useCallback(() => {
     cancelClose();
     compute();
     setOpen(true);
-    setVisible(true);
+    // visible en el siguiente frame para que la transición corra
+    requestAnimationFrame(() => setVisible(true));
   }, [cancelClose, compute]);
 
-  const closeTip = useCallback(
+  const doClose = useCallback(
     (delay = 0) => {
       cancelClose();
+      pinnedRef.current = false;
       if (delay <= 0) {
         setVisible(false);
         setOpen(false);
@@ -76,16 +82,34 @@ export function InfoTip({ children, label = "Ver ayuda", className, tone = "ligh
     [cancelClose]
   );
 
+  // Hover = vista temporal (solo si no está fijado)
+  const onHoverIn = useCallback(() => {
+    if (!pinnedRef.current) doOpen();
+  }, [doOpen]);
+  const onHoverOut = useCallback(() => {
+    if (!pinnedRef.current) doClose(150);
+  }, [doClose]);
+
+  // Clic = fija / suelta
+  const onToggle = useCallback(() => {
+    if (pinnedRef.current) {
+      doClose();
+    } else {
+      pinnedRef.current = true;
+      doOpen();
+    }
+  }, [doOpen, doClose]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeTip();
+      if (e.key === "Escape") doClose();
     };
     const onPointerDown = (e: PointerEvent) => {
       const t = e.target as Node | null;
       if (t && btnRef.current?.contains(t)) return;
       if (t && balloonRef.current?.contains(t)) return;
-      closeTip();
+      doClose();
     };
     const onScrollResize = () => compute();
     window.addEventListener("keydown", onKey);
@@ -98,7 +122,7 @@ export function InfoTip({ children, label = "Ver ayuda", className, tone = "ligh
       window.removeEventListener("scroll", onScrollResize, true);
       window.removeEventListener("resize", onScrollResize);
     };
-  }, [open, compute, closeTip]);
+  }, [open, compute, doClose]);
 
   useEffect(
     () => () => {
@@ -116,11 +140,11 @@ export function InfoTip({ children, label = "Ver ayuda", className, tone = "ligh
         aria-label={label}
         title={label}
         aria-describedby={open ? `${uid}-tip` : undefined}
-        onMouseEnter={openTip}
-        onMouseLeave={() => closeTip(150)}
-        onFocus={openTip}
-        onBlur={() => closeTip(150)}
-        onClick={() => (open ? closeTip() : openTip())}
+        onMouseEnter={onHoverIn}
+        onMouseLeave={onHoverOut}
+        onFocus={onHoverIn}
+        onBlur={onHoverOut}
+        onClick={onToggle}
         className={cn(
           "inline-flex size-5 shrink-0 items-center justify-center rounded-full transition [&>svg]:size-4",
           dark ? "text-white/70 hover:text-white" : "text-text-tertiary hover:text-brand-600",
@@ -135,8 +159,8 @@ export function InfoTip({ children, label = "Ver ayuda", className, tone = "ligh
             ref={balloonRef}
             id={`${uid}-tip`}
             role="tooltip"
-            onMouseEnter={openTip}
-            onMouseLeave={() => closeTip(150)}
+            onMouseEnter={onHoverIn}
+            onMouseLeave={onHoverOut}
             style={pos ? { left: pos.left, ...(pos.bottom !== undefined ? { bottom: pos.bottom } : { top: pos.top }) } : { visibility: "hidden" }}
             className={cn(
               "fixed z-[100] w-72 max-w-[calc(100vw-16px)] rounded-xl border border-card-border bg-card-background p-3 shadow-xl transition-all duration-200",
