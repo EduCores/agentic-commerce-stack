@@ -3,7 +3,7 @@ import { prisma } from "../src/lib/adapters/prisma";
 async function main() {
   const updated = await prisma.agent.update({
     where: { slug: "sales-assistant" },
-    data: { model: "nvidia/nemotron-3-ultra" },
+    data: { model: "nvidia/nemotron-3-ultra-550b-a55b" },
     select: { slug: true, model: true },
   });
   console.log("UPDATED:", JSON.stringify(updated));

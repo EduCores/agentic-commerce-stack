@@ -148,13 +148,13 @@ async function main() {
   // 4) Agente: actualizar SOLO el prompt anti-alucinación; respeta el modelo configurado
   const agent = await prisma.agent.upsert({
     where: { slug: "sales-assistant" },
-    update: { systemPrompt: SALES_SYSTEM_PROMPT, model: "nvidia/nemotron-3-ultra", storeId, isActive: true },
+    update: { systemPrompt: SALES_SYSTEM_PROMPT, model: "nvidia/nemotron-3-ultra-550b-a55b", storeId, isActive: true },
     create: {
       slug: "sales-assistant",
       name: "Sales Assistant",
       description: "Ayuda a vender, consulta stock y procesa compras",
       systemPrompt: SALES_SYSTEM_PROMPT,
-      model: "nvidia/nemotron-3-ultra",
+      model: "nvidia/nemotron-3-ultra-550b-a55b",
       isActive: true,
       storeId,
     },
@@ -179,8 +179,8 @@ async function main() {
   // 6) Crews StarShop — 8 agents (Welcome + 6 + OrderTracking + Escalate) + Confirm
   const welcomeAgent = await prisma.agent.upsert({
     where: { slug: "starshop-welcome" },
-    update: { systemPrompt: STARSHOP_WELCOME_PROMPT, model: "nvidia/nemotron-3-ultra", storeId, isActive: true },
-    create: { slug: "starshop-welcome", name: "StarShop Welcome Agent", description: "Greet y detecta intent (paso 1)", systemPrompt: STARSHOP_WELCOME_PROMPT, model: "nvidia/nemotron-3-ultra", isActive: true, storeId },
+    update: { systemPrompt: STARSHOP_WELCOME_PROMPT, model: "nvidia/nemotron-3-ultra-550b-a55b", storeId, isActive: true },
+    create: { slug: "starshop-welcome", name: "StarShop Welcome Agent", description: "Greet y detecta intent (paso 1)", systemPrompt: STARSHOP_WELCOME_PROMPT, model: "nvidia/nemotron-3-ultra-550b-a55b", isActive: true, storeId },
   });
 
   const crews = Object.values(STARSHOP_CREWS);
