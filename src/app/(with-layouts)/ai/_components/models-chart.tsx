@@ -45,9 +45,9 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-5">
         <div className="md:col-span-3 min-w-0">
-          <div className="h-64 p-0">
+          <div className="h-80 p-0">
             <ChartContainer className="h-full w-full" height="100%" width="100%">
-              <BarChart data={rows} margin={{ top: 16, right: 8, left: -8, bottom: 0 }}>
+              <BarChart data={rows} margin={{ top: 16, right: 8, left: -8, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis
                   dataKey="model"
@@ -57,7 +57,7 @@ export function AiModelsChart({ data }: { data: AiStats | null }) {
                   interval={0}
                   angle={-20}
                   dy={12}
-                  height={60}
+                  height={72}
                   tickFormatter={(v: string) => displayModelName(v)}
                 />
                 <YAxis
