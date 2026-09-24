@@ -146,19 +146,21 @@ export function MetaConnectCard() {
   const active = conns.find((c) => c.isActive);
 
   return (
-    <Card className="min-w-0 md:col-span-3">
+    <Card className="min-w-0">
       <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-[#0866FF] text-white [&>svg]:size-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <CardTitle className="flex min-w-0 flex-1 items-center gap-2 text-sm">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#0866FF] text-white [&>svg]:size-4">
               <Facebook />
             </span>
-            Meta Ads — plug & play SDK
+            <span className="min-w-0 truncate">Meta Ads — plug & play SDK</span>
           </CardTitle>
-          {active ? <Badge color="success">Conectado · datos reales</Badge> : <Badge color="gray">Modo mock — conecta para datos reales</Badge>}
           <InfoTip label="Cómo funciona Meta Ads">
             Conecta tu Ad Account y trae <strong>spend, impresiones, clics y conversiones reales</strong> al canal Meta de /marketing. Sin credenciales, el sistema usa mock y no se rompe.
           </InfoTip>
+        </div>
+        <div className="mt-2">
+          {active ? <Badge color="success">Conectado · datos reales</Badge> : <Badge color="gray">Modo mock — conecta para datos reales</Badge>}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -168,18 +170,18 @@ export function MetaConnectCard() {
         ) : conns.length > 0 ? (
           <div className="space-y-2">
             {conns.map((c) => (
-              <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-card-border p-3 text-sm">
+              <div key={c.id} className="rounded-lg border border-card-border p-3 text-sm">
                 <div className="min-w-0">
-                  <p className="font-medium text-text-primary">
+                  <p className="flex flex-wrap items-center gap-1.5 font-medium text-text-primary">
                     {c.name} <span className="font-mono text-xs text-text-tertiary">act_{c.adAccountId}</span>{" "}
                     <Badge color={c.isActive ? "success" : "gray"}>{c.isActive ? "Activa" : "Inactiva"}</Badge>
                   </p>
-                  <p className="text-xs text-text-tertiary">
+                  <p className="mt-1 text-xs text-text-tertiary">
                     {c.lastSyncAt ? `Último sync: ${new Date(c.lastSyncAt).toLocaleString("es-CL")} · ${c.lastSyncStatus ?? ""}` : "Sin sync aún"}
                     {c.lastError ? ` · Error: ${c.lastError.slice(0, 80)}` : ""}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="mt-2 flex items-center gap-2">
                   <Button size="sm" appearance="outline" onClick={() => sync(c.id)} isDisabled={syncing}>
                     {syncing ? "..." : "Sincronizar"}
                   </Button>
@@ -210,7 +212,7 @@ export function MetaConnectCard() {
             </a>{" "}
             con permisos <code>ads_read</code>, <code>ads_management</code>. 2) Copia Ad Account ID (solo dígitos, sin act_). 3) Prueba y conecta.
           </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="mt-3 grid gap-3">
             <label className="flex flex-col gap-1 text-xs">
               Nombre
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="StarShop Meta" className={inputCls} />
@@ -219,7 +221,7 @@ export function MetaConnectCard() {
               Ad Account ID *
               <input value={form.adAccountId} onChange={(e) => setForm({ ...form, adAccountId: e.target.value })} placeholder="123456789012345" className={inputCls} />
             </label>
-            <label className="flex flex-col gap-1 text-xs sm:col-span-2">
+            <label className="flex flex-col gap-1 text-xs">
               Access Token * (se guarda cifrado en prod)
               <input
                 value={form.accessToken}
