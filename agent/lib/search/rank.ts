@@ -116,15 +116,24 @@ export function rankProducts(products: UniversalProduct[], query: string): RankR
       }
     }
 
-    // 5) Tokens en aliases / tags / categoría
+    // 4b) Head noun: en español el sustantivo va primero ("enchufe exterior").
+    // Si el título trae el primer término, es el producto (no un accesorio).
+    const head = tokens[0];
+    if (head && head.length > 2 && c.title.includes(head)) {
+      score += 10;
+      matchedBy.push("head");
+    }
+
+    // 5) Tokens en aliases / tags / categoría (taxonomía de la tienda pesa)
     for (const term of expanded) {
       if (c.aliases.some((alias) => alias === term || alias.includes(term))) {
         score += 12;
         matchedBy.push(`alias:${term}`);
       } else if (c.tags.some((tag) => tag === term || tag.includes(term))) {
         score += 8;
-      } else if (c.category.includes(term)) {
-        score += 6;
+      } else if (term.length > 2 && c.category.includes(term)) {
+        score += 12;
+        matchedBy.push(`categoria:${term}`);
       }
     }
 
