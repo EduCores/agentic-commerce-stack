@@ -105,6 +105,7 @@ export async function GET() {
     // DEMO_MOCK: marketing activo sin datos reales
     if (DEMO_MODE && orders.length === 0) {
       return NextResponse.json({
+        live: false,
         channels: [
           { channel: "Starshop", spend: 120000, clicks: 840, convRate: 4.2, revenue: 680000 },
           { channel: "Meta", spend: 80000, clicks: 520, convRate: 3.8, revenue: 420000 },
@@ -132,8 +133,8 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ channels, funnel, campaigns, audience, totals: { impressions: funnel[0].value, revenue: orders.reduce((a, o) => a + Number(o.total), 0) } });
+    return NextResponse.json({ live: true, channels, funnel, campaigns, audience, totals: { impressions: funnel[0].value, revenue: orders.reduce((a, o) => a + Number(o.total), 0) } });
   } catch (e) {
-    return NextResponse.json({ channels: [], funnel: [], campaigns: [], audience: { customers: 0, byChannel: [] }, totals: { impressions: 0, revenue: 0 }, warning: e instanceof Error ? e.message : String(e) });
+    return NextResponse.json({ live: false, channels: [], funnel: [], campaigns: [], audience: { customers: 0, byChannel: [] }, totals: { impressions: 0, revenue: 0 }, warning: e instanceof Error ? e.message : String(e) });
   }
 }

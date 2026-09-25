@@ -29,7 +29,8 @@ function CampaignsHero({ data }: { data: MarketingData }) {
             </InfoTip>
           </h3>
           <span className="mt-2 inline-flex items-center gap-1.5 rounded-[4px] bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
-            <span className="size-1.5 rounded-full bg-amber-300" /> Modo mock — conecta para datos reales
+            <span className={`size-1.5 rounded-full ${data.live ? "bg-emerald-300" : "bg-amber-300"}`} />
+            {data.live ? "Datos reales — tienda conectada" : "Modo mock — conecta para datos reales"}
           </span>
         </div>
         <Link href="/store" className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur hover:bg-white/25">
@@ -87,7 +88,7 @@ function CampaignsHero({ data }: { data: MarketingData }) {
 function CampaignsDetail({ data }: { data: MarketingData }) {
   if (data.campaigns.length === 0) {
     return (
-      <Card className="min-w-0 md:col-span-3">
+      <Card className="min-w-0">
         <CardHeader><CardTitle className="text-sm">Campañas por tienda — catálogo híbrido</CardTitle></CardHeader>
         <CardContent>
           <p className="text-sm text-text-tertiary">Aún no hay campañas. Conecta una tienda en /store para crear la primera (mock para demo, shopify con dominio/apiKey para real).</p>
@@ -98,7 +99,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
   }
   const totalCampaignRevenue = data.campaigns.reduce((a, c) => a + (c.revenue ?? 0), 0);
   return (
-    <Card className="min-w-0 md:col-span-3">
+    <Card className="min-w-0">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-sm">Campañas por tienda — desglose real</CardTitle>
@@ -111,7 +112,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-1 xl:grid-cols-2">
           {data.campaigns.map((c, i) => {
             const pct = sharePct(c.revenue ?? 0, totalCampaignRevenue);
             return (
@@ -214,12 +215,14 @@ export function MarketingDashboard() {
       {/* 3. Embudo de conversión */}
       <MarketingFunnel data={data} />
 
-      {/* 4-6. Resto: campañas, Meta + audiencia 50/50, canales */}
+      {/* Campañas + audiencia 50/50, luego Meta y canales a ancho completo */}
       <div className="grid gap-4 md:grid-cols-3">
-        <CampaignsDetail data={data} />
         <div className="grid gap-4 md:col-span-3 md:grid-cols-2">
-          <MetaConnectCard />
+          <CampaignsDetail data={data} />
           <AudienceCard data={data} />
+        </div>
+        <div className="md:col-span-3">
+          <MetaConnectCard />
         </div>
         <div className="md:col-span-3">
           <MarketingChannelTable data={data} />
