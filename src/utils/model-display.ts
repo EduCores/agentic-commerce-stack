@@ -7,6 +7,7 @@ export function displayModelName(id: string | null | undefined): string {
   if (!id) return "—";
   const short = id.split("/").pop() ?? id;
   if (/^qwen3-30b/i.test(short)) return "Qwen3-30B";
+  if (/^qwen3\.8/i.test(short)) return "Qwen3.8";
   if (/nemotron/i.test(short)) return "Nemotron 3";
   return short;
 }

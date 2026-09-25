@@ -24,8 +24,16 @@ export async function POST(req: Request) {
     .setIssuedAt()
     .setExpirationTime("15m")
     .sign(RESET_SECRET);
-  const { default: sendEmail } = await import("@/../agent/tools/send-email");
-  await sendEmail.execute({ to: normalized, subject: "Recupera tu acceso StarShop", template: "general", text: `Usa este código para restablecer (15 min): ${token}` } as never).catch(() => {});
+  // Flujo email-agent (workflow con logs en /workflows) — awaited, sin duplicar
+  // envíos: un solo camino sendTransactionalEmail para todo el tramo auth.
+  const { dispatchEmailEvent } = await import("@/workflows/email-agent");
+  await dispatchEmailEvent({
+    trigger: "password_reset",
+    to: normalized,
+    subject: "Recupera tu acceso StarShop",
+    text: `Usa este código para restablecer (15 min): ${token}`,
+    vars: { asunto: "Recupera tu acceso StarShop", mensaje: `Usa este código para restablecer (15 min): ${token}` },
+  }).catch(() => {});
   const isDev = process.env.NODE_ENV !== "production";
   return NextResponse.json({ ok: true, message: "Si existe la cuenta, enviamos instrucciones.", ...(isDev ? { debugToken: token } : {}) });
 }

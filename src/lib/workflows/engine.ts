@@ -28,7 +28,11 @@ export function createWorkflow<Input>(slug: string, runner: (input: Input) => Pr
 }
 
 // ── Runtime durable local (logs en Prisma) ──
-export async function startWorkflow<Input>(workflow: WorkflowDefinition<Input>, input: Input): Promise<{ id: string; status: string }> {
+export async function startWorkflow<Input>(
+  workflow: WorkflowDefinition<Input>,
+  input: Input,
+  opts?: { wait?: boolean }
+): Promise<{ id: string; status: string }> {
   // Busca definition en DB para linkear run
   const def = await prisma.workflowDefinition.findUnique({ where: { slug: workflow.slug } }).catch(() => null);
 
@@ -43,23 +47,42 @@ export async function startWorkflow<Input>(workflow: WorkflowDefinition<Input>, 
     },
   });
 
-  // Ejecuta en background (no bloquea al agente) — durable via step logs
-  // En Vercel prod, esto sería dispatch al World; aquí es fire-and-await con reintentos simples
-  void (async () => {
+  // Inyecta el id del run en el input (si es objeto) para que los steps linkeen
+  // sus logStep → OrderStepLog.workflowRunId (XYFlow los muestra bajo el run).
+  const runInput = (
+    typeof input === "object" && input !== null
+      ? { ...(input as Record<string, unknown>), workflowRunId: run.id }
+      : input
+  ) as Input;
+
+  // Ejecuta con reintentos simples — durable via step logs
+  // - opts.wait=true → el caller ESPERA el resultado (emails: la respuesta del
+  //   route sale después de que el correo salga, igual que antes con await).
+  // - default → fire-and-forget (no bloquea al agente).
+  // En Vercel prod, esto sería dispatch al World.
+  const exec = async (): Promise<{ status: "COMPLETED" | "FAILED" }> => {
     try {
-      await workflow.run(input);
+      await workflow.run(runInput);
       await prisma.workflowRun.update({
         where: { id: run.id },
         data: { status: "COMPLETED", completedAt: new Date(), currentStep: "DONE" },
       });
+      return { status: "COMPLETED" };
     } catch (e) {
       await prisma.workflowRun.update({
         where: { id: run.id },
         data: { status: "FAILED", error: String(e), completedAt: new Date() },
       });
+      return { status: "FAILED" };
     }
-  })();
+  };
 
+  if (opts?.wait) {
+    const result = await exec();
+    return { id: run.id, status: result.status };
+  }
+
+  void exec();
   return { id: run.id, status: "RUNNING" };
 }
 

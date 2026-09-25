@@ -83,6 +83,10 @@ export const NODE_LABEL_ES: Record<string, string> = {
   "3 Escalate To Human": "3 Derivar a humano",
   "3 Admin Ops (Dueño)": "3 Operaciones admin (Dueño)",
   "4 Confirm Order": "4 Confirmar pedido",
+  "Email Event Trigger": "1 Evento de email",
+  "Validate Recipient": "2 Validar destinatario",
+  "Render Template": "3 Renderizar plantilla",
+  "Send Email": "4 Enviar email",
 };
 
 /** Traducción display de tipos de nodo (identificadores intactos en los datos). */
@@ -114,6 +118,7 @@ export const FLOW_MODELS: Array<{ id: string; label: string }> = [
   { id: "nvidia/nemotron-3-ultra-550b-a55b:free", label: "Nemotron 3 Ultra (gratis $0)" },
   { id: "nvidia/nemotron-3.5-lightning:free", label: "Nemotron 3.5 Lightning (gratis $0)" },
   { id: "nvidia/nemotron-3-super-120b-a12b:free", label: "Nemotron 3 Super 120B (gratis $0)" },
+  { id: "qwen/qwen3.8-27b:free", label: "Qwen3.8 27B (gratis $0, pruebas)" },
   { id: "nvidia/nemotron-3-ultra-550b-a55b", label: "Nemotron 3 Ultra (pago)" },
   { id: "qwen/qwen3-30b-a3b-instruct-2507", label: "Qwen3 30B (estable, barato)" },
   { id: "openai/gpt-4o", label: "GPT-4o (mejor calidad, más caro)" },

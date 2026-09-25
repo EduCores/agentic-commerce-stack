@@ -1,9 +1,28 @@
-import { prisma } from "../src/lib/adapters/prisma";
+import { readFileSync } from "node:fs";
+
+function loadEnv() {
+  for (const raw of readFileSync(".env", "utf8").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eq = line.indexOf("=");
+    if (eq === -1) continue;
+    const key = line.slice(0, eq).trim();
+    const value = line.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
+    if (!process.env[key]) process.env[key] = value;
+  }
+}
+loadEnv();
 
 async function main() {
+  const { prisma } = await import("../src/lib/adapters/prisma");
+  // Modelo de PRUEBAS: Qwen gratuito de la cadena de fallback (ver
+  // STARSHOP_CREW_FALLBACKS en prisma/starshop-prompts.ts). Si el upstream
+  // responde 429, runAgent encadena al siguiente modelo gratis solo.
+  const TEST_MODEL = "qwen/qwen3.8-27b:free";
+  const original = await prisma.agent.findUnique({ where: { slug: "sales-assistant" }, select: { model: true } });
   const updated = await prisma.agent.update({
     where: { slug: "sales-assistant" },
-    data: { model: "nvidia/nemotron-3-ultra-550b-a55b" },
+    data: { model: TEST_MODEL },
     select: { slug: true, model: true },
   });
   console.log("UPDATED:", JSON.stringify(updated));
@@ -44,6 +63,12 @@ async function main() {
   const stepTools4 = r4.toolCalls.map((t: unknown) => (t as { toolName?: string }).toolName);
   console.log("--- TEST4 TOOL CALLS:", JSON.stringify(stepTools4));
   console.log("--- TEST4 RESPONSE:\n" + r4.text.slice(0, 600));
+
+  // Restaura el modelo original para no dejar la BD en modo pruebas.
+  if (original?.model && original.model !== TEST_MODEL) {
+    await prisma.agent.update({ where: { slug: "sales-assistant" }, data: { model: original.model } });
+    console.log("RESTORED model:", original.model);
+  }
 
   await prisma.$disconnect();
 }

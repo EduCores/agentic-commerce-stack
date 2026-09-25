@@ -20,8 +20,16 @@ export async function POST(req: Request) {
   await prisma.verificationCode.updateMany({ where: { email: normalized, purpose: "2fa", consumedAt: null }, data: { consumedAt: new Date() } }).catch(() => {});
   await prisma.verificationCode.deleteMany({ where: { expiresAt: { lt: new Date() } } }).catch(() => {});
   await prisma.verificationCode.create({ data: { email: normalized, code, purpose: "2fa", expiresAt: new Date(Date.now() + 5 * 60 * 1000) } });
-  const { default: sendEmail } = await import("@/../agent/tools/send-email");
-  await sendEmail.execute({ to: normalized, subject: "Tu código StarShop", template: "general", text: `Tu código de verificación (5 min): ${code}` } as never).catch(() => {});
+  // Flujo email-agent (workflow con logs en /workflows) — awaited: la respuesta
+  // sale después de que el correo salga, igual que antes con sendEmail.execute().
+  const { dispatchEmailEvent } = await import("@/workflows/email-agent");
+  await dispatchEmailEvent({
+    trigger: "2fa_code",
+    to: normalized,
+    subject: "Tu código StarShop",
+    text: `Tu código de verificación (5 min): ${code}`,
+    vars: { asunto: "Tu código StarShop", mensaje: `Tu código de verificación (5 min): ${code}` },
+  }).catch(() => {});
   const isDev = process.env.NODE_ENV !== "production";
   return NextResponse.json({ ok: true, message: "Código enviado al correo.", ...(isDev ? { debugCode: code } : {}) });
 }

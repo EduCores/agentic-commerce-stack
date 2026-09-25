@@ -21,10 +21,19 @@ export const STARSHOP_CREW_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
  * saturado, 5xx, red caída), el runtime reintenta EN ORDEN con estos modelos
  * gratis antes de rendirse. Verificados con tool-calling en OpenRouter
  * (free tier: 50 req/día por cuenta, 20/min).
+ *
+ * qwen3.8-27b:free es el único Qwen gratuito disponible hoy (los slug
+ * qwen-2.5-72b:free y qwen3-30b-a3b:free ya no existen en el free tier).
+ * Sirve como modelo de PRUEBAS: el upstream puede responder 429 temporal,
+ * y en ese caso la cadena sigue con los Nemotron (isLlmUnavailable lo reintenta).
+ * Si se cambia aquí: el id ya entra solo a ALLOWED_MODELS (spread) pero hay que
+ * añadirlo a FLOW_MODELS (src/components/flow/types.ts) para poder elegirlo
+ * en el editor de /workflows.
  */
 export const STARSHOP_CREW_FALLBACKS = [
   "nvidia/nemotron-3.5-lightning:free",
   "nvidia/nemotron-3-super-120b-a12b:free",
+  "qwen/qwen3.8-27b:free",
 ] as const;
 
 /**

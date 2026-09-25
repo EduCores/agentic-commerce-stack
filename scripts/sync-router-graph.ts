@@ -33,6 +33,7 @@ async function main() {
   loadEnv();
   const { prisma } = await import("../src/lib/adapters/prisma");
   const { starShopRouterGraph, starShopRouterSteps } = await import("../src/workflows/starshop-router");
+  const { emailAgentGraph, emailAgentSteps } = await import("../src/workflows/email-agent");
   const { getCrewConfig, refreshCrewOverrides } = await import("../agent/index");
   const { STARSHOP_INTENTS, STARSHOP_CREW_TOOLS } = await import("../prisma/starshop-prompts");
 
@@ -43,6 +44,21 @@ async function main() {
     data: { graph: starShopRouterGraph, steps: starShopRouterSteps, isActive: true, version: { increment: 1 } },
   });
   console.log("grafo publicado:", updated.slug, "v" + updated.version, "isActive:", updated.isActive);
+
+  // Grafo del Email Agent — crea si falta (seed solo escribe el grafo al CREAR).
+  const email = await prisma.workflowDefinition.upsert({
+    where: { slug: "email-agent" },
+    update: { graph: emailAgentGraph, steps: emailAgentSteps, isActive: true, version: { increment: 1 } },
+    create: {
+      slug: "email-agent",
+      name: "Email Agent",
+      description: "Evento → validar destinatario → renderizar plantilla → enviar (Resend/mock)",
+      trigger: "eve_tool",
+      graph: emailAgentGraph,
+      steps: emailAgentSteps,
+    },
+  });
+  console.log("grafo publicado:", email.slug, "v" + email.version, "isActive:", email.isActive);
 
   const overrides = await refreshCrewOverrides();
   console.log("intents con override:", overrides ? Object.keys(overrides).join(", ") : "(null -> fallback codigo)");

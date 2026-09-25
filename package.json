@@ -8,6 +8,8 @@
         "start": "next start",
         "lint": "eslint",
         "test:sanitize": "tsx scripts/test-sanitize-reply.ts",
+        "acs:test-email": "tsx scripts/test-email-flow.ts",
+        "acs:sync-router": "tsx scripts/sync-router-graph.ts",
         "clean": "node scripts/clean.mjs",
         "clean:cache": "node scripts/clean.mjs --cache-only",
         "acs:dev": "node scripts/check-env.mjs && prisma generate && next dev",

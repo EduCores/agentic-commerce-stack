@@ -66,7 +66,8 @@ export default async function AgentsPage() {
         <AgentsModelsChart />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid items-start gap-4 md:grid-cols-2">
+      <div className="min-w-0 space-y-4">
       <Card className="min-w-0">
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -98,6 +99,45 @@ export default async function AgentsPage() {
             })}
           </CardContent>
         </Card>
+        <Card className="min-w-0">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
+                <Bot />
+              </span>
+              <CardTitle className="min-w-0">Cómo crear un agente — en 3 pasos</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <ol className="grid min-w-0 gap-3 xl:grid-cols-3">
+              <li className="min-w-0 rounded-lg border border-card-border bg-background-gray-secondary/30 p-3">
+                <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-black">1</span>
+                <p className="mt-2 font-semibold text-text-primary">Define el agente</p>
+                <p className="text-xs leading-4 text-text-tertiary [&_code]:break-all">
+                  Inserta en <code className="rounded bg-card-background px-1 py-0.5">prisma.agent</code> con <code>systemPrompt</code> y <code>config.tools</code> (ej: <code>sales-assistant</code>).
+                </p>
+              </li>
+              <li className="min-w-0 rounded-lg border border-card-border bg-background-gray-secondary/30 p-3">
+                <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-black">2</span>
+                <p className="mt-2 font-semibold text-text-primary">Crea la herramienta</p>
+                <p className="text-xs leading-4 text-text-tertiary [&_code]:break-all">
+                  En <code className="rounded bg-card-background px-1 py-0.5">agent/tools/*.ts</code> usa <code>defineTool</code> + <code>zod</code>. Se valida y aparece arriba.
+                </p>
+              </li>
+              <li className="min-w-0 rounded-lg border border-card-border bg-background-gray-secondary/30 p-3">
+                <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-black">3</span>
+                <p className="mt-2 font-semibold text-text-primary">Conecta el flujo</p>
+                <p className="text-xs leading-4 text-text-tertiary [&_code]:break-all">
+                  El agente invoca <code className="rounded bg-card-background px-1 py-0.5">startWorkflow(processOrderWorkflow)</code> — puente EVE → Flujos.
+                </p>
+              </li>
+            </ol>
+            <p className="rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-700 dark:bg-violet-950/30 dark:text-violet-300">
+              Tip: edita prompts y modelos sin código en <Link href="/workflows" className="font-bold underline">/workflows</Link> y publica — el agente los usa en ~60s.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
         <Card className="min-w-0">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -143,44 +183,6 @@ export default async function AgentsPage() {
             </CardContent>
         </Card>
       </div>
-      <Card className="min-w-0">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 [&>svg]:size-4">
-              <Bot />
-            </span>
-            <CardTitle className="min-w-0">Cómo crear un agente — en 3 pasos</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <ol className="grid min-w-0 gap-3 sm:grid-cols-3">
-            <li className="min-w-0 rounded-lg border border-card-border bg-background-gray-secondary/30 p-3">
-              <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-black">1</span>
-              <p className="mt-2 font-semibold text-text-primary">Define el agente</p>
-              <p className="text-xs leading-4 text-text-tertiary [&_code]:break-all">
-                Inserta en <code className="rounded bg-card-background px-1 py-0.5">prisma.agent</code> con <code>systemPrompt</code> y <code>config.tools</code> (ej: <code>sales-assistant</code>).
-              </p>
-            </li>
-            <li className="min-w-0 rounded-lg border border-card-border bg-background-gray-secondary/30 p-3">
-              <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-black">2</span>
-              <p className="mt-2 font-semibold text-text-primary">Crea la herramienta</p>
-              <p className="text-xs leading-4 text-text-tertiary [&_code]:break-all">
-                En <code className="rounded bg-card-background px-1 py-0.5">agent/tools/*.ts</code> usa <code>defineTool</code> + <code>zod</code>. Se valida y aparece arriba.
-              </p>
-            </li>
-            <li className="min-w-0 rounded-lg border border-card-border bg-background-gray-secondary/30 p-3">
-              <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-black">3</span>
-              <p className="mt-2 font-semibold text-text-primary">Conecta el flujo</p>
-              <p className="text-xs leading-4 text-text-tertiary [&_code]:break-all">
-                El agente invoca <code className="rounded bg-card-background px-1 py-0.5">startWorkflow(processOrderWorkflow)</code> — puente EVE → Flujos.
-              </p>
-            </li>
-          </ol>
-          <p className="rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-700 dark:bg-violet-950/30 dark:text-violet-300">
-            Tip: edita prompts y modelos sin código en <Link href="/workflows" className="font-bold underline">/workflows</Link> y publica — el agente los usa en ~60s.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }

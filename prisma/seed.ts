@@ -3,6 +3,7 @@ import { prisma } from "../src/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "./sales-system-prompt";
 import { STARSHOP_CREW_MODEL, STARSHOP_CREWS, STARSHOP_WELCOME_PROMPT } from "./starshop-prompts";
 import { starShopRouterGraph, starShopRouterSteps } from "../src/workflows/starshop-router";
+import { emailAgentGraph, emailAgentSteps } from "../src/workflows/email-agent";
 import { normalize, tokenize } from "../agent/lib/search/normalize";
 import { STARSHOP_CATEGORIES } from "../agent/lib/search/categories";
 
@@ -173,6 +174,22 @@ async function main() {
       trigger: "eve_tool",
       graph: starShopRouterGraph,
       steps: starShopRouterSteps,
+    },
+  });
+
+  // 5b) Workflow Email Agent — emails automáticos por evento (2FA/reset/pedido).
+  // El grafo y el estado de publicación se CONSERVAN al re-sembrar (mismo criterio
+  // que el router: las ediciones en /workflows son la fuente de configuración).
+  await prisma.workflowDefinition.upsert({
+    where: { slug: "email-agent" },
+    update: { steps: emailAgentSteps },
+    create: {
+      slug: "email-agent",
+      name: "Email Agent",
+      description: "Evento → validar destinatario → renderizar plantilla → enviar (Resend/mock)",
+      trigger: "eve_tool",
+      graph: emailAgentGraph,
+      steps: emailAgentSteps,
     },
   });
 
