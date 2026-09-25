@@ -5,6 +5,39 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getTeamWhatsAppLink, memberWaLink } from "@/lib/whatsapp";
 import { AgentMarkdown } from "./agent-markdown";
 
+type AgentToolCall = {
+  toolName?: string;
+  output?: { navigateTo?: string };
+  args?: { path?: string };
+};
+
+type AgentChatResponse = {
+  text?: string;
+  error?: string;
+  toolCalls?: AgentToolCall[];
+};
+
+type SpeechRecognitionResultEvent = {
+  results?: ArrayLike<{ 0?: { transcript?: string } }>;
+};
+
+type SpeechRecognitionErrorEvent = {
+  error?: string;
+};
+
+type SpeechRecognitionInstance = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionResultEvent) => void) | null;
+  onend: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
@@ -21,9 +54,9 @@ export function ACSFloatingButtons() {
     { role: "agent", text: "¡Hola Dueño! Soy Star Admin Ops — opero tu tienda. Pregúntame: ¿cuánto vendí hoy? | stock bajo | pedidos con alerta" },
   ]);
   const [agentTyping, setAgentTyping] = useState(false);
-  const [agentPulse, setAgentPulse] = useState(0);
+  const [agentPulse] = useState(0);
   const [agentListening, setAgentListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const agentScrollRef = useRef<HTMLDivElement>(null);
   const [voiceOn, setVoiceOn] = useState(false);
   const [speakingId, setSpeakingId] = useState<number | null>(null);
@@ -41,12 +74,12 @@ export function ACSFloatingButtons() {
   }, [agentOpen, waOpen]);
 
   const typeAgentMessage = (full: string) => {
-    setAgentMessages((m) => [...(m as any), { role: "agent", text: "" }]);
+    setAgentMessages((messages) => [...messages, { role: "agent", text: "" }]);
     let idx = 0;
     const t = setInterval(() => {
       idx = Math.min(idx + 2, full.length);
-      setAgentMessages((curr: any) => {
-        const copy = [...curr];
+      setAgentMessages((messages) => {
+        const copy = [...messages];
         const last = copy.length - 1;
         if (last >= 0 && copy[last].role === "agent") copy[last] = { ...copy[last], text: full.slice(0, idx) };
         return copy;
@@ -79,8 +112,10 @@ export function ACSFloatingButtons() {
   };
 
   useEffect(() => {
-    const v = localStorage.getItem("starshop-voiceOn");
-    if (v === "1") setVoiceOn(true);
+    const timer = window.setTimeout(() => {
+      if (localStorage.getItem("starshop-voiceOn") === "1") setVoiceOn(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
   useEffect(() => {
     localStorage.setItem("starshop-voiceOn", voiceOn ? "1" : "0");
@@ -111,9 +146,9 @@ export function ACSFloatingButtons() {
         body: JSON.stringify({ message: input, history: history.slice(-8), storeId: "seed-store" }),
       });
       if (r.status === 401) return { text: "Sesión expirada. Recarga e inicia sesión de nuevo." };
-      const data = await r.json();
+      const data = (await r.json()) as AgentChatResponse;
       const calls = data.toolCalls ?? [];
-      const nav = calls.find((t: any) => t.toolName === "navigateTo");
+      const nav = calls.find((toolCall) => toolCall.toolName === "navigateTo");
       const navigateTo = nav?.output?.navigateTo ?? nav?.args?.path;
       if (data.text) return { text: data.text, navigateTo };
       if (navigateTo) return { text: "Te llevo a la tienda.", navigateTo };
@@ -131,20 +166,23 @@ export function ACSFloatingButtons() {
   }, []);
 
   const toggleAgentVoice = () => {
-    const w = window as any;
-    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-    if (!SR) { typeAgentMessage("Tu navegador no soporta voz. Usa Chrome/Edge."); return; }
+    const speechWindow = window as Window & {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    const SpeechRecognition = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+    if (!SpeechRecognition) { typeAgentMessage("Tu navegador no soporta voz. Usa Chrome/Edge."); return; }
     if (agentListening) { try { recognitionRef.current?.stop(); } catch {} setAgentListening(false); return; }
     setAgentInput("");
-    const recognition = new SR();
+    const recognition = new SpeechRecognition();
     recognition.lang = "es-CL"; recognition.interimResults = false; recognition.maxAlternatives = 1;
-    recognition.onresult = (e: any) => {
-      const transcript = (e.results?.[0]?.[0]?.transcript ?? "").trim();
+    recognition.onresult = (event) => {
+      const transcript = (event.results?.[0]?.[0]?.transcript ?? "").trim();
       try { recognition.stop(); } catch {}
       if (transcript) { setAgentInput(transcript); window.setTimeout(() => sendAgent(transcript), 150); }
     };
     recognition.onend = () => setAgentListening(false);
-    recognition.onerror = (e: any) => { setAgentListening(false); if (e?.error && !["aborted","no-speech","not-allowed"].includes(e.error)) typeAgentMessage(`No pude captar tu voz (${e.error}).`); };
+    recognition.onerror = (event) => { setAgentListening(false); if (event.error && !["aborted", "no-speech", "not-allowed"].includes(event.error)) typeAgentMessage(`No pude captar tu voz (${event.error}).`); };
     recognitionRef.current = recognition;
     try { recognition.start(); setAgentListening(true); } catch { setAgentListening(false); }
   };
@@ -156,7 +194,7 @@ export function ACSFloatingButtons() {
     setAgentInput(""); setAgentTyping(true);
     await new Promise((r) => setTimeout(r, 280));
     const historyForLLM = agentMessages.slice(-8);
-    const { text, navigateTo } = await getAgentReply(t, historyForLLM as any);
+    const { text, navigateTo } = await getAgentReply(t, historyForLLM);
     setAgentTyping(false);
     typeAgentMessage(text);
     if (navigateTo) setTimeout(() => { window.location.href = navigateTo; }, 1200);

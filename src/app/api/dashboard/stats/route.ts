@@ -44,7 +44,7 @@ export async function GET(req: Request) {
 
     // Ventas por día/mes — soporta filtros Mes/Año además de últimos N días
     let since: Date;
-    let salesByDay: { date: string; total: number }[] = [];
+    const salesByDay: { date: string; total: number }[] = [];
     let rangeOrders: { total: unknown; createdAt: Date }[] = [];
     if (month && year) {
       since = new Date(year, month - 1, 1, 0, 0, 0, 0);

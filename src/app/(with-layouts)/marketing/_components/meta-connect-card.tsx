@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { InfoTip } from "@/components/tailgrids/core/info-tip";
@@ -32,7 +32,7 @@ export function MetaConnectCard() {
   const [testing, setTesting] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const r = await fetch("/api/meta");
       if (r.status === 401) {
@@ -47,11 +47,12 @@ export function MetaConnectCard() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    const timer = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
 
   async function test() {
     if (!form.accessToken || !form.adAccountId) {

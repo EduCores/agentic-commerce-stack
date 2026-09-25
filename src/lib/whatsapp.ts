@@ -24,7 +24,7 @@ export function waLink(number: string, message: string): string {
 /** Normaliza a dígitos wa.me (ej "+56 9 3747 9835" → "56937479835"). null si inválido. */
 export function normalizePhone(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
-  let digits = raw.replace(/\D/g, "");
+  const digits = raw.replace(/\D/g, "");
   if (digits.startsWith("56") && digits.length === 11) return digits;
   if (digits.length === 9 && digits.startsWith("9")) return `56${digits}`;
   if (digits.length >= 8 && digits.length <= 15) return digits;

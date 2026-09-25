@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     ]);
 
     // Rango por Mes/Año si se filtró — pisa los últimos N días
-    let byDay: { day: string; requests: number }[] = [];
+    const byDay: { day: string; requests: number }[] = [];
     if (month && year) {
       const daysInMonth = new Date(year, month, 0).getDate();
       for (let d = 1; d <= daysInMonth; d++) {

@@ -2,12 +2,15 @@
 import { MoonIcon, SunIcon } from "@/components/common/header/icons";
 import { Button } from "@/components/tailgrids/core/button";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export default function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
   if (!mounted) {
     return (
       <Button iconOnly appearance="outline" className="size-10 rounded-lg border border-card-border bg-card-background text-icon-primary shadow-xs [&>svg]:size-auto" aria-hidden>

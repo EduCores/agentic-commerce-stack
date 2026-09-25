@@ -25,7 +25,7 @@ export async function GET(req: Request) {
 
     // Rango: Mes/Año si se filtró (pisa los últimos N días), si no últimos N días
     const sumDay = (day: typeof orders) => day.reduce((a, o) => a + Number(o.total), 0);
-    let salesByDay: { date: string; total: number; orders: number }[] = [];
+    const salesByDay: { date: string; total: number; orders: number }[] = [];
     if (month && year) {
       const dim = new Date(year, month, 0).getDate();
       for (let d = 1; d <= dim; d++) {
