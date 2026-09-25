@@ -6,10 +6,10 @@
 import { generateText, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
 import { headersFor, hasProviderKey, resolveModel, sdkModelFor } from "./lib/model-provider";
-import { AGENT_MAX_STEPS } from "@/shared/agent-limits";
+import { AGENT_MAX_OUTPUT_TOKENS, AGENT_MAX_STEPS } from "@/shared/agent-limits";
 
 /** Re-export para que los tests y el editor del flow usen la misma constante. */
-export { AGENT_MAX_STEPS };
+export { AGENT_MAX_STEPS, AGENT_MAX_OUTPUT_TOKENS };
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
 import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../prisma/starshop-prompts";
@@ -42,32 +42,138 @@ import getSalesSummary from "./tools/sales-summary";
 const DIRECT_REPLY_RULE =
   "\n\nFORMATO DE RESPUESTA: entrega DIRECTAMENTE la respuesta final al cliente, en español y en 1-3 frases. No muestres tu razonamiento, análisis, pasos internos ni texto en inglés.";
 
+/**
+ * Límite de intentos de `directChat`.
+ *
+ * POR QUÉ 2 Y NO LA CADENA COMPLETA: esta función solo se dispara cuando el
+ * agente terminó en tool calls sin texto final (raro). Antes recorría los 17
+ * modelos de la cadena, y medido en producción eso costaba 20-47 s:
+ *   - `Tool choice is none, but model called a tool` → HTTP 400 en Groq
+ *   - `Insufficient credits` → HTTP 402 en los 5 modelos pagados de OpenRouter
+ *   - `free-models-per-day` → HTTP 429 en los 9 :free (cuota agotada)
+ * O sea, 16 intentos que TODOS fallaban antes de devolver el texto final.
+ * Con 2 intentos (Groq primero) la respuesta sale en <1 s con el mismo texto.
+ *
+ * Si estos 2 fallan, `FALLBACK_TEXT` presenta un mensaje amable al usuario: es
+ * preferible un mensaje genérico honesto que 47 s de espera.
+ */
+const DIRECT_CHAT_MAX_ATTEMPTS = 2;
+
+/**
+ * Timeout por intento de `directChat` (3 s).
+ *
+ * El plan gratuito de Vercel corta a los 10 s. Este camino solo se activa cuando
+ * el agente ya ejecutó tools y cortó sin texto: es la última milla, y esperar
+ * más de 3 s por respuesta final se nota más que un `FALLBACK_TEXT` honesto.
+ * Medido: con 8 s el peor caso llegó a 29 s (2 intentos × 8 s + el agente).
+ */
+const DIRECT_CHAT_TIMEOUT_MS = 3_000;
+
+/** Tope de tokens de salida en `directChat` (mismo criterio que el agente). */
+const DIRECT_CHAT_MAX_TOKENS = 500;
+
+/**
+ * Turnos de historial que se envían al modelo.
+ *
+ * Cada turno va en el prompt de ENTRADA, y el free de Groq topa a 8.000
+ * tokens/minuto contando entrada + salida. Con 6 turnos de historial el
+ * prompt crecía ~1.500 tokens extra por request; medido, eso era lo que
+ * agotaba el minuto y disparaba los 429 "on input tokens per minute".
+ * 3 turnos dan contexto suficiente para "sí, ese mismo" sin inflar el prompt.
+ */
+const AGENT_HISTORY_TURNS = 3;
+
+/**
+ * Resumen para `directChat`: qué pidió el cliente + qué devolvieron las tools.
+ *
+ * Se usa cuando el agente ejecutó tools pero cortó sin texto final (solo
+ * quedaron los tool calls). Sin este contexto el modelo no sabe qué encontró y
+ * responde "no encontré el producto" aunque la búsqueda haya funcionado.
+ *
+ * Deliberadamente NO se reenvían los mensajes crudos: los `tool_calls` del
+ * assistant y los bloques `role: "tool"` no son válidos en una llamada sin
+ * tools declaradas (Groq devuelve 400 "Tool choice is none, but model called
+ * a tool"), y además inflan el prompt contra el tope de 8.000 tokens/min.
+ */
+function buildToolContext(messages: Array<{ role: "user" | "assistant"; content: string }>, toolResults?: unknown): string {
+  const lastUser = [...messages].reverse().find((m) => m.role === "user");
+  const ask = lastUser?.content?.trim() || "(sin consulta)";
+  const data = toolResults ? `\n\nRESULTADOS OBTENIDOS:\n${JSON.stringify(toolResults).slice(0, 2500)}` : "";
+  return `El cliente preguntó: "${ask}"${data}\n\nYa consultaste el catálogo. NO llames a ninguna herramienta: ahora solo redacta la respuesta al cliente con esos datos.`;
+}
+
+/**
+ * Arma una respuesta en texto a partir de los resultados de las tools, SIN
+ * llamar al modelo. Es el último recurso cuando el LLM ejecutó tools pero cortó
+ * sin texto y el modelo de respaldo no está disponible.
+ *
+ * POR QUÉ: medido, ese camino devolvía `text: ""` y el chat pintaba un bubble
+ * vacío — el peor resultado posible para el usuario. Con esto siempre hay algo
+ * legible, y en 0 ms.
+ */
+function buildTextFromToolResults(results: unknown): string {
+  if (!Array.isArray(results) || results.length === 0) return "";
+  const lines: string[] = [];
+  for (const raw of results) {
+    if (!raw || typeof raw !== "object") continue;
+    const r = raw as Record<string, unknown>;
+    const products = Array.isArray(r.products) ? r.products : [];
+    for (const p of products.slice(0, 3)) {
+      if (!p || typeof p !== "object") continue;
+      const prod = p as Record<string, unknown>;
+      const title = typeof prod.title === "string" ? prod.title : null;
+      if (!title) continue;
+      const price = typeof prod.price === "number" ? `$${prod.price.toLocaleString("es-CL")}` : null;
+      const stock = typeof prod.stock === "number" ? ` · stock ${prod.stock}` : "";
+      lines.push(`- **${title}**${price ? ` — ${price}` : ""}${stock}`);
+    }
+    const total = typeof r.total === "number" ? `Total estimado: **$${r.total.toLocaleString("es-CL")}**` : "";
+    if (total) lines.push(total);
+  }
+  if (lines.length === 0) return "";
+  return `Encontré estos productos:\n\n${lines.join("\n")}\n\n¿Te los agrego al carrito o prefieres que te cotice otra cantidad?`;
+}
+
 async function directChat(
   modelId: string,
   system: string,
-  messages: Array<{ role: "user" | "assistant"; content: string }>
+  messages: Array<{ role: "user" | "assistant"; content: string }>,
+  toolResults?: unknown
 ): Promise<string> {
+  let attempts = 0;
   for (const attemptModel of buildModelChain(modelId)) {
+    if (attempts >= DIRECT_CHAT_MAX_ATTEMPTS) break;
     const resolved = resolveModel(attemptModel);
     if (!resolved) continue;
+    // 400 (tool choice) y 402 (sin créditos) no se arreglan probando otro
+    // modelo del mismo provider: se cuentan como intento y se sigue, pero no
+    // insistimos en los pagados de OpenRouter, que siempre dan 402.
+    if (resolved.provider === "openrouter" && !resolved.isFree) continue;
+    attempts++;
     try {
       const body = {
         model: resolved.upstreamId,
         messages: [
           { role: "system", content: system + DIRECT_REPLY_RULE },
-          ...messages,
+          // Contexto de las tools ya ejecutado: el agente acaba de llamarlas y
+          //cortó sin texto. Sin esto el modelo responde "no encuentro nada" y
+          // además intenta llamar tools que aquí no existen (HTTP 400
+          // "Tool choice is none, but model called a tool").
+          { role: "user", content: buildToolContext(messages, toolResults) },
         ],
         temperature: 0.7,
-        max_tokens: 700,
+        max_tokens: DIRECT_CHAT_MAX_TOKENS,
       };
       const r = await fetch(`${resolved.baseURL}/chat/completions`, {
         method: "POST",
         headers: headersFor(resolved),
         body: JSON.stringify(body),
+        // Sin timeout el request puede colgarse y sumar segundos al final.
+        signal: AbortSignal.timeout(DIRECT_CHAT_TIMEOUT_MS),
       });
       if (!r.ok) {
         const t = await r.text().catch(() => "");
-        console.log("[ACS-AGENT] directChat HTTP", r.status, attemptModel, t.slice(0, 200));
+        console.log("[ACS-AGENT] directChat HTTP", r.status, attemptModel, t.slice(0, 160));
         // 429 por cuota diaria de free: marcar para no reintentar en los siguientes mensajes.
         if (r.status === 429 && isDailyFreeQuotaError(t)) markModelExhausted(attemptModel);
         continue;
@@ -96,11 +202,11 @@ type ChatTurn = { role?: string; text?: string; content?: string };
 function toModelMessages(input: string, history?: unknown[]): Array<{ role: "user" | "assistant"; content: string }> {
   const out: Array<{ role: "user" | "assistant"; content: string }> = [];
   if (Array.isArray(history)) {
-    for (const m of history.slice(-6) as ChatTurn[]) {
+    for (const m of history.slice(-AGENT_HISTORY_TURNS) as ChatTurn[]) {
       if (!m || typeof m !== "object") continue;
       const text = ((m.text ?? m.content) ?? "").toString().trim();
       if (!text) continue;
-      out.push({ role: m.role === "user" ? "user" : "assistant", content: text.slice(0, 600) });
+      out.push({ role: m.role === "user" ? "user" : "assistant", content: text.slice(0, 400) });
     }
   }
   const current = input.trim();
@@ -393,7 +499,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
         messages,
         tools: toAISDKTools(allowedTools),
         stopWhen: stepCountIs(AGENT_MAX_STEPS) as never,
-        maxOutputTokens: 700,
+        maxOutputTokens: AGENT_MAX_OUTPUT_TOKENS,
       } as never);
       usedModel = attemptModel;
       break;
@@ -439,15 +545,25 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   let direct = false;
   if (!finalText && (rawText || stepToolCalls.length > 0)) {
     const hasKey = hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq");
+    // Resultados de las tools: sin ellos el modelo de respaldo no sabe qué
+    // encontró y responde "no encontré el producto".
+    const results = ((result as unknown as { steps?: Array<{ toolResults?: unknown[] }> }).steps ?? [])
+      .flatMap((s) => s.toolResults ?? []);
     if (hasKey) {
-      const directReply = await directChat(modelId, system, messages);
+      const directReply = await directChat(modelId, system, messages, results);
       if (directReply) {
         finalText = directReply;
         direct = true;
       }
     }
     // La cadena tampoco dio texto usable: mensaje amigable antes que devolver JSON crudo.
+    // OJO: el fallback solo aplica si el modelo dijo ALGO (rawText). Si cortó
+    // en blanco puro tras las tools, se arma una respuesta desde los propios
+    // resultados: devolver "" hacía que el chat mostrara un bubble vacío.
     if (!finalText && rawText) finalText = FALLBACK_TEXT;
+    if (!finalText && stepToolCalls.length > 0) {
+      finalText = buildTextFromToolResults(results);
+    }
   }
 
   // Log run (no bloquea la respuesta si la BD falla)
@@ -482,7 +598,7 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
         messages,
         tools: toAISDKTools(allowedTools) as never,
         stopWhen: stepCountIs(AGENT_MAX_STEPS) as never,
-        maxOutputTokens: 700,
+        maxOutputTokens: AGENT_MAX_OUTPUT_TOKENS,
       } as never);
 
       // Stream text chunks como IA que escribe. El filtro retiene los pseudo
@@ -510,7 +626,7 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
       if (!finalText && (rawFinal || toolCalls.length > 0)) {
         const hasKey = hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq");
         if (hasKey) {
-          const directReply = await directChat(attemptModel, system, messages);
+          const directReply = await directChat(attemptModel, system, messages, toolCalls);
           if (directReply) finalText = directReply;
         }
         if (!finalText && rawFinal) finalText = FALLBACK_TEXT;
