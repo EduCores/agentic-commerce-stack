@@ -4,12 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { MarketingFunnel } from "./funnel";
-import { MarketingChannelTable } from "./channel-table";
+import { MarketingChannelTable, ChannelIcon } from "./channel-table";
 import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { sharePct } from "@/utils/period-stats";
 import type { MarketingData } from "./types";
 import Link from "next/link";
-import { Megaphone, Package, Store, TrendingUp } from "lucide-react";
+import { Megaphone, Package, Store, TrendingUp, Users } from "lucide-react";
 import { MetaConnectCard } from "./meta-connect-card";
 
 function CampaignsHero({ data }: { data: MarketingData }) {
@@ -158,7 +158,14 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
 function AudienceCard({ data }: { data: MarketingData }) {
   return (
     <Card className="min-w-0 xl:col-span-2">
-      <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+            <Users />
+          </span>
+          <CardTitle className="text-sm">Información de la audiencia</CardTitle>
+        </div>
+      </CardHeader>
       <CardContent className="text-sm text-text-secondary">
         <p>
           <strong className="text-2xl font-extrabold tracking-tight text-text-primary">
@@ -169,7 +176,10 @@ function AudienceCard({ data }: { data: MarketingData }) {
         <div className="mt-3 space-y-1.5">
           {(data.audience?.byChannel ?? []).slice(0, 4).map((a) => (
             <div key={a.channel} className="flex items-center justify-between gap-2 text-sm">
-              <span>{a.channel}</span>
+              <span className="flex min-w-0 items-center gap-2">
+                <ChannelIcon name={a.channel} />
+                <span className="min-w-0 truncate">{a.channel}</span>
+              </span>
               <Badge color="gray">{a.customers} personas</Badge>
             </div>
           ))}

@@ -32,7 +32,7 @@ function distribute(total: number, raw: number[]): number[] {
   return scaled;
 }
 
-function ChannelIcon({ name }: { name: string }) {
+export function ChannelIcon({ name }: { name: string }) {
   const chip = "flex size-9 items-center justify-center rounded-lg [&>svg]:size-5";
   if (name === "Starshop") {
     return (
