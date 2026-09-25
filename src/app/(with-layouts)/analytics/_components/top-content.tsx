@@ -6,10 +6,12 @@ import Link from "next/link";
 import { FolderX, PackageX } from "lucide-react";
 
 export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
-  const maxRevenue = Math.max(...data.topContent.map((t) => t.revenue ?? 0), 1);
-  const totalRevenue = data.topContent.reduce((a, t) => a + (t.revenue ?? 0), 0);
-  const totalViews = data.topContent.reduce((a, t) => a + t.views, 0);
-  const totalUnits = data.topContent.reduce((a, t) => a + t.uniques, 0);
+  // Ranking por monto $: los más altos primero (verdes), degradando hasta rojo.
+  const ranked = [...data.topContent].sort((a, b) => (b.revenue ?? 0) - (a.revenue ?? 0));
+  const maxRevenue = Math.max(...ranked.map((t) => t.revenue ?? 0), 1);
+  const totalRevenue = ranked.reduce((a, t) => a + (t.revenue ?? 0), 0);
+  const totalViews = ranked.reduce((a, t) => a + t.views, 0);
+  const totalUnits = ranked.reduce((a, t) => a + t.uniques, 0);
 
   /** Color por posición del ranking: #1 verde y degrada (verde → amarillo → naranjo → rojo) hasta el último. */
   function rankColor(rank: number, count: number): string {
@@ -43,16 +45,16 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
               </p>
             </div>
             <span className="rounded-[4px] bg-background-gray-secondary px-2.5 py-1 text-xs font-bold text-text-primary">
-              Top {data.topContent.length}
+              Top {ranked.length}
             </span>
           </div>
         </CardHeader>
         <CardContent>
-          {data.topContent.length === 0 ? (
+          {ranked.length === 0 ? (
             <p className="text-sm text-text-tertiary">Sin movimientos aún. Vende desde /store o el chat.</p>
           ) : (
             <div className="space-y-2">
-              {data.topContent.map((t, i) => (
+              {ranked.map((t, i) => (
                 <div key={t.sku} className="rounded-lg border border-card-border p-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-2">
@@ -71,7 +73,7 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
                       className="h-full rounded-full"
                       style={{
                         width: `${Math.max(6, Math.round(((t.revenue ?? 0) / maxRevenue) * 100))}%`,
-                        backgroundColor: rankColor(i, data.topContent.length),
+                        backgroundColor: rankColor(i, ranked.length),
                       }}
                     />
                   </div>
