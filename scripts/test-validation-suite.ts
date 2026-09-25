@@ -14,7 +14,33 @@ function loadEnv() {
 loadEnv();
 
 async function testAll() {
-  // ══ 0. REGRESIÓN: meta-preguntas al agente NUNCA deben buscar en el catálogo ══
+  // ══ 0. REGRESIÓN: memoria de cuota diaria free (no quemar N requests por mensaje) ══
+  console.log("=== 0. REGRESIÓN: memoria de cuota diaria de modelos free ===");
+  const quota = await import("../prisma/starshop-prompts");
+  quota.resetModelQuotaCache();
+  const chainAntes = quota.buildModelChain();
+  const freeAntes = chainAntes.filter((m) => m.endsWith(":free"));
+  // Detectar el 429 real de OpenRouter y marcar los free como agotados.
+  const errReal = "Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 100";
+  for (const m of freeAntes) quota.markModelExhausted(m);
+  const chainDespues = quota.buildModelChain();
+  const freeDespues = chainDespues.filter((m) => m.endsWith(":free"));
+  const memoriaOk = freeAntes.length > 0 && freeDespues.length === 0;
+  console.log(`  free en cadena inicial : ${freeAntes.length}`);
+  console.log(`  free tras 429 marcado : ${freeDespues.length}`);
+  console.log(`  [${memoriaOk ? "OK" : "FAIL"}] los free agotados se omiten (ahorra cuota)`);
+  // El detector NO debe confundir saturación puntual con cuota diaria.
+  const esCuota = quota.isDailyFreeQuotaError(errReal) === true;
+  const noEsCuota = quota.isDailyFreeQuotaError("Rate limit exceeded: too many requests") === false;
+  console.log(`  [${esCuota ? "OK" : "FAIL"}] detecta "free-models-per-day" como cuota`);
+  console.log(`  [${noEsCuota ? "OK" : "FAIL"}] NO confunde saturacion puntual con cuota`);
+  quota.resetModelQuotaCache();
+  const chainRestaurada = quota.buildModelChain();
+  const restauradaOk = chainRestaurada.filter((m) => m.endsWith(":free")).length === freeAntes.length;
+  console.log(`  [${restauradaOk ? "OK" : "FAIL"}] reset restaura los free\n`);
+  if (!memoriaOk || !esCuota || !noEsCuota || !restauradaOk) throw new Error("REGRESIÓN: la memoria de cuota free no funciona");
+
+  // ══ 1. REGRESIÓN: meta-preguntas al agente NUNCA deben buscar en el catálogo ══
   // Caso real reportado: "estas cnectado?" → el agente respondía
   // "¡Vamos! Busco 'estas cnectado?' en todo el catálogo" (product_search).
   console.log("=== 0. REGRESIÓN: preguntas al agente NO son búsqueda ===");

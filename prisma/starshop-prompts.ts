@@ -60,23 +60,115 @@ export const STARSHOP_CREW_FALLBACKS = [
   "meta-llama/llama-3.3-70b-instruct",
   "openai/gpt-4o-mini",
   "google/gemini-2.5-flash",
-  // ── Free: coste $0 mientras haya cuota diaria; 429 si está agotada ──
+  // ── Free: coste $0 mientras haya cuota diaria. Cuando se agota devuelven 429 y
+  //    se marcan como agotados (ver isDailyFreeQuotaError/markModelExhausted) para
+  //    no gastar 4 requests de cuota por cada mensaje del cliente.
+  //    Todos verificados en la lista oficial de :free de OpenRouter.
+  "qwen/qwen3.8-27b:free",
+  "nvidia/nemotron-3-ultra-550b-a55b:free",
   "nvidia/nemotron-3.5-lightning:free",
   "nvidia/nemotron-3-super-120b-a12b:free",
-  "qwen/qwen3.8-27b:free",
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "inclusionai/ling-3.0-flash-sante:free",
+  "liquid/lfm-2.5-2.6b:free",
+  "poolside/laguna-s-2.1:free",
 ] as const;
 
-/** IDs de modelos que hoy devuelven 404/402 (retirados: NO usarlos en demo). */
+/**
+ * IDs de modelos que hoy devuelven 404/402 (retirados: NO usarlos en demo).
+ * Nota: z-ai/glm-5.2:free existe pero NO soporta tool-calling (404 con tools),
+ * por eso no entra en la cadena aunque sea gratis.
+ */
 export const STARSHOP_RETIRED_MODELS = [
   "google/gemini-2-0-flash-001",
   "anthropic/claude-3.5-haiku",
   "openai/gpt-oss-20b:free",
+  "openai/gpt-oss-120b:free",
   "nvidia/nemotron-3-nano-30b-a3b:free",
+  "meta-llama/llama-3.2-3b-instruct:free",
+  "google/gemma-3-27b-it:free",
+  "mistralai/mistral-small-3.2-24b-instruct:free",
+  "deepseek/deepseek-chat-v3.1:free",
+  "z-ai/glm-4.5-air:free",
+  "qwen/qwen2.5-72b-instruct:free",
+  "thinkingmachines/inkling:free",
 ] as const;
 
 /**
+ * Memoria de cuota diaria de OpenRouter.
+ *
+ * POR QUÉ EXISTE: los modelos `:free` tienen tope diario POR CUENTA. Cuando se
+ * agotan devuelven 429 "free-models-per-day". El problema era que la cadena de
+ * fallback reintentaba CADA request con todos los free agotados: con 4 free en la
+ * cadena, cada mensaje del cliente gastaba 4 requests de cuota (fallidos) antes
+ * de llegar al modelo pagado. Con 50/día eso rendía solo ~12 mensajes reales.
+ *
+ * QUÉ HACE: cuando un modelo responde 429 por cuota diaria, se marca como
+ * agotado y se salta en las siguientes peticiones hasta que expire la ventana
+ * (reinicio a medianoche UTC, o 6 horas como margen de seguridad). Así el
+ * segundo mensaje onwards va directo al modelo pagado: 1 request, no 4.
+ *
+ * NO AFECTA a: saturación puntual (429 rate-limit normal), 5xx, ni errores de
+ * red. Solo al 429 que menciona explícitamente la cuota diaria de free.
+ */
+
+/** Modelo → timestamp (ms) hasta el que se considera agotado. */
+const exhausted = new Map<string, number>();
+
+/** Margen extra sobre el reinicio de medianoche UTC, por si hay desfase. */
+const FREE_QUOTA_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas
+
+/**
+ * true si el error corresponde a la CUOTA DIARIA de modelos free (agotada),
+ * no a saturación puntual. OpenRouter lo dice explícitamente en el mensaje.
+ */
+export function isDailyFreeQuotaError(msg: string): boolean {
+  return /free-models-per-day|free model requests per day|daily limit.*free/i.test(msg);
+}
+
+/** Marca un modelo free como agotado (se usará unicamente vía isDailyFreeQuotaError). */
+export function markModelExhausted(model: string): void {
+  if (!model.endsWith(":free")) return;
+  exhausted.set(model, Date.now() + FREE_QUOTA_TTL_MS);
+  console.log(`[MODEL-QUOTA] ${model} agotado (cuota diaria free). Se omite hasta nuevo reinicio.`);
+}
+
+/** true si el modelo está marcado como agotado y aún no expiró la ventana. */
+export function isModelExhausted(model: string): boolean {
+  const until = exhausted.get(model);
+  if (!until) return false;
+  if (Date.now() >= until) {
+    exhausted.delete(model);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Filtra la cadena de modelos quitando los ya conocidos como agotados.
+ * Si TODOS están agotados, devuelve la cadena original (por si la cuota se
+ * reinició entre requests y el siguiente intento ya funcione).
+ */
+export function filterExhausted(chain: string[]): string[] {
+  const usable = chain.filter((m) => !isModelExhausted(m));
+  return usable.length > 0 ? usable : chain;
+}
+
+/** Limpia la memoria (tests / reinicio manual). */
+export function resetModelQuotaCache(): void {
+  exhausted.clear();
+}
+
+/** Snapshot de la memoria (diagnóstico). */
+export function getExhaustedModels(): string[] {
+  return Array.from(exhausted.entries()).filter(([, until]) => Date.now() < until).map(([m]) => m);
+}
+
+/**
  * Orden de intentos de modelo para una request: el preferido (override del grafo,
- * env o BD) primero, luego el principal del código y los respaldos, sin duplicados.
+ * env o BD) primero, luego el principal del código y los respaldos, sin duplicados,
+ * y DESCARTANDO los que ya sabemos que están sin cuota diaria.
  * Ej: buildModelChain("openai/gpt-4o") → [gpt-4o, ultra:free, lightning:free, super:free]
  */
 export function buildModelChain(preferred?: string | null): string[] {
@@ -85,7 +177,7 @@ export function buildModelChain(preferred?: string | null): string[] {
     const id = (item ?? "").trim();
     if (id && !chain.includes(id)) chain.push(id);
   }
-  return chain;
+  return filterExhausted(chain);
 }
 
 export const STARSHOP_WELCOME_PROMPT = `Eres Star, asistente de bienvenida de StarShop (B2B Chile). Detecta intención del cliente o del admin dueño.

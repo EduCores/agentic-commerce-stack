@@ -2,7 +2,7 @@
  * ACS Intent Detection — LLM primero, heurística como fallback mock.
  * Sin datos reales: funciona sin DB y sin API key (cae a heurística).
  */
-import { STARSHOP_INTENTS, STARSHOP_WELCOME_PROMPT, STARSHOP_CREW_MODEL, buildModelChain, type StarShopIntent } from "../../../prisma/starshop-prompts";
+import { STARSHOP_INTENTS, STARSHOP_WELCOME_PROMPT, STARSHOP_CREW_MODEL, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../../../prisma/starshop-prompts";
 import { isSmallTalk, isAgentMetaQuestion } from "../../../agent/lib/search/normalize";
 
 export type IntentSource = "llm" | "heuristic";
@@ -94,6 +94,11 @@ async function detectIntentLLM(message: string, history?: unknown[]): Promise<De
       });
       if (!r.ok) {
         if (r.status === 402 || r.status === 429 || r.status >= 500) {
+          // 429 por cuota diaria de free: marcar para no reintentar en los siguientes mensajes.
+          if (r.status === 429) {
+            const detail = await r.text().catch(() => "");
+            if (isDailyFreeQuotaError(detail)) markModelExhausted(model);
+          }
           console.log(`[ACS-ROUTER] modelo ${model} no disponible (HTTP ${r.status}), probando siguiente`);
           continue;
         }

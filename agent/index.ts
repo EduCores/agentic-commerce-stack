@@ -8,7 +8,7 @@ import { z } from "zod";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
-import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, buildModelChain, type StarShopIntent } from "../prisma/starshop-prompts";
+import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../prisma/starshop-prompts";
 import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type GraphCrewOverride } from "./lib/crew-graph";
 import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
@@ -76,6 +76,8 @@ async function directChat(
       if (!r.ok) {
         const t = await r.text().catch(() => "");
         console.log("[ACS-AGENT] directChat HTTP", r.status, attemptModel, t.slice(0, 200));
+        // 429 por cuota diaria de free: marcar para no reintentar en los siguientes mensajes.
+        if (r.status === 429 && isDailyFreeQuotaError(t)) markModelExhausted(attemptModel);
         continue;
       }
       const j = await r.json();
@@ -407,6 +409,9 @@ export async function runAgent(params: { agentSlug: string; input: string; store
       lastErr = e;
       const msg = e instanceof Error ? e.message : String(e);
       console.log(`[ACS-AGENT] runAgent modelo ${attemptModel} falló, probando siguiente`, msg.slice(0, 160));
+      // 429 por cuota diaria de free: se marca agotado y se omite en los siguientes
+      // mensajes (evita gastar N requests de cuota por cada mensaje del cliente).
+      if (isDailyFreeQuotaError(msg)) markModelExhausted(attemptModel);
     }
   }
 
@@ -526,6 +531,8 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
       if (yielded) throw e; // ya se envió texto al cliente: no reintentar (evita duplicar)
       const msg = e instanceof Error ? e.message : String(e);
       console.log(`[ACS-AGENT] streamAgent modelo ${attemptModel} falló, probando siguiente`, msg.slice(0, 160));
+      // 429 por cuota diaria de free: marcar para no reintentar en los siguientes mensajes.
+      if (isDailyFreeQuotaError(msg)) markModelExhausted(attemptModel);
     }
   }
 

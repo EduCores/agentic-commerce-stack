@@ -120,15 +120,23 @@ export const FLOW_INTENTS = STARSHOP_INTENTS;
  * No se ofrecen en el selector los IDs que hoy devuelven 404/402.
  */
 export const FLOW_MODELS: Array<{ id: string; label: string }> = [
+  // ── Pagados: fiabilidad garantizada (respuesta 200 verificada) ──
   { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B (rápido, fiable)" },
   { id: "qwen/qwen3-30b-a3b-instruct-2507", label: "Qwen3 30B (rápido, barato)" },
   { id: "meta-llama/llama-3.3-70b-instruct", label: "Llama 3.3 70B (fiable)" },
   { id: "openai/gpt-4o-mini", label: "GPT-4o mini (muy fiable)" },
   { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash (rápido)" },
-  { id: "nvidia/nemotron-3-ultra-550b-a55b:free", label: "Nemotron 3 Ultra (gratis $0, cuota diaria)" },
+  // ── Free $0: con tope DIARIO por cuenta (50/día; 1.000 con 10 créditos).
+  //    Cuando se agota devuelven 429 y ACS los marca agotados para no reintentar.
+  { id: "qwen/qwen3.8-27b:free", label: "Qwen3.8 27B (gratis $0, pruebas)" },
+  { id: "nvidia/nemotron-3-ultra-550b-a55b:free", label: "Nemotron 3 Ultra (gratis $0)" },
   { id: "nvidia/nemotron-3.5-lightning:free", label: "Nemotron 3.5 Lightning (gratis $0)" },
   { id: "nvidia/nemotron-3-super-120b-a12b:free", label: "Nemotron 3 Super 120B (gratis $0)" },
-  { id: "qwen/qwen3.8-27b:free", label: "Qwen3.8 27B (gratis $0, pruebas)" },
+  { id: "google/gemma-4-31b-it:free", label: "Gemma 4 31B (gratis $0)" },
+  { id: "google/gemma-4-26b-a4b-it:free", label: "Gemma 4 26B MoE (gratis $0)" },
+  { id: "inclusionai/ling-3.0-flash-sante:free", label: "Ling 3 Flash (gratis $0)" },
+  { id: "liquid/lfm-2.5-2.6b:free", label: "LFM 2.5 2.6B (gratis $0, chico)" },
+  { id: "poolside/laguna-s-2.1:free", label: "Laguna S 2.1 (gratis $0)" },
 ];
 
 /**
