@@ -39,7 +39,7 @@ export function AnalyticsInsights({ data }: { data: AnalyticsData }) {
           <div className="flex min-w-0 items-start gap-2.5 rounded-lg border border-card-border/60 p-3">
             <CalendarDays className="mt-0.5 size-4 shrink-0 text-sky-600" />
             <p className="min-w-0 text-xs leading-4 text-text-secondary">
-              Pico el <strong className="text-text-primary">{peak.date.slice(5)}</strong> con{" "}
+              Mejor día el <strong className="text-text-primary">{peak.date.slice(5)}</strong> con{" "}
               <strong className="text-text-primary">{formatCLP(peak.total)}</strong> ({peak.orders} pedidos).
             </p>
           </div>
@@ -73,7 +73,7 @@ export function AnalyticsInsights({ data }: { data: AnalyticsData }) {
       <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs leading-4 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300">
         <strong>Recomendación:</strong>{" "}
         {lowCount > 0 ? (
-          <>reponé los <strong>{lowCount} productos en quiebre</strong> antes del próximo peak de ventas. <Link href="/products" className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-button-primary-background px-3 py-1.5 text-xs font-bold text-button-primary-text hover:bg-button-primary-hover-background">Ver stock →</Link></>
+          <>reponé los <strong>{lowCount} productos en quiebre</strong> antes del próximo máximo de ventas. <Link href="/products" className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-button-primary-background px-3 py-1.5 text-xs font-bold text-button-primary-text hover:bg-button-primary-hover-background">Ver stock →</Link></>
         ) : bestShare >= 60 ? (
           <>diversificá canales: <strong>{bestSource?.source}</strong> concentra el {bestShare.toLocaleString("es-CL")}%. <Link href="/marketing" className="font-bold underline">Ver canales →</Link></>
         ) : (

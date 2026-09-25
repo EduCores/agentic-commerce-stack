@@ -81,7 +81,7 @@ export function AnalyticsSalesChart({ data, days, onDays, month, year, onMonth, 
               tickFormatter={(v: number) => (v >= 1000 ? `${Math.round(v / 1000)} mil` : `${v}`)}
               width={44}
             />
-            <Tooltip content={<ChartTooltipContent />} />
+            <Tooltip content={<ChartTooltipContent className="border border-card-border bg-tooltip-background shadow-xl" />} />
             <Area type="monotone" dataKey="total" name="Ventas" stroke="#00cf2f" strokeWidth={2} fill="#00cf2f" fillOpacity={0.3} dot={false} />
             <Area type="monotone" dataKey="orders" name="Pedidos" stroke="#00cf2f" strokeWidth={2} strokeDasharray="4 4" fill="transparent" dot={false} />
           </AreaChart>

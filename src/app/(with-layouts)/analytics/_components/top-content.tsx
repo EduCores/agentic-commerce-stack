@@ -6,10 +6,18 @@ import Link from "next/link";
 import { FolderX, PackageX } from "lucide-react";
 
 export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
-  const maxViews = Math.max(...data.topContent.map((t) => t.views), 1);
+  const maxRevenue = Math.max(...data.topContent.map((t) => t.revenue ?? 0), 1);
   const totalRevenue = data.topContent.reduce((a, t) => a + (t.revenue ?? 0), 0);
   const totalViews = data.topContent.reduce((a, t) => a + t.views, 0);
   const totalUnits = data.topContent.reduce((a, t) => a + t.uniques, 0);
+
+  /** Color según el monto del producto: verde (más), amarillo, naranjo, rojo (menos). */
+  function revenueColor(ratio: number): string {
+    if (ratio >= 0.75) return "#16A34A";
+    if (ratio >= 0.5) return "#FACC15";
+    if (ratio >= 0.25) return "#F97316";
+    return "#EF4444";
+  }
   return (
     <>
       <Card className="min-w-0 md:col-span-2">
@@ -47,7 +55,13 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
                     </span>
                   </div>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background-gray-secondary">
-                    <div className="h-full rounded-full" style={{ width: `${Math.round((t.views / maxViews) * 100)}%`, backgroundColor: ["#5750F1", "#22C55E", "#F59E0B", "#06B6D4", "#8B5CF6", "#EC4899"][i % 6] }} />
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${Math.max(6, Math.round(((t.revenue ?? 0) / maxRevenue) * 100))}%`,
+                        backgroundColor: revenueColor((t.revenue ?? 0) / maxRevenue),
+                      }}
+                    />
                   </div>
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-tertiary">
                     <span><strong className="text-text-primary">{t.views.toLocaleString("es-CL")}</strong> visitas</span>
