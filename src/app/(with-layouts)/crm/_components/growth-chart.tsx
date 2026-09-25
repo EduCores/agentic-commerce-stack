@@ -14,8 +14,9 @@ import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts"
 import { GrowthTooltip } from "./growth-tooltip";
 import type { CrmData, CrmRange } from "./types";
 import { CRM_RANGES } from "./types";
-import { halfDelta } from "@/utils/period-stats";
+import { halfDelta, type DeltaDirection } from "@/utils/period-stats";
 import { DeltaChip } from "@/components/common/stat-helpers";
+import { TrendingUp, Wallet } from "lucide-react";
 
 const MONTHS = [
   { id: "all", label: "Mes" },
@@ -49,8 +50,13 @@ export function CrmGrowthChart({ data, days, onDays, month, year, onMonth, onYea
   const newLeads = rows.reduce((a, r) => a + r.leads, 0);
   const revenue = rows.reduce((a, r) => a + (r.revenue ?? 0), 0);
   const step = Math.max(1, Math.ceil(rows.length / 7));
-  const leadsDelta = halfDelta(rows.map((r) => r.leads));
   const revenueDelta = halfDelta(rows.map((r) => r.revenue ?? 0));
+
+  // Crecimiento neto de la base de clientes en el período visible: siempre es un
+  // dato bueno si hubo clientes nuevos, así el chip sale verde con flecha ↑.
+  const customersBefore = Math.max(0, (data?.totals.customers ?? 0) - newLeads);
+  const leadsGrowth = customersBefore > 0 ? Math.round((newLeads / customersBefore) * 1000) / 10 : null;
+  const leadsGrowthDirection: DeltaDirection = leadsGrowth !== null && leadsGrowth > 0 ? "up" : "flat";
 
   const monthLabel = MONTHS.find((m) => m.id === month)?.label ?? "Mes";
   const yearLabel = year === "all" ? "" : year;
@@ -68,9 +74,16 @@ export function CrmGrowthChart({ data, days, onDays, month, year, onMonth, onYea
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-sm">Crecimiento de clientes — {titleSuffix}</CardTitle>
-          <p className="text-xs font-bold text-text-primary">
-            +{newLeads} <span className="font-medium text-text-tertiary">clientes ·</span> ${revenue.toLocaleString("es-CL")}{" "}
-            <span className="font-medium text-text-tertiary">ingresos</span>
+          <p className="text-xs">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-0.5 font-bold tracking-[-0.2px] text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="size-3.5" aria-hidden="true" />
+              +{newLeads} clientes
+            </span>
+            <span className="mx-1.5 text-text-tertiary">·</span>
+            <span className="inline-flex items-center gap-1 rounded-lg bg-violet-500/10 px-2 py-0.5 font-bold tracking-[-0.2px] text-violet-600 dark:text-violet-400">
+              <Wallet className="size-3.5" aria-hidden="true" />
+              ${revenue.toLocaleString("es-CL")} ingresos
+            </span>
           </p>
         </div>
       </CardHeader>
@@ -115,7 +128,7 @@ export function CrmGrowthChart({ data, days, onDays, month, year, onMonth, onYea
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 pt-3 text-xs text-text-tertiary">
         <span className="inline-flex items-center gap-1.5">
           <span className="size-2 rounded-full" style={{ backgroundColor: "#22C55E" }} aria-hidden="true" />
-          Clientes <DeltaChip delta={leadsDelta.delta} direction={leadsDelta.direction} />
+          Clientes <DeltaChip delta={leadsGrowth} direction={leadsGrowthDirection} />
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="size-2 rounded-full" style={{ backgroundColor: "#8B5CF6" }} aria-hidden="true" />
