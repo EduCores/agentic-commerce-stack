@@ -54,19 +54,6 @@ export type LabeledEdgeData = {
 };
 
 /**
- * Carril determinista por edge (-1, 0, +1): los edges paralelos de un fan-out
- * (route-1 → 7 crews) comparten la franja del punto medio; sin carriles las
- * pastillas se solapan en fila. El offset vertical las escalona sobre el cable.
- */
-function laneOf(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return (h % 3) - 1;
-}
-
-const LANE_DY = 30;
-
-/**
  * Arista con pastilla grande clicable (?): explica qué hace y para qué sirve
  * el crew/paso destino. Solo informativa: no cambia la ejecución.
  */
@@ -94,7 +81,6 @@ export function LabeledEdge({
   const d = (data ?? {}) as LabeledEdgeData;
   const label = typeof d.label === "string" ? d.label : "";
   const info = infoFor(d.toneKey);
-  const laneDy = laneOf(id) * LANE_DY;
   // Con zoom alejado las pastillas completas se solaparían: se colapsan al ?.
   // Umbral 0.7: a ese zoom los nodos están a ~207px y la pastilla mide 200px.
   const { zoom } = useViewport();
@@ -113,7 +99,7 @@ export function LabeledEdge({
           <div
             className="absolute"
             style={{
-              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY + laneDy}px)`,
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: "all",
             }}
           >
@@ -126,8 +112,8 @@ export function LabeledEdge({
                 }}
                 title={info ? `${label} — clic para ver qué hace` : label}
                 className={cn(
-                  "flex max-w-[160px] items-center gap-1.5 rounded border-4 px-3 py-1.5 shadow-md",
-                  "text-xs font-bold",
+                  "flex max-w-[132px] items-center gap-1 rounded border-4 px-2 py-1 shadow-md",
+                  "text-[11px] font-bold",
                   pillFor(d.toneKey)
                 )}
               >
