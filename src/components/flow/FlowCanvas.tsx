@@ -64,7 +64,8 @@ function Field({ label, children, className }: { label: string; children: ReactN
 const NODE_W = 224;
 const NODE_H = 224;
 const GAP_X = 96;
-const GAP_Y = 150;
+/** GAP_Y debe superar NODE_H: si no, las bandas de filas contiguas se traslapan. */
+const GAP_Y = 264;
 /** Nodos por fila dentro de una capa: los 8 crews van en una sola fila horizontal. */
 const PER_ROW = 8;
 
