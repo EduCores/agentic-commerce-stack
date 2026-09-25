@@ -47,6 +47,11 @@ export default defineTool({
     const matched = matchCategories(rawText, ranked.tokens);
 
     const hits = ranked.hits.slice(0, limit);
+    // Guardia de confianza: si el mejor calza débil o empata con el segundo,
+    // el agente debe preguntar en vez de navegar al primero a ciegas.
+    const top1 = ranked.hits[0];
+    const top2 = ranked.hits[1];
+    const uncertain = !top1 || top1.score < 25 || (top2 !== undefined && top1.score - top2.score < 8);
     // Enriquece con imagen real desde Prisma (best-effort: el mock puede no estar en BD).
     const dbMeta = await prisma.product
       .findMany({
@@ -84,10 +89,13 @@ export default defineTool({
       categorySuggestions,
       noResults: productsOut.length === 0,
       notAProductQuery: false,
+      uncertain,
       message:
         productsOut.length === 0
           ? `No encontramos productos para "${query}". Puedes revisar estas categorías: ${categorySuggestions.map((c) => c.name).join(", ")}.`
-          : `${productsOut.length} producto(s) encontrado(s). Si quieres verlos en la tienda, navega a la categoría sugerida.`,
+          : uncertain
+            ? `Coincidencia débil para "${query}": NO navegues directo a un producto. Muestra estas opciones al cliente y pregúntale cuál necesita.`
+            : `${productsOut.length} producto(s) encontrado(s). Si quieres verlos en la tienda, navega a la categoría sugerida.`,
     };
   },
 });

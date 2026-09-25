@@ -66,6 +66,13 @@ const QUERY_FILLERS = new Set([
   "cual", "cuales", "donde", "cuando",
   "porfa", "porfavor", "favor", "gracias", "disculpa",
   "estoy", "estoi", "usar", "usa", "funciona", "funcionan", "sirve", "sirven",
+  // Pronombres/demostrativos: nunca nombran un producto ("necesito algo para...").
+  "algo", "alguien", "esto", "eso", "este", "esta", "estos", "estas",
+  "ese", "esa", "esos", "esas", "aquel", "aquella", "aquello",
+  // Verbos de uso/intención: describen la tarea, no el producto ("para instalar un enchufe").
+  "instalar", "instalacion", "instalaciones", "colocar", "colocacion",
+  "poner", "cambiar", "reparar", "arreglar", "conectar",
+  "comprar", "compra", "compro", "llevar", "llevo", "cotizar", "cotizacion",
 ]);
 
 /**

@@ -55,10 +55,24 @@ export function rankProducts(products: UniversalProduct[], query: string): RankR
 
   const hits: ProductHit[] = [];
 
-  for (const product of products) {
-    const c = buildCandidate(product);
+  // Frecuencia de cada término en títulos: los términos raros ("enchufe")
+  // pesan más que los comunes ("exterior", "led"). Evita que un modificador
+  // secundario le gane al sustantivo que el cliente busca.
+  const candidates = products.map(buildCandidate);
+  const df = new Map<string, number>();
+  for (const term of new Set(expanded)) {
+    let n = 0;
+    for (const c of candidates) if (c.title.includes(term)) n++;
+    df.set(term, n);
+  }
+  const idf = (term: string) => 1 + Math.log10(products.length / Math.max(1, df.get(term) ?? 1));
+
+  for (let pi = 0; pi < products.length; pi++) {
+    const product = products[pi];
+    const c = candidates[pi];
     let score = 0;
     const matchedBy: string[] = [];
+    const matchedTerms = new Set<string>();
 
     // 1) SKU exacto o parcial
     if (c.sku === rawText) {
@@ -89,14 +103,16 @@ export function rankProducts(products: UniversalProduct[], query: string): RankR
       }
     }
 
-    // 4) Tokens (con sinónimos y variantes) en el título
+    // 4) Tokens (con sinónimos y variantes) en el título, ponderados por rareza
     for (const term of expanded) {
       if (c.title === term) {
-        score += 25;
+        score += 25 * idf(term);
         matchedBy.push(term);
+        matchedTerms.add(term);
       } else if (c.title.includes(term)) {
-        score += term.length > 3 ? 15 : 12;
+        score += (term.length > 3 ? 15 : 12) * idf(term);
         matchedBy.push(term);
+        matchedTerms.add(term);
       }
     }
 
@@ -128,6 +144,13 @@ export function rankProducts(products: UniversalProduct[], query: string): RankR
           break;
         }
       }
+    }
+
+    // Bonus por cobertura: calzar 2+ términos distintos de la consulta
+    // ("enchufe exterior" real) supera a calzar solo un modificador.
+    if (matchedTerms.size >= 2) {
+      score += 20;
+      matchedBy.push("multi-termino");
     }
 
     if (score > 0) hits.push({ product, score, matchedBy });
