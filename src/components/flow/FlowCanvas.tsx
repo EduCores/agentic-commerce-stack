@@ -63,8 +63,42 @@ function Field({ label, children, className }: { label: string; children: ReactN
 // columnas y filas se separan con holgura para que nunca se solapen.
 const NODE_W = 224;
 const NODE_H = 224;
-const GAP_X = 72;
-const GAP_Y = 130;
+const GAP_X = 96;
+const GAP_Y = 150;
+/** Máx. nodos por fila dentro de una capa: evita filas eternas que se ven solapadas. */
+const PER_ROW = 4;
+
+/** Pasa anti-colisión (AABB): garantiza que ningún par de nodos se solape. */
+function separate(nodes: Node[]): Node[] {
+  const pos = new Map(nodes.map((n) => [n.id, { ...n.position }]));
+  for (let iter = 0; iter < 60; iter++) {
+    let moved = false;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = pos.get(nodes[i].id)!;
+        const b = pos.get(nodes[j].id)!;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const ox = NODE_W + 32 - Math.abs(dx);
+        const oy = NODE_H + 32 - Math.abs(dy);
+        if (ox > 0 && oy > 0) {
+          if (ox < oy) {
+            const s = Math.sign(dx) || (i % 2 === 0 ? 1 : -1);
+            a.x -= (s * ox) / 2;
+            b.x += (s * ox) / 2;
+          } else {
+            const s = Math.sign(dy) || 1;
+            a.y -= (s * oy) / 2;
+            b.y += (s * oy) / 2;
+          }
+          moved = true;
+        }
+      }
+    }
+    if (!moved) break;
+  }
+  return nodes.map((n) => ({ ...n, position: pos.get(n.id) ?? n.position }));
+}
 
 /** Posiciona los nodos en capas por profundidad (BFS tolerante a ciclos). */
 function layeredLayout(nodes: Node[], edges: Edge[]): Node[] {
@@ -112,13 +146,19 @@ function layeredLayout(nodes: Node[], edges: Edge[]): Node[] {
     .sort((a, b) => a - b)
     .forEach((d) => {
       const ids = layers.get(d) ?? [];
-      const width = ids.length * NODE_W + Math.max(0, ids.length - 1) * GAP_X;
-      ids.forEach((id, i) => {
-        positions.set(id, { x: Math.round(-width / 2 + i * (NODE_W + GAP_X)), y: Math.round(d * (NODE_H + GAP_Y)) });
+      ids.forEach((id, k) => {
+        const row = Math.floor(k / PER_ROW);
+        const col = k % PER_ROW;
+        const rowIds = ids.slice(row * PER_ROW, (row + 1) * PER_ROW);
+        const width = rowIds.length * NODE_W + Math.max(0, rowIds.length - 1) * GAP_X;
+        positions.set(id, {
+          x: Math.round(-width / 2 + col * (NODE_W + GAP_X)),
+          y: Math.round(d * (NODE_H + GAP_Y) + row * (NODE_H + GAP_Y)),
+        });
       });
     });
 
-  return nodes.map((n) => ({ ...n, position: positions.get(n.id) ?? n.position }));
+  return separate(nodes.map((n) => ({ ...n, position: positions.get(n.id) ?? n.position })));
 }
 
 // ── Conversión FlowGraph (Prisma/JSON) <-> nodos y edges de XYFlow ───────────
