@@ -13,6 +13,7 @@ export function HomeChannelsCard() {
     queryKey: ["home-channels"],
     queryFn: async () => (await fetch("/api/marketing")).json(),
     refetchInterval: 60000,
+    placeholderData: (prev) => prev,
   });
 
   const channels = (data?.channels ?? []).slice().sort((a, b) => b.revenue - a.revenue).slice(0, 4);

@@ -31,9 +31,10 @@ export function RealStats() {
       return r.json();
     },
     refetchInterval: 30000,
+    placeholderData: (prev) => prev,
   });
 
-  if (isLoading) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Cargando tu panel en tiempo real...</CardContent></Card>;
+  if (isLoading && !data) return <Card className="min-h-[420px]"><CardContent className="p-6 text-sm text-text-tertiary">Cargando tu panel en tiempo real...</CardContent></Card>;
   if (!data) return <Card><CardContent className="p-6 text-sm text-text-tertiary">Sin datos por ahora</CardContent></Card>;
   const alerts = data.recentOrders.filter((o) => o.status === "FAILED" || o.status === "PENDING").length;
 

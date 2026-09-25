@@ -12,6 +12,7 @@ export function HomeLowStockCard() {
     queryKey: ["home-lowstock"],
     queryFn: async () => (await fetch("/api/analytics")).json(),
     refetchInterval: 60000,
+    placeholderData: (prev) => prev,
   });
 
   const items = (data?.lowStock ?? []).slice(0, 5);
