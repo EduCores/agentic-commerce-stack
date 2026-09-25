@@ -31,6 +31,9 @@ export function MetaConnectCard() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [rule, setRule] = useState({ minRoas: "1", daysNoSales: "3", notifyEmail: "" });
+  const [checkResult, setCheckResult] = useState<{ paused: { id: string; name: string; spend: number }[]; watching: number; emailed: string | null } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -125,6 +128,31 @@ export function MetaConnectCard() {
       toast.error(e instanceof Error ? e.message : String(e));
     } finally {
       setSyncing(false);
+    }
+  }
+
+  async function autopilot() {
+    setChecking(true);
+    setCheckResult(null);
+    try {
+      const r = await fetch("/api/meta/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ minRoas: Number(rule.minRoas) || 1, daysNoSales: Number(rule.daysNoSales) || 3, notifyEmail: rule.notifyEmail || undefined }),
+      });
+      const j = await r.json();
+      if (!r.ok) {
+        toast.error(j.error ?? "Falló la revisión");
+        return;
+      }
+      setCheckResult(j);
+      if (j.paused?.length > 0) toast.success(`Pausadas ${j.paused.length} campaña(s) sin ventas${j.emailed ? ` · avisé a ${j.emailed}` : ""}`);
+      else toast.success(`Sin pausas: ${j.watching ?? 0} en vigilancia`);
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setChecking(false);
     }
   }
 
@@ -260,6 +288,51 @@ export function MetaConnectCard() {
             )}
             <span className="text-xs text-text-tertiary">Requiere login admin en /login</span>
           </div>
+        </div>
+
+        {/* Piloto automático fase 1: pausa perdedoras y avisa */}
+        <div className="rounded-xl border border-card-border bg-background-gray-secondary/30 p-4">
+          <p className="flex items-center gap-2 text-xs font-semibold text-text-primary">
+            Piloto automático — frena la hemorragia
+            <InfoTip label="Cómo funciona el piloto">
+              Revisa tus campañas con gasto y sin conversiones. Al acumular las revisiones configuradas, las pausa solas y te avisa por email. Las que venden no se tocan nunca.
+            </InfoTip>
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <label className="flex flex-col gap-1 text-xs">
+              ROAS piso
+              <input value={rule.minRoas} onChange={(e) => setRule({ ...rule, minRoas: e.target.value })} placeholder="1" inputMode="decimal" className={inputCls} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              Revisiones sin ventas
+              <input value={rule.daysNoSales} onChange={(e) => setRule({ ...rule, daysNoSales: e.target.value })} placeholder="3" inputMode="numeric" className={inputCls} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              Email aviso (opcional)
+              <input value={rule.notifyEmail} onChange={(e) => setRule({ ...rule, notifyEmail: e.target.value })} placeholder="dueno@starshop.cl" className={inputCls} />
+            </label>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button appearance="fill" onClick={autopilot} isDisabled={checking || !active}>
+              {checking ? "Revisando..." : "Revisar ahora"}
+            </Button>
+            {!active && <span className="text-xs text-text-tertiary">Conecta una cuenta para activar el piloto</span>}
+          </div>
+          {checkResult && (
+            <div className="mt-3 space-y-1 text-xs">
+              {checkResult.paused.length > 0 ? (
+                checkResult.paused.map((p) => (
+                  <p key={p.id} className="rounded-lg bg-red-50 px-3 py-2 font-medium text-red-700 dark:bg-red-950/30 dark:text-red-300">
+                    Pausada: {p.name} · gastó ${p.spend.toLocaleString("es-CL")} sin ventas
+                  </p>
+                ))
+              ) : (
+                <p className="rounded-lg bg-emerald-50 px-3 py-2 font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
+                  Sin pausas · {checkResult.watching} campaña(s) en vigilancia{checkResult.emailed ? ` · avisé a ${checkResult.emailed}` : ""}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -176,4 +176,61 @@ export async function getMetaMarketingData(): Promise<{ spend: number; impressio
   }
 }
 
+export type MetaCampaign = {
+  id: string;
+  name: string;
+  status: string;
+  spend: number;
+  conversions: number;
+  roas?: number;
+};
+
+/** Insights por campaña (últimos 7 días) para el piloto automático. */
+export async function fetchMetaCampaigns(accessToken: string, adAccountIdRaw: string): Promise<MetaCampaign[]> {
+  const adAccountId = normalizeAdAccountId(adAccountIdRaw);
+  const enc = encodeURIComponent(accessToken);
+  const [listRes, insRes] = await Promise.all([
+    fetch(`https://graph.facebook.com/v20.0/act_${adAccountId}/campaigns?fields=id,name,effective_status&limit=50&access_token=${enc}`, { signal: AbortSignal.timeout(15000) }),
+    fetch(`https://graph.facebook.com/v20.0/act_${adAccountId}/insights?level=campaign&fields=campaign_id,campaign_name,spend,actions,purchase_roas&date_preset=last_7d&limit=50&access_token=${enc}`, { signal: AbortSignal.timeout(15000) }),
+  ]);
+  const listJson = await listRes.json().catch(() => ({}));
+  const insJson = await insRes.json().catch(() => ({}));
+  if (!listRes.ok) throw new Error(listJson?.error?.message ?? `Meta campañas HTTP ${listRes.status}`);
+  if (!insRes.ok) throw new Error(insJson?.error?.message ?? `Meta insights HTTP ${insRes.status}`);
+  const camps: Array<{ id: string; name: string; effective_status: string }> = listJson.data ?? [];
+  const rows: Array<{ campaign_id: string; spend?: string; actions?: Array<{ action_type: string; value: string }>; purchase_roas?: Array<{ value: string }> }> = insJson.data ?? [];
+  const byId = new Map(rows.map((r) => [r.campaign_id, r]));
+  return camps.map((c) => {
+    const row = byId.get(c.id);
+    const actions = row?.actions ?? [];
+    const purchase = actions.find((a) => a.action_type === "purchase" || a.action_type === "omni_purchase");
+    const roasEntry = row?.purchase_roas?.[0];
+    return {
+      id: c.id,
+      name: c.name,
+      status: c.effective_status,
+      spend: Number(row?.spend ?? 0),
+      conversions: purchase ? Number(purchase.value) : 0,
+      roas: roasEntry ? Number(roasEntry.value) : undefined,
+    };
+  });
+}
+
+/** Pausa una campaña (pata de escritura del piloto automático). */
+export async function pauseMetaCampaign(accessToken: string, campaignId: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch(`https://graph.facebook.com/v20.0/${campaignId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "PAUSED", access_token: accessToken }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, error: json?.error?.message ?? `HTTP ${res.status}` };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 export { maskToken, normalizeAdAccountId };
