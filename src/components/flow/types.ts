@@ -113,16 +113,22 @@ export const FLOW_INTENTS = STARSHOP_INTENTS;
  * Modelos aceptados por el runtime (allowlist de agent/index.ts).
  * Si se agrega un modelo aquí sin agregarlo allá, el agente IGNORA el override
  * y sigue usando el modelo del código (comportamiento seguro, no rompe el chat).
+ *
+ * ORDEN IMPORTANTE: primero los PAGADOS (fiabilidad garantizada). Los :free de
+ * OpenRouter tienen tope DIARIO por cuenta; agotados devuelven 429 y el agente
+ * cae a heurística. "Add 10 credits" sube la cuota free a 100 req/día.
+ * No se ofrecen en el selector los IDs que hoy devuelven 404/402.
  */
 export const FLOW_MODELS: Array<{ id: string; label: string }> = [
-  { id: "nvidia/nemotron-3-ultra-550b-a55b:free", label: "Nemotron 3 Ultra (gratis $0)" },
+  { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B (rápido, fiable)" },
+  { id: "qwen/qwen3-30b-a3b-instruct-2507", label: "Qwen3 30B (rápido, barato)" },
+  { id: "meta-llama/llama-3.3-70b-instruct", label: "Llama 3.3 70B (fiable)" },
+  { id: "openai/gpt-4o-mini", label: "GPT-4o mini (muy fiable)" },
+  { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash (rápido)" },
+  { id: "nvidia/nemotron-3-ultra-550b-a55b:free", label: "Nemotron 3 Ultra (gratis $0, cuota diaria)" },
   { id: "nvidia/nemotron-3.5-lightning:free", label: "Nemotron 3.5 Lightning (gratis $0)" },
   { id: "nvidia/nemotron-3-super-120b-a12b:free", label: "Nemotron 3 Super 120B (gratis $0)" },
   { id: "qwen/qwen3.8-27b:free", label: "Qwen3.8 27B (gratis $0, pruebas)" },
-  { id: "nvidia/nemotron-3-ultra-550b-a55b", label: "Nemotron 3 Ultra (pago)" },
-  { id: "qwen/qwen3-30b-a3b-instruct-2507", label: "Qwen3 30B (estable, barato)" },
-  { id: "openai/gpt-4o", label: "GPT-4o (mejor calidad, más caro)" },
-  { id: "google/gemini-2-0-flash-001", label: "Gemini 2.0 Flash (rápido)" },
 ];
 
 /**

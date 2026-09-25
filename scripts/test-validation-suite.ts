@@ -14,6 +14,52 @@ function loadEnv() {
 loadEnv();
 
 async function testAll() {
+  // ══ 0. REGRESIÓN: meta-preguntas al agente NUNCA deben buscar en el catálogo ══
+  // Caso real reportado: "estas cnectado?" → el agente respondía
+  // "¡Vamos! Busco 'estas cnectado?' en todo el catálogo" (product_search).
+  console.log("=== 0. REGRESIÓN: preguntas al agente NO son búsqueda ===");
+  const { isSmallTalk, isAgentMetaQuestion, cleanProductQuery } = await import("../agent/lib/search/normalize");
+  const metaCasos = [
+    "estas cnectado?",
+    "estás conectado?",
+    "¿estás conectado?",
+    "estas conectado",
+    "estas cnectado",
+    "estás funcionando?",
+    "sigues vivo?",
+    "¿me escuchas?",
+    "¿me oyes?",
+    "¿eres un bot?",
+    "¿eres real?",
+    "habla un humano",
+    "estás ahí?",
+    "test",
+    "prueba de sonido",
+  ];
+  let metaFail = 0;
+  for (const texto of metaCasos) {
+    const meta = isAgentMetaQuestion(texto);
+    const ok = meta === true;
+    if (!ok) metaFail++;
+    console.log(`  [${ok ? "OK" : "FAIL"}] meta="${texto}" isAgentMetaQuestion=${meta} smallTalk=${isSmallTalk(texto)} cleanQuery=${JSON.stringify(cleanProductQuery(texto))}`);
+  }
+  // Caso contrario: con producto real NO debe ser meta.
+  const conProducto = isAgentMetaQuestion("estás conectado? necesito un taladro percutor");
+  const conProductoOk = conProducto === false;
+  if (!conProductoOk) metaFail++;
+  console.log(`  [${conProductoOk ? "OK" : "FAIL"}] meta+producto NO debe ser meta: ${conProducto}`);
+  // Ningún caso de meta debe dejar un término de búsqueda.
+  let cleanFail = 0;
+  for (const texto of metaCasos) {
+    const q = cleanProductQuery(texto);
+    if (q !== "") {
+      cleanFail++;
+      console.log(`  [FAIL] "${texto}" deja query de búsqueda: ${JSON.stringify(q)}`);
+    }
+  }
+  console.log(`Meta-preguntas: ${metaCasos.length + 1 - metaFail - cleanFail} ok, ${metaFail} fallo(s) de detector, ${cleanFail} fallo(s) de cleanQuery\n`);
+  if (metaFail > 0 || cleanFail > 0) throw new Error("REGRESIÓN: preguntas al agente se están colando como búsqueda de catálogo");
+
   console.log("=== 1. Validando Intent Router (Heurística) ===");
   const { detectIntentHeuristic } = await import("../src/lib/eve/detect-intent");
   const testCases: Array<{ text: string; expected: string; isAdmin?: boolean }> = [
@@ -27,6 +73,12 @@ async function testAll() {
     { text: "cuánto vendimos hoy y reporte de ventas", isAdmin: true, expected: "admin_ops" },
     { text: "compara el precio con la competencia", expected: "price_comparison" },
     { text: "dejé mi carrito abandonado quiero retomar compra", expected: "abandoned_cart" },
+    // Regresión: preguntas al asistente NO pueden caer en product_search.
+    { text: "estas cnectado?", expected: "general_inquiry" },
+    { text: "estás conectado?", expected: "general_inquiry" },
+    { text: "estás funcionando?", expected: "general_inquiry" },
+    { text: "me escuchas?", expected: "general_inquiry" },
+    { text: "eres un bot?", expected: "general_inquiry" },
   ];
 
   let routerPass = 0;

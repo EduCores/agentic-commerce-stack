@@ -226,13 +226,17 @@ const intentToCrewKey: Record<StarShopIntent, keyof typeof STARSHOP_CREWS> = {
 // Tools realmente registradas/instanciadas (para validar overrides del grafo)
 const KNOWN_TOOLS = Object.keys(ALL_TOOL_DEFS) as string[];
 
-// Allowlist de modelos: un typo en el editor jamas rompe el chat (se ignora el override)
+// Allowlist de modelos: un typo en el editor jamas rompe el chat (se ignora el override).
+// Los pagados van primero porque son los ÚNICOS que garantizan respuesta cuando la
+// cuota diaria de los :free de OpenRouter está agotada (429 free-models-per-day).
 const ALLOWED_MODELS: readonly string[] = [
+  "openai/gpt-oss-120b",
   "qwen/qwen3-30b-a3b-instruct-2507",
+  "meta-llama/llama-3.3-70b-instruct",
+  "openai/gpt-4o-mini",
+  "google/gemini-2.5-flash",
   STARSHOP_CREW_MODEL,
   ...STARSHOP_CREW_FALLBACKS,
-  "openai/gpt-4o",
-  "google/gemini-2-0-flash-001",
 ];
 
 /** Errores de "no disponible" del LLM (no bugs): sin créditos, saturado, red, 5xx. */

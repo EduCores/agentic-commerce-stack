@@ -7,33 +7,71 @@
  */
 
 /**
- * Modelo único de todos los crews StarShop y del router de intención.
- * Se usa el endpoint :free de OpenRouter (mismo Nemotron 3 Ultra, coste $0)
- * porque la cuenta no tiene créditos comprados: el endpoint de pago responde
- * 402 "requires payment" en cuanto el request pide tokens de salida reales.
+ * MODELO PRINCIPAL (gratis $0) — mismo para todos los crews y el router.
+ *
+ * IMPORTANTE: OpenRouter limita los modelos :free POR CUENTA con un tope
+ * diario. Cuando se agota, TODOS los :free devuelven
+ * 429 "free-models-per-day. Add 10 credits to unlock 100" y el agente cae a
+ * la heurística, lo que degrada la experiencia (p.ej. "¿estás conectado?" se
+ * clasifica como búsqueda de producto por un token desconocido).
+ * Por eso la cadena incluye modelos DE PAGO baratos y rápidos como respaldo
+ * real, verificados con HTTP 200.
+ *
  * Si se cambia aquí: añadir el id también a ALLOWED_MODELS (agent/index.ts)
- * y republicar el grafo con `npx tsx scripts/sync-router-graph.ts`.
+ * y FLOW_MODELS (src/components/flow/types.ts), y republicar el grafo con
+ * `npx tsx scripts/sync-router-graph.ts`.
  */
 export const STARSHOP_CREW_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
 
 /**
  * Cadena de respaldo: si el modelo principal falla (402 sin créditos, 429
- * saturado, 5xx, red caída), el runtime reintenta EN ORDEN con estos modelos
- * gratis antes de rendirse. Verificados con tool-calling en OpenRouter
- * (free tier: 50 req/día por cuenta, 20/min).
+ * diario agotado, 5xx, red caída), el runtime reintenta EN ORDEN con estos
+ * modelos antes de rendirse.
  *
- * qwen3.8-27b:free es el único Qwen gratuito disponible hoy (los slug
- * qwen-2.5-72b:free y qwen3-30b-a3b:free ya no existen en el free tier).
- * Sirve como modelo de PRUEBAS: el upstream puede responder 429 temporal,
- * y en ese caso la cadena sigue con los Nemotron (isLlmUnavailable lo reintenta).
- * Si se cambia aquí: el id ya entra solo a ALLOWED_MODELS (spread) pero hay que
- * añadirlo a FLOW_MODELS (src/components/flow/types.ts) para poder elegirlo
- * en el editor de /workflows.
+ * Orden VERIFICADO contra el caso que originó este fix ("¿estás conectado?"
+ * no debe buscar en el catálogo):
+ *
+ * 1) PAGADOS pero baratos y rápidos — devuelven 200 y NO inventan búsquedas:
+ *    - openai/gpt-oss-120b        ~860ms   ✅ "Sí, estoy conectado"
+ *    - qwen/qwen3-30b-a3b-2507    ~560ms   ✅ "Sí, estoy conectado y listo"
+ *    - meta-llama/llama-3.3-70b    ~800ms   ✅ "Sí, estoy conectado"
+ *    - openai/gpt-4o-mini        ~1500ms   ✅ muy fiable, algo más caro
+ *    - google/gemini-2.5-flash    ~870ms   ✅ (OJO: gemini-2-0-flash-001 ya NO existe → 404)
+ *
+ * 2) FREE al final: se intentan igual (coste $0 mientras haya cuota), pero si
+ *    la cuota diaria de la cuenta está agotada responden 429 y la cadena
+ *    continúa hacia el siguiente.
+ *
+ * NOTA sobre OpenRouter: los :free tienen tope diario POR CUENTA. Agotado,
+ * devuelven "429 free-models-per-day. Add 10 credits to unlock 100". Con 10
+ * créditos la cuota sube a 100 req/día. Los pagados de arriba son el seguro
+ * para que el agente NUNCA quede mudo aunque los free fallen.
+ *
+ * qwen3.8-27b:free sigue siendo el modelo de PRUEBAS de scripts/test-agent.ts.
+ *
+ * Si se cambia aquí: el id entra solo a ALLOWED_MODELS (spread), pero hay que
+ * añadirlo también a FLOW_MODELS (src/components/flow/types.ts) para poder
+ * elegirlo en el editor de /workflows.
  */
 export const STARSHOP_CREW_FALLBACKS = [
+  // ── Pagados: fiabilidad garantizada (verificados con HTTP 200 + tool-calling) ──
+  "openai/gpt-oss-120b",
+  "qwen/qwen3-30b-a3b-instruct-2507",
+  "meta-llama/llama-3.3-70b-instruct",
+  "openai/gpt-4o-mini",
+  "google/gemini-2.5-flash",
+  // ── Free: coste $0 mientras haya cuota diaria; 429 si está agotada ──
   "nvidia/nemotron-3.5-lightning:free",
   "nvidia/nemotron-3-super-120b-a12b:free",
   "qwen/qwen3.8-27b:free",
+] as const;
+
+/** IDs de modelos que hoy devuelven 404/402 (retirados: NO usarlos en demo). */
+export const STARSHOP_RETIRED_MODELS = [
+  "google/gemini-2-0-flash-001",
+  "anthropic/claude-3.5-haiku",
+  "openai/gpt-oss-20b:free",
+  "nvidia/nemotron-3-nano-30b-a3b:free",
 ] as const;
 
 /**
