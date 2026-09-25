@@ -6,6 +6,10 @@
 import { generateText, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
 import { headersFor, hasProviderKey, resolveModel, sdkModelFor } from "./lib/model-provider";
+import { AGENT_MAX_STEPS } from "@/shared/agent-limits";
+
+/** Re-export para que los tests y el editor del flow usen la misma constante. */
+export { AGENT_MAX_STEPS };
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
 import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../prisma/starshop-prompts";
@@ -37,6 +41,7 @@ import getSalesSummary from "./tools/sales-summary";
 // chain-of-thought como respuesta final; con esto entregan SOLO la respuesta.
 const DIRECT_REPLY_RULE =
   "\n\nFORMATO DE RESPUESTA: entrega DIRECTAMENTE la respuesta final al cliente, en español y en 1-3 frases. No muestres tu razonamiento, análisis, pasos internos ni texto en inglés.";
+
 async function directChat(
   modelId: string,
   system: string,
@@ -387,7 +392,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
         system,
         messages,
         tools: toAISDKTools(allowedTools),
-        stopWhen: stepCountIs(4) as never,
+        stopWhen: stepCountIs(AGENT_MAX_STEPS) as never,
         maxOutputTokens: 700,
       } as never);
       usedModel = attemptModel;
@@ -476,7 +481,7 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
         system,
         messages,
         tools: toAISDKTools(allowedTools) as never,
-        stopWhen: stepCountIs(4) as never,
+        stopWhen: stepCountIs(AGENT_MAX_STEPS) as never,
         maxOutputTokens: 700,
       } as never);
 

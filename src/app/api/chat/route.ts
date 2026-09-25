@@ -3,6 +3,9 @@ import { cookies } from "next/headers";
 import { verifySessionToken, AUTH_COOKIE } from "@/lib/auth";
 import { runAgent, runStarShopFlow, refreshCrewOverrides } from "@/../agent";
 import { guardChatRequest, corsHeaders, isOriginAllowed } from "@/lib/api/chat-guard";
+import { prisma } from "@/lib/adapters/prisma";
+import { ROUTER_SLUG } from "@/../agent/lib/crew-graph";
+import { AGENT_MAX_STEPS } from "@/shared/agent-limits";
 
 export async function OPTIONS(req: Request) {
   const origin = req.headers.get("origin");
@@ -12,17 +15,44 @@ export async function OPTIONS(req: Request) {
   return NextResponse.json({}, { headers: corsHeaders(origin) });
 }
 
-export async function GET(req: Request) {
-  const origin = req.headers.get("origin");
-  // Solo booleans/model: NO exponer prefijos de API key ni host de BD en un endpoint público
-  return NextResponse.json({
+// Groq — plan gratuito del agente: mantiene viva la función de Vercel.
+// Se llama a sí mismo con GET /api/chat (health) en lugar de doing trabajo real:
+// así la instancia serverless ya está caliente cuando llega el primer usuario
+// y el cold start (medido: 49 s) desaparece del primer mensaje.
+export const dynamic = "force-dynamic";
+
+/** No dejar logs de health-check en producción: genera ruido. */
+const QUIET = !!process.env.VERCEL;
+
+export async function GET() {
+  // Reanuda la instancia: lee la config, inicializa Prisma y el SDK de AI.
+  await warmUp();
+  if (!QUIET) console.log("[ACS-WARMUP] función despierta");
+  // Solo booleanos/model: NO exponer prefijos de API key ni host de BD.
+  // hasGroqKey es el más importante: sin él la cadena descarta los groq/*
+  // y el agente cae a los :free de OpenRouter (50/día) → latencia + 504.
+  return Response.json({
     ok: true,
+    hasGroqKey: !!process.env.GROQ_API_KEY,
     hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
-    hasAdminKey: !!process.env.OPENROUTER_ADMIN_KEY,
-    openRouterModel: process.env.OPENROUTER_MODEL ?? "(no env OPENROUTER_MODEL)",
     hasDatabaseUrl: !!process.env.DATABASE_URL,
+    maxSteps: AGENT_MAX_STEPS,
     time: new Date().toISOString(),
-  }, { headers: corsHeaders(origin) });
+  });
+}
+
+/**
+ * Precalienta lo que el agente usa en el primer request real.
+ * Todo best-effort: si algo falla, el agente igual funciona (más lento).
+ */
+async function warmUp() {
+  const tasks: Promise<unknown>[] = [
+    // Abre la conexión de Postgres (si no, el primer findMany la paga).
+    prisma.workflowDefinition
+      .findFirst({ where: { slug: ROUTER_SLUG }, select: { id: true } })
+      .catch(() => null),
+  ];
+  await Promise.allSettled(tasks);
 }
 
 export async function POST(req: Request) {
