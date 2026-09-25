@@ -41,7 +41,7 @@ export function MarketingFunnel({ data }: { data: MarketingData | null }) {
             <CartesianGrid strokeDasharray="3 3" horizontal={false} />
             <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} tickCount={7} />
             <YAxis type="category" dataKey="stage" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={78} />
-            <Tooltip content={<ChartTooltipContent className="border border-card-border bg-tooltip-background shadow-xl" />} />
+            <Tooltip cursor={false} content={<ChartTooltipContent className="border border-card-border bg-tooltip-background shadow-xl" />} />
             <Bar dataKey="value" name="Cantidad" radius={[0, 6, 6, 0]}>
               {rows.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />

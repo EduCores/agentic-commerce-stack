@@ -76,6 +76,7 @@ export function AnalyticsStatusChart({ data, className }: { data: AnalyticsData 
             />
             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} allowDecimals={false} domain={[0, Math.ceil(maxCount * 1.15)]} />
             <Tooltip
+              cursor={false}
               content={
                 <BreakdownTooltip
                   totalOrders={totalOrders}
@@ -148,7 +149,7 @@ export function AnalyticsSourceChart({ data, className }: { data: AnalyticsData 
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip content={<BreakdownTooltip totalOrders={totalOrders} />} />
+            <Tooltip cursor={false} content={<BreakdownTooltip totalOrders={totalOrders} />} />
           </PieChart>
         </ChartContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none z-0">
