@@ -65,8 +65,8 @@ const NODE_W = 224;
 const NODE_H = 224;
 const GAP_X = 96;
 const GAP_Y = 150;
-/** Máx. nodos por fila dentro de una capa: evita filas eternas que se ven solapadas. */
-const PER_ROW = 4;
+/** Nodos por fila dentro de una capa: los 8 crews van en una sola fila horizontal. */
+const PER_ROW = 8;
 
 /** Pasa anti-colisión (AABB): garantiza que ningún par de nodos se solape. */
 function separate(nodes: Node[]): Node[] {
