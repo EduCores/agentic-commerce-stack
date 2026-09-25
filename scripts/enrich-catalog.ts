@@ -14,6 +14,7 @@
  */
 import "dotenv/config";
 import { prisma } from "../src/lib/adapters/prisma";
+import { resolveModel, headersFor, filterResolvable } from "../agent/lib/model-provider";
 
 const MODEL = process.argv.find((a) => a.startsWith("--model="))?.split("=")[1]
   ?? "nvidia/nemotron-3.5-lightning:free";
@@ -34,63 +35,90 @@ async function enrichOne(title: string, sku: string, category: string, current: 
   return null;
 }
 
+// Cadena de respaldo del agente (Groq primero → pagados → free de OpenRouter).
+// Reusa el multi-provider de agent/lib/model-provider.ts (misma mecánica que runAgent).
+const EXTRA_FALLBACKS = [
+  "groq/qwen/qwen3.8-27b",
+  "groq/openai/gpt-oss-120b",
+  "groq/openai/gpt-oss-20b",
+  "openai/gpt-oss-120b",
+  "qwen/qwen3-30b-a3b-instruct-2507",
+  "meta-llama/llama-3.3-70b-instruct",
+  "openai/gpt-4o-mini",
+  "google/gemini-2.5-flash",
+  "qwen/qwen3.8-27b:free",
+  "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "nvidia/nemotron-3.5-lightning:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+] as const;
+
+const CHAIN = filterResolvable([MODEL, ...EXTRA_FALLBACKS]);
+
 async function tryEnrich(userMsg: string): Promise<Enrichment | null> {
-  const body = {
-    model: MODEL,
-    response_format: { type: "json_object" },
-    messages: [
-      {
-        role: "system",
-        content: "Eres un catalogador experto de ferretería chilena (StarShop). Respondes SOLO JSON válido.",
-      },
-      { role: "user", content: userMsg },
-    ],
-  };
-  async function callOnce(): Promise<Response | null> {
+  for (const id of CHAIN) {
+    const r = resolveModel(id);
+    if (!r) continue;
+    const body = {
+      model: r.upstreamId,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: "Eres un catalogador experto de ferretería chilena (StarShop). Respondes SOLO JSON válido.",
+        },
+        { role: "user", content: userMsg },
+      ],
+    };
+    let resp: Response | null = null;
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 45000);
     try {
-      return await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      resp = await fetch(`${r.baseURL}/chat/completions`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "Content-Type": "application/json" },
+        headers: headersFor(r),
         body: JSON.stringify(body),
         signal: ctrl.signal,
       });
-    } catch (e) {
-      console.log(`  fetch falló (${e instanceof Error ? e.name : "red"})`);
-      return null;
+    } catch {
+      resp = null;
     } finally {
       clearTimeout(t);
     }
+    if (!resp) {
+      console.log(`  ${id}: red`);
+      continue;
+    }
+    if (!resp.ok) {
+      console.log(`  ${id}: HTTP ${resp.status}`);
+      await new Promise((s) => setTimeout(s, 1500));
+      continue;
+    }
+    const j = (await resp.json()) as { choices?: { message?: { content?: string } }[] };
+    const raw = j.choices?.[0]?.message?.content ?? "";
+    // Los modelos :free suelen envolver el JSON en texto/explicaciones: recorta al objeto.
+    const cleaned = raw.replace(/```json|```/g, "");
+    const s = cleaned.indexOf("{");
+    const e = cleaned.lastIndexOf("}");
+    if (s < 0 || e <= s) {
+      console.log(`  ${id}: sin JSON (${raw.slice(0, 80)}...)`);
+      continue;
+    }
+    try {
+      const parsed = JSON.parse(cleaned.slice(s, e + 1)) as Partial<Enrichment>;
+      if (typeof parsed.description !== "string" || !Array.isArray(parsed.aliases)) continue;
+      return {
+        description: parsed.description.slice(0, 500),
+        aliases: [...new Set(parsed.aliases.filter((a) => typeof a === "string").map((a) => a.trim()).filter(Boolean))].slice(0, 12),
+        tags: Array.isArray(parsed.tags) ? parsed.tags.filter((t) => typeof t === "string").slice(0, 6) : [],
+      };
+    } catch {
+      console.log(`  ${id}: JSON inválido`);
+      continue;
+    }
   }
-  const r = (await callOnce()) ?? (await callOnce());
-  if (!r) return null;
-  if (!r.ok) {
-    console.log(`  LLM HTTP ${r.status}, salto`);
-    return null;
-  }
-  const j = (await r.json()) as { choices?: { message?: { content?: string } }[] };
-  const raw = j.choices?.[0]?.message?.content ?? "";
-  // Los modelos :free suelen envolver el JSON en texto/explicaciones: recorta al objeto.
-  const cleaned = raw.replace(/```json|```/g, "");
-  const s = cleaned.indexOf("{");
-  const e = cleaned.lastIndexOf("}");
-  if (s < 0 || e <= s) {
-    console.log(`  sin JSON (${raw.slice(0, 80)}...)`);
-    return null;
-  }
-  try {
-    const parsed = JSON.parse(cleaned.slice(s, e + 1)) as Partial<Enrichment>;
-    if (typeof parsed.description !== "string" || !Array.isArray(parsed.aliases)) return null;
-    return {
-      description: parsed.description.slice(0, 500),
-      aliases: [...new Set(parsed.aliases.filter((a) => typeof a === "string").map((a) => a.trim()).filter(Boolean))].slice(0, 12),
-      tags: Array.isArray(parsed.tags) ? parsed.tags.filter((t) => typeof t === "string").slice(0, 6) : [],
-    };
-  } catch {
-    console.log("  JSON inválido, salto");
-    return null;
-  }
+  return null;
 }
 
 async function main() {

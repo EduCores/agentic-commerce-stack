@@ -32,6 +32,7 @@ export function MetaConnectCard() {
   const [testing, setTesting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [sendingReport, setSendingReport] = useState(false);
   const [rule, setRule] = useState({ minRoas: "1", daysNoSales: "3", notifyEmail: "" });
   const [checkResult, setCheckResult] = useState<{ paused: { id: string; name: string; spend: number }[]; watching: number; emailed: string | null } | null>(null);
 
@@ -153,6 +154,24 @@ export function MetaConnectCard() {
       toast.error(e instanceof Error ? e.message : String(e));
     } finally {
       setChecking(false);
+    }
+  }
+
+  async function sendWeeklyReport() {
+    setSendingReport(true);
+    try {
+      const r = await fetch("/api/meta/report", { method: "POST" });
+      const j = await r.json();
+      if (!r.ok) {
+        toast.error(j.error ?? "Falló el reporte");
+        return;
+      }
+      if (j.sent) toast.success(`Reporte enviado a ${j.to}`);
+      else toast.warning("Reporte generado, pero no había email de dueño para enviarlo");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSendingReport(false);
     }
   }
 
@@ -315,6 +334,9 @@ export function MetaConnectCard() {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button appearance="fill" onClick={autopilot} isDisabled={checking || !active}>
               {checking ? "Revisando..." : "Revisar ahora"}
+            </Button>
+            <Button appearance="outline" onClick={sendWeeklyReport} isDisabled={sendingReport || !active}>
+              {sendingReport ? "Enviando..." : "Enviar reporte semanal"}
             </Button>
             {!active && <span className="text-xs text-text-tertiary">Conecta una cuenta para activar el piloto</span>}
           </div>

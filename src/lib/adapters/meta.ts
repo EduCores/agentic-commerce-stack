@@ -5,6 +5,7 @@
  * - Sin credenciales → usa fallback mock para que marketing no se rompa
  */
 
+import crypto from "node:crypto";
 import { prisma } from "@/lib/adapters/prisma";
 
 export type MetaInsight = {
@@ -228,6 +229,78 @@ export async function pauseMetaCampaign(accessToken: string, campaignId: string)
     const json = await res.json().catch(() => ({}));
     if (!res.ok) return { ok: false, error: json?.error?.message ?? `HTTP ${res.status}` };
     return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** Identidad pública para el frontend: solo pixelId (no es secreto). */
+export async function getMetaPixelId(): Promise<string | null> {
+  const conn = await getActiveMetaConnection();
+  return conn?.isActive && conn.pixelId ? conn.pixelId : null;
+}
+
+export type MetaEventInput = {
+  event_name: string;
+  event_id?: string;
+  email?: string;
+  phone?: string;
+  fbp?: string;
+  value?: number;
+  currency?: string;
+  content_ids?: string[];
+  event_source_url?: string;
+};
+
+/**
+ * Conversions API: reenvía un evento del frontend StarShop a Meta (Pixel ID).
+ * Dedup automático vía event_id + fbp (cuando vienen). Nunca rompe el flujo.
+ */
+export async function sendMetaEvents(
+  accessToken: string,
+  pixelId: string,
+  events: MetaEventInput[]
+): Promise<{ ok: boolean; meta?: unknown; error?: string }> {
+  try {
+    const data = events.map((e) => {
+      const user_data: Record<string, string | string[]> = {};
+      const email = e.email?.trim().toLowerCase();
+      if (email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        user_data.em = [crypto.createHash("sha256").update(email).digest("hex")];
+      }
+      const phone = e.phone?.replace(/\D/g, "");
+      if (phone) {
+        user_data.ph = [crypto.createHash("sha256").update(phone).digest("hex")];
+      }
+      if (e.fbp) user_data.fbp = e.fbp;
+      const body: Record<string, unknown> = {
+        event_name: e.event_name,
+        event_time: Math.floor(Date.now() / 1000),
+        action_source: "website",
+        user_data,
+      };
+      if (e.event_id) body.event_id = e.event_id;
+      if (e.event_source_url) body.event_source_url = e.event_source_url;
+      const custom = {} as Record<string, unknown>;
+      if (e.value != null) custom.value = e.value;
+      if (e.currency) custom.currency = e.currency;
+      if (e.content_ids?.length) {
+        custom.content_ids = e.content_ids;
+        custom.content_type = "product";
+      }
+      if (Object.keys(custom).length) body.custom_data = custom;
+      return body;
+    });
+
+    const res = await fetch(`https://graph.facebook.com/v20.0/${pixelId}/events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, access_token: accessToken }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, error: json?.error?.message ?? `Meta CAPI HTTP ${res.status}` };
+    return { ok: true, meta: json };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
