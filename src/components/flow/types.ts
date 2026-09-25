@@ -137,6 +137,11 @@ export const FLOW_MODELS: Array<{ id: string; label: string }> = [
   { id: "inclusionai/ling-3.0-flash-sante:free", label: "Ling 3 Flash (gratis $0)" },
   { id: "liquid/lfm-2.5-2.6b:free", label: "LFM 2.5 2.6B (gratis $0, chico)" },
   { id: "poolside/laguna-s-2.1:free", label: "Laguna S 2.1 (gratis $0)" },
+  // ── Groq plan gratuito: 1.000 requests/día POR MODELO, sin tarjeta ni créditos.
+  //    Requiere GROQ_API_KEY; sin ella, la cadena los descarta automáticamente.
+  { id: "groq/qwen/qwen3.8-27b", label: "Qwen3.8 27B · Groq (gratis, 1.000/día)" },
+  { id: "groq/openai/gpt-oss-120b", label: "GPT-OSS 120B · Groq (gratis, 1.000/día)" },
+  { id: "groq/openai/gpt-oss-20b", label: "GPT-OSS 20B · Groq (gratis, 1.000/día)" },
 ];
 
 /**

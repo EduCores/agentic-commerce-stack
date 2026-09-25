@@ -5,7 +5,7 @@
  */
 import { generateText, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { headersFor, hasProviderKey, resolveModel, sdkModelFor } from "./lib/model-provider";
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
 import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../prisma/starshop-prompts";
@@ -25,18 +25,9 @@ import sendEmail from "./tools/send-email";
 import orderTracking from "./tools/order-tracking";
 import getSalesSummary from "./tools/sales-summary";
 
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
-
-// Cliente separado para admin (créditos/límite independientes de tienda).
-// Si no hay OPENROUTER_ADMIN_KEY, cae a la key general.
-function getOpenRouter(isAdmin?: boolean) {
-  if (isAdmin && process.env.OPENROUTER_ADMIN_KEY) {
-    return createOpenRouter({ apiKey: process.env.OPENROUTER_ADMIN_KEY });
-  }
-  return openrouter;
-}
+// NOTA: la resolución de modelos por provider (OpenRouter / Groq) vive en
+// agent/lib/model-provider.ts. Usar sdkModelFor() / resolveModel() / headersFor()
+// en lugar de crear clientes de OpenRouter aquí.
 
 // Llamada directa a OpenRouter como respaldo: genera respuesta conversacional real
 // (el generateText con tools a veces corta en tool calls sin texto final).
@@ -47,15 +38,16 @@ function getOpenRouter(isAdmin?: boolean) {
 const DIRECT_REPLY_RULE =
   "\n\nFORMATO DE RESPUESTA: entrega DIRECTAMENTE la respuesta final al cliente, en español y en 1-3 frases. No muestres tu razonamiento, análisis, pasos internos ni texto en inglés.";
 async function directChat(
-  apiKey: string,
   modelId: string,
   system: string,
   messages: Array<{ role: "user" | "assistant"; content: string }>
 ): Promise<string> {
   for (const attemptModel of buildModelChain(modelId)) {
+    const resolved = resolveModel(attemptModel);
+    if (!resolved) continue;
     try {
       const body = {
-        model: attemptModel,
+        model: resolved.upstreamId,
         messages: [
           { role: "system", content: system + DIRECT_REPLY_RULE },
           ...messages,
@@ -63,14 +55,9 @@ async function directChat(
         temperature: 0.7,
         max_tokens: 700,
       };
-      const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const r = await fetch(`${resolved.baseURL}/chat/completions`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://agentic-commerce-stack.vercel.app",
-          "X-Title": "ACS Sales Agent",
-        },
+        headers: headersFor(resolved),
         body: JSON.stringify(body),
       });
       if (!r.ok) {
@@ -396,7 +383,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   for (const attemptModel of chain) {
     try {
       result = await generateText({
-        model: getOpenRouter(params.useAdminKey).chat(attemptModel as never) as never,
+        model: sdkModelFor(attemptModel, params.useAdminKey) as never,
         system,
         messages,
         tools: toAISDKTools(allowedTools),
@@ -446,9 +433,9 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   let finalText = sanitizeReplyText(rawText);
   let direct = false;
   if (!finalText && (rawText || stepToolCalls.length > 0)) {
-    const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
-    if (apiKey) {
-      const directReply = await directChat(apiKey, modelId, system, messages);
+    const hasKey = hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq");
+    if (hasKey) {
+      const directReply = await directChat(modelId, system, messages);
       if (directReply) {
         finalText = directReply;
         direct = true;
@@ -483,7 +470,7 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
   for (const attemptModel of chain) {
     let yielded = false;
     try {
-      const model = getOpenRouter(params.useAdminKey).chat(attemptModel as never) as never;
+      const model = sdkModelFor(attemptModel, params.useAdminKey);
       const result = streamText({
         model,
         system,
@@ -516,9 +503,9 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
       // tool-call como texto, genera la respuesta conversacional de respaldo
       // (misma lógica que runAgent, con contexto completo).
       if (!finalText && (rawFinal || toolCalls.length > 0)) {
-        const apiKey = (params.useAdminKey && process.env.OPENROUTER_ADMIN_KEY) || process.env.OPENROUTER_API_KEY || "";
-        if (apiKey) {
-          const directReply = await directChat(apiKey, attemptModel, system, messages);
+        const hasKey = hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq");
+        if (hasKey) {
+          const directReply = await directChat(attemptModel, system, messages);
           if (directReply) finalText = directReply;
         }
         if (!finalText && rawFinal) finalText = FALLBACK_TEXT;

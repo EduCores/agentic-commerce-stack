@@ -4,6 +4,7 @@
  */
 import { STARSHOP_INTENTS, STARSHOP_WELCOME_PROMPT, STARSHOP_CREW_MODEL, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../../../prisma/starshop-prompts";
 import { isSmallTalk, isAgentMetaQuestion } from "../../../agent/lib/search/normalize";
+import { hasProviderKey, headersFor, resolveModel } from "../../../agent/lib/model-provider";
 
 export type IntentSource = "llm" | "heuristic";
 
@@ -65,24 +66,21 @@ function isValidIntent(v: unknown): v is StarShopIntent {
 }
 
 async function detectIntentLLM(message: string, history?: unknown[]): Promise<DetectIntentResult | null> {
-  const apiKey = process.env.OPENROUTER_API_KEY || "";
-  if (!apiKey) return null;
+  // El router usa cualquier provider con credencial (OpenRouter y/o Groq).
+  if (!hasProviderKey("openrouter") && !hasProviderKey("groq")) return null;
   const preferred = process.env.OPENROUTER_MODEL || STARSHOP_CREW_MODEL;
   // Cadena de respaldo: si el principal está sin cupo/saturado (402/429/5xx) se
   // prueba el siguiente modelo gratis. Un timeout NO encadena (sumaría otra espera
   // de 8s al router): se cae a la heurística como antes.
   for (const model of buildModelChain(preferred)) {
+    const resolved = resolveModel(model);
+    if (!resolved) continue;
     try {
-      const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const r = await fetch(`${resolved.baseURL}/chat/completions`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://agentic-commerce-stack.vercel.app",
-          "X-Title": "ACS Intent Router",
-        },
+        headers: headersFor(resolved),
         body: JSON.stringify({
-          model,
+          model: resolved.upstreamId,
           temperature: 0,
           max_tokens: 160,
           messages: [

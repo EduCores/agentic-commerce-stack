@@ -6,6 +6,11 @@
  * cada crew tiene su prompt aislado y su whitelist de tools.
  */
 
+// Resolución multi-provider (OpenRouter + Groq) para la cadena de modelos.
+import { filterResolvable, isFreeModel } from "../agent/lib/model-provider";
+
+export { isFreeModel };
+
 /**
  * MODELO PRINCIPAL (gratis $0) — mismo para todos los crews y el router.
  *
@@ -73,6 +78,14 @@ export const STARSHOP_CREW_FALLBACKS = [
   "inclusionai/ling-3.0-flash-sante:free",
   "liquid/lfm-2.5-2.6b:free",
   "poolside/laguna-s-2.1:free",
+  // ── Groq plan gratuito: 1.000 requests/día POR MODELO (no 50 como OpenRouter),
+  //    sin tarjeta ni créditos. Es la red de seguridad para demos/pruebas: cuando
+  //    se agota la cuota diaria de OpenRouter, aquí todavía queda margen.
+  //    Prefijo `groq/` → agent/lib/model-provider.ts los enruta a Groq.
+  //    Solo se usan si hay GROQ_API_KEY (si no, se descartan de la cadena).
+  "groq/qwen/qwen3.8-27b",
+  "groq/openai/gpt-oss-120b",
+  "groq/openai/gpt-oss-20b",
 ] as const;
 
 /**
@@ -124,12 +137,16 @@ const FREE_QUOTA_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas
  * no a saturación puntual. OpenRouter lo dice explícitamente en el mensaje.
  */
 export function isDailyFreeQuotaError(msg: string): boolean {
-  return /free-models-per-day|free model requests per day|daily limit.*free/i.test(msg);
+  return /free-models-per-day|free model requests per day|daily limit.*free|requests per day|Rate limit reached/i.test(msg);
 }
 
-/** Marca un modelo free como agotado (se usará unicamente vía isDailyFreeQuotaError). */
+/**
+ * Marca un modelo como agotado (solo vía isDailyFreeQuotaError).
+ * Aplica a los `:free` de OpenRouter y a los `groq/*` de Groq (ambos con
+ * tope diario por cuenta). Un modelo de pago nunca se marca.
+ */
 export function markModelExhausted(model: string): void {
-  if (!model.endsWith(":free")) return;
+  if (!isFreeModel(model)) return;
   exhausted.set(model, Date.now() + FREE_QUOTA_TTL_MS);
   console.log(`[MODEL-QUOTA] ${model} agotado (cuota diaria free). Se omite hasta nuevo reinicio.`);
 }
@@ -177,7 +194,7 @@ export function buildModelChain(preferred?: string | null): string[] {
     const id = (item ?? "").trim();
     if (id && !chain.includes(id)) chain.push(id);
   }
-  return filterExhausted(chain);
+  return filterExhausted(filterResolvable(chain));
 }
 
 export const STARSHOP_WELCOME_PROMPT = `Eres Star, asistente de bienvenida de StarShop (B2B Chile). Detecta intención del cliente o del admin dueño.
