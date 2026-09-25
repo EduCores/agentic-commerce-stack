@@ -15,10 +15,14 @@ export function WorkflowEditor({
   slug,
   initialGraph,
   isActive,
+  currentSlug,
+  workflows,
 }: {
   slug: string;
   initialGraph: FlowGraph;
   isActive: boolean;
+  currentSlug?: string;
+  workflows?: { slug: string; name: string; isActive: boolean }[];
 }) {
   const router = useRouter();
   const [live, setLive] = useState(isActive);
@@ -71,6 +75,8 @@ export function WorkflowEditor({
       onSave={handleSave}
       onPublish={handlePublish}
       isLive={live}
+      currentSlug={currentSlug}
+      workflows={workflows}
     />
   );
 }

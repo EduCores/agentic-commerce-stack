@@ -6,6 +6,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { ScrollHint } from "@/components/tailgrids/core/scroll-hint";
+import { toast } from "sonner";
 import { RoleSelect } from "./role-select";
 import type { TeamMember } from "./types";
 import { CalendarDays, Lock, Mail, MessageCircle, Phone, Plus, ShieldCheck, Trash2, User, UserPlus, Users } from "lucide-react";
@@ -22,15 +23,38 @@ export function TeamTable() {
   const [role, setRole] = useState("member");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
+  const [adding, setAdding] = useState(false);
 
   async function add() {
-    if (!email || !password) return;
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast.error("Ingresa un correo válido.");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    setAdding(true);
     setMsg("");
-    const r = await fetch("/api/admin/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, name, phone, role, password }) });
-    const j = await r.json();
-    if (!r.ok) { setMsg(j.error ?? "Error"); return; }
-    setEmail(""); setName(""); setPhone(""); setPassword(""); setMsg(`Miembro ${j.email} agregado${j.phone ? " → WhatsApp activo" : ""}`);
-    qc.invalidateQueries({ queryKey: ["team"] });
+    try {
+      const r = await fetch("/api/admin/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, name, phone, role, password }) });
+      const j = await r.json();
+      if (!r.ok) {
+        const m = j.error ?? "Error";
+        setMsg(m);
+        toast.error(m);
+        return;
+      }
+      setEmail(""); setName(""); setPhone(""); setPassword("");
+      const okMsg = `Miembro ${j.email} agregado${j.phone ? " → WhatsApp activo" : ""}`;
+      setMsg(okMsg);
+      toast.success(okMsg);
+      qc.invalidateQueries({ queryKey: ["team"] });
+    } catch {
+      toast.error("No se pudo agregar al miembro.");
+    } finally {
+      setAdding(false);
+    }
   }
 
   async function remove(id: string) {
@@ -75,7 +99,7 @@ export function TeamTable() {
             <RoleSelect value={role} onChange={setRole} label="Rol del miembro" />
           </div>
           <label className="flex min-w-45 flex-1 flex-col gap-1 text-xs"><span className="flex items-center gap-1.5"><Lock className="size-3.5" />Contraseña</span><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="mín. 8" className="w-full rounded-lg border border-card-border bg-input-background px-3 py-2 text-sm text-text-primary [color-scheme:light] dark:[color-scheme:dark]" /></label>
-          <Button onClick={add} appearance="fill"><span className="flex items-center gap-1.5"><Plus className="size-4" />Agregar</span></Button>
+          <Button onClick={add} appearance="fill" isDisabled={adding}><span className="flex items-center gap-1.5"><Plus className="size-4" />{adding ? "Agregando..." : "Agregar"}</span></Button>
           {msg && <Badge color="gray">{msg}</Badge>}
         </CardContent>
       </Card>

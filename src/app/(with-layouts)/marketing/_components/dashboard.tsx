@@ -88,7 +88,7 @@ function CampaignsHero({ data }: { data: MarketingData }) {
 function CampaignsDetail({ data }: { data: MarketingData }) {
   if (data.campaigns.length === 0) {
     return (
-      <Card className="min-w-0">
+      <Card className="min-w-0 xl:col-span-2">
         <CardHeader><CardTitle className="text-sm">Campañas por tienda — catálogo híbrido</CardTitle></CardHeader>
         <CardContent>
           <p className="text-sm text-text-tertiary">Aún no hay campañas. Conecta una tienda en /store para crear la primera (mock para demo, shopify con dominio/apiKey para real).</p>
@@ -99,7 +99,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
   }
   const totalCampaignRevenue = data.campaigns.reduce((a, c) => a + (c.revenue ?? 0), 0);
   return (
-    <Card className="min-w-0">
+    <Card className="min-w-0 xl:col-span-2">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-sm">Campañas por tienda — desglose real</CardTitle>
@@ -157,7 +157,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
 
 function AudienceCard({ data }: { data: MarketingData }) {
   return (
-    <Card className="min-w-0">
+    <Card className="min-w-0 xl:col-span-2">
       <CardHeader><CardTitle className="text-sm">Información de la audiencia</CardTitle></CardHeader>
       <CardContent className="text-sm text-text-secondary">
         <p>

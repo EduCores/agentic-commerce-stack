@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { InfoTip } from "@/components/tailgrids/core/info-tip";
@@ -47,27 +46,15 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
       </div>
 
       <div className="rounded-sm border border-card-border bg-card-background p-6 shadow-sm">
-        {all.length > 1 && (
-          <div className="mb-4 flex flex-wrap justify-end gap-2">
-            {ordered.map((w) => (
-              <Link
-                key={w.slug}
-                href={`/workflows?slug=${w.slug}`}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium ${
-                  w.slug === workflow?.slug
-                    ? "border-brand-500 bg-brand-500 text-button-primary-text"
-                    : "border-card-border bg-card-background text-text-primary hover:bg-background-gray-secondary"
-                }`}
-              >
-                {w.name}
-                {w.isActive && <span className="ml-2 text-[10px] uppercase tracking-widest">en vivo</span>}
-              </Link>
-            ))}
-          </div>
-        )}
-
         {workflow && graph ? (
-          <WorkflowEditor key={workflow.slug} slug={workflow.slug} initialGraph={graph} isActive={workflow.isActive} />
+          <WorkflowEditor
+            key={workflow.slug}
+            slug={workflow.slug}
+            initialGraph={graph}
+            isActive={workflow.isActive}
+            currentSlug={workflow.slug}
+            workflows={ordered.map((w) => ({ slug: w.slug, name: w.name, isActive: w.isActive }))}
+          />
         ) : workflow ? (
           <p className="text-sm text-text-tertiary">Este flujo todavía no tiene grafo guardado.</p>
         ) : (

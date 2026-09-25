@@ -33,6 +33,7 @@ import { Card } from "@/components/tailgrids/core/card";
 import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import { AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/tailgrids/core/accordion";
 import { cn } from "@/utils/cn";
+import Link from "next/link";
 import { Maximize2, Minimize2, ScanSearch } from "lucide-react";
 import { BaseNode } from "./nodes/BaseNode";
 import { LabeledEdge } from "./edges/labeled-edge";
@@ -194,6 +195,8 @@ export type FlowCanvasProps = {
   onPublish?: () => Promise<void> | void;
   isLive?: boolean;
   isLoading?: boolean;
+  currentSlug?: string;
+  workflows?: { slug: string; name: string; isActive: boolean }[];
 };
 
 export default function FlowCanvas({
@@ -204,6 +207,8 @@ export default function FlowCanvas({
   onPublish,
   isLive = false,
   isLoading = false,
+  currentSlug,
+  workflows,
 }: FlowCanvasProps) {
   const graph = useMemo(() => initialData ?? initialGraphForType("trigger"), [initialData]);
   /** Auto-orden al cargar: el grafo guardado siempre se muestra ordenado por capas
@@ -438,8 +443,26 @@ const graphNodes = useMemo(() => {
       {/* ── Lienzo ─────────────────────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <Card className="flex flex-wrap items-center gap-2 py-3">
+          {workflows && workflows.length > 1 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {workflows.map((w) => (
+                <Link
+                  key={w.slug}
+                  href={`/workflows?slug=${w.slug}`}
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
+                    w.slug === (currentSlug ?? workflowSlug)
+                      ? "border-brand-500 bg-brand-500 text-button-primary-text"
+                      : "border-card-border bg-card-background text-text-primary hover:bg-background-gray-secondary"
+                  }`}
+                >
+                  {w.name}
+                  {w.isActive && <span className="ml-2 text-[10px] uppercase tracking-widest">en vivo</span>}
+                </Link>
+              ))}
+            </div>
+          )}
           {dirty && <Badge color="warning">Cambios sin guardar</Badge>}
-          <div className="flex flex-wrap gap-2">
+          <div className="ml-auto flex flex-wrap gap-2">
             <Button size="sm" variant="ghost" appearance="outline" isDisabled={readOnly} onClick={handleAutoLayout}>
               Auto-orden
             </Button>
