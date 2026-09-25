@@ -22,6 +22,12 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
   const selected = params.slug ? all.find((w) => w.slug === params.slug) : undefined;
   const workflow = selected ?? routerWorkflow ?? all[0] ?? null;
   const graph = (workflow?.graph as FlowGraph | null) ?? null;
+  // Tabs: el router en vivo siempre primero, luego por actualización.
+  const ordered = [...all].sort((a, b) => {
+    if (a.slug === ROUTER_SLUG) return -1;
+    if (b.slug === ROUTER_SLUG) return 1;
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
 
   return (
     <div className="space-y-6 p-3 sm:p-6">
@@ -42,8 +48,8 @@ export default async function WorkflowsAdminPage({ searchParams }: { searchParam
 
       <div className="rounded-sm border border-card-border bg-card-background p-6 shadow-sm">
         {all.length > 1 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {all.map((w) => (
+          <div className="mb-4 flex flex-wrap justify-end gap-2">
+            {ordered.map((w) => (
               <Link
                 key={w.slug}
                 href={`/workflows?slug=${w.slug}`}

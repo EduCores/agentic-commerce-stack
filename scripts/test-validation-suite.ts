@@ -16,7 +16,7 @@ loadEnv();
 async function testAll() {
   console.log("=== 1. Validando Intent Router (Heurística) ===");
   const { detectIntentHeuristic } = await import("../src/lib/eve/detect-intent");
-  const testCases = [
+  const testCases: Array<{ text: string; expected: string; isAdmin?: boolean }> = [
     { text: "hola buenas tardes", expected: "general_inquiry" },
     { text: "tienes taladros inalámbricos?", expected: "product_search" },
     { text: "cuánto sale el envío a Santiago?", expected: "general_inquiry" },
@@ -37,6 +37,7 @@ async function testAll() {
     console.log(`  [${pass ? "OK" : "FAIL"}] "${tc.text}" -> ${res} (esperado: ${tc.expected})`);
   }
   console.log(`Router results: ${routerPass}/${testCases.length} pasados.\n`);
+  if (routerPass !== testCases.length) throw new Error(`Fallaron ${testCases.length - routerPass} casos del router`);
 
   console.log("=== 2. Validando Tools Principales StarShop / ACS ===");
   const { default: searchProducts } = await import("../agent/tools/search-products");
@@ -44,76 +45,60 @@ async function testAll() {
   const { default: checkStock } = await import("../agent/tools/check-stock");
   const { default: navigateTo } = await import("../agent/tools/navigate");
 
-  // Probar searchProducts
-  const searchRes = await (searchProducts as any).execute({ query: "taladro", limit: 3 });
+  const searchRes = await searchProducts.execute({ storeId: "seed-store", query: "taladro", limit: 3 });
   console.log("Tool searchProducts resultado:", {
-    total: searchRes.total,
-    firstProduct: searchRes.products?.[0]?.name,
+    found: searchRes.found,
+    firstProduct: searchRes.products?.[0]?.title,
     sku: searchRes.products?.[0]?.sku,
     price: searchRes.products?.[0]?.price,
   });
-
-  // Probar calculatePricing para RM con envío gratis (>= 49990) y con flete
   const skuTest = searchRes.products?.[0]?.sku;
-  if (skuTest) {
-    const priceRes1 = await (calculatePricing as any).execute({
-      sku: skuTest,
-      qty: 1,
-      region: "Región Metropolitana",
-    });
-    console.log("Tool calculatePricing (RM 1 ud):", {
-      sku: priceRes1.sku,
-      title: priceRes1.title,
-      unitPrice: priceRes1.unitPrice,
-      shipping: priceRes1.shipping,
-      total: priceRes1.total,
-      shippingDays: priceRes1.shippingDays,
-    });
+  if (!skuTest) throw new Error("searchProducts no devolvió productos para validar");
 
-    const priceRes2 = await (calculatePricing as any).execute({
-      sku: skuTest,
-      qty: 5,
-      region: "Valparaíso",
-    });
-    console.log("Tool calculatePricing (Valparaíso 5 uds tier -8%):", {
-      sku: priceRes2.sku,
-      unitPrice: priceRes2.unitPrice,
-      shipping: priceRes2.shipping,
-      total: priceRes2.total,
-      shippingDays: priceRes2.shippingDays,
-    });
-  }
+  const priceRes1 = await calculatePricing.execute({ sku: skuTest, qty: 1, region: "Región Metropolitana" });
+  console.log("Tool calculatePricing (RM 1 ud):", {
+    sku: priceRes1.sku,
+    title: priceRes1.title,
+    unitPrice: priceRes1.unitPrice,
+    shipping: priceRes1.shipping,
+    total: priceRes1.total,
+    shippingDays: priceRes1.shippingDays,
+  });
+  const priceRes2 = await calculatePricing.execute({ sku: skuTest, qty: 5, region: "Valparaíso" });
+  console.log("Tool calculatePricing (Valparaíso 5 uds tier -8%):", {
+    sku: priceRes2.sku,
+    unitPrice: priceRes2.unitPrice,
+    shipping: priceRes2.shipping,
+    total: priceRes2.total,
+    shippingDays: priceRes2.shippingDays,
+  });
 
-  // Probar checkStock
-  if (skuTest) {
-    const stockRes = await (checkStock as any).execute({ sku: skuTest, qty: 1 });
-    console.log("Tool checkStock resultado para", skuTest, ":", stockRes);
-  }
+  const stockRes = await checkStock.execute({ storeId: "seed-store", sku: skuTest, qty: 1 });
+  console.log("Tool checkStock resultado para", skuTest, ":", stockRes);
 
-  // Probar navigateTo
-  const navRes = await (navigateTo as any).execute({ path: "/busqueda", query: "multimetro" });
+  const navRes = await navigateTo.execute({ path: "/busqueda", query: "multimetro" });
   console.log("Tool navigateTo resultado:", navRes);
 
   console.log("\n=== 3. Validando Agentes en Base de Datos Prisma ===");
   const { prisma } = await import("../src/lib/adapters/prisma");
-  const agents = await prisma.agent.findMany({
-    select: { slug: true, name: true, model: true, isActive: true },
-  });
+  const agents = await prisma.agent.findMany({ select: { slug: true, name: true, model: true, isActive: true } });
   console.log(`Total agentes registrados en BD: ${agents.length}`);
-  for (const a of agents) {
-    console.log(`  - [${a.isActive ? "ACTIVO" : "INACTIVO"}] ${a.slug} (${a.name}) -> Modelo: ${a.model}`);
+  for (const agent of agents) {
+    console.log(`  - [${agent.isActive ? "ACTIVO" : "INACTIVO"}] ${agent.slug} (${agent.name}) -> Modelo: ${agent.model}`);
   }
 
-  const workflows = await prisma.workflowDefinition.findMany({
-    select: { name: true, slug: true, isActive: true },
-  });
+  const workflows = await prisma.workflowDefinition.findMany({ select: { name: true, slug: true, isActive: true } });
   console.log(`\nTotal workflows en BD: ${workflows.length}`);
-  for (const w of workflows) {
-    console.log(`  - [${w.isActive ? "ACTIVO" : "INACTIVO"}] ${w.slug} (${w.name})`);
+  for (const workflow of workflows) {
+    console.log(`  - [${workflow.isActive ? "ACTIVO" : "INACTIVO"}] ${workflow.slug} (${workflow.name})`);
   }
 
   await prisma.$disconnect();
   console.log("\nValidación completada exitosamente.");
 }
 
-testAll().catch(console.error);
+testAll().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+

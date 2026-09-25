@@ -265,11 +265,14 @@ const graphNodes = useMemo(() => {
 
   // Re-sincroniza cuando el server entrega otro grafo (cambio de workflow o reload)
   useEffect(() => {
-    setNodes(graphNodes);
-    setEdges(toFlowEdges(graph));
-    setSelectedNodeId(null);
-    setSelectedEdgeId(null);
-    setDirty(false);
+    const timer = window.setTimeout(() => {
+      setNodes(graphNodes);
+      setEdges(toFlowEdges(graph));
+      setSelectedNodeId(null);
+      setSelectedEdgeId(null);
+      setDirty(false);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [graph, graphNodes, setNodes, setEdges]);
 
   const selectedNode = useMemo(() => nodes.find((n) => n.id === selectedNodeId) ?? null, [nodes, selectedNodeId]);
@@ -403,10 +406,10 @@ const graphNodes = useMemo(() => {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Fila superior: paleta + lienzo (móvil los apila verticalmente) */}
-      <div className="flex flex-col gap-3 xl:flex-row">
+      {/* Fila superior: paleta arriba + lienzo debajo */}
+      <div className="flex flex-col gap-3">
       {/* ── Paleta de nodos (drag & drop o clic) ─────────────────────────── */}
-      <Card className="w-full shrink-0 space-y-3 xl:w-60">
+      <Card className="w-full shrink-0 space-y-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Nodos</p>
           <p className="mt-1 text-[11px] leading-4 text-text-tertiary">Arrastra al lienzo o haz clic para agregar.</p>
