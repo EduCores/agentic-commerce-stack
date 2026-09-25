@@ -11,12 +11,24 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
   const totalViews = data.topContent.reduce((a, t) => a + t.views, 0);
   const totalUnits = data.topContent.reduce((a, t) => a + t.uniques, 0);
 
-  /** Color según el monto del producto: verde (más), amarillo, naranjo, rojo (menos). */
-  function revenueColor(ratio: number): string {
-    if (ratio >= 0.75) return "#16A34A";
-    if (ratio >= 0.5) return "#FACC15";
-    if (ratio >= 0.25) return "#F97316";
-    return "#EF4444";
+  /** Color por posición del ranking: #1 verde y degrada (verde → amarillo → naranjo → rojo) hasta el último. */
+  function rankColor(rank: number, count: number): string {
+    const stops = [
+      { r: 34, g: 197, b: 94 },
+      { r: 250, g: 204, b: 21 },
+      { r: 249, g: 115, b: 22 },
+      { r: 239, g: 68, b: 68 },
+    ];
+    const t = count <= 1 ? 0 : rank / (count - 1);
+    const n = stops.length - 1;
+    const seg = Math.min(n - 1, Math.floor(t * n));
+    const local = t * n - seg;
+    const a = stops[seg];
+    const b = stops[seg + 1];
+    const r = Math.round(a.r + (b.r - a.r) * local);
+    const g = Math.round(a.g + (b.g - a.g) * local);
+    const bl = Math.round(a.b + (b.b - a.b) * local);
+    return `rgb(${r}, ${g}, ${bl})`;
   }
   return (
     <>
@@ -59,7 +71,7 @@ export function AnalyticsTopContent({ data }: { data: AnalyticsData }) {
                       className="h-full rounded-full"
                       style={{
                         width: `${Math.max(6, Math.round(((t.revenue ?? 0) / maxRevenue) * 100))}%`,
-                        backgroundColor: revenueColor((t.revenue ?? 0) / maxRevenue),
+                        backgroundColor: rankColor(i, data.topContent.length),
                       }}
                     />
                   </div>
