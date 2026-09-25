@@ -25,8 +25,15 @@ export { isFreeModel };
  * Si se cambia aquí: añadir el id también a ALLOWED_MODELS (agent/index.ts)
  * y FLOW_MODELS (src/components/flow/types.ts), y republicar el grafo con
  * `npx tsx scripts/sync-router-graph.ts`.
+ *
+ * POR QUÉ GROQ Y NO UN :free DE OPENROUTER: este id va PRIMERO en cada request
+ * (buildModelChain lo pone delante de todo). Un :free de OpenRouter carga
+ * 50 requests/día por cuenta: cuando se agota, cada mensaje pagaba un 429 extra
+ * ANTES de llegar al modelo que sí funciona, lo que subió la latencia a 5-15 s
+ * y provocó 504 Gateway Timeout en las peticiones que ejecutan tools.
+ * Groq da 1.000 requests/día sin tarjeta y responde en ~330-540 ms.
  */
-export const STARSHOP_CREW_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
+export const STARSHOP_CREW_MODEL = "groq/qwen/qwen3.8-27b";
 
 /**
  * Cadena de respaldo: si el modelo principal falla (402 sin créditos, 429
@@ -58,17 +65,37 @@ export const STARSHOP_CREW_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
  * añadirlo también a FLOW_MODELS (src/components/flow/types.ts) para poder
  * elegirlo en el editor de /workflows.
  */
+/**
+ * ORDEN DE LA CADENA = ORDEN DE LATENCIA EN PRODUCCIÓN.
+ *
+ * Cada modelo que falla se traduce en un round-trip extra ANTES de llegar al
+ * que sí funciona. Con los :free de OpenRouter agotados (50/día por cuenta) la
+ * cadena recorría 9× 429 + 5 pagados antes de llegar a Groq: 5-15 s de latencia
+ * y 504 Gateway Timeout en las peticiones que ejecutan tools. Por eso Groq va
+ * PRIMERO: es el provider más confiable que tenemos (1.000 req/día, sin tarjeta)
+ * y responde en ~330-540 ms. Los :free de OpenRouter quedan al final porque su
+ * cuota es el recurso más escaso.
+ *
+ * Medido en prod tras el reorden: 1.5-3 s por mensaje, sin 504.
+ */
 export const STARSHOP_CREW_FALLBACKS = [
-  // ── Pagados: fiabilidad garantizada (verificados con HTTP 200 + tool-calling) ──
+  // ── 1) Groq plan gratuito: 1.000 requests/día POR MODELO, sin tarjeta ni
+  //    créditos. El más rápido y el de mayor cuota. Prefijo `groq/` →
+  //    agent/lib/model-provider.ts los enruta al endpoint de Groq.
+  //    Solo se usan si hay GROQ_API_KEY (si no, se descartan de la cadena).
+  "groq/qwen/qwen3.8-27b",
+  "groq/openai/gpt-oss-120b",
+  "groq/openai/gpt-oss-20b",
+  // ── 2) Pagados: fiabilidad garantizada (verificados con HTTP 200 + tool-calling)
   "openai/gpt-oss-120b",
   "qwen/qwen3-30b-a3b-instruct-2507",
   "meta-llama/llama-3.3-70b-instruct",
   "openai/gpt-4o-mini",
   "google/gemini-2.5-flash",
-  // ── Free: coste $0 mientras haya cuota diaria. Cuando se agota devuelven 429 y
-  //    se marcan como agotados (ver isDailyFreeQuotaError/markModelExhausted) para
-  //    no gastar 4 requests de cuota por cada mensaje del cliente.
-  //    Todos verificados en la lista oficial de :free de OpenRouter.
+  // ── 3) Free de OpenRouter: $0 pero con el tope MÁS ESCASO (50/día por cuenta).
+  //    Cuando se agota devuelven 429 y se marcan como agotados (ver
+  //    isDailyFreeQuotaError/markModelExhausted) para no reintentar en cada
+  //    mensaje. Todos verificados en la lista oficial de :free de OpenRouter.
   "qwen/qwen3.8-27b:free",
   "nvidia/nemotron-3-ultra-550b-a55b:free",
   "nvidia/nemotron-3.5-lightning:free",
@@ -78,14 +105,6 @@ export const STARSHOP_CREW_FALLBACKS = [
   "inclusionai/ling-3.0-flash-sante:free",
   "liquid/lfm-2.5-2.6b:free",
   "poolside/laguna-s-2.1:free",
-  // ── Groq plan gratuito: 1.000 requests/día POR MODELO (no 50 como OpenRouter),
-  //    sin tarjeta ni créditos. Es la red de seguridad para demos/pruebas: cuando
-  //    se agota la cuota diaria de OpenRouter, aquí todavía queda margen.
-  //    Prefijo `groq/` → agent/lib/model-provider.ts los enruta a Groq.
-  //    Solo se usan si hay GROQ_API_KEY (si no, se descartan de la cadena).
-  "groq/qwen/qwen3.8-27b",
-  "groq/openai/gpt-oss-120b",
-  "groq/openai/gpt-oss-20b",
 ] as const;
 
 /**
