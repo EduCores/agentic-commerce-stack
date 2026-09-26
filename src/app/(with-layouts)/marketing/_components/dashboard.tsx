@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
@@ -116,7 +117,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
           {data.campaigns.map((c, i) => {
             const pct = sharePct(c.revenue ?? 0, totalCampaignRevenue);
             return (
-              <div key={c.id} className="rounded-xl border border-card-border p-4">
+              <Fragment key={c.id}>
                 <div className="flex items-center gap-3">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-badge-violet-background text-badge-violet-text [&>svg]:size-5">
                     <Store />
@@ -141,7 +142,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
                   <span><strong className="text-text-primary">{c.products}</strong> productos</span>
                   <span><strong className="text-text-primary">{c.orders}</strong> pedidos</span>
                 </div>
-              </div>
+              </Fragment>
             );
           })}
         </div>
