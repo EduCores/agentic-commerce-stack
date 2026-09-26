@@ -134,9 +134,6 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
                   ${c.revenue.toLocaleString("es-CL")}
                   <span className="ml-2 align-middle text-xs font-medium text-text-tertiary">ingresos</span>
                 </p>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background-gray-secondary">
-                  <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500" style={{ width: `${pct}%` }} />
-                </div>
                 <div className="mt-2.5 flex items-center gap-4 border-t border-card-border/60 pt-2 text-xs text-text-tertiary">
                   <span><strong className="text-text-primary">{c.products}</strong> productos</span>
                   <span><strong className="text-text-primary">{c.orders}</strong> pedidos</span>
