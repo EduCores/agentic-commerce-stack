@@ -116,7 +116,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
           {data.campaigns.map((c, i) => {
             const pct = sharePct(c.revenue ?? 0, totalCampaignRevenue);
             return (
-              <div key={c.id} className="rounded-xl border border-card-border p-4 transition hover:border-brand-500/40 hover:shadow-sm">
+              <div key={c.id} className="rounded-xl border border-card-border p-4">
                 <div className="flex items-center gap-3">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-badge-violet-background text-badge-violet-text [&>svg]:size-5">
                     <Store />
