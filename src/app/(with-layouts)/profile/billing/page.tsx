@@ -17,7 +17,12 @@ const PLANS = [
     tagline: "Producto estrella",
     featured: true,
     priceNote: "Valor por dimensión del proyecto",
-    features: ["Sitio Web", "ACS", "Meta Ads Manager", "Reels+Historias"],
+    features: [
+      { t: "Sitio Web", d: "Vitrina online de tu negocio, lista para vender." },
+      { t: "ACS", d: "Panel inteligente que opera tu tienda con IA." },
+      { t: "Meta Ads Manager", d: "Campañas pagadas en Facebook e Instagram." },
+      { t: "Reels+Historias", d: "Videos cortos e historias que atraen clientes." },
+    ],
   },
   {
     id: "acs-plus",
@@ -26,13 +31,13 @@ const PLANS = [
     featured: false,
     priceNote: "Valor por dimensión del proyecto",
     features: [
-      "Todo lo del plan ACS+",
-      "Shazam de construcción (LiDAR / Visión 3D)",
-      "Experto norma SEC (Pliegos RIC)",
-      "Bodega autónoma (inventario predictivo)",
-      "Presupuestos para contratistas",
-      "Fletes express a faena (< 2 h)",
-      "Devolución de excedentes (economía circular B2B)",
+      { t: "Todo lo del plan ACS+", d: "Incluye los 4 servicios del plan ACS+." },
+      { t: "Shazam de construcción (LiDAR / Visión 3D)", d: "Apunta con el celular y reconoce materiales y avance." },
+      { t: "Experto norma SEC (Pliegos RIC)", d: "Resuelve dudas de normativa eléctrica chilena." },
+      { t: "Bodega autónoma (inventario predictivo)", d: "Anticipa la demanda y evita quiebres de stock." },
+      { t: "Presupuestos para contratistas", d: "Cotiza materiales y mano de obra en minutos." },
+      { t: "Fletes express a faena (< 2 h)", d: "Despacho a obra en menos de 2 horas." },
+      { t: "Devolución de excedentes (economía circular B2B)", d: "Vende sobrantes de obra a otras empresas." },
     ],
   },
 ];
@@ -142,10 +147,14 @@ export default function BillingPage() {
               <p className="mt-1 text-xs text-text-tertiary">Próxima facturación: 01-10-2026 · Se renueva automáticamente</p>
             </div>
           </div>
-          <ul className="mt-3 grid gap-1.5 sm:grid-cols-2">
+          <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
             {plan.features.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm text-text-secondary">
-                <Check className="size-4 shrink-0 text-emerald-600" /> {f}
+              <li key={f.t} className="flex items-start gap-2 text-sm text-text-secondary">
+                <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                <span>
+                  <span className="font-semibold text-text-primary">{f.t}</span>
+                  <span className="block text-xs text-text-tertiary">{f.d}</span>
+                </span>
               </li>
             ))}
           </ul>
@@ -182,9 +191,12 @@ export default function BillingPage() {
                 </p>
                 <p className="text-xs text-text-tertiary">{p.tagline}</p>
                 <p className="mt-1 text-sm font-bold text-brand-600">{p.priceNote}</p>
-                <ul className="mt-2 space-y-1">
+                <ul className="mt-2 space-y-1.5">
                   {p.features.map((f) => (
-                    <li key={f} className="text-xs text-text-tertiary">· {f}</li>
+                    <li key={f.t} className="text-xs">
+                      <span className="font-semibold text-text-secondary">· {f.t}</span>
+                      <span className="block pl-2.5 text-text-tertiary">{f.d}</span>
+                    </li>
                   ))}
                 </ul>
               </button>
