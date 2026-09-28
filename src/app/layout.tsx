@@ -14,7 +14,7 @@ const geistInter = Inter({
 export const metadata: Metadata = {
   title: {
     template: "%s | StarShop ACS",
-    default: "StarShop ACS — Panel del dueño",
+    default: "ACS",
   },
   description:
     "Panel de administración StarShop: tienda híbrida, agente IA, flujos de trabajo y equipo.",
