@@ -10,7 +10,7 @@ export default function Home() {
       <div className="min-w-0 px-3 sm:px-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">Panel — Dueño de tienda</h2>
+            <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">Home</h2>
             <InfoTip label="Acerca del panel">
               Todo tu ACS en un vistazo: ventas, stock, clientes, marketing y automatización.
             </InfoTip>
