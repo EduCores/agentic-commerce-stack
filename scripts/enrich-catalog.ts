@@ -15,6 +15,15 @@
 import "dotenv/config";
 import { prisma } from "../src/lib/adapters/prisma";
 import { resolveModel, headersFor, filterResolvable } from "../agent/lib/model-provider";
+import {
+  buildAttempt,
+  isJsonModeFailure,
+  markModeUnreliable,
+  modesFor,
+  structuredOutputsEnabled,
+  type JsonMode,
+  type JsonSchemaSpec,
+} from "../agent/lib/structured-output";
 
 const MODEL = process.argv.find((a) => a.startsWith("--model="))?.split("=")[1]
   ?? "nvidia/nemotron-3.5-lightning:free";
@@ -22,6 +31,64 @@ const APPLY = process.argv.includes("--apply");
 const LIMIT = Number(process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 50);
 
 type Enrichment = { description: string; aliases: string[]; tags: string[] };
+
+/**
+ * Esquema del enriquecimiento para los modos estructurados
+ * (`additionalProperties: false` + todo en `required`, como exige strict).
+ */
+const ENRICHMENT_SCHEMA: JsonSchemaSpec = {
+  name: "starshop_enrichment",
+  schema: {
+    type: "object",
+    properties: {
+      description: {
+        type: "string",
+        description: "1-2 líneas en español chileno: qué es + uso principal",
+      },
+      aliases: {
+        type: "array",
+        description:
+          "6-10 formas en que un cliente lo buscaría: sinónimos, coloquialismos, plurales, con/sin marca",
+        items: { type: "string" },
+      },
+      tags: {
+        type: "array",
+        description: "3-5 tags: uso, lugar (exterior/interior), rubro",
+        items: { type: "string" },
+      },
+    },
+    required: ["description", "aliases", "tags"],
+    additionalProperties: false,
+  },
+};
+
+/** Recorta y valida el JSON del enriquecimiento (los :free suelen envolverlo en texto). */
+function parseEnrichment(raw: string): Enrichment | null {
+  const cleaned = raw.replace(/```json|```/g, "");
+  const s = cleaned.indexOf("{");
+  const e = cleaned.lastIndexOf("}");
+  if (s < 0 || e <= s) return null;
+  try {
+    const parsed = JSON.parse(cleaned.slice(s, e + 1)) as Partial<Enrichment>;
+    if (typeof parsed.description !== "string" || !Array.isArray(parsed.aliases)) return null;
+    return {
+      description: parsed.description.slice(0, 500),
+      aliases: [
+        ...new Set(
+          parsed.aliases
+            .filter((a) => typeof a === "string")
+            .map((a) => a.trim())
+            .filter(Boolean)
+        ),
+      ].slice(0, 12),
+      tags: Array.isArray(parsed.tags)
+        ? parsed.tags.filter((t) => typeof t === "string").slice(0, 6)
+        : [],
+    };
+  } catch {
+    return null;
+  }
+}
 
 async function enrichOne(title: string, sku: string, category: string, current: string, sourceUrl?: string): Promise<Enrichment | null> {
   const extra = sourceUrl ? `\nFicha de referencia (puede estar vacía): ${sourceUrl}` : "";
@@ -60,62 +127,63 @@ async function tryEnrich(userMsg: string): Promise<Enrichment | null> {
   for (const id of CHAIN) {
     const r = resolveModel(id);
     if (!r) continue;
-    const body = {
-      model: r.upstreamId,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: "Eres un catalogador experto de ferretería chilena (StarShop). Respondes SOLO JSON válido.",
-        },
-        { role: "user", content: userMsg },
-      ],
-    };
-    let resp: Response | null = null;
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 45000);
-    try {
-      resp = await fetch(`${r.baseURL}/chat/completions`, {
-        method: "POST",
-        headers: headersFor(r),
-        body: JSON.stringify(body),
-        signal: ctrl.signal,
-      });
-    } catch {
-      resp = null;
-    } finally {
-      clearTimeout(t);
-    }
-    if (!resp) {
-      console.log(`  ${id}: red`);
-      continue;
-    }
-    if (!resp.ok) {
-      console.log(`  ${id}: HTTP ${resp.status}`);
-      await new Promise((s) => setTimeout(s, 1500));
-      continue;
-    }
-    const j = (await resp.json()) as { choices?: { message?: { content?: string } }[] };
-    const raw = j.choices?.[0]?.message?.content ?? "";
-    // Los modelos :free suelen envolver el JSON en texto/explicaciones: recorta al objeto.
-    const cleaned = raw.replace(/```json|```/g, "");
-    const s = cleaned.indexOf("{");
-    const e = cleaned.lastIndexOf("}");
-    if (s < 0 || e <= s) {
-      console.log(`  ${id}: sin JSON (${raw.slice(0, 80)}...)`);
-      continue;
-    }
-    try {
-      const parsed = JSON.parse(cleaned.slice(s, e + 1)) as Partial<Enrichment>;
-      if (typeof parsed.description !== "string" || !Array.isArray(parsed.aliases)) continue;
-      return {
-        description: parsed.description.slice(0, 500),
-        aliases: [...new Set(parsed.aliases.filter((a) => typeof a === "string").map((a) => a.trim()).filter(Boolean))].slice(0, 12),
-        tags: Array.isArray(parsed.tags) ? parsed.tags.filter((t) => typeof t === "string").slice(0, 6) : [],
+    // Escalera por modelo: modo verificado → json_object → texto+regex. Un 400 de
+    // validación JSON baja de modo ANTES de descartar el modelo (no se pierde una
+    // respuesta útil por exigir un formato que ese modelo no domina).
+    const modes: JsonMode[] = structuredOutputsEnabled("scripts") ? modesFor(id) : ["text"];
+    for (const mode of modes) {
+      const attempt = buildAttempt(id, mode, ENRICHMENT_SCHEMA);
+      const body = {
+        model: r.upstreamId,
+        messages: [
+          {
+            role: "system",
+            content: "Eres un catalogador experto de ferretería chilena (StarShop). Respondes SOLO JSON válido.",
+          },
+          { role: "user", content: userMsg },
+        ],
+        ...(attempt.responseFormat ? { response_format: attempt.responseFormat } : {}),
+        ...attempt.extras,
       };
-    } catch {
-      console.log(`  ${id}: JSON inválido`);
-      continue;
+      let resp: Response | null = null;
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 45000);
+      try {
+        resp = await fetch(`${r.baseURL}/chat/completions`, {
+          method: "POST",
+          headers: headersFor(r),
+          body: JSON.stringify(body),
+          signal: ctrl.signal,
+        });
+      } catch {
+        resp = null;
+      } finally {
+        clearTimeout(t);
+      }
+      if (!resp) {
+        console.log(`  ${id}: red`);
+        break; // siguiente modelo
+      }
+      if (!resp.ok) {
+        const detail = await resp.text().catch(() => "");
+        if (isJsonModeFailure(resp.status, detail)) {
+          markModeUnreliable(id, mode);
+          console.log(`  ${id}: ${mode} rechazado (JSON), bajo de modo`);
+          continue; // mismo modelo, siguiente modo
+        }
+        console.log(`  ${id}: HTTP ${resp.status}`);
+        await new Promise((s) => setTimeout(s, 1500));
+        break; // siguiente modelo
+      }
+      const j = (await resp.json()) as { choices?: { message?: { content?: string } }[] };
+      const raw = j.choices?.[0]?.message?.content ?? "";
+      const parsed = parseEnrichment(raw);
+      if (!parsed) {
+        console.log(`  ${id}: sin JSON válido en modo ${mode}`);
+        continue; // mismo modelo, siguiente modo
+      }
+      console.log(`  ${id}: OK (modo ${mode})`);
+      return parsed;
     }
   }
   return null;

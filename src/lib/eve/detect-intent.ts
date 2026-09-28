@@ -5,6 +5,15 @@
 import { STARSHOP_INTENTS, STARSHOP_WELCOME_PROMPT, STARSHOP_CREW_MODEL, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../../../prisma/starshop-prompts";
 import { isSmallTalk, isAgentMetaQuestion } from "../../../agent/lib/search/normalize";
 import { hasProviderKey, headersFor, resolveModel } from "../../../agent/lib/model-provider";
+import {
+  buildAttempt,
+  isJsonModeFailure,
+  markModeUnreliable,
+  modesFor,
+  structuredOutputsEnabled,
+  type JsonMode,
+  type JsonSchemaSpec,
+} from "../../../agent/lib/structured-output";
 
 export type IntentSource = "llm" | "heuristic";
 
@@ -65,58 +74,152 @@ function isValidIntent(v: unknown): v is StarShopIntent {
   return typeof v === "string" && (STARSHOP_INTENTS as readonly string[]).includes(v);
 }
 
+/**
+ * Esquema del router (structured outputs). Todos los campos en `required` +
+ * `additionalProperties: false`: es lo que exige el modo strict de los
+ * proveedores y lo que hace la respuesta verificable sin regex.
+ */
+const INTENT_SCHEMA: JsonSchemaSpec = {
+  name: "starshop_intent",
+  schema: {
+    type: "object",
+    properties: {
+      intent: {
+        type: "string",
+        enum: [...STARSHOP_INTENTS],
+        description: "Intención principal del cliente (una sola)",
+      },
+      confidence: { type: "number", description: "Confianza de 0 a 1" },
+    },
+    required: ["intent", "confidence"],
+    additionalProperties: false,
+  },
+};
+
+/**
+ * Presupuesto del router: no puede comerse el tiempo del agente.
+ * Con la escalera (modo verificado → json_object → texto) un modelo puede
+ * consumir más de un intento, así que acotamos intentos y tiempo total.
+ */
+const ROUTER_MAX_ATTEMPTS = Number(process.env.ACS_ROUTER_MAX_ATTEMPTS ?? 4);
+const ROUTER_TOTAL_BUDGET_MS = Number(process.env.ACS_ROUTER_BUDGET_MS ?? 9_000);
+
+/** Traza de los últimos intentos (diagnóstico: `npm run test:router`). */
+export type RouterTraceEntry = {
+  model: string;
+  mode: JsonMode | "none";
+  status: number | "ok" | "error";
+  note?: string;
+};
+const routerTrace: RouterTraceEntry[] = [];
+export function getRouterTrace(): RouterTraceEntry[] {
+  return [...routerTrace];
+}
+export function resetRouterTrace(): void {
+  routerTrace.length = 0;
+}
+function trace(entry: RouterTraceEntry): void {
+  routerTrace.push(entry);
+  if (routerTrace.length > 30) routerTrace.shift();
+}
+
+/** Extrae {intent, confidence} del texto, venga limpio o con envoltorio. */
+function parseIntentReply(raw: string): DetectIntentResult | null {
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try {
+    const parsed = JSON.parse(match[0]) as { intent?: unknown; confidence?: unknown };
+    if (!isValidIntent(parsed.intent)) return null;
+    const confidence =
+      typeof parsed.confidence === "number" ? Math.min(1, Math.max(0, parsed.confidence)) : 0.75;
+    return { intent: parsed.intent, confidence, source: "llm" };
+  } catch {
+    return null;
+  }
+}
+
 async function detectIntentLLM(message: string, history?: unknown[]): Promise<DetectIntentResult | null> {
   // El router usa cualquier provider con credencial (OpenRouter y/o Groq).
   if (!hasProviderKey("openrouter") && !hasProviderKey("groq")) return null;
   const preferred = process.env.OPENROUTER_MODEL || STARSHOP_CREW_MODEL;
+  const structured = structuredOutputsEnabled("router");
+  const startedAt = Date.now();
+  let attempts = 0;
   // Cadena de respaldo: si el principal está sin cupo/saturado (402/429/5xx) se
   // prueba el siguiente modelo gratis. Un timeout NO encadena (sumaría otra espera
   // de 8s al router): se cae a la heurística como antes.
   for (const model of buildModelChain(preferred)) {
     const resolved = resolveModel(model);
     if (!resolved) continue;
-    try {
-      const r = await fetch(`${resolved.baseURL}/chat/completions`, {
-        method: "POST",
-        headers: headersFor(resolved),
-        body: JSON.stringify({
-          model: resolved.upstreamId,
-          temperature: 0,
-          max_tokens: 160,
-          messages: [
-            { role: "system", content: `${STARSHOP_WELCOME_PROMPT}\n\nSi la consulta continúa una conversación previa, usa la conversación como contexto para clasificar (ej: después de preguntar por un producto, "¿cuánto con despacho?" es checkout_support; "¿y ese taladro qué tal?" es product_search).\n\nResponde SOLO JSON: {"intent":"<una de ${STARSHOP_INTENTS.join("|")}>","confidence":0.0-1.0}` },
-            { role: "user", content: message.slice(0, 500) + historyContext(history) },
-          ],
-        }),
-        signal: AbortSignal.timeout(8000),
-      });
-      if (!r.ok) {
-        if (r.status === 402 || r.status === 429 || r.status >= 500) {
-          // 429 por cuota diaria de free: marcar para no reintentar en los siguientes mensajes.
-          if (r.status === 429) {
-            const detail = await r.text().catch(() => "");
-            if (isDailyFreeQuotaError(detail)) markModelExhausted(model);
+    // Escalera por modelo: modo verificado → json_object → texto+regex. Un 400 de
+    // validación JSON baja de modo ANTES de descartar el modelo (una respuesta útil
+    // no se convierte en error); 402/429/5xx siguen saltando al modelo siguiente.
+    const modes: JsonMode[] = structured ? modesFor(model) : ["text"];
+    for (const mode of modes) {
+      if (attempts >= ROUTER_MAX_ATTEMPTS) return null;
+      if (Date.now() - startedAt > ROUTER_TOTAL_BUDGET_MS) {
+        console.log("[ACS-ROUTER] presupuesto agotado, cae a heurística");
+        return null;
+      }
+      attempts++;
+      const attempt = buildAttempt(model, mode, INTENT_SCHEMA);
+      try {
+        const r = await fetch(`${resolved.baseURL}/chat/completions`, {
+          method: "POST",
+          headers: headersFor(resolved),
+          body: JSON.stringify({
+            model: resolved.upstreamId,
+            temperature: 0,
+            max_tokens: 160,
+            messages: [
+              { role: "system", content: `${STARSHOP_WELCOME_PROMPT}\n\nSi la consulta continúa una conversación previa, usa la conversación como contexto para clasificar (ej: después de preguntar por un producto, "¿cuánto con despacho?" es checkout_support; "¿y ese taladro qué tal?" es product_search).\n\nResponde SOLO JSON: {"intent":"<una de ${STARSHOP_INTENTS.join("|")}>","confidence":0.0-1.0}` },
+              { role: "user", content: message.slice(0, 500) + historyContext(history) },
+            ],
+            ...(attempt.responseFormat ? { response_format: attempt.responseFormat } : {}),
+            ...attempt.extras,
+          }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) {
+          const detail = await r.text().catch(() => "");
+          // El modelo no produjo JSON conforme al modo: se marca el modo y se
+          // reintenta el MISMO modelo bajando de escalera (no se descarta).
+          if (isJsonModeFailure(r.status, detail)) {
+            markModeUnreliable(model, mode);
+            trace({ model, mode, status: r.status, note: "json inválido" });
+            continue;
           }
-          console.log(`[ACS-ROUTER] modelo ${model} no disponible (HTTP ${r.status}), probando siguiente`);
+          // 429 por cuota diaria de free: marcar para no reintentar en los siguientes mensajes.
+          if (r.status === 429 && isDailyFreeQuotaError(detail)) markModelExhausted(model);
+          if (r.status === 402 || r.status === 429 || r.status >= 500) {
+            console.log(`[ACS-ROUTER] modelo ${model} no disponible (HTTP ${r.status}), probando siguiente`);
+            trace({ model, mode, status: r.status, note: "no disponible" });
+            break; // siguiente modelo
+          }
+          if (r.status === 401) return null; // credencial inválida: cambiar de modelo no lo arregla
+          trace({ model, mode, status: r.status, note: "error duro" });
+          break; // 400 no-JSON: siguiente modelo (comportamiento histórico)
+        }
+        const j = await r.json();
+        const raw: string = (j?.choices?.[0]?.message?.content ?? "").trim();
+        const parsed = parseIntentReply(raw);
+        if (!parsed) {
+          // Respuesta ilegible en este modo: se prueba el modo siguiente del mismo modelo.
+          trace({ model, mode, status: "ok", note: "sin JSON parseable" });
           continue;
         }
-        return null; // 400/401: cambiar de modelo no lo arregla
+        trace({ model, mode, status: "ok" });
+        return parsed;
+      } catch (e) {
+        // Timeout/abort: no encadenar otro modelo (duplicaría la espera) -> heurística
+        if (e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError")) {
+          trace({ model, mode, status: "error", note: "timeout" });
+          return null;
+        }
+        console.log(`[ACS-ROUTER] modelo ${model} error de red, probando siguiente`, e instanceof Error ? e.message : e);
+        trace({ model, mode, status: "error", note: "red" });
+        break; // siguiente modelo
       }
-      const j = await r.json();
-      const raw: string = (j?.choices?.[0]?.message?.content ?? "").trim();
-      // Extrae JSON aunque venga con texto extra
-      const match = raw.match(/\{[^}]*\}/);
-      if (!match) return null;
-      const parsed = JSON.parse(match[0]) as { intent?: unknown; confidence?: unknown };
-      if (!isValidIntent(parsed.intent)) return null;
-      const confidence = typeof parsed.confidence === "number"
-        ? Math.min(1, Math.max(0, parsed.confidence))
-        : 0.75;
-      return { intent: parsed.intent, confidence, source: "llm" };
-    } catch (e) {
-      // Timeout/abort: no encadenar otro modelo (duplicaría la espera) -> heurística
-      if (e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError")) return null;
-      console.log(`[ACS-ROUTER] modelo ${model} error de red, probando siguiente`, e instanceof Error ? e.message : e);
     }
   }
   return null;
