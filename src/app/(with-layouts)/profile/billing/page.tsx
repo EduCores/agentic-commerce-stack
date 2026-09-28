@@ -12,22 +12,24 @@ import { CreditCard, Check, Download } from "lucide-react";
 
 const PLANS = [
   {
-    id: "emprendedor",
-    name: "Emprendedor",
-    price: 9990,
-    features: ["1 tienda", "100 productos", "Soporte por email"],
+    id: "base",
+    name: "Base Digital",
+    priceNote: "Valor por dimensión del proyecto",
+    features: ["Sitio Web", "ACS", "Meta Ads Manager", "Reels"],
   },
   {
-    id: "pro",
-    name: "Pro",
-    price: 29990,
-    features: ["5 tiendas", "Productos ilimitados", "Agente Star + flujos", "Soporte prioritario"],
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: 79990,
-    features: ["Tiendas ilimitadas", "Multi-usuario + roles", "SLA dedicado", "Onboarding asistido"],
+    id: "faena",
+    name: "Faena Total",
+    priceNote: "Valor por dimensión del proyecto",
+    features: [
+      "Todo lo del plan Base Digital",
+      "Shazam de construcción (LiDAR / Visión 3D)",
+      "Experto norma SEC (Pliegos RIC)",
+      "Bodega autónoma (inventario predictivo)",
+      "Presupuestos para contratistas",
+      "Fletes express a faena (< 2 h)",
+      "Devolución de excedentes (economía circular B2B)",
+    ],
   },
 ];
 
@@ -64,12 +66,12 @@ function validExpiry(exp: string): boolean {
 }
 
 export default function BillingPage() {
-  const [planId, setPlanId] = useState("pro");
+  const [planId, setPlanId] = useState("base");
   const [card, setCard] = useState({ last4: "4242", brand: "Visa", exp: "12/28" });
   const [form, setForm] = useState({ number: "", exp: "", cvc: "", name: "" });
   const [saving, setSaving] = useState(false);
 
-  const plan = PLANS.find((p) => p.id === planId) ?? PLANS[1];
+  const plan = PLANS.find((p) => p.id === planId) ?? PLANS[0];
 
   function changePlan(id: string) {
     if (id === planId) return;
@@ -126,7 +128,7 @@ export default function BillingPage() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-2xl font-extrabold tracking-tight text-text-primary">
-                {plan.name} <span className="text-base font-medium text-text-tertiary">· ${plan.price.toLocaleString("es-CL")}/mes</span>
+                {plan.name} <span className="text-base font-medium text-text-tertiary">· {plan.priceNote}</span>
               </p>
               <p className="mt-1 text-xs text-text-tertiary">Próxima facturación: 01-10-2026 · Se renueva automáticamente</p>
             </div>
@@ -145,7 +147,7 @@ export default function BillingPage() {
       <Card>
         <CardHeader><CardTitle className="text-sm">Cambiar de plan</CardTitle></CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             {PLANS.map((p) => (
               <button
                 key={p.id}
@@ -162,7 +164,7 @@ export default function BillingPage() {
                   {p.name}
                   {planId === p.id && <Badge color="success">Actual</Badge>}
                 </p>
-                <p className="mt-1 text-xl font-extrabold text-text-primary">${p.price.toLocaleString("es-CL")}<span className="text-xs font-medium text-text-tertiary">/mes</span></p>
+                <p className="mt-1 text-sm font-bold text-brand-600">{p.priceNote}</p>
                 <ul className="mt-2 space-y-1">
                   {p.features.map((f) => (
                     <li key={f} className="text-xs text-text-tertiary">· {f}</li>
