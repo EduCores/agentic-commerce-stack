@@ -12,7 +12,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <SignInForm />
-          <p className="mt-4 text-center text-[11px] text-text-tertiary">StarShop ACS · Panel del dueño</p>
+          <p className="mt-4 text-center text-[11px] text-text-tertiary">ACS</p>
         </CardContent>
       </Card>
     </div>
