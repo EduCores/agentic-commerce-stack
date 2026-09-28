@@ -8,21 +8,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids
 import { Input } from "@/components/tailgrids/core/input";
 import { Label } from "@/components/tailgrids/core/label";
 import { TextField } from "@/components/tailgrids/core/text-field";
-import { CreditCard, Check, Download } from "lucide-react";
+import { CreditCard, Check, Download, Star } from "lucide-react";
 
 const PLANS = [
   {
-    id: "base",
-    name: "Base Digital",
+    id: "acs",
+    name: "ACS+",
+    tagline: "Producto estrella",
+    featured: true,
     priceNote: "Valor por dimensión del proyecto",
-    features: ["Sitio Web", "ACS", "Meta Ads Manager", "Reels"],
+    features: ["Sitio Web", "ACS", "Meta Ads Manager", "Reels+Historias"],
   },
   {
-    id: "faena",
-    name: "Faena Total",
+    id: "acs-plus",
+    name: "ACS Plus+",
+    tagline: "Construcción y faenas",
+    featured: false,
     priceNote: "Valor por dimensión del proyecto",
     features: [
-      "Todo lo del plan Base Digital",
+      "Todo lo del plan ACS+",
       "Shazam de construcción (LiDAR / Visión 3D)",
       "Experto norma SEC (Pliegos RIC)",
       "Bodega autónoma (inventario predictivo)",
@@ -66,7 +70,7 @@ function validExpiry(exp: string): boolean {
 }
 
 export default function BillingPage() {
-  const [planId, setPlanId] = useState("base");
+  const [planId, setPlanId] = useState("acs");
   const [card, setCard] = useState({ last4: "4242", brand: "Visa", exp: "12/28" });
   const [form, setForm] = useState({ number: "", exp: "", cvc: "", name: "" });
   const [saving, setSaving] = useState(false);
@@ -122,6 +126,11 @@ export default function BillingPage() {
             </span>
             <CardTitle className="text-sm">Plan actual</CardTitle>
             <Badge color="success">Activo</Badge>
+            {plan.featured && (
+              <Badge color="primary" className="inline-flex items-center gap-1">
+                <Star className="size-3" /> Producto estrella
+              </Badge>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -154,16 +163,24 @@ export default function BillingPage() {
                 type="button"
                 onClick={() => changePlan(p.id)}
                 aria-pressed={planId === p.id}
-                className={`rounded-xl border p-4 text-left transition ${
+                className={`relative overflow-hidden rounded-xl border p-4 text-left transition ${
                   planId === p.id
                     ? "border-brand-500 bg-brand-500/5 shadow-sm"
-                    : "border-card-border bg-card-background hover:border-brand-500/50"
+                    : p.featured
+                      ? "border-brand-500/60 bg-gradient-to-br from-brand-500/10 via-card-background to-card-background hover:border-brand-500 hover:shadow-sm"
+                      : "border-card-border bg-card-background hover:border-brand-500/50"
                 }`}
               >
-                <p className="flex items-center justify-between text-sm font-bold text-text-primary">
+                {p.featured && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-brand-500 px-2 py-0.5 text-[11px] font-bold text-black">
+                    <Star className="size-3" /> Producto estrella
+                  </span>
+                )}
+                <p className="mt-1.5 flex items-center justify-between text-sm font-bold text-text-primary">
                   {p.name}
                   {planId === p.id && <Badge color="success">Actual</Badge>}
                 </p>
+                <p className="text-xs text-text-tertiary">{p.tagline}</p>
                 <p className="mt-1 text-sm font-bold text-brand-600">{p.priceNote}</p>
                 <ul className="mt-2 space-y-1">
                   {p.features.map((f) => (

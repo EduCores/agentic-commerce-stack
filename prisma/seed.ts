@@ -69,8 +69,8 @@ async function main() {
   //    provider "starshop" → /api/store/sync hace pull real del catálogo.
   const store = await prisma.storeConnection.upsert({
     where: { id: "seed-store" },
-    update: { name: "Starshop Frontend", provider: "starshop", domain: process.env.STARSHOP_API_URL ?? "http://localhost:3000" },
-    create: { id: "seed-store", name: "Starshop Frontend", provider: "starshop", domain: process.env.STARSHOP_API_URL ?? "http://localhost:3000", config: {} },
+    update: { name: "Starshop Frontend", provider: "starshop", domain: process.env.STARSHOP_PUBLIC_ORIGIN ?? process.env.STARSHOP_API_URL ?? "http://localhost:3000" },
+    create: { id: "seed-store", name: "Starshop Frontend", provider: "starshop", domain: process.env.STARSHOP_PUBLIC_ORIGIN ?? process.env.STARSHOP_API_URL ?? "http://localhost:3000", config: {} },
   });
   const storeId = store.id;
 
