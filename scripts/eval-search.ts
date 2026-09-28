@@ -46,6 +46,7 @@ top("cinta led blanca", "CINTA-LED-5M");
 top("taladroa", "TALADRO-20V");
 top("alicates", "ALICATE-8");
 top("cuanto sale el taladro", "TALADRO-20V");
+top("hola tienes taladors por ahí?", "TALADRO-20V");
 top("kit domotica interruptor", "KIT-DOMOTICA");
 cleanEmpty("hola");
 cleanEmpty("estamos de vuelta?");

@@ -120,7 +120,14 @@ export async function POST(req: Request) {
     const searchCall = toolCalls.find((tc) => tc.toolName === "searchProducts");
     let autoQuery = "";
     if (!hasNavigate && searchCall) {
-      const query = ((searchCall.args?.query as string) ?? "").trim();
+      // Preferir la query limpia que devolvió la tool ("hola tienes taladors por
+      // ahí?" → "taladors"): es la que el storefront sabe resolver. Si la tool
+      // detectó que NO era consulta de producto (saludo/charla), no se navega:
+      // mandar /busqueda?q=hola mostraba una ventana de resultados vacía.
+      const out = (searchCall.output ?? {}) as Record<string, unknown>;
+      const cleanFromTool = typeof out.cleanQuery === "string" ? out.cleanQuery.trim() : "";
+      const rawArg = ((searchCall.args?.query as string) ?? "").trim();
+      const query = cleanFromTool || (out.notAProductQuery === true ? "" : rawArg);
       if (query) {
         autoQuery = query;
         toolCalls.push({
