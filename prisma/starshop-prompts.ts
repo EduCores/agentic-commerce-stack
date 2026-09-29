@@ -26,6 +26,10 @@ export { isFreeModel };
  * y FLOW_MODELS (src/components/flow/types.ts), y republicar el grafo con
  * `npx tsx scripts/sync-router-graph.ts`.
  *
+ * TEMPORAL (prueba Gemini primero): STARSHOP_CREW_MODEL apunta a
+ * gemini/gemini-flash-lite-latest. Para volver a Groq, cambia de vuelta a
+ * "groq/qwen/qwen3.8-27b".
+ *
  * POR QUÉ GROQ Y NO UN :free DE OPENROUTER: este id va PRIMERO en cada request
  * (buildModelChain lo pone delante de todo). Un :free de OpenRouter carga
  * 50 requests/día por cuenta: cuando se agota, cada mensaje pagaba un 429 extra
@@ -33,7 +37,7 @@ export { isFreeModel };
  * y provocó 504 Gateway Timeout en las peticiones que ejecutan tools.
  * Groq da 1.000 requests/día sin tarjeta y responde en ~330-540 ms.
  */
-export const STARSHOP_CREW_MODEL = "groq/qwen/qwen3.8-27b";
+export const STARSHOP_CREW_MODEL = "gemini/gemini-flash-lite-latest";
 
 /**
  * Cadena de respaldo: si el modelo principal falla (402 sin créditos, 429
