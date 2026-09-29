@@ -44,13 +44,17 @@ type Props = {
   onYear: (v: string) => void;
 };
 
-/** Badge flotante del hover: solo el conteo del día, sin fecha. */
+/** Badge flotante del hover: solo el conteo del día, sin fecha.
+ *  Mismo lenguaje visual que las píldoras del embudo de /marketing
+ *  (rounded-lg + bg-background-gray-secondary + punto + valor en strong). */
 function ActivityDayBadge({ active, payload }: { active?: boolean; payload?: { value?: number | string }[] }) {
   if (!active || !payload?.length) return null;
   const v = Number(payload[0].value ?? 0);
   return (
-    <div className="rounded-[4px] bg-button-primary-background px-3 py-1.5 text-xs font-extrabold whitespace-nowrap text-button-primary-text shadow-lg">
-      {v.toLocaleString("es-CL")} solicitudes
+    <div className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-card-border bg-background-gray-secondary px-2.5 py-1 text-xs text-text-secondary shadow-xl">
+      <span className="size-2 shrink-0 rounded-full bg-brand-500" aria-hidden="true" />
+      <strong className="font-bold text-text-primary">{v.toLocaleString("es-CL")}</strong>
+      solicitudes
     </div>
   );
 }
@@ -120,11 +124,16 @@ export function AiActivityChart({ data, days, onDays, month, year, onMonth, onYe
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded-[4px] bg-badge-primary-background px-2.5 py-1 text-xs font-bold text-badge-primary-text">
-              {total} en período
+            <span className="flex items-center gap-1.5 rounded-lg bg-background-gray-secondary px-2.5 py-1 text-xs text-text-secondary">
+              <span className="size-2 shrink-0 rounded-full bg-brand-500" aria-hidden="true" />
+              <strong className="font-bold text-text-primary">{total.toLocaleString("es-CL")}</strong>
+              en período
             </span>
-            <span className="rounded-[4px] bg-badge-warning-background px-2.5 py-1 text-xs font-bold text-badge-warning-text">
-              ~${(total * 0.9).toFixed(1)} costo estimado
+            <span className="flex items-center gap-1.5 rounded-lg bg-background-gray-secondary px-2.5 py-1 text-xs text-text-secondary">
+              <span className="size-2 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
+              ~$
+              <strong className="font-bold text-text-primary">{(total * 0.9).toFixed(1)}</strong>
+              costo estimado
             </span>
           </div>
         </div>

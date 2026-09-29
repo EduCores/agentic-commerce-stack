@@ -35,9 +35,21 @@ export function CatalogTable({ rows }: Props) {
 
   return (
     <ScrollHint>
-        <table className="w-full min-w-[760px] text-sm">
+        {/* w-max + table-fixed: la tabla abraza el contenido (suma de <col>)
+            para que "Producto" (300px con truncate) no estire en desktop
+            ancho y "Proveedor" quede pegado. En móvil el ScrollHint da
+            scroll horizontal en vez de romper el layout. */}
+        <table className="w-max min-w-[760px] table-fixed text-sm">
+          <colgroup>
+            <col style={{ width: 104 }} />
+            <col style={{ width: 300 }} />
+            <col style={{ width: 128 }} />
+            <col style={{ width: 104 }} />
+            <col style={{ width: 148 }} />
+            <col style={{ width: 108 }} />
+          </colgroup>
           <thead className="border-b border-card-border bg-background-gray-secondary/50 text-xs text-text-tertiary">
-            <tr><th className="p-2 text-left" style={{ width: "4%" }}>SKU</th><th className="p-2 text-left">Producto</th><th className="p-2 text-left">Proveedor</th><th className="p-2 text-right">Precio</th><th className="p-2 text-right">Stock</th><th className="p-2 text-center">Estado</th></tr>
+            <tr><th className="whitespace-nowrap p-2 text-left">SKU</th><th className="p-2 text-left">Producto</th><th className="whitespace-nowrap p-2 text-left">Proveedor</th><th className="whitespace-nowrap p-2 text-right">Precio</th><th className="whitespace-nowrap p-2 text-right">Stock</th><th className="whitespace-nowrap p-2 text-center">Estado</th></tr>
           </thead>
           <tbody>
             {rows.map((p) => {
@@ -47,43 +59,43 @@ export function CatalogTable({ rows }: Props) {
               return (
                 <tr key={p.id} className="border-b border-card-border/60 transition hover:bg-background-gray-secondary/60">
                   <td className="p-2">
-  <div className="flex max-w-[72px] items-center gap-1">
-    <span className="truncate font-mono text-xs text-text-secondary" title={p.sku}>{p.sku}</span>
-    <Button
-      type="button"
-      variant="ghost"
-      appearance="ghost"
-      iconOnly
-      size="xs"
-      className="h-5 w-5 shrink-0 rounded p-0"
-      aria-label={`Copiar SKU ${p.sku}`}
-      onPress={() => copySku(p.sku)}
-    >
-      <Copy1 className="size-3.5" />
-    </Button>
-  </div>
-</td>
-                  <td className="p-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex max-w-[96px] items-center gap-1">
+                      <span className="truncate font-mono text-xs text-text-secondary" title={p.sku}>{p.sku}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        appearance="ghost"
+                        iconOnly
+                        size="xs"
+                        className="h-5 w-5 shrink-0 rounded p-0"
+                        aria-label={`Copiar SKU ${p.sku}`}
+                        onPress={() => copySku(p.sku)}
+                      >
+                        <Copy1 className="size-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                  <td className="min-w-0 p-2">
+                    <div className="flex min-w-0 items-center gap-2">
                       <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-3.5">
                         <Package />
                       </span>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-text-primary">{p.title}</p>
-                        <p className="truncate text-xs text-text-tertiary max-w-[280px]">{p.description}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-text-primary" title={p.title}>{p.title}</p>
+                        <p className="truncate text-xs text-text-tertiary" title={p.description}>{p.description}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="p-2"><Badge color={providerColor}>{p.provider}</Badge></td>
-                  <td className="p-2 text-right font-bold text-brand-600">${p.price.toLocaleString("es-CL")}</td>
-                  <td className="p-2 text-right">
+                  <td className="whitespace-nowrap p-2"><Badge color={providerColor}>{p.provider}</Badge></td>
+                  <td className="whitespace-nowrap p-2 text-right font-bold text-brand-600">${p.price.toLocaleString("es-CL")}</td>
+                  <td className="whitespace-nowrap p-2 text-right">
                     <span className="inline-flex items-center gap-1.5">
                       <span className={`size-2 rounded-full ${stockColor}`} />
                       <span className="font-medium">{p.stock}</span>
                       <span className="text-xs text-text-tertiary">({p.reservedStock} res.)</span>
                     </span>
                   </td>
-                  <td className="p-2 text-center"><Badge color={p.isActive ? "success" : "gray"}>{p.isActive ? "Activo" : "Inactivo"}</Badge></td>
+                  <td className="whitespace-nowrap p-2 text-center"><Badge color={p.isActive ? "success" : "gray"}>{p.isActive ? "Activo" : "Inactivo"}</Badge></td>
                 </tr>
               );
             })}
