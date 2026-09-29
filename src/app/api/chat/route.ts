@@ -34,6 +34,7 @@ export async function GET() {
   return Response.json({
     ok: true,
     hasGroqKey: !!process.env.GROQ_API_KEY,
+    hasGeminiKey: !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY),
     hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
     hasDatabaseUrl: !!process.env.DATABASE_URL,
     maxSteps: AGENT_MAX_STEPS,

@@ -34,7 +34,7 @@
  *
  * FLAG: ACS_STRUCTURED_OUTPUTS = off | router | scripts | all  (default: all).
  */
-import { isGroqModel } from "./model-provider";
+import { isGeminiModel, isGroqModel } from "./model-provider";
 
 export type JsonMode = "schema_strict" | "json_object" | "text";
 
@@ -51,6 +51,13 @@ const VERIFIED_MODES: Record<string, JsonMode> = {
   "groq/qwen/qwen3.8-27b": "json_object",
   "groq/openai/gpt-oss-120b": "text",
   "groq/openai/gpt-oss-20b": "text",
+  // ── Google directo (AI Studio): endpoint OpenAI-compatible. Acepta
+  //    response_format json_object (verificado 2026-09-29: 200 + tool-calling con
+  //    gemini-flash-lite-latest). Como Groq/Gemini-directo no es OpenRouter, los
+  //    extras de OpenRouter nunca se le envían (ver buildAttempt). Arranca en
+  //    json_object; si un día falla la validación, la escalera baja a text sola.
+  "gemini/gemini-flash-latest": "json_object",
+  "gemini/gemini-flash-lite-latest": "json_object",
   // ── OpenRouter pagados (structured_outputs=True en la metadata del modelo) ──
   "openai/gpt-oss-120b": "schema_strict",
   "qwen/qwen3-30b-a3b-instruct-2507": "schema_strict",
@@ -123,11 +130,12 @@ export type JsonAttempt = {
  * Construye el payload de un intento. `spec` es obligatorio para `schema_strict`
  * (sin esquema no hay nada que exigir y se cae a texto).
  *
- * EXTRAS SOLO-OPENROUTER: en Groq rebotarían con 400 (el provider reutilizado no
- * filtra los campos exclusivos de OpenRouter), así que se gatean por proveedor.
+ * EXTRAS SOLO-OPENROUTER: en Groq y Google directo rebotarían con 400 (el
+ * provider reutilizado no filtra los campos exclusivos de OpenRouter), así que
+ * se gatean por proveedor.
  */
 export function buildAttempt(modelId: string, mode: JsonMode, spec?: JsonSchemaSpec): JsonAttempt {
-  const isOpenRouter = !isGroqModel(modelId);
+  const isOpenRouter = !isGroqModel(modelId) && !isGeminiModel(modelId);
   if (mode === "text" || !spec) {
     return { mode: "text", extras: {} };
   }

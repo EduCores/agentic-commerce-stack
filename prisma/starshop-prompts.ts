@@ -86,6 +86,16 @@ export const STARSHOP_CREW_FALLBACKS = [
   "groq/qwen/qwen3.8-27b",
   "groq/openai/gpt-oss-120b",
   "groq/openai/gpt-oss-20b",
+  // ── 2) Google directo (AI Studio): free tier sin tarjeta, con tool-calling
+  //    verificado 2026-09-29 (HTTP 200 directo + invocación de función).
+  //    Prefijo `gemini/` → endpoint OpenAI-compatible de Gemini. Solo se usan
+  //    si hay GEMINI_API_KEY (si no, se descartan de la cadena).
+  //    OJO: `google/*` SIN el prefijo `gemini/` son IDs de OpenRouter, no directos.
+  //    Y OJO 2: los IDs con versión fija (gemini-2.0-flash, gemini-2.5-flash…)
+  //    devuelven 404 en el endpoint OpenAI-compatible de esta cuenta; los alias
+  //    `-latest` sí resuelven. NO cambiar a IDs fijos sin re-verificar.
+  "gemini/gemini-flash-latest",
+  "gemini/gemini-flash-lite-latest",
   // ── 2) Pagados: fiabilidad garantizada (verificados con HTTP 200 + tool-calling)
   "openai/gpt-oss-120b",
   "qwen/qwen3-30b-a3b-instruct-2507",

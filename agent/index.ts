@@ -544,7 +544,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
   let finalText = sanitizeReplyText(rawText);
   let direct = false;
   if (!finalText && (rawText || stepToolCalls.length > 0)) {
-    const hasKey = hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq");
+    const hasKey = hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq") || hasProviderKey("google");
     // Resultados de las tools: sin ellos el modelo de respaldo no sabe qué
     // encontró y responde "no encontré el producto".
     const results = ((result as unknown as { steps?: Array<{ toolResults?: unknown[] }> }).steps ?? [])
@@ -624,7 +624,7 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
       // tool-call como texto, genera la respuesta conversacional de respaldo
       // (misma lógica que runAgent, con contexto completo).
       if (!finalText && (rawFinal || toolCalls.length > 0)) {
-        const hasKey = hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq");
+        const hasKey = hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq") || hasProviderKey("google");
         if (hasKey) {
           const directReply = await directChat(attemptModel, system, messages, toolCalls);
           if (directReply) finalText = directReply;

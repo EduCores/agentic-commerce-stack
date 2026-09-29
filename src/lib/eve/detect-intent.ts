@@ -139,8 +139,8 @@ function parseIntentReply(raw: string): DetectIntentResult | null {
 }
 
 async function detectIntentLLM(message: string, history?: unknown[]): Promise<DetectIntentResult | null> {
-  // El router usa cualquier provider con credencial (OpenRouter y/o Groq).
-  if (!hasProviderKey("openrouter") && !hasProviderKey("groq")) return null;
+  // El router usa cualquier provider con credencial (OpenRouter, Groq y/o Google directo).
+  if (!hasProviderKey("openrouter") && !hasProviderKey("groq") && !hasProviderKey("google")) return null;
   const preferred = process.env.OPENROUTER_MODEL || STARSHOP_CREW_MODEL;
   const structured = structuredOutputsEnabled("router");
   const startedAt = Date.now();

@@ -142,6 +142,13 @@ export const FLOW_MODELS: Array<{ id: string; label: string }> = [
   { id: "groq/qwen/qwen3.8-27b", label: "Qwen3.8 27B · Groq (gratis, 1.000/día)" },
   { id: "groq/openai/gpt-oss-120b", label: "GPT-OSS 120B · Groq (gratis, 1.000/día)" },
   { id: "groq/openai/gpt-oss-20b", label: "GPT-OSS 20B · Groq (gratis, 1.000/día)" },
+  // ── Google directo (AI Studio): free tier sin tarjeta, con tool-calling.
+  //    Requiere GEMINI_API_KEY; sin ella, la cadena los descarta automáticamente.
+  //    OJO: el prefijo es `gemini/`, no `google/` (`google/*` son IDs de OpenRouter).
+  //    Los IDs fijos con versión dan 404 en esta cuenta; los alias `-latest`
+  //    están verificados (2026-09-29). NO usar IDs fijos sin re-verificar.
+  { id: "gemini/gemini-flash-latest", label: "Gemini Flash · Google (gratis)" },
+  { id: "gemini/gemini-flash-lite-latest", label: "Gemini Flash-Lite · Google (gratis)" },
 ];
 
 /**
