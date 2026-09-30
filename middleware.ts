@@ -30,7 +30,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/auth/sign-in", req.url));
   }
   try {
-    await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    // Rol member = solo lectura (demo/clientes): puede navegar (GET) y usar
+    // endpoints públicos ya autorizados arriba (auth, chat), pero ningún otro
+    // /api/* con escritura. Sin Server Actions en el proyecto, esto cubre
+    // todas las mutaciones (POST/PATCH/PUT/DELETE).
+    if ((payload.role as string) === "member" && pathname.startsWith("/api/")) {
+      if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") {
+        return NextResponse.next();
+      }
+      return NextResponse.json({ error: "Solo lectura: tu rol no permite modificar" }, { status: 403 });
+    }
     return NextResponse.next();
   } catch {
     if (pathname.startsWith("/api/")) return NextResponse.json({ error: "Sesión expirada" }, { status: 401 });

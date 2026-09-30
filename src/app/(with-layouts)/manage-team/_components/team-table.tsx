@@ -11,12 +11,21 @@ import { RoleSelect } from "./role-select";
 import type { TeamMember } from "./types";
 import { CalendarDays, Lock, Mail, MessageCircle, Phone, Plus, ShieldCheck, Trash2, User, UserPlus, Users } from "lucide-react";
 
+const ROLE_LABEL: Record<string, string> = { member: "Miembro", admin: "Administrador", owner: "Dueño" };
+
 export function TeamTable() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery<{ members: TeamMember[] }>({
     queryKey: ["team"],
     queryFn: async () => (await fetch("/api/admin/team")).json(),
   });
+  // Rol propio: los member ven la lista pero sin crear/editar/eliminar
+  // (el bloqueo real está en middleware + API; esto solo limpia la UI demo).
+  const { data: me } = useQuery<{ admin: { role: string } | null }>({
+    queryKey: ["auth-me"],
+    queryFn: async () => (await fetch("/api/auth/me")).json().catch(() => ({ admin: null })),
+  });
+  const readOnly = me?.admin?.role === "member";
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -82,6 +91,12 @@ export function TeamTable() {
 
   return (
     <div className="space-y-4">
+      {readOnly && (
+        <p className="rounded-lg border border-card-border bg-background-gray-secondary/60 px-3 py-2 text-xs text-text-secondary">
+          Estás en modo solo lectura: puedes ver el equipo pero no modificarlo.
+        </p>
+      )}
+      {!readOnly && (
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -103,6 +118,7 @@ export function TeamTable() {
           {msg && <Badge color="gray">{msg}</Badge>}
         </CardContent>
       </Card>
+      )}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -125,13 +141,21 @@ export function TeamTable() {
                       <td className="p-2">{m.name ?? "—"}</td>
                       <td className="p-2">{m.email}</td>
                       <td className="p-2">
-                        <input defaultValue={m.phone ?? ""} key={`${m.id}-${m.phone ?? "none"}`} onBlur={(e) => { if (e.target.value !== (m.phone ?? "")) changePhone(m.id, e.target.value); }} placeholder="569XXXXXXXX" className="w-32 rounded-lg border border-card-border bg-input-background px-2 py-1 text-xs text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
+                        {readOnly ? (
+                          <span className="text-xs text-text-primary">{m.phone ?? "—"}</span>
+                        ) : (
+                          <input defaultValue={m.phone ?? ""} key={`${m.id}-${m.phone ?? "none"}`} onBlur={(e) => { if (e.target.value !== (m.phone ?? "")) changePhone(m.id, e.target.value); }} placeholder="569XXXXXXXX" className="w-32 rounded-lg border border-card-border bg-input-background px-2 py-1 text-xs text-text-primary [color-scheme:light] dark:[color-scheme:dark]" />
+                        )}
                       </td>
                       <td className="p-2">
-                        <RoleSelect value={m.role} onChange={(next) => changeRole(m.id, next)} label={`Rol de ${m.email}`} size="sm" />
+                        {readOnly ? (
+                          <Badge color="gray">{ROLE_LABEL[m.role] ?? m.role}</Badge>
+                        ) : (
+                          <RoleSelect value={m.role} onChange={(next) => changeRole(m.id, next)} label={`Rol de ${m.email}`} size="sm" />
+                        )}
                       </td>
                       <td className="p-2 text-xs text-text-tertiary">{new Date(m.createdAt).toLocaleDateString("es-CL")}</td>
-                      <td className="p-2 text-right"><button onClick={() => remove(m.id)} className="inline-flex items-center gap-1 text-xs font-medium text-red-600 underline"><Trash2 className="size-3.5" />Eliminar</button></td>
+                      <td className="p-2 text-right">{!readOnly && (<button onClick={() => remove(m.id)} className="inline-flex items-center gap-1 text-xs font-medium text-red-600 underline"><Trash2 className="size-3.5" />Eliminar</button>)}</td>
                     </tr>
                   ))}
                 </tbody>
