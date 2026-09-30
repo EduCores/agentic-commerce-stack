@@ -39,6 +39,7 @@ const memoryStore: RateLimitStore = {
   async increment(key, windowMs) {
     const start = windowStart(windowMs);
     const count = (local.get(`${key}:${start}`) ?? 0) + 1;
+    local.set(`${key}:${start}`, count);
     // Poda: solo interesan las ventanas viva y anterior.
     if (local.size > 5000) {
       const cutoff = start - windowMs;

@@ -62,7 +62,7 @@ async function main() {
   console.log("\n=== A. PROTECCIONES (deben mantenerse) ===");
 
   // A1 — Allowlist de Origin: un sitio ajeno no puede gastar la API key.
-  const evil = guardChatRequest(req({ origin: "https://evil.example", "x-real-ip": "10.0.0.1" }), "probe-a1");
+  const evil = await guardChatRequest(req({ origin: "https://evil.example", "x-real-ip": "10.0.0.1" }), "probe-a1");
   record(
     "A1 allowlist de Origin",
     "proteccion",
@@ -71,7 +71,7 @@ async function main() {
   );
 
   // A1b — Sin Origin la petición se ACEPTA (by design del guard: curl/Postman/proxy).
-  const noOrigin = guardChatRequest(req({ "x-real-ip": "10.0.0.2" }), "probe-a1b");
+  const noOrigin = await guardChatRequest(req({ "x-real-ip": "10.0.0.2" }), "probe-a1b");
   record(
     "A1b petición sin Origin",
     "hallazgo",
@@ -84,7 +84,7 @@ async function main() {
   // A2 — Rate-limit: 31ª petición de la MISMA IP en la misma ventana ⇒ 429.
   let blockedAt = 0;
   for (let i = 1; i <= 40 && !blockedAt; i++) {
-    const r = checkRateLimit("203.0.113.7", "probe-a2");
+    const r = await checkRateLimit("203.0.113.7", "probe-a2");
     if (!r.allowed) blockedAt = i;
   }
   record("A2 rate-limit por IP", "proteccion", blockedAt > 0, blockedAt ? `bloqueada la petición #${blockedAt}` : "nunca bloqueó");
@@ -114,7 +114,7 @@ async function main() {
   // B1 — El marcador de proxy interno no está autenticado: cualquiera lo envía.
   let b1Passed = 0;
   for (let i = 0; i < 200; i++) {
-    const g = guardChatRequest(req({ "x-acs-internal-proxy": "1", "x-real-ip": "198.51.100.9" }), "probe-b1");
+    const g = await guardChatRequest(req({ "x-acs-internal-proxy": "1", "x-real-ip": "198.51.100.9" }), "probe-b1");
     if (g.allowed) b1Passed++;
   }
   record(
@@ -130,7 +130,7 @@ async function main() {
   let b2Passed = 0;
   for (let i = 0; i < 200; i++) {
     const ip = `192.0.2.${i % 256}:${i}`; // IP falsa distinta en cada intento
-    const g = guardChatRequest(req({ "x-forwarded-for": `${ip}, 203.0.113.50` }), "probe-b2");
+    const g = await guardChatRequest(req({ "x-forwarded-for": `${ip}, 203.0.113.50` }), "probe-b2");
     if (g.allowed) b2Passed++;
   }
   record(
