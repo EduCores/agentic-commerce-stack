@@ -30,11 +30,11 @@ export function HomeLowStockCard() {
           <p className="text-xs text-text-tertiary">Todo el stock al día.</p>
         ) : (
           items.map((p) => (
-            <div key={p.sku} className="flex items-center justify-between gap-2 text-sm">
-              <span className="min-w-0 truncate text-text-primary">
+            <div key={p.sku} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-card-border/60 px-3 py-2 text-sm">
+              <span className="min-w-0 flex-1 truncate text-text-primary" title={`${p.title} (${p.sku})`}>
                 {p.title} <span className="text-xs text-text-tertiary">{p.sku}</span>
               </span>
-              <Badge color={p.stock < 10 ? "error" : p.stock <= 30 ? "warning" : "success"}>{p.stock} uds</Badge>
+              <Badge color={p.stock < 10 ? "error" : p.stock <= 30 ? "warning" : "success"} className="shrink-0 whitespace-nowrap tabular-nums">{p.stock}&nbsp;uds</Badge>
             </div>
           ))
         )}
