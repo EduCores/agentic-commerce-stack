@@ -6,6 +6,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { formatCLP } from "./home-types";
 import { HomeCardLink } from "./home-card-link";
 import { sharePct } from "@/utils/period-stats";
+import { HomeActivityCard } from "./home-activity-card";
 
 type AiTotals = { requests: number; cost: number; successRate: number; activeAgents: number };
 type AiDay = { day: string; requests: number };
@@ -174,7 +175,7 @@ export function SiteSummaries() {
               {mktChannels.slice(0, 3).map((c) => {
                 const pct = sharePct(c.revenue ?? 0, mktTotal);
                 return (
-                  <div key={c.channel} className="min-w-0">
+                  <div key={c.channel} className="min-w-0 rounded-lg border border-card-border/60 bg-background-gray-secondary_alt/40 px-3 py-2">
                     <div className="flex items-center justify-between gap-2 text-xs">
                       <span className="min-w-0 truncate font-medium text-text-secondary">{c.channel}</span>
                       <span className="shrink-0 font-bold text-text-primary">{pct.toLocaleString("es-CL")}%</span>
@@ -195,6 +196,9 @@ export function SiteSummaries() {
         )}
         <HomeCardLink href="/marketing">Ver marketing →</HomeCardLink>
       </div>
+
+      {/* Actividad — últimos pasos de agentes y flujos (completa la fila en desktop) */}
+      <HomeActivityCard />
 
       {/* Carros — dinero en juego con urgencia */}
       {carts.data && carts.data.open > 0 && (
