@@ -127,8 +127,8 @@ export default function LastTransactionsTable() {
           </span>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <InputGroup className="h-9 min-w-0 w-full items-center py-0">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <InputGroup className="h-9 min-w-0 w-full items-center py-0 sm:flex-1">
             <InputGroupAddon align="inline-start" className="pr-0 text-icon-tertiary">
               <SearchIcon className="size-4" />
             </InputGroupAddon>
@@ -140,8 +140,8 @@ export default function LastTransactionsTable() {
             />
           </InputGroup>
 
-          <div className="flex items-center gap-2">
-            <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 sm:shrink-0">
+            <div className="min-w-0 flex-1 sm:w-40 sm:flex-none lg:w-48">
               <Select value={statusFilter} onChange={(v) => setStatusFilter(String(v))} aria-label="Filtrar por estado">
                 <SelectTrigger className="h-9 w-full px-2.5 text-xs">
                   <SelectValue />

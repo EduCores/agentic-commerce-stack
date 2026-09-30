@@ -16,8 +16,8 @@ const CHANNEL_BRAND: Record<string, { color: string }> = {
 };
 
 function ChannelIcon({ name, color }: { name: string; color: string }) {
-  const chip = "flex size-8 shrink-0 items-center justify-center rounded-lg [&>svg]:size-4";
-  const style = { backgroundColor: `${color}1A`, color };
+  const chip = "flex size-8 shrink-0 items-center justify-center [&>svg]:size-4";
+  const style = { color };
   if (name === "Starshop") {
     return (
       <span className={chip} style={style}>

@@ -20,7 +20,7 @@ export async function GET(req: Request) {
       prisma.agent.count(),
       prisma.workflowDefinition.count(),
       prisma.product.findMany({ take: 5, orderBy: { updatedAt: "desc" }, select: { sku: true, title: true, price: true, stock: true } }),
-      prisma.order.findMany({ take: 5, orderBy: { createdAt: "desc" }, select: { id: true, total: true, status: true, paymentStatus: true, createdAt: true, customer: { select: { name: true, email: true } } } }),
+      prisma.order.findMany({ take: 8, orderBy: { createdAt: "desc" }, select: { id: true, total: true, status: true, paymentStatus: true, createdAt: true, customer: { select: { name: true, email: true } } } }),
       prisma.agentRun.count(),
       prisma.workflowRun.count(),
     ]);
@@ -34,7 +34,7 @@ export async function GET(req: Request) {
     const revenue = Number(revenueAgg._sum.total ?? 0);
 
     // Top products by order volume
-    const topProductsRaw = await prisma.orderItem.groupBy({ by: ["productId"], _sum: { quantity: true }, orderBy: { _sum: { quantity: "desc" } }, take: 5 }).catch(() => []);
+    const topProductsRaw = await prisma.orderItem.groupBy({ by: ["productId"], _sum: { quantity: true }, orderBy: { _sum: { quantity: "desc" } }, take: 8 }).catch(() => []);
     const topProductIds = topProductsRaw.map((x) => x.productId);
     const topProductsMeta = topProductIds.length ? await prisma.product.findMany({ where: { id: { in: topProductIds } }, select: { id: true, title: true, sku: true, price: true, stock: true } }) : [];
     const topProducts = topProductsRaw.map((g) => {

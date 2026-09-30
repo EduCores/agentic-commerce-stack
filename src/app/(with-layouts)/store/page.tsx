@@ -17,7 +17,11 @@ type StoreConfig = {
 
 export default async function StorePage() {
   const stores = await prisma.storeConnection.findMany({ orderBy: { createdAt: "desc" } }).catch(() => []);
-  const products = await prisma.product.findMany({ take: 12, orderBy: { updatedAt: "desc" } }).catch(() => []);
+  const [products, totalProducts] = await Promise.all([
+    prisma.product.findMany({ take: 100, orderBy: { updatedAt: "desc" } }).catch(() => []),
+    prisma.product.count().catch(() => 0),
+  ]);
+  const catalogTotal = totalProducts > 0 ? totalProducts : products.length;
   const primary = stores[0];
   const primaryHealth = ((primary?.config as unknown as StoreConfig | null)?.lastHealthCheck) ?? null;
 
@@ -109,7 +113,7 @@ export default async function StorePage() {
               <span className="flex size-8 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
                 <Package size={16} />
               </span>
-              <CardTitle>Catálogo universal ({products.length})</CardTitle>
+              <CardTitle>Catálogo universal ({catalogTotal})</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -146,7 +150,7 @@ export default async function StorePage() {
                       </p>
                       <p className="mt-0.5 text-xs text-text-tertiary">{p.sku}</p>
                       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1 border-t border-card-border/60 pt-2 text-xs text-text-tertiary">
-                        <span className="min-w-0">Stock {p.stock} · Reservado {p.reservedStock}</span>
+                        <span className="min-w-0 rounded-md bg-badge-sky-background px-1.5 py-0.5 font-medium text-badge-sky-text">Stock {p.stock} · Reservado {p.reservedStock}</span>
                         <Badge color={stockState.color}>{stockState.badge}</Badge>
                       </div>
                       </div>

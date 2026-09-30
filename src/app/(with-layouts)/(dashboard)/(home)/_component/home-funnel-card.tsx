@@ -45,7 +45,7 @@ export function HomeFunnelCard() {
               const prev = i > 0 ? rows[i - 1].value : null;
               const stepConv = prev ? Math.round((r.value / prev) * 1000) / 10 : null;
               return (
-                <div key={r.stage} className="min-w-0 space-y-1">
+                <div key={r.stage} className="min-w-0 space-y-1 rounded-lg border border-card-border/60 px-3 py-2">
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <span className="flex min-w-0 items-center gap-1.5 font-medium text-text-secondary">
                       <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />

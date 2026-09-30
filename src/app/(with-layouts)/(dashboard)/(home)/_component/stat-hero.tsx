@@ -54,7 +54,7 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             </span>
             <p className="min-w-0 truncate text-xs font-medium text-white/80">Pedidos totales</p>
           </div>
-          <p className="mt-2 break-words text-2xl font-extrabold tracking-tight">{orders.toLocaleString("es-CL")}</p>
+          <p className="mt-2 text-2xl font-extrabold tracking-tight whitespace-nowrap lg:text-xl xl:text-2xl">{orders.toLocaleString("es-CL")}</p>
           <p className="text-xs text-white/70">todos los estados del catálogo</p>
         </div>
         <div className="min-w-0 rounded-xl bg-white/10 p-4 backdrop-blur">
@@ -64,7 +64,7 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             </span>
             <p className="min-w-0 truncate text-xs font-medium text-white/80">Ingresos totales</p>
           </div>
-          <p className="mt-2 break-words text-2xl font-extrabold tracking-tight">{formatCLP(revenue)}</p>
+          <p className="mt-2 text-2xl font-extrabold tracking-tight whitespace-nowrap lg:text-xl xl:text-2xl">{formatCLP(revenue)}</p>
           <p className="text-xs text-white/70">pedidos pagados + completados</p>
         </div>
         <div className="min-w-0 rounded-xl bg-white/10 p-4 backdrop-blur">
@@ -74,7 +74,7 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             </span>
             <p className="min-w-0 truncate text-xs font-medium text-white/80">Ticket promedio</p>
           </div>
-          <p className="mt-2 break-words text-2xl font-extrabold tracking-tight">{formatCLP(ticket)}</p>
+          <p className="mt-2 text-2xl font-extrabold tracking-tight whitespace-nowrap lg:text-xl xl:text-2xl">{formatCLP(ticket)}</p>
           <p className="text-xs text-white/70">ingresos ÷ pedidos</p>
         </div>
         <div className="min-w-0 rounded-xl bg-white/10 p-4 backdrop-blur">
@@ -84,7 +84,7 @@ export function StatHero({ orders, revenue, alerts, availability, stockTotal, re
             </span>
             <p className="min-w-0 truncate text-xs font-medium text-white/80">Stock disponible</p>
           </div>
-          <p className="mt-2 break-words text-2xl font-extrabold tracking-tight">{availability}%</p>
+          <p className="mt-2 text-2xl font-extrabold tracking-tight whitespace-nowrap lg:text-xl xl:text-2xl">{availability}%</p>
           <p className="text-xs text-white/70">{stockTotal.toLocaleString("es-CL")} uds · {reserved.toLocaleString("es-CL")} reservadas</p>
         </div>
       </div>

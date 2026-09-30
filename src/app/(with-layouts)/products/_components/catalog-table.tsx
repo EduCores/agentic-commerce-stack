@@ -35,14 +35,15 @@ export function CatalogTable({ rows }: Props) {
 
   return (
     <ScrollHint>
-        {/* w-max + table-fixed: la tabla abraza el contenido (suma de <col>)
-            para que "Producto" (300px con truncate) no estire en desktop
-            ancho y "Proveedor" quede pegado. En móvil el ScrollHint da
-            scroll horizontal en vez de romper el layout. */}
-        <table className="w-max min-w-[760px] table-fixed text-sm">
+        {/* w-full + table-fixed: la tabla llena la tarjeta (sin scroll en
+            desktop/notebook) y "Producto" (180px con truncate + title con
+            el texto completo) no empuja "Proveedor" fuera de pantalla.
+            En móvil el min-w + ScrollHint da scroll horizontal en vez
+            de romper el layout. */}
+        <table className="w-full min-w-[760px] table-fixed text-sm">
           <colgroup>
             <col style={{ width: 104 }} />
-            <col style={{ width: 300 }} />
+            <col style={{ width: 180 }} />
             <col style={{ width: 128 }} />
             <col style={{ width: 104 }} />
             <col style={{ width: 148 }} />

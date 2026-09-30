@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
@@ -89,7 +89,7 @@ function CampaignsHero({ data }: { data: MarketingData }) {
 function CampaignsDetail({ data }: { data: MarketingData }) {
   if (data.campaigns.length === 0) {
     return (
-      <Card className="min-w-0 xl:col-span-2">
+      <Card className="min-w-0">
         <CardHeader><CardTitle className="text-sm">Campañas por tienda — catálogo híbrido</CardTitle></CardHeader>
         <CardContent>
           <p className="text-sm text-text-tertiary">Aún no hay campañas. Conecta una tienda en /store para crear la primera (mock para demo, shopify con dominio/apiKey para real).</p>
@@ -100,7 +100,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
   }
   const totalCampaignRevenue = data.campaigns.reduce((a, c) => a + (c.revenue ?? 0), 0);
   return (
-    <Card className="min-w-0 xl:col-span-2">
+    <Card className="min-w-0">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-sm">Campañas por tienda — desglose real</CardTitle>
@@ -113,7 +113,7 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-3 sm:grid-cols-1 xl:grid-cols-2">
+        <div className="grid gap-3">
           {data.campaigns.map((c, i) => {
             const pct = sharePct(c.revenue ?? 0, totalCampaignRevenue);
             return (
@@ -156,9 +156,67 @@ function CampaignsDetail({ data }: { data: MarketingData }) {
   );
 }
 
+function StoresSummary({ data }: { data: MarketingData }) {
+  const totalRevenue = data.campaigns.reduce((a, c) => a + (c.revenue ?? 0), 0);
+  const totalOrders = data.campaigns.reduce((a, c) => a + (c.orders ?? 0), 0);
+  const totalProducts = data.campaigns.reduce((a, c) => a + (c.products ?? 0), 0);
+  const active = data.campaigns.filter((c) => c.active).length;
+  const best = [...data.campaigns].sort((a, b) => (b.revenue ?? 0) - (a.revenue ?? 0))[0];
+  const bestPct = best ? sharePct(best.revenue ?? 0, totalRevenue) : 0;
+  const rows: { label: ReactNode; value: ReactNode }[] = [
+    { label: "Ingresos totales", value: <span className="text-xs font-bold text-brand-600">${totalRevenue.toLocaleString("es-CL")}</span> },
+    { label: "Pedidos", value: <span className="text-xs font-bold text-text-primary">{totalOrders.toLocaleString("es-CL")}</span> },
+    { label: "Productos en catálogo", value: <span className="text-xs font-bold text-text-primary">{totalProducts.toLocaleString("es-CL")}</span> },
+    { label: "Tiendas activas", value: <span className="flex shrink-0 items-center gap-2"><Badge color={active > 0 ? "success" : "gray"}>{active}/{data.campaigns.length}</Badge></span> },
+  ];
+  return (
+    <Card className="min-w-0">
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
+              <Store />
+            </span>
+            <CardTitle className="text-sm">Resumen de tiendas</CardTitle>
+          </div>
+          <Link href="/store" className="text-xs font-medium text-brand-600 underline">Gestionar en /store →</Link>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {data.campaigns.length === 0 ? (
+          <p className="text-sm text-text-tertiary">Sin tiendas conectadas. Crea la primera en /store.</p>
+        ) : (
+          <div className="space-y-2">
+            {rows.map((r, i) => (
+              <div key={i} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-card-border/60 px-3 py-2 text-sm">
+                <span className="min-w-0 truncate text-text-primary">{r.label}</span>
+                {r.value}
+              </div>
+            ))}
+            {best && (
+              <div className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-card-border/60 px-3 py-2 text-sm">
+                <span className="min-w-0 truncate text-text-primary">Mejor tienda: <strong>{best.name}</strong></span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <span className="text-xs font-bold text-brand-600">${(best.revenue ?? 0).toLocaleString("es-CL")}</span>
+                  <span className="rounded-[4px] bg-badge-violet-background px-2 py-0.5 text-xs font-bold text-badge-violet-text">
+                    {bestPct.toLocaleString("es-CL")}%
+                  </span>
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+        <p className="mt-3 border-t border-card-border pt-3 text-xs text-text-tertiary">
+          Cada tienda conectada es una campaña. Refuerza la que más convierte desde /admin/emails.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 function AudienceCard({ data }: { data: MarketingData }) {
   return (
-    <Card className="min-w-0 xl:col-span-2">
+    <Card className="min-w-0">
       <CardHeader>
         <div className="flex items-center gap-2">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-sky-background text-badge-sky-text [&>svg]:size-4">
@@ -176,7 +234,7 @@ function AudienceCard({ data }: { data: MarketingData }) {
         </p>
         <div className="mt-3 space-y-1.5">
           {(data.audience?.byChannel ?? []).slice(0, 4).map((a) => (
-            <div key={a.channel} className="flex items-center justify-between gap-2 text-sm">
+            <div key={a.channel} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-card-border/60 px-3 py-2 text-sm">
               <span className="flex min-w-0 items-center gap-2">
                 <ChannelIcon name={a.channel} />
                 <span className="min-w-0 truncate">{a.channel}</span>
@@ -226,19 +284,20 @@ export function MarketingDashboard() {
       {/* 3. Embudo de conversión */}
       <MarketingFunnel data={data} />
 
-      {/* Campañas + audiencia 50/50, luego Meta y canales a ancho completo */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="grid gap-4 md:col-span-3 md:grid-cols-2">
-          <CampaignsDetail data={data} />
-          <AudienceCard data={data} />
-        </div>
-        <div className="md:col-span-3">
-          <MetaConnectCard />
-        </div>
-        <div className="md:col-span-3">
-          <MarketingChannelTable data={data} />
-        </div>
+      {/* Campañas + resumen — 50/50 en md+ */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <CampaignsDetail data={data} />
+        <StoresSummary data={data} />
       </div>
+
+      {/* Audiencia + Rendimiento por canal — 50/50 forzado en md+ */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <AudienceCard data={data} />
+        <MarketingChannelTable data={data} />
+      </div>
+
+      {/* Meta a ancho completo */}
+      <MetaConnectCard />
     </div>
   );
 }

@@ -16,23 +16,20 @@ const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "gray"> = {
 export function RecentOrders({ orders }: { orders: HomeStats["recentOrders"] }) {
   return (
     <div className="min-w-0 rounded-xl border border-card-border bg-card-background p-5">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge-violet-background text-badge-violet-text [&>svg]:size-4">
             <ShoppingCart />
           </span>
           <h3 className="min-w-0 truncate text-sm font-semibold tracking-[-0.2px] text-text-primary">Últimos pedidos</h3>
         </div>
-        <HomeCardLink href="/orders" size="sm" className="mt-0 w-auto shrink-0">
-          Ver todos →
-        </HomeCardLink>
       </div>
       <div className="mt-3 space-y-2">
         {orders.length === 0 ? (
           <p className="text-xs text-text-tertiary">Sin pedidos todavía</p>
         ) : (
-          orders.slice(0, 5).map((o) => (
-            <div key={o.id} className="flex items-center justify-between gap-2 text-sm">
+          orders.slice(0, 8).map((o) => (
+            <div key={o.id} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-card-border/60 px-3 py-2 text-sm">
               <span className="min-w-0 truncate text-text-primary">
                 {o.customer?.name ?? "—"} <span className="text-xs text-text-tertiary">{String(o.id).slice(0, 8)}</span>
               </span>
@@ -44,6 +41,7 @@ export function RecentOrders({ orders }: { orders: HomeStats["recentOrders"] }) 
           ))
         )}
       </div>
+      <HomeCardLink href="/orders">Ver todos →</HomeCardLink>
     </div>
   );
 }

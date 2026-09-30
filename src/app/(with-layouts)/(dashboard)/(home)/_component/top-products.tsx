@@ -27,13 +27,13 @@ export function TopProducts({ items }: { items: HomeStats["topProducts"] }) {
           items.map((tp, i) => {
             const revenue = (tp.quantity ?? 0) * Number(tp.product?.price ?? 0);
             return (
-              <div key={i} className="flex items-center justify-between gap-2 text-sm">
+              <div key={i} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-card-border/60 px-3 py-2 text-sm">
                 <span className="min-w-0 truncate text-text-primary">
                   {tp.product?.title ?? "—"} <span className="text-xs text-text-tertiary">{tp.product?.sku}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   <span className="text-xs font-bold text-text-primary">{formatCLP(revenue)}</span>
-                  <Badge color={RANK[i % RANK.length]}>{tp.quantity} uds · {sharePct(tp.quantity ?? 0, totalQty).toLocaleString("es-CL")}%</Badge>
+                  <Badge color={RANK[i % RANK.length]} className="shrink-0 whitespace-nowrap tabular-nums">{tp.quantity}&nbsp;uds · {sharePct(tp.quantity ?? 0, totalQty).toLocaleString("es-CL")}%</Badge>
                 </span>
               </div>
             );
