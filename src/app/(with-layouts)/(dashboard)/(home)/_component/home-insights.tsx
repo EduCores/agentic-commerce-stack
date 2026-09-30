@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Trophy, CalendarDays, BadgeCheck, TriangleAlert, Lightbulb } from "lucide-react";
+import { Trophy, CalendarDays, BadgeCheck, TriangleAlert, Lightbulb, Coins, TrendingUp, TrendingDown } from "lucide-react";
 import { formatCLP } from "./home-types";
 
 type MarketingData = {
@@ -46,6 +46,18 @@ export function HomeInsights() {
   const paidOrders = status.filter((s) => ["PAID", "FULFILLED"].includes(s.status)).reduce((a, s) => a + s.count, 0);
   const paidRate = totalOrders > 0 ? Math.round((paidOrders / totalOrders) * 1000) / 10 : 0;
   const lowCount = (analytics?.lowStock ?? []).length;
+
+  // Idea 5: canal que más ingresos genera (ángulo facturación, no conversión)
+  const totalChannelRev = channels.reduce((a, c) => a + (c.revenue || 0), 0);
+  const revLeader = [...channels].filter((c) => c.revenue > 0).sort((a, b) => b.revenue - a.revenue)[0];
+  const revShare = revLeader && totalChannelRev > 0 ? Math.round((revLeader.revenue / totalChannelRev) * 100) : 0;
+
+  // Idea 6: tendencia — segunda mitad del período vs primera mitad
+  const half = Math.floor(days.length / 2);
+  const firstHalf = days.slice(0, half).reduce((a, d) => a + d.total, 0);
+  const secondHalf = days.slice(half).reduce((a, d) => a + d.total, 0);
+  const trendPct = half > 0 && firstHalf > 0 ? Math.round(((secondHalf - firstHalf) / firstHalf) * 100) : null;
+  const trendUp = (trendPct ?? 0) >= 0;
 
   if (!marketing && !analytics) {
     return (
@@ -100,6 +112,32 @@ export function HomeInsights() {
             <p className="min-w-0 text-xs leading-4 text-text-secondary">
               <strong className="text-text-primary">{lowCount} productos</strong> con stock crítico.{" "}
               <Link href="/products" className="font-bold text-brand-600 underline">Reponer →</Link>
+            </p>
+          </div>
+        )}
+        {revLeader && (
+          <div className="flex min-w-0 items-start gap-2.5 rounded-lg border border-card-border/60 p-3">
+            <Coins className="mt-0.5 size-4 shrink-0 text-amber-500" />
+            <p className="min-w-0 text-xs leading-4 text-text-secondary">
+              <strong className="text-text-primary">{revLeader.channel}</strong> generó{" "}
+              <strong className="text-text-primary">{formatCLP(revLeader.revenue)}</strong> — {revShare}% de tus ingresos por canal.
+              Es donde más dinero entra hoy.
+            </p>
+          </div>
+        )}
+        {trendPct !== null && Math.abs(trendPct) >= 1 && (
+          <div className="flex min-w-0 items-start gap-2.5 rounded-lg border border-card-border/60 p-3">
+            {trendUp ? (
+              <TrendingUp className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+            ) : (
+              <TrendingDown className="mt-0.5 size-4 shrink-0 text-rose-600" />
+            )}
+            <p className="min-w-0 text-xs leading-4 text-text-secondary">
+              Tus ventas están{" "}
+              <strong className={trendUp ? "text-emerald-600" : "text-rose-600"}>
+                {trendUp ? "subiendo" : "bajando"} {Math.abs(trendPct)}%
+              </strong>{" "}
+              en la segunda mitad del período vs la primera ({formatCLP(firstHalf)} → {formatCLP(secondHalf)}).
             </p>
           </div>
         )}

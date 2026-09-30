@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import { verifySessionToken, AUTH_COOKIE } from "@/lib/auth";
 import { runAgent, runStarShopFlow, refreshCrewOverrides } from "@/../agent";
-import { guardChatRequest, corsHeaders, isOriginAllowed } from "@/lib/api/chat-guard";
+import { guardChatRequest, corsHeaders, isOriginAllowed, getClientIp, internalProxyHeaders } from "@/lib/api/chat-guard";
 import { prisma } from "@/lib/adapters/prisma";
 import { ROUTER_SLUG } from "@/../agent/lib/crew-graph";
 import { AGENT_MAX_STEPS } from "@/shared/agent-limits";
@@ -57,13 +57,25 @@ async function warmUp() {
 }
 
 export async function POST(req: Request) {
+  // El body se lee ANTES del guard: si la petición se reenvía a /api/chat/stream
+  // (stream=true), el conteo del rate-limit ocurre ALLÍ una sola vez y con la IP
+  // firmada del cliente. Así no hace falta ningún header "mágico" falsificable.
+  const body = (await req.json().catch(() => ({}))) as {
+    message?: string;
+    history?: unknown[];
+    agentSlug?: string;
+    storeId?: string;
+    useFlow?: boolean;
+    stream?: boolean;
+  };
+  const { message, history, agentSlug, storeId, useFlow, stream } = body;
+
   // Protección: allowlist de orígenes + rate-limit por IP
-  const guard = guardChatRequest(req, "chat");
+  const guard = await guardChatRequest(req, "chat", { skipRateLimit: stream === true });
   if (!guard.allowed) {
     return NextResponse.json({ error: guard.error, retryAfter: guard.retryAfter }, { status: guard.status, headers: guard.headers });
   }
 
-  const { message, history, agentSlug, storeId, useFlow, stream } = await req.json();
   // isAdmin NUNCA viene del cliente: se deriva de la sesión (evita escalada a flujos admin + gasto de la key del dueño)
   const token = (await cookies()).get(AUTH_COOKIE.name)?.value;
   const isAdmin = token ? !!(await verifySessionToken(token)) : false;
@@ -72,7 +84,7 @@ export async function POST(req: Request) {
   if (stream) {
     const url = new URL(req.url);
     url.pathname = "/api/chat/stream";
-    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json", "x-acs-internal-proxy": "1" }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
+    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json", ...internalProxyHeaders(getClientIp(req)) }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
     // Proxy streaming response tal cual
     return new Response(r.body, { status: r.status, headers: { "Content-Type": "text/event-stream", ...guard.headers } });
   }

@@ -8,14 +8,29 @@
  *      lista permitida se rechaza con 403. Las peticiones SIN Origin (curl, Postman,
  *      server-to-server y el proxy interno route.ts → stream/route.ts) se permiten;
  *      su defensa es el rate-limit.
- *   2. Rate-limit por IP: ventana fija en memoria (mapa de buckets). En Vercel el
- *      runtime es serverless: el límite es best-effort por instancia lambda. Para un
- *      endurecimiento multi-instancia real, migrar el store a Upstash/Redis o BD.
+ *   2. Rate-limit por IP: ventana fija de 60 s. El contador vive en
+ *      `./rate-limit-store`: con `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
+ *      se cuenta en Redis compartido (válido entre TODAS las instancias lambda, que es
+ *      el límite de verdad); sin esas variables cae a memoria —best-effort por
+ *      instancia— y, si Redis falla, degrada a memoria con circuit breaker de 30 s.
+ *      Se usa la API REST de Upstash por `fetch`: cero dependencias nuevas.
+ *   3. Proxy interno FIRMADO: cuando route.ts reenvía a /api/chat/stream no puede
+ *      contar dos veces el mismo mensaje, así que salta su propio conteo y le pasa
+ *      la IP del cliente en `x-acs-proxy-ip` + firma HMAC-SHA256 (`x-acs-proxy-sig`,
+ *      sellada con getJwtSecret()). Sin firma válida esas cabeceras se ignoran y la
+ *      petición se cuenta con la IP de quien llama: nadie puede inventarse un bypass.
  *
  * Configuración vía env:
  *   ALLOWED_ORIGINS          — orígenes extra separados por coma
  *   CHAT_RATE_LIMIT_PER_MIN  — máx peticiones por IP y minuto (default 30, 0 = ilimitado)
+ *   UPSTASH_REDIS_REST_URL   — host REST de Upstash (ej: https://x.upstash.io)
+ *   UPSTASH_REDIS_REST_TOKEN — token Bearer de ese host ⇒ rate-limit distribuido
+ *                              (sin ambas variables el contador cae a memoria, por instancia)
  */
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { getJwtSecret } from "@/lib/jwt-secret";
+import { getRateLimitStore, reportStoreFailure } from "./rate-limit-store";
+
 
 const ORIGIN_HEADER = "Access-Control-Allow-Origin";
 
@@ -68,70 +83,117 @@ function parsePositiveInt(v: string | undefined, fallback: number): number {
 
 const MAX_PER_MIN = parsePositiveInt(process.env.CHAT_RATE_LIMIT_PER_MIN, 30);
 
-interface Bucket {
-  count: number;
-  resetAt: number;
-}
-const buckets = new Map<string, Bucket>();
+// El contador vive en ./rate-limit-store (memoria o Redis según env) para que el
+// límite no dependa de cuántas instancias lambda hayan entrado frías.
 
-function pruneBuckets(now: number) {
-  if (buckets.size < 10_000) return;
-  for (const [k, b] of buckets) {
-    if (b.resetAt <= now) buckets.delete(k);
-  }
-}
-
-/** IP cliente: Vercel expone la real vía x-forwarded-for. */
+/**
+ * IP cliente. En Vercel el borde añade la IP real a `x-forwarded-for`: la entrada
+ * FIABLE es la ÚLTIMA (la que agrega el proxy más cercano). Leer la primera permitía
+ * al cliente inventarse una IP distinta en cada intento y saltarse el rate-limit.
+ * Nota: desplegado SIN proxy delante, `x-forwarded-for` es 100% del cliente; en ese
+ * caso hay que limitar por otra vía (p. ej. el borde/CDN).
+ */
 export function getClientIp(req: Request): string {
   const fwd = req.headers.get("x-forwarded-for");
   if (fwd) {
-    const first = fwd.split(",")[0].trim();
-    if (first) return first;
+    const parts = fwd.split(",").map((p) => p.trim()).filter(Boolean);
+    const last = parts[parts.length - 1];
+    if (last) return last;
   }
   const real = req.headers.get("x-real-ip");
   if (real) return real.trim();
   return "unknown";
 }
 
+// ─── Proxy interno firmado (route.ts → stream/route.ts) ──────────────────────────────
+export const PROXY_IP_HEADER = "x-acs-proxy-ip";
+export const PROXY_SIG_HEADER = "x-acs-proxy-sig";
+
+function signProxyIp(ip: string): string {
+  return createHmac("sha256", getJwtSecret()).update(`acs-chat-proxy:${ip}`).digest("hex");
+}
+
+/** Cabeceras que route.ts añade al reenviar la petición al mismo proyecto. */
+export function internalProxyHeaders(clientIp: string): Record<string, string> {
+  return { [PROXY_IP_HEADER]: clientIp, [PROXY_SIG_HEADER]: signProxyIp(clientIp) };
+}
+
+/**
+ * IP declarada por el proxy interno, SOLO si la firma HMAC es válida.
+ * Un cliente externo no puede calcularla (no conoce ADMIN_JWT_SECRET).
+ */
+export function verifiedProxyIp(req: Request): string | null {
+  const ip = req.headers.get(PROXY_IP_HEADER);
+  const sig = req.headers.get(PROXY_SIG_HEADER);
+  if (!ip || !sig) return null;
+  const expected = signProxyIp(ip);
+  const a = Buffer.from(sig, "utf8");
+  const b = Buffer.from(expected, "utf8");
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  return ip;
+}
+
 export type RateLimitResult =
   | { allowed: true }
   | { allowed: false; retryAfterSec: number };
 
-export function checkRateLimit(ip: string, scope: string): RateLimitResult {
+/**
+ * Cuenta una petición contra el backend activo (Redis compartido si `UPSTASH_REDIS_REST_*`
+ * están definidos; si no, memoria). Nunca lanza: si el backend distribuido falla se
+ * degrada a memoria y se abre un circuit breaker de 30 s para no martillearlo.
+ */
+export async function checkRateLimit(ip: string, scope: string): Promise<RateLimitResult> {
   if (MAX_PER_MIN <= 0) return { allowed: true };
-  const now = Date.now();
-  pruneBuckets(now);
-  const id = `${scope}:${ip}`;
-  const b = buckets.get(id);
-  if (!b || b.resetAt <= now) {
-    buckets.set(id, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true };
+  const key = `acs:chat:${scope}:${ip}`;
+  let res: { count: number; windowEndsAt: number };
+  try {
+    res = await getRateLimitStore().increment(key, WINDOW_MS);
+  } catch (e) {
+    reportStoreFailure(e);
+    try {
+      // Con el breaker abierto getRateLimitStore() ya devuelve el store de memoria.
+      res = await getRateLimitStore().increment(key, WINDOW_MS);
+    } catch {
+      return { allowed: true }; // un limiter roto no puede tumbar el chat
+    }
   }
-  b.count += 1;
-  if (b.count > MAX_PER_MIN) {
-    return { allowed: false, retryAfterSec: Math.max(1, Math.ceil((b.resetAt - now) / 1000)) };
+  if (res.count > MAX_PER_MIN) {
+    return { allowed: false, retryAfterSec: Math.max(1, Math.ceil((res.windowEndsAt - Date.now()) / 1000)) };
   }
   return { allowed: true };
+}
+
+/** Backend de contadores en uso ("upstash" | "memory"); para diagnóstico y para la sonda. */
+export function rateLimitBackend(): string {
+  return getRateLimitStore().name;
 }
 
 export type GuardResult =
   | { allowed: true; headers: Record<string, string> }
   | { allowed: false; status: number; error: string; retryAfter?: number; headers: Record<string, string> };
 
+export type GuardOptions = {
+  /**
+   * true solo cuando route.ts ya NO cuenta esta petición porque la va a reenviar a
+   * /api/chat/stream (allí se cuenta una sola vez, con la IP firmada del cliente).
+   */
+  skipRateLimit?: boolean;
+};
+
 /**
  * Valida origin + rate-limit en una petición de chat.
- * El marcador `x-acs-internal-proxy: 1` indica que la petición vino del proxy interno
- * de route.ts (ya validada), evitando el doble conteo del rate limit.
+ * La IP se toma de `x-acs-proxy-ip` solo si trae firma válida (proxy interno); en
+ * cualquier otro caso se usa la IP real de quien llama — el marcador ya no se puede
+ * falsificar para saltarse el límite.
  */
-export function guardChatRequest(req: Request, scope: string): GuardResult {
+export async function guardChatRequest(req: Request, scope: string, opts?: GuardOptions): Promise<GuardResult> {
   const origin = req.headers.get("origin");
   if (!isOriginAllowed(origin)) {
     return { allowed: false, status: 403, error: "Origen no permitido", headers: corsHeaders(origin) };
   }
-  const isInternal = req.headers.get("x-acs-internal-proxy") === "1";
-  if (!isInternal) {
-    const ip = getClientIp(req);
-    const rl = checkRateLimit(ip, scope);
+  if (!opts?.skipRateLimit) {
+    const ip = verifiedProxyIp(req) ?? getClientIp(req);
+    const rl = await checkRateLimit(ip, scope);
     if (!rl.allowed) {
       return { allowed: false, status: 429, error: "Demasiadas peticiones. Intenta en un momento.", retryAfter: rl.retryAfterSec, headers: corsHeaders(origin) };
     }

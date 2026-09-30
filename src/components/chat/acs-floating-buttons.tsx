@@ -4,6 +4,7 @@ import { ArrowUp, Bot, X, Send, Sparkles, Mic, MicOff, Volume2, VolumeX } from "
 import { motion, AnimatePresence } from "framer-motion";
 import { getTeamWhatsAppLink, memberWaLink } from "@/lib/whatsapp";
 import { AgentMarkdown } from "./agent-markdown";
+import { safeNavPath } from "@/utils/safe-nav";
 
 type AgentToolCall = {
   toolName?: string;
@@ -197,7 +198,8 @@ export function ACSFloatingButtons() {
     const { text, navigateTo } = await getAgentReply(t, historyForLLM);
     setAgentTyping(false);
     typeAgentMessage(text);
-    if (navigateTo) setTimeout(() => { window.location.href = navigateTo; }, 1200);
+    const nav = safeNavPath(navigateTo);
+    if (nav) setTimeout(() => { window.location.href = nav; }, 1200);
   };
 
   return (

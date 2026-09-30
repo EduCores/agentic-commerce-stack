@@ -12,7 +12,7 @@ import { AGENT_MAX_OUTPUT_TOKENS, AGENT_MAX_STEPS } from "@/shared/agent-limits"
 export { AGENT_MAX_STEPS, AGENT_MAX_OUTPUT_TOKENS };
 import { prisma } from "@/lib/adapters/prisma";
 import { SALES_SYSTEM_PROMPT } from "../prisma/sales-system-prompt";
-import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../prisma/starshop-prompts";
+import { STARSHOP_CREWS, STARSHOP_CREW_FALLBACKS, STARSHOP_CREW_MODEL, STARSHOP_CREW_TOOLS, STARSHOP_LANGUAGE_RULE, STARSHOP_TRUTH_RULE, STARSHOP_INJECTION_RULE, buildModelChain, isDailyFreeQuotaError, markModelExhausted, type StarShopIntent } from "../prisma/starshop-prompts";
 import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type GraphCrewOverride } from "./lib/crew-graph";
 import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
@@ -436,7 +436,7 @@ async function resolveAgent(params: { agentSlug: string; storeId?: string; _over
       .catch(() => null);
     return {
       agent: { id: dbAgent?.id ?? `crew-${params.agentSlug}`, slug: params.agentSlug, model: params._override.model, systemPrompt: params._override.systemPrompt },
-      system: `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}\n\n${STARSHOP_TRUTH_RULE}`,
+      system: `${params._override.systemPrompt}\n\n${STARSHOP_LANGUAGE_RULE}\n\n${STARSHOP_TRUTH_RULE}\n\n${STARSHOP_INJECTION_RULE}`,
       modelId: params._override.model,
       allowedTools: params._override.allowedTools,
     };
@@ -444,7 +444,7 @@ async function resolveAgent(params: { agentSlug: string; storeId?: string; _over
   const agent = (await getAgentConfig(params.agentSlug)) as ResolvedAgentConfig["agent"];
   return {
     agent,
-    system: `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}\n\n${STARSHOP_TRUTH_RULE}`,
+    system: `${agent.systemPrompt ?? `Eres asistente de commerce para ${params.storeId ?? "tienda demo"}. Ayuda a buscar productos, verificar stock y comprar.`}\n\n${STARSHOP_LANGUAGE_RULE}\n\n${STARSHOP_TRUTH_RULE}\n\n${STARSHOP_INJECTION_RULE}`,
     modelId: agent.model ?? DEFAULT_MODEL,
     allowedTools: undefined,
   };

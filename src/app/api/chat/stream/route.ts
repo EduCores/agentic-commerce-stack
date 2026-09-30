@@ -20,7 +20,7 @@ export async function OPTIONS(req: Request) {
  */
 export async function POST(req: Request) {
   // Protección: allowlist de orígenes + rate-limit por IP (el proxy interno pasa marcado)
-  const guard = guardChatRequest(req, "chat-stream");
+  const guard = await guardChatRequest(req, "chat-stream");
   if (!guard.allowed) {
     return new Response(JSON.stringify({ error: guard.error, retryAfter: guard.retryAfter }), { status: guard.status, headers: { "Content-Type": "application/json", ...guard.headers } });
   }

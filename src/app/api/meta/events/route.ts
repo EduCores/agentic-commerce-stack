@@ -19,7 +19,7 @@ export async function OPTIONS(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const guard = guardChatRequest(req, "events");
+  const guard = await guardChatRequest(req, "events");
   if (!guard.allowed) {
     return NextResponse.json({ error: guard.error, retryAfter: guard.retryAfter }, { status: guard.status, headers: guard.headers });
   }

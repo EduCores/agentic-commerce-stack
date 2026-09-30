@@ -51,6 +51,51 @@ function findQueryAnchor(text: string, query: string): number {
   return best;
 }
 
+/** Esquemas que el servidor acepta abrir. */
+const ALLOWED_SCHEMES = new Set(["http:", "https:"]);
+
+/**
+ * Host interno o reservado: loopback, LAN, link-local (metadata cloud), CGNAT y
+ * sufijos .internal/.local. El modelo puede pedir CUALQUIER url, así que el fetch
+ * del servidor no debe poder alcanzar servicios que no son públicos (SSRF).
+ */
+export function isBlockedHost(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (!h) return true;
+  if (h === "localhost" || h.endsWith(".localhost") || h.endsWith(".internal") || h.endsWith(".local")) return true;
+  // IPv6: loopback, unspecified, link-local (fe80::/10) y unique-local (fc00::/7)
+  if (h === "::1" || h === "::" || h === "0.0.0.0" || h.startsWith("fe80:") || /^f[cd][0-9a-f]{2}:/.test(h)) return true;
+  const v4 = h.match(/^(\d{1,4})\.(\d{1,4})\.(\d{1,4})\.(\d{1,4})$/);
+  if (!v4) return false;
+  const a = Number(v4[1]);
+  const b = Number(v4[2]);
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT 100.64/10
+  if (a === 169 && b === 254) return true; // link-local: 169.254.169.254 = metadata cloud
+  if (a === 172 && b >= 16 && b <= 31) return true; // 172.16/12
+  if (a === 192 && b === 168) return true; // 192.168/16
+  if (a === 198 && (b === 18 || b === 19)) return true; // benchmarking 198.18/15
+  return false;
+}
+
+/**
+ * Valida la URL antes de abrirla (tanto en Jina como en el fetch directo).
+ * Devuelve el motivo del rechazo para que el modelo responda "no puedo consultar
+ * esa URL" en vez de inventar datos de una página que nunca leyó.
+ */
+export function assertSafeUrl(raw: string): { ok: true; url: string } | { ok: false; reason: string } {
+  let u: URL;
+  try {
+    u = new URL(raw.trim());
+  } catch {
+    return { ok: false, reason: "URL inválida" };
+  }
+  if (!ALLOWED_SCHEMES.has(u.protocol)) return { ok: false, reason: `Esquema no permitido (${u.protocol})` };
+  if (u.username || u.password) return { ok: false, reason: "URL con credenciales embebidas" };
+  if (isBlockedHost(u.hostname)) return { ok: false, reason: `Destino no público (${u.hostname})` };
+  return { ok: true, url: u.toString() };
+}
+
 /**
  * Scrape Website Tool — ACS
  * Extrae contenido de una URL para comparar precios, políticas o fichas.
@@ -66,8 +111,18 @@ export default defineTool({
     maxChars: z.number().min(500).max(8000).default(4000).describe("Límite de caracteres del texto devuelto"),
   }),
   async execute({ url, query, maxChars }) {
+    // Puerta anti-SSRF: solo http(s) públicos (nada de localhost, LAN ni metadata cloud).
+    const safe = assertSafeUrl(url);
+    if (!safe.ok) {
+      return {
+        ok: false,
+        url,
+        error: `URL rechazada: ${safe.reason}`,
+        hint: "Solo se pueden consultar URLs públicas http(s). No insistas con esa dirección: responde con la información que ya tengas o invita a ventas@starshop.cl.",
+      };
+    }
     const jinaKey = process.env.JINA_API_KEY;
-    const target = url.trim();
+    const target = safe.url;
     let text = "";
     let source: "jina" | "direct" = "jina";
     let status = 0;

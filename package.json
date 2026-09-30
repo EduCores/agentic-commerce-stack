@@ -10,6 +10,7 @@
         "test:sanitize": "tsx scripts/test-sanitize-reply.ts",
         "test:search": "tsx scripts/eval-search.ts",
         "test:router": "tsx scripts/eval-router.ts",
+        "test:security": "tsx scripts/probe-chat-security.ts",
         "acs:probe-structured": "tsx scripts/probe-structured-outputs.ts",
         "acs:test-email": "tsx scripts/test-email-flow.ts",
         "acs:sync-router": "tsx scripts/sync-router-graph.ts",

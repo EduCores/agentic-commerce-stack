@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { ChatBubble } from "./chat-bubble";
+import { safeNavPath } from "@/utils/safe-nav";
 type Msg = { id: string; role: "user" | "assistant"; text: string; streaming?: boolean; crew?: string; detectedIntent?: string };
 type ToolCall = { toolName: string; args: Record<string, unknown>; output: unknown };
 export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string }) {
@@ -82,7 +83,8 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
               else if (evt.type === "done") {
                 if (evt.text && evt.text !== full) full = evt.text;
                 const nav = (evt.toolCalls as unknown as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");
-                const path = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo ?? (nav?.args as { path?: string } | undefined)?.path;
+                const raw = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo ?? (nav?.args as { path?: string } | undefined)?.path;
+                const path = safeNavPath(raw);
                 if (path) { setTimeout(() => { window.location.href = path; }, 900); }
                 const final = full || evt.text || "";
                 setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: final, crew, detectedIntent, streaming: false } : x)));
@@ -96,7 +98,7 @@ export function StarShopChat({ apiUrl = "/api/chat/stream" }: { apiUrl?: string 
         const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, history, storeId: "seed-store" }) });
         const j = await r.json();
         const nav = (j.toolCalls as ToolCall[] | undefined)?.find((t) => t.toolName === "navigateTo");
-        const path = (nav?.output as { navigateTo?: string } | undefined)?.navigateTo;
+        const path = safeNavPath((nav?.output as { navigateTo?: string } | undefined)?.navigateTo);
         const finalJ = j.text ?? "";
         setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, text: finalJ, crew: j.crew, detectedIntent: j.detectedIntent, streaming: false } : x)));
         if (finalJ) speak(finalJ);
