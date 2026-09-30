@@ -17,6 +17,7 @@ import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type Gra
 import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
 import { sanitizeReplyText, createToolCallTextFilter } from "./lib/sanitize-reply";
+import { verifyClaims, collectStepEvidence, buildVerifiedFacts, VERIFY_FALLBACK_TEXT } from "./lib/verify-claims";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
 import searchProducts from "./tools/search-products";
@@ -28,6 +29,7 @@ import scrapeWebsite from "./tools/scrape-website";
 import sendEmail from "./tools/send-email";
 import orderTracking from "./tools/order-tracking";
 import getSalesSummary from "./tools/sales-summary";
+import searchDocs from "./tools/search-docs";
 
 // NOTA: la resolución de modelos por provider (OpenRouter / Groq) vive en
 // agent/lib/model-provider.ts. Usar sdkModelFor() / resolveModel() / headersFor()
@@ -274,6 +276,7 @@ export const acsTools = {
   sendEmail,
   orderTracking,
   getSalesSummary,
+  searchDocs,
 };
 
 const ALL_TOOL_DEFS: Record<string, { description: string; inputSchema: z.ZodTypeAny; execute: unknown }> = {
@@ -288,6 +291,7 @@ const ALL_TOOL_DEFS: Record<string, { description: string; inputSchema: z.ZodTyp
   sendEmail: { description: sendEmail.description, inputSchema: sendEmail.inputSchema as z.ZodTypeAny, execute: sendEmail.execute as never },
   orderTracking: { description: orderTracking.description, inputSchema: orderTracking.inputSchema as z.ZodTypeAny, execute: orderTracking.execute as never },
   getSalesSummary: { description: getSalesSummary.description, inputSchema: getSalesSummary.inputSchema as z.ZodTypeAny, execute: getSalesSummary.execute as never },
+  searchDocs: { description: searchDocs.description, inputSchema: searchDocs.inputSchema as z.ZodTypeAny, execute: searchDocs.execute as never },
 };
 
 // Tools compilados UNA vez al cargar el módulo (evita reconstruir wrappers en cada request)
@@ -566,11 +570,53 @@ export async function runAgent(params: { agentSlug: string; input: string; store
     }
   }
 
+  // Fase 1 del harness: verificación post-hoc de cifras contra la evidencia de
+  // las tools de ESTE turno (agent/lib/verify-claims.ts). Si el texto afirma un
+  // precio/stock/SKU que no salió de las tools, se bloquea: 1 reintento
+  // correctivo con los datos verificados y, si persiste, mensaje honesto.
+  // Se omite para vacíos y para FALLBACK_TEXT (no contiene afirmaciones).
+  let claimsOk = true;
+  let claimViolations: Array<{ kind: string; claimed: string; detail: string }> = [];
+  if (finalText && finalText !== FALLBACK_TEXT) {
+    const verifySteps = ((result as unknown as { steps?: unknown }).steps ?? []) as unknown;
+    const claimEvidence = collectStepEvidence(verifySteps);
+    const check = verifyClaims(finalText, claimEvidence);
+    claimsOk = check.ok;
+    claimViolations = check.violations;
+    if (!check.ok) {
+      console.log("[ACS-VERIFY] afirmaciones no verificadas, bloqueando", JSON.stringify(check.violations).slice(0, 400));
+      const facts = buildVerifiedFacts(claimEvidence);
+      const canRetry =
+        facts.length > 0 &&
+        (hasProviderKey("openrouter", params.useAdminKey) || hasProviderKey("groq") || hasProviderKey("google"));
+      if (canRetry) {
+        const corrected = sanitizeReplyText(
+          await directChat(
+            modelId,
+            system + "\n\nDATOS VERIFICADOS DE ESTE TURNO (usa EXCLUSIVAMENTE estas cifras, no inventes ninguna):\n" + facts,
+            messages,
+          ),
+        );
+        const recheck = verifyClaims(corrected, claimEvidence);
+        if (recheck.ok && corrected) {
+          finalText = corrected;
+          claimsOk = true;
+          claimViolations = [];
+        } else {
+          console.log("[ACS-VERIFY] reintento correctivo falló, mensaje honesto");
+          finalText = VERIFY_FALLBACK_TEXT;
+        }
+      } else {
+        finalText = VERIFY_FALLBACK_TEXT;
+      }
+    }
+  }
+
   // Log run (no bloquea la respuesta si la BD falla)
   await logRunSafe({
     agentId: agent.id,
     input: { text: params.input, storeId: params.storeId, crew: params.agentSlug } as object,
-    output: { text: finalText || rawText, toolCalls: stepToolCalls } as object,
+    output: { text: finalText || rawText, toolCalls: stepToolCalls, claims: { ok: claimsOk, violations: claimViolations } } as object,
     status: "COMPLETED",
   });
 
@@ -632,7 +678,25 @@ export async function* streamAgent(params: { agentSlug: string; input: string; s
         if (!finalText && rawFinal) finalText = FALLBACK_TEXT;
       }
       if (attemptModel !== chain[0]) console.log(`[ACS-AGENT] streamAgent respondió con respaldo ${attemptModel}`);
-      yield { type: "done" as const, text: finalText, toolCalls, agentSlug: agent.slug };
+      // Fase 1 del harness (telemetría en streaming): el texto ya salió por
+      // chunks y no se puede retractar; se verifica igual para observabilidad
+      // (logs + flag claimsOk en el evento done). El bloqueo correctivo vive
+      // en runAgent (ruta no-stream, la que usa el widget StarShop).
+      let streamClaimsOk = true;
+      if (finalText && finalText !== FALLBACK_TEXT) {
+        // toolResults del último paso (el SDK solo expone el último en stream;
+        // cobertura parcial documentada: sirve como telemetría, no como gate).
+        const streamResults = ((await result.toolResults) ?? []) as unknown;
+        const streamCheck = verifyClaims(
+          finalText,
+          collectStepEvidence([{ toolCalls, toolResults: streamResults }]),
+        );
+        streamClaimsOk = streamCheck.ok;
+        if (!streamCheck.ok) {
+          console.log("[ACS-VERIFY] stream con afirmaciones no verificadas", JSON.stringify(streamCheck.violations).slice(0, 400));
+        }
+      }
+      yield { type: "done" as const, text: finalText, toolCalls, agentSlug: agent.slug, claimsOk: streamClaimsOk };
       return;
     } catch (e) {
       lastErr = e;

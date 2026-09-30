@@ -5,6 +5,7 @@
  * Persiste en WorkflowDefinition (graph XYFlow) y WorkflowRun/OrderStepLog para observabilidad.
  */
 import { createWorkflow, createStep, logStep } from "@/lib/workflows/engine";
+import { prisma } from "@/lib/adapters/prisma";
 import { STARSHOP_CREW_TOOLS, STARSHOP_CREWS, type StarShopIntent } from "../../prisma/starshop-prompts";
 
 // ── Steps ────────────────────────────────────────────────────────────────────
@@ -54,10 +55,64 @@ export function crewStep(crewSlug: string, nodeId: string) {
   );
 }
 
+/**
+ * Gate pre-confirmación — Fase 1 del harness.
+ *
+ * POR QUÉ: antes solo logueaba COMPLETED con el orderId que le pasaran,
+ * confirmando pedidos inexistentes, vacíos, cancelados o sin reserva de
+ * stock. Ahora verifica en BD: la orden existe, tiene ítems y total > 0,
+ * no está CANCELLED/FAILED/REFUNDED, y hay un RESERVE_STOCK COMPLETED
+ * registrado (la reserva real la hace reserveStockStep; aquí se exige la
+ * evidencia). Si algo falla, loguea FAILED y lanza: la orden NO se confirma.
+ */
+const NON_CONFIRMABLE = new Set(["CANCELLED", "FAILED", "REFUNDED"]);
+
+export type ConfirmGateOrder = {
+  id: string;
+  status: string;
+  total: number | string | { toString(): string };
+  items: unknown[];
+};
+
+/**
+ * Validación pura del gate (testeable sin BD — ver scripts/eval-confirm-gate.ts).
+ * Retorna el motivo de bloqueo o null si la orden puede confirmarse.
+ */
+export function confirmGateCheck(order: ConfirmGateOrder | null, hasReserveEvidence: boolean): string | null {
+  if (!order) return "orden inexistente";
+  if (NON_CONFIRMABLE.has(order.status)) return `orden en estado ${order.status}`;
+  if (order.items.length === 0) return "orden sin ítems";
+  if (Number(order.total) <= 0) return "orden con total no positivo";
+  if (!hasReserveEvidence) return "orden sin reserva de stock verificada (RESERVE_STOCK)";
+  return null;
+}
+
 export const confirmOrderStep = createStep<{ orderId: string; workflowRunId?: string }, { orderId: string }>(
   "confirm-order",
   async ({ orderId, workflowRunId }) => {
-    await logStep({ stepName: "CONFIRM_ORDER", workflowRunId, orderId, status: "COMPLETED", input: { orderId }, output: { orderId } });
+    const fail = async (reason: string) => {
+      await logStep({ stepName: "CONFIRM_ORDER", workflowRunId, orderId, status: "FAILED", input: { orderId }, error: reason });
+      throw new Error(`[CONFIRM-GATE] ${reason}`);
+    };
+    const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } }).catch(() => null);
+    const reserved = order
+      ? await prisma.orderStepLog
+          .findFirst({ where: { orderId, stepName: "RESERVE_STOCK", status: "COMPLETED" } })
+          .catch(() => null)
+      : null;
+    const blocked = confirmGateCheck(
+      order ? { id: order.id, status: order.status, total: Number(order.total), items: order.items } : null,
+      !!reserved,
+    );
+    if (blocked || !order) return fail(`${blocked ?? "orden inexistente"}: ${orderId}`);
+    await logStep({
+      stepName: "CONFIRM_ORDER",
+      workflowRunId,
+      orderId,
+      status: "COMPLETED",
+      input: { orderId },
+      output: { orderId, items: order.items.length, total: Number(order.total) },
+    });
     return { orderId };
   }
 );

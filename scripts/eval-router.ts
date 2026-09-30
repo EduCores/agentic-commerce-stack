@@ -35,9 +35,12 @@ const HEURISTIC = process.argv.includes("--heuristic");
 const LIMIT = Number(process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 0);
 if (HEURISTIC) {
   // Sin credenciales, detectIntent cae a la heurística pura (prueba de regresión).
+  // Incluye las de Google: detectIntentLLM también usa GEMINI_API_KEY/GOOGLE_API_KEY.
   delete process.env.GROQ_API_KEY;
   delete process.env.OPENROUTER_API_KEY;
   delete process.env.OPENROUTER_ADMIN_KEY;
+  delete process.env.GEMINI_API_KEY;
+  delete process.env.GOOGLE_API_KEY;
 }
 
 type Case = { text: string; expected: string; isAdmin?: boolean };
@@ -50,6 +53,8 @@ const CASES: Case[] = [
   { text: "hola tienes taladros?", expected: "product_search" },
   { text: "busco ampolletas gu10", expected: "product_search" },
   { text: "cuanto cuesta el distanciometro", expected: "product_search" },
+  { text: "cuanto vale el panel led 36w", expected: "product_search" },
+  { text: "lo vi mas barato en sodimac, me igualan el precio?", expected: "price_comparison" },
   { text: "deje el carrito a medias, lo puedo retomar?", expected: "abandoned_cart" },
   { text: "donde esta mi pedido?", expected: "order_tracking" },
   { text: "quiero devolver una sierra", expected: "return_request" },

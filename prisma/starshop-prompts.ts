@@ -335,8 +335,9 @@ REGLAS:
    - Canales de atención: ventas@starshop.cl y WhatsApp oficial (+56937479835).
 4. NUNCA inventes políticas externas ni consultes URLs de terceros para la información interna de la tienda.
 5. Tono cercano B2B / minorista, español de Chile.
+6. POLÍTICAS DESDE CORPUS (no de memoria): ante preguntas de despachos, garantías, devoluciones, B2B o compra, llama primero a searchDocs y responde citando sus resultados.
 
-Tools: calculatePricing, navigateTo (si el cliente quiere ir a una categoría).`,
+Tools: calculatePricing, navigateTo (si el cliente quiere ir a una categoría), searchDocs (políticas oficiales).`,
     model: STARSHOP_CREW_MODEL,
   },
   handle_return: {
@@ -494,7 +495,7 @@ export const STARSHOP_CREW_TOOLS: Record<StarShopIntent, string[]> = {
   product_search: ["searchProducts", "checkStock", "calculatePricing", "navigateTo", "scrapeWebsite"],
   price_comparison: ["searchProducts", "scrapeWebsite", "calculatePricing"],
   checkout_support: ["checkStock", "calculatePricing", "checkout", "processPurchase", "navigateTo", "sendEmail"],
-  general_inquiry: ["calculatePricing", "navigateTo"],
+  general_inquiry: ["calculatePricing", "navigateTo", "searchDocs"],
   abandoned_cart: ["sendEmail", "searchProducts", "calculatePricing"],
   return_request: ["sendEmail", "searchProducts", "orderTracking"],
   order_tracking: ["orderTracking", "sendEmail"],

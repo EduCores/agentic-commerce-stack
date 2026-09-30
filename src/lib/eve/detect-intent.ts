@@ -172,7 +172,7 @@ async function detectIntentLLM(message: string, history?: unknown[]): Promise<De
             temperature: 0,
             max_tokens: 160,
             messages: [
-              { role: "system", content: `${STARSHOP_WELCOME_PROMPT}\n\nSi la consulta continúa una conversación previa, usa la conversación como contexto para clasificar (ej: después de preguntar por un producto, "¿cuánto con despacho?" es checkout_support; "¿y ese taladro qué tal?" es product_search).\n\nResponde SOLO JSON: {"intent":"<una de ${STARSHOP_INTENTS.join("|")}>","confidence":0.0-1.0}` },
+              { role: "system", content: `${STARSHOP_WELCOME_PROMPT}\n\nSi la consulta continúa una conversación previa, usa la conversación como contexto para clasificar (ej: después de preguntar por un producto, "¿cuánto con despacho?" es checkout_support; "¿y ese taladro qué tal?" es product_search). price_comparison es SOLO si menciona otra tienda, competencia, "más barato en otro lado" o precios externos; una pregunta simple de precio ("¿cuánto cuesta X?") es product_search.\n\nResponde SOLO JSON: {"intent":"<una de ${STARSHOP_INTENTS.join("|")}>","confidence":0.0-1.0}` },
               { role: "user", content: message.slice(0, 500) + historyContext(history) },
             ],
             ...(attempt.responseFormat ? { response_format: attempt.responseFormat } : {}),
@@ -225,6 +225,19 @@ async function detectIntentLLM(message: string, history?: unknown[]): Promise<De
   return null;
 }
 
+/**
+ * Señal de comparación EXTERNA de precios ("otra tienda", "más barato",
+ * "sodimac", URL…). Sin ella, una pregunta de precio ("¿cuánto cuesta X?")
+ * es product_search: el crew de búsqueda la responde con searchProducts +
+ * calculatePricing. Mandarla a price_comparison dispara scrapes a Jina sin
+ * referencia externa que comparar (medido: "cuanto cuesta el distanciometro"
+ * ruteaba mal a price_comparison).
+ */
+export function hasExternalPriceSignal(message: string): boolean {
+  const t = normalize(message);
+  return /(otr[ao]s? (tienda|lado|parte)|mas barato|mejor precio|competencia|comparar?|http|www\.|mercadolibre|sodimac|easy\b|construmart|homecenter|precio.*(fuera|externo))/i.test(t);
+}
+
 export async function detectIntent(message: string, opts?: { isAdmin?: boolean; history?: unknown[] }): Promise<DetectIntentResult> {
   const viaLLM = await detectIntentLLM(message, opts?.history);
   if (viaLLM) {
@@ -238,6 +251,13 @@ export async function detectIntent(message: string, opts?: { isAdmin?: boolean; 
     // searchProducts y anuncie una búsqueda que no corresponde.
     if (viaLLM.intent === "product_search" && (isAgentMetaQuestion(message) || isSmallTalk(message))) {
       return { intent: "general_inquiry", confidence: 0.9, source: "heuristic" };
+    }
+    // El router LLM manda preguntas simples de precio ("¿cuánto cuesta X?")
+    // a price_comparison, cuyo crew scrapea tiendas externas sin tener qué
+    // comparar. Sin señal externa explícita, es product_search (el crew de
+    // búsqueda responde con searchProducts + calculatePricing).
+    if (viaLLM.intent === "price_comparison" && !hasExternalPriceSignal(message)) {
+      return { intent: "product_search", confidence: 0.8, source: "heuristic" };
     }
     return viaLLM;
   }
