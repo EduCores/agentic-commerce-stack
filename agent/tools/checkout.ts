@@ -9,7 +9,10 @@ export default defineTool({
     flow: z.enum(["minorista", "b2b"]).optional().default("minorista"),
   }),
   async execute({ sku, qty, flow }) {
-    const path = flow === "b2b" ? `/cotizacion?sku=${sku}&qty=${qty}` : `/checkout?sku=${sku}&qty=${qty}`;
+    // El SKU viaja en la query: se codifica (un SKU con espacios o "&" rompía
+    // la URL y el widget la rechazaba en safeNavPath).
+    const q = `sku=${encodeURIComponent(sku)}&qty=${qty}`;
+    const path = flow === "b2b" ? `/cotizacion?${q}` : `/checkout?${q}`;
     return { checkoutUrl: path, sku, qty, flow, message: `Checkout ${flow} iniciado para ${sku} x${qty}` };
   },
 });

@@ -93,6 +93,12 @@ const QUERY_FILLERS = new Set([
   // Pronombres/demostrativos: nunca nombran un producto ("necesito algo para...").
   "algo", "alguien", "esto", "eso", "este", "esta", "estos", "estas",
   "ese", "esa", "esos", "esas", "aquel", "aquella", "aquello",
+  // Cuantificadores vagos y sustantivos genéricos: no nombran ningún producto
+  // ("busco algunas herramientas" → "herramientas"; "busco algo" → "").
+  // Espejo de QUERY_FILLERS de StarShop (src/lib/agent-chat.ts): sin esto el
+  // aviso citaba «Busco "algunas herramientas"» y navegaba a una ventana vacía.
+  "alguna", "alguno", "algunas", "algunos",
+  "cosa", "cosas", "producto", "productos", "articulo", "articulos", "mercaderia",
   // Verbos de uso/intención: describen la tarea, no el producto ("para instalar un enchufe").
   "instalar", "instalacion", "instalaciones", "colocar", "colocacion",
   "poner", "cambiar", "reparar", "arreglar", "conectar",

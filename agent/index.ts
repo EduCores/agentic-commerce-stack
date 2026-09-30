@@ -464,7 +464,9 @@ export type RunAgentResult = Awaited<ReturnType<typeof runAgent>>;
 export async function runAdminOps(params: { input: string; storeId?: string; history?: unknown[] }) {
   const detectedIntent: StarShopIntent = "admin_ops";
   const crew = await getCrewConfig(detectedIntent);
-  const allowedTools = CREW_TOOL_MAP[detectedIntent] ?? Object.keys(ALL_TOOL_DEFS);
+  // crew.tools ya trae el override publicado del grafo (o el fallback del código):
+  // usar CREW_TOOL_MAP directo ignoraba lo editado en /workflows.
+  const allowedTools = crew.tools;
 
   logRouterWorkflow(params.input, detectedIntent, "ACS-ADMIN");
 
@@ -740,7 +742,7 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
     input: params.input,
     storeId: params.storeId,
     history: params.history,
-    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin), model: crew.model, allowedTools: smallTalk ? [] : crew.tools },
+    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin, params.storeId), model: crew.model, allowedTools: smallTalk ? [] : crew.tools },
   } as never)) {
     yield chunk;
   }
@@ -749,15 +751,21 @@ export async function* streamStarShopFlow(params: { input: string; storeId?: str
 /**
  * Quién habla en ESTA conversación (el modelo no lo sabe si no se lo dices).
  * Sin esto, admin_ops declina métricas creyendo que habla con un cliente.
+ * También informa la TIENDA ACTUAL: sin el storeId en el prompt, el modelo no
+ * puede pasarlo a las tools que lo aceptan (getSalesSummary, orderTracking,
+ * calculatePricing, searchProducts) y todo se mezclaba entre tiendas.
  */
-function audienceNote(detectedIntent: StarShopIntent, isAdmin?: boolean): string {
+function audienceNote(detectedIntent: StarShopIntent, isAdmin?: boolean, storeId?: string): string {
+  const tienda = storeId?.trim()
+    ? `\nTIENDA ACTUAL: storeId="${storeId.trim()}". Pásalo como storeId en TODAS las tools que lo acepten (searchProducts, checkStock, calculatePricing, getSalesSummary, orderTracking): sin él, los datos se mezclan entre tiendas.`
+    : "";
   if (detectedIntent === "admin_ops" && isAdmin) {
-    return "\n\nCONTEXTO DE ESTA CONVERSACIÓN: hablas con el DUEÑO autenticado de la tienda. Tienes permiso total: llama a getSalesSummary y entrega las cifras reales con el formato indicado. Nada de declinar.";
+    return `\n\nCONTEXTO DE ESTA CONVERSACIÓN: hablas con el DUEÑO autenticado de la tienda. Tienes permiso total: llama a getSalesSummary y entrega las cifras reales con el formato indicado. Nada de declinar.${tienda}`;
   }
   if (!isAdmin) {
-    return "\n\nCONTEXTO DE ESTA CONVERSACIÓN: hablas con un CLIENTE de la tienda StarShop (NO es el dueño). Nunca reveles ingresos ni métricas internas; ayuda con catálogo, stock y su compra.";
+    return `\n\nCONTEXTO DE ESTA CONVERSACIÓN: hablas con un CLIENTE de la tienda StarShop (NO es el dueño). Nunca reveles ingresos ni métricas internas; ayuda con catálogo, stock y su compra.${tienda}`;
   }
-  return "";
+  return tienda ? `\n${tienda}` : "";
 }
 
 // Wrapper non-streaming de runAgent con el flow StarShop (para compat con chat endpoint)
@@ -774,7 +782,7 @@ export async function runStarShopFlow(params: { input: string; storeId?: string;
     input: params.input,
     storeId: params.storeId,
     history: params.history,
-    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin), model: crew.model, allowedTools: smallTalk ? [] : crew.tools },
+    _override: { systemPrompt: crew.prompt + audienceNote(detectedIntent, params.isAdmin, params.storeId), model: crew.model, allowedTools: smallTalk ? [] : crew.tools },
   } as never);
   return {
     ...(agentResult as { text: string; toolCalls?: unknown[] }),

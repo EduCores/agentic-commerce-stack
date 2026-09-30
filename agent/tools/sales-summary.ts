@@ -76,14 +76,31 @@ type TopProducto = {
 async function resumenVentana(
   inicio: Date,
   fin: Date,
+  storeId?: string,
+  onError?: (e?: unknown) => void,
 ): Promise<{ revenue: number; orders: number; topProducts: TopProducto[] }> {
   const filtro: Prisma.OrderWhereInput = {
     status: { in: ["PAID", "FULFILLED"] },
     createdAt: { gte: inicio, lt: fin },
+    // Sin storeId el resumen mezcla TODAS las tiendas: el dueño vería ingresos
+    // ajenos. El router-admin informa la tienda actual y el prompt exige pasarla.
+    ...(storeId ? { storeId } : {}),
+  };
+  // Cada lectura con fallback avisa vía onError: un cero por BD caída no debe
+  // confundirse con "sin ventas" (ver dbOk en execute).
+  const fail = (e: unknown) => {
+    console.warn("[sales-summary] lectura BD falló, se usa fallback", e instanceof Error ? e.message : e);
+    onError?.();
   };
   const [rev, n, grupos] = await Promise.all([
-    prisma.order.aggregate({ _sum: { total: true }, where: filtro }).catch(() => ({ _sum: { total: null } })),
-    prisma.order.count({ where: filtro }).catch(() => 0),
+    prisma.order.aggregate({ _sum: { total: true }, where: filtro }).catch((e) => {
+      fail(e);
+      return { _sum: { total: null } };
+    }),
+    prisma.order.count({ where: filtro }).catch((e) => {
+      fail(e);
+      return 0;
+    }),
     prisma.orderItem
       .groupBy({
         by: ["productId"],
@@ -92,14 +109,20 @@ async function resumenVentana(
         orderBy: { _sum: { quantity: "desc" } },
         take: 3,
       })
-      .catch(() => []),
+      .catch((e) => {
+        fail(e);
+        return [];
+      }),
   ]);
 
   const ids = grupos.map((g) => g.productId);
   const metas = ids.length
     ? await prisma.product
         .findMany({ where: { id: { in: ids } }, select: { id: true, title: true, sku: true, price: true, images: true } })
-        .catch(() => [])
+        .catch((e) => {
+          fail(e);
+          return [];
+        })
     : [];
   const topProducts: TopProducto[] = grupos.map((g) => {
     const m = metas.find((x) => x.id === g.productId);
@@ -133,8 +156,9 @@ export default defineTool({
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "date debe ser AAAA-MM-DD")
       .optional(),
+    storeId: z.string().optional().describe("ID de la tienda (el router-admin lo informa en el contexto). Sin storeId el resumen mezcla todas las tiendas."),
   }),
-  async execute({ period, date }) {
+  async execute({ period, date, storeId }) {
     // Corte del día en HORA CHILENA (nunca la del servidor/UTC).
     const ahora = new Date();
     let clave = claveLocal(TIENDA_TZ, ahora);
@@ -149,12 +173,21 @@ export default defineTool({
     const inicioPrevio = new Date(inicio.getTime() - 24 * 3600 * 1000);
 
     const label = date ?? ((period ?? "today") === "yesterday" ? "ayer" : "hoy");
+    const sid = storeId?.trim() || undefined;
+    // Si la BD falla, las lecturas devuelven ceros por los .catch: se marca dbOk
+    // para que el dueño distinga "sin ventas" de "no pude leer los datos".
+    // (Antes un corte de BD se reportaba como revenue:0/orders:0 indistinguible.)
+    let dbOk = true;
+    const fail = (e: unknown) => {
+      dbOk = false;
+      console.warn("[sales-summary] lectura BD falló, se usa fallback", e instanceof Error ? e.message : e);
+    };
 
     // Día pedido + día anterior completo + últimos 7 días (para comparar sin una 2ª llamada).
     const [dia, previo, stockAgg, sieteDias] = await Promise.all([
-      resumenVentana(inicio, fin),
+      resumenVentana(inicio, fin, sid, fail),
       (async () => {
-        const r = await resumenVentana(inicioPrevio, inicio);
+        const r = await resumenVentana(inicioPrevio, inicio, sid, fail);
         return {
           date: claveLocal(TIENDA_TZ, inicioPrevio),
           label: "ayer",
@@ -162,17 +195,24 @@ export default defineTool({
         };
       })(),
       prisma.product
-        .aggregate({ _sum: { stock: true, reservedStock: true } })
-        .catch(() => ({ _sum: { stock: 0, reservedStock: 0 } })),
+        .aggregate({ _sum: { stock: true, reservedStock: true }, ...(sid ? { where: { storeId: sid } } : {}) })
+        .catch((e) => {
+          fail(e);
+          return { _sum: { stock: 0, reservedStock: 0 } };
+        }),
       prisma.order
         .findMany({
           where: {
             status: { in: ["PAID", "FULFILLED"] },
             createdAt: { gte: new Date(inicio.getTime() - 6 * 24 * 3600 * 1000), lt: fin },
+            ...(sid ? { storeId: sid } : {}),
           },
           select: { total: true, createdAt: true },
         })
-        .catch(() => [] as { total: unknown; createdAt: Date }[]),
+        .catch((e) => {
+          fail(e);
+          return [] as { total: unknown; createdAt: Date }[];
+        }),
     ]);
 
     // Serie día a día de los últimos 7 días: cada bucket usa las medianoches REALES
@@ -195,6 +235,10 @@ export default defineTool({
     return {
       date: clave,
       label,
+      storeId: sid ?? null,
+      // dbOk=false = alguna lectura falló: los ceros son fallback, NO ventas reales.
+      // El prompt admin_ops ordena reportarlo como corte de datos, jamás como "sin ventas".
+      dbOk,
       revenue: dia.revenue,
       orders: dia.orders,
       topProducts: dia.topProducts,

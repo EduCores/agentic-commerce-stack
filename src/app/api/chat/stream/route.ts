@@ -25,7 +25,13 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: guard.error, retryAfter: guard.retryAfter }), { status: guard.status, headers: { "Content-Type": "application/json", ...guard.headers } });
   }
 
-  const { message, history, storeId, agentSlug, useFlow } = await req.json();
+  const { message, history, storeId, agentSlug, useFlow } = (await req.json().catch(() => ({}))) as {
+    message?: string;
+    history?: unknown[];
+    storeId?: string;
+    agentSlug?: string;
+    useFlow?: boolean;
+  };
   // isAdmin NUNCA viene del cliente: se deriva de la sesión
   const token = (await cookies()).get(AUTH_COOKIE.name)?.value;
   const isAdmin = token ? !!(await verifySessionToken(token)) : false;

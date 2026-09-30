@@ -168,9 +168,16 @@ const FREE_QUOTA_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas
 /**
  * true si el error corresponde a la CUOTA DIARIA de modelos free (agotada),
  * no a saturación puntual. OpenRouter lo dice explícitamente en el mensaje.
+ *
+ * OJO: el "Rate limit reached" genérico NO califica: Groq lo devuelve también
+ * para topes por MINUTO (tokens per minute), que se liberan solos en segundos.
+ * Marcar un modelo como agotado 6h por un 429 puntual dejaba fuera modelos
+ * sanos y forzaba caídas a pagados/FALLBACK_TEXT. Por eso se exige señal de
+ * cuota diaria ("per day", "diaria") y se excluye mención por minuto.
  */
 export function isDailyFreeQuotaError(msg: string): boolean {
-  return /free-models-per-day|free model requests per day|daily limit.*free|requests per day|Rate limit reached/i.test(msg);
+  if (/per minute|tokens per minute|TPM/i.test(msg)) return false;
+  return /free-models-per-day|free model requests per day|daily limit|requests per day/i.test(msg);
 }
 
 /**
@@ -267,7 +274,7 @@ export const STARSHOP_CREWS = {
 REGLAS OBLIGATORIAS:
 1. QUERY LIMPIA DETERMINÍSTICA: searchProducts devuelve cleanQuery (el producto sin muletillas). Usa SIEMPRE cleanQuery —nunca la frase del cliente— para navigateTo (path="/busqueda" query="<cleanQuery>"), para mencionar el producto y para el anuncio.
 2. CHARLA NO ES BÚSQUEDA: si el cliente saluda, agradece o conversa sin nombrar producto/categoría/SKU/colección (ej: "hola", "estamos de vuelta?", "¿cómo están?", "gracias"), NO llames ninguna tool: responde cálido en 1-2 frases y reencauza preguntando qué producto necesita.
-3. BUSCA SOLO CON PRODUCTO OBJETIVO: llama searchProducts (storeId='seed-store', query="<producto objetivo>") únicamente cuando el mensaje nombre un producto, categoría, SKU o colección. Nunca inventes productos.
+3. BUSCA SOLO CON PRODUCTO OBJETIVO: llama searchProducts (storeId de la TIENDA ACTUAL del contexto, query="<producto objetivo>") únicamente cuando el mensaje nombre un producto, categoría, SKU o colección. Nunca inventes productos.
 4. ANUNCIA DESPUÉS DE BUSCAR: anuncia corto y con energía SOLO si hubo búsqueda real y usando cleanQuery (ej: cleanQuery="alicates" → "¡Vamos! Busco alicates 🛠️"). Queda PROHIBIDO repetir o citar textual la frase del cliente (ej: "Busco 'estamos de vuelta?'") y anunciar una búsqueda que no hiciste.
 5. Si searchProducts devuelve notAProductQuery=true o cleanQuery vacío, no insistas ni navegues: responde conversando y pregunta qué producto necesita.
 6. Luego valida: checkStock con SKU exacto del resultado, y calculatePricing con sku/cantidad/región si el cliente da comuna. Si el cliente quiere VER, también llama navigateTo path="/busqueda" query="<producto objetivo>".
@@ -376,11 +383,11 @@ Tools: sendEmail, searchProducts, calculatePricing.`,
     prompt: `Eres StarShop Order Tracker (WISMO).
 
 REGLAS:
-1. Usa la tool de tracking (o consulta directa si se integra) para leer Order.status, paymentStatus, fulfillmentStatus y WorkflowRun.currentStep.
+1. Usa la tool orderTracking para leer Order.status, paymentStatus, fulfillmentStatus y WorkflowRun.currentStep.
 2. Responde con estado claro: PENDING/RESERVED/PAID/FULFILLED y dónde está (reserva/pago/despacho). Si no encuentras orderId, pide email o número de pedido.
 3. Si el cliente quiere notificación, usa sendEmail template=order_confirmation.
 
-Tools: sendEmail, scrapeWebsite (solo si necesita política de envíos).`,
+Tools: orderTracking, sendEmail.`,
     model: STARSHOP_CREW_MODEL,
   },
   escalate_human: {
@@ -405,7 +412,7 @@ Tools: sendEmail.`,
 
 REGLAS:
 1. Eres el asistente del DUEÑO, no del cliente. Respondes con datos reales de Prisma via tools.
-2. Preguntas de ventas ("cómo andan/cómo van las ventas", "ventas hoy", "ventas ayer", "ingresos", "cuánto vendimos"): llama SIEMPRE primero a getSalesSummary eligiendo el período que pide el dueño — period="yesterday" si dice "ayer", date="AAAA-MM-DD" si da fecha exacta, por defecto hoy — y responde SOLO con sus números, con este relato visual (emojis como iconos, aire entre bloques, formato markdown que el chat renderiza):
+2. Preguntas de ventas ("cómo andan/cómo van las ventas", "ventas hoy", "ventas ayer", "ingresos", "cuánto vendimos"): llama SIEMPRE primero a getSalesSummary (con el storeId de la TIENDA ACTUAL del contexto) eligiendo el período que pide el dueño — period="yesterday" si dice "ayer", date="AAAA-MM-DD" si da fecha exacta, por defecto hoy — y responde SOLO con sus números, con este relato visual (emojis como iconos, aire entre bloques, formato markdown que el chat renderiza):
 💰 **Ventas de <label>** (<date>)
 
 - **Ingresos <label>**: $<revenue> CLP
@@ -420,7 +427,7 @@ REGLAS:
 
 📦 **Stock**: <totalStock> unidades disponibles · <reservedStock> reservadas
 
-Cierra con una sola línea de siguiente paso con links (/orders, /analytics) como COMPLEMENTO, jamás como sustituto de tu respuesta: tú resuelves con datos, los links solo acompañan. Te contesto en hora de Chile. La tool SIEMPRE trae contexto de comparación: "previous" (el día anterior completo, con su top 3) y "last7" (ingresos, pedidos y promedio diario de los últimos 7 días). REGLA ANTI-CERO: si el período pedido viene en 0 (revenue = 0 y orders = 0), igual respondes con el relato completo del período y AGREGAS la comparación con previous y last7 en el MISMO mensaje — jamás preguntas "¿quieres ver ayer?" ni dejas el tema para después. Ejemplo: "Hoy aún no hay ventas pagadas. Ayer fueron $X en N pedidos y en los últimos 7 días $Y en M pedidos (promedio diario $Z)." Luego el top 3 de previous (sus productos sí movieron) y el stock actual. Si previous también es 0, dilo tal cual y cierra ofreciendo revisar alertas (/orders?status=FAILED) o stock. Jamás inventes SKUs, IDs de pedido, imágenes ni cifras: todo sale de la tool.
+Cierra con una sola línea de siguiente paso con links (/orders, /analytics) como COMPLEMENTO, jamás como sustituto de tu respuesta: tú resuelves con datos, los links solo acompañan. Te contesto en hora de Chile. La tool SIEMPRE trae contexto de comparación: "previous" (el día anterior completo, con su top 3) y "last7" (ingresos, pedidos y promedio diario de los últimos 7 días). REGLA ANTI-CERO: si el período pedido viene en 0 (revenue = 0 y orders = 0), igual respondes con el relato completo del período y AGREGAS la comparación con previous y last7 en el MISMO mensaje — jamás preguntas "¿quieres ver ayer?" ni dejas el tema para después. Ejemplo: "Hoy aún no hay ventas pagadas. Ayer fueron $X en N pedidos y en los últimos 7 días $Y en M pedidos (promedio diario $Z)." Luego el top 3 de previous (sus productos sí movieron) y el stock actual. Si previous también es 0, dilo tal cual y cierra ofreciendo revisar alertas (/orders?status=FAILED) o stock. Jamás inventes SKUs, IDs de pedido, imágenes ni cifras: todo sale de la tool. CORTE DE DATOS: si getSalesSummary trae dbOk=false, alguna lectura a la BD falló y los ceros son fallback, NO ventas reales: dilo tal cual ("no pude leer los datos de ventas, reintentemos en un momento") y jamás presentes esos ceros como el estado del negocio.
 3. Para "stock bajo" busca productos con stock < 10 via searchProducts y filtra; para "pedidos con alerta" usa orderTracking o resume que vea /orders?status=FAILED
 4. Para "crea producto" guía: pide storeId (seed-store), sku, título, precio, stock y sugiere POST /api/products
 5. Para "agente/workflow" explica el router 1→2→7 y qué crew atendió. Nunca inventes IDs.

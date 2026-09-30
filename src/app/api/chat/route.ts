@@ -6,6 +6,7 @@ import { guardChatRequest, corsHeaders, isOriginAllowed, getClientIp, internalPr
 import { prisma } from "@/lib/adapters/prisma";
 import { ROUTER_SLUG } from "@/../agent/lib/crew-graph";
 import { AGENT_MAX_STEPS } from "@/shared/agent-limits";
+import { injectSearchNavigation, isLiveNavigation, mapAgentToolCalls } from "./flow";
 
 export async function OPTIONS(req: Request) {
   const origin = req.headers.get("origin");
@@ -84,7 +85,10 @@ export async function POST(req: Request) {
   if (stream) {
     const url = new URL(req.url);
     url.pathname = "/api/chat/stream";
-    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json", ...internalProxyHeaders(getClientIp(req)) }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
+    // El stream deriva isAdmin de la cookie de sesión: hay que reenviarla en el
+    // fetch interno (si no, todo admin vía stream:true llegaba como no-admin).
+    const cookie = req.headers.get("cookie");
+    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json", ...(cookie ? { cookie } : {}), ...internalProxyHeaders(getClientIp(req)) }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
     // Proxy streaming response tal cual
     return new Response(r.body, { status: r.status, headers: { "Content-Type": "text/event-stream", ...guard.headers } });
   }
@@ -117,39 +121,14 @@ export async function POST(req: Request) {
       rawCalls = [];
       text = ((result as unknown as { text?: string }).text ?? "").trim();
     }
-        const toolCallsMapped: Array<{ toolName: string; args: Record<string, unknown>; output: Record<string, unknown> }> = rawCalls.map((tc) => {
-      const toolName = ((tc.toolName ?? tc.name) as string | undefined) ?? "unknown";
-      const input = (tc.input ?? tc.args ?? {}) as Record<string, unknown>;
-      const output = (tc.output ?? {}) as Record<string, unknown>;
-      const args: Record<string, unknown> = { ...input };
-      if (typeof output.navigateTo === "string") args.path = output.navigateTo;
-      return { toolName, args, output };
-    });
+        const toolCallsMapped: Array<{ toolName: string; args: Record<string, unknown>; output: Record<string, unknown> }> = mapAgentToolCalls(rawCalls);
     toolCalls = toolCallsMapped;
 
-    // Inyección robusta de navegación: si el LLM llamó searchProducts pero NO navigateTo,
-    // agregamos /busqueda?q= automáticamente para garantizar la experiencia.
-    const hasNavigate = toolCalls.some((tc) => tc.toolName === "navigateTo");
-    const searchCall = toolCalls.find((tc) => tc.toolName === "searchProducts");
-    let autoQuery = "";
-    if (!hasNavigate && searchCall) {
-      // Preferir la query limpia que devolvió la tool ("hola tienes taladors por
-      // ahí?" → "taladors"): es la que el storefront sabe resolver. Si la tool
-      // detectó que NO era consulta de producto (saludo/charla), no se navega:
-      // mandar /busqueda?q=hola mostraba una ventana de resultados vacía.
-      const out = (searchCall.output ?? {}) as Record<string, unknown>;
-      const cleanFromTool = typeof out.cleanQuery === "string" ? out.cleanQuery.trim() : "";
-      const rawArg = ((searchCall.args?.query as string) ?? "").trim();
-      const query = cleanFromTool || (out.notAProductQuery === true ? "" : rawArg);
-      if (query) {
-        autoQuery = query;
-        toolCalls.push({
-          toolName: "navigateTo",
-          args: { path: "/busqueda", query, fromAutoInject: true },
-          output: { navigateTo: `/busqueda?q=${encodeURIComponent(query)}` },
-        });
-      }
-    }
+    // Inyección robusta de navegación (ver flow.ts: solo con resultados reales,
+    // nunca sobre charla ni búsquedas vacías, y sin contar navigations bloqueadas).
+    const injected = injectSearchNavigation(toolCalls);
+    toolCalls = injected.toolCalls;
+    const autoQuery = injected.autoQuery;
 
         // Texto de respaldo: si el LLM devolvió tool calls sin texto, igual respondemos algo útil.
     // (finalText ya incluye directFallback desde runAgent; texto vacío aquí significa que todo falló)
@@ -157,7 +136,9 @@ export async function POST(req: Request) {
       if (autoQuery) {
         text = `Busqueda encontrada para "${autoQuery}"! Te abri la ventana de resultados con todos los productos disponibles. Le filtro por precio o potencia?`;
       } else {
-        const nav = toolCalls.find((tc) => tc.toolName === "navigateTo");
+        // Solo una navegación REAL promete llevar a la tienda: una bloqueada
+        // no navega, así que no se anuncia como si lo hiciera.
+        const nav = toolCalls.find(isLiveNavigation);
         if (nav) {
           text = `Te llevo a la tienda para que veas los resultados. Si necesitas algo más especifico, pregunta por un producto o categoria.`;
         } else {
