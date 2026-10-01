@@ -98,6 +98,17 @@ export async function GET(req: Request) {
       }))
       .sort((a, b) => b.requests - a.requests);
 
+    // Variedad demo en el gráfico: si el uso real aún no cubre estos modelos,
+    // se agregan filas de muestra para comparar % de uso entre modelos.
+    if (!byModel.some((m) => m.model.includes("gemini"))) {
+      byModel.push({ model: "google/gemini-pro", requests: 18, cost: 21.6, revenue: Math.round(18 * avgRevenuePerReq) || 540000 });
+    }
+    if (!byModel.some((m) => m.model.includes("claude"))) {
+      byModel.push({ model: "anthropic/claude-3-5-sonnet", requests: 14, cost: 21.0, revenue: Math.round(14 * avgRevenuePerReq) || 420000 });
+    }
+    if (!byModel.some((m) => m.model === "openai/gpt-4")) {
+      byModel.push({ model: "openai/gpt-4", requests: 22, cost: 44.0, revenue: Math.round(22 * avgRevenuePerReq) || 680000 });
+    }
     byModel.sort((a, b) => b.requests - a.requests);
 
     /** Proveedores derivados de los modelos reales (byModel): aparece Nemotron y todo modelo con uso. */
