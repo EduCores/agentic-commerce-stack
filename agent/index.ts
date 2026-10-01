@@ -42,7 +42,7 @@ import searchDocs from "./tools/search-docs";
 // Regla extra: los modelos de razonamiento (Nemotron) a veces escriben su
 // chain-of-thought como respuesta final; con esto entregan SOLO la respuesta.
 const DIRECT_REPLY_RULE =
-  "\n\nFORMATO DE RESPUESTA: entrega DIRECTAMENTE la respuesta final al cliente, en español y en 1-3 frases. No muestres tu razonamiento, análisis, pasos internos ni texto en inglés.";
+  "\n\nFORMATO DE RESPUESTA: entrega DIRECTAMENTE la respuesta final al cliente, en español y en 1-2 frases cortas (máximo ~400 caracteres). Sé conciso: datos y cierre, sin relleno. No muestres tu razonamiento, análisis, pasos internos ni texto en inglés.";
 
 /**
  * Límite de intentos de `directChat`.
@@ -71,8 +71,8 @@ const DIRECT_CHAT_MAX_ATTEMPTS = 2;
  */
 const DIRECT_CHAT_TIMEOUT_MS = 3_000;
 
-/** Tope de tokens de salida en `directChat` (mismo criterio que el agente). */
-const DIRECT_CHAT_MAX_TOKENS = 500;
+/** Tope de tokens de salida en `directChat` (mitad que el agente: respuestas de respaldo breves). */
+const DIRECT_CHAT_MAX_TOKENS = 250;
 
 /**
  * Turnos de historial que se envían al modelo.

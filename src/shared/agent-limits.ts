@@ -21,11 +21,12 @@
 export const AGENT_MAX_STEPS = 2;
 
 /**
- * Tope de tokens de SALIDA por paso (500).
+ * Tope de tokens de SALIDA por paso (250).
  *
  * El free de Groq da 8.000 tokens/minuto. Con 700 de salida por paso y 2-3
  * pasos, una sola conversación podía consumir el minuto completo y dejar al
- * siguiente usuario con 429. 500 basta para las respuestas de un asistente de
- * ventas (1-4 frases) y baja el consumo ~30% sin perder calidad perceptible.
+ * siguiente usuario con 429. 250 (~la mitad de caracteres que antes) basta
+ * para respuestas de ventas breves (1-2 frases) y baja el consumo ~65%.
+ * No bajar más: los args JSON de los tool-calls comparten este presupuesto.
  */
-export const AGENT_MAX_OUTPUT_TOKENS = 500;
+export const AGENT_MAX_OUTPUT_TOKENS = 250;
