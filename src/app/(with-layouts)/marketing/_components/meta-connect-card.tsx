@@ -312,7 +312,7 @@ export function MetaConnectCard() {
         {/* Piloto automático fase 1: pausa perdedoras y avisa */}
         <div className="rounded-xl border border-card-border bg-background-gray-secondary/30 p-4">
           <p className="flex items-center gap-2 text-xs font-semibold text-text-primary">
-            Piloto automático — frena la hemorragia
+            Piloto automático — protege tu inversión
             <InfoTip label="Cómo funciona el piloto">
               Revisa tus campañas con gasto y sin conversiones. Al acumular las revisiones configuradas, las pausa solas y te avisa por email. Las que venden no se tocan nunca.
             </InfoTip>

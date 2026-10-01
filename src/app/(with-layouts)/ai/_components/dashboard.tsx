@@ -11,6 +11,7 @@ import { AGENT_STATUS_ES } from "./types";
 import { InfoTip } from "@/components/tailgrids/core/info-tip";
 import Link from "next/link";
 import { Activity, BadgeCheck, Bot, Sparkles, Wallet } from "lucide-react";
+import { displayModelName } from "@/utils/model-display";
 
 export function AiDashboard() {
   const [days, setDays] = useState<AiRange>(21);
@@ -72,7 +73,7 @@ export function AiDashboard() {
               <p className="text-xs font-medium text-white/80">Costo total</p>
             </div>
             <p className="mt-2 text-2xl font-extrabold tracking-tight">${data.totals.cost.toLocaleString("es-CL")}</p>
-            <p className="break-all text-xs text-white/70">${avgCost.toFixed(2)} por solicitud · modelo {data.byModel[0]?.model ?? "—"}</p>
+            <p className="break-all text-xs text-white/70">${avgCost.toFixed(2)} por solicitud · modelo en uso {displayModelName(data.activeModel)}</p>
           </div>
           <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
             <div className="flex items-center gap-2">

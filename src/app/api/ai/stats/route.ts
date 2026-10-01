@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/adapters/prisma";
 import { DEMO_MODE } from "@/lib/demo";
+import { STARSHOP_CREW_MODEL } from "../../../../../prisma/starshop-prompts";
 
 export const dynamic = "force-dynamic";
 
@@ -97,16 +98,6 @@ export async function GET(req: Request) {
       }))
       .sort((a, b) => b.requests - a.requests);
 
-    // --- DEMO FAKE (quitar en entrega): inyecta Gemini, Claude y Chat-GPT para mostrar variedad ---
-    if (!byModel.some((m) => m.model.includes("gemini"))) {
-      byModel.push({ model: "google/gemini-pro", requests: 18, cost: 21.6, revenue: Math.round(18 * avgRevenuePerReq) || 540000 });
-    }
-    if (!byModel.some((m) => m.model.includes("claude"))) {
-      byModel.push({ model: "anthropic/claude-3-5-sonnet", requests: 14, cost: 21.0, revenue: Math.round(14 * avgRevenuePerReq) || 420000 });
-    }
-    if (!byModel.some((m) => m.model === "openai/gpt-4")) {
-      byModel.push({ model: "openai/gpt-4", requests: 22, cost: 44.0, revenue: Math.round(22 * avgRevenuePerReq) || 680000 });
-    }
     byModel.sort((a, b) => b.requests - a.requests);
 
     /** Proveedores derivados de los modelos reales (byModel): aparece Nemotron y todo modelo con uso. */
@@ -142,6 +133,7 @@ export async function GET(req: Request) {
               });
       return NextResponse.json({
         totals: { requests: 42, cost: 37.8, successRate: 96.4, activeAgents: 8 },
+        activeModel: STARSHOP_CREW_MODEL,
         byDay: demoByDay,
         table: [
           { id: "1", name: "Asistente Ventas", slug: "sales-assistant", model: "nvidia/nemotron-3-ultra-550b-a55b", active: true, requests: 12, success: 96.4, cost: 10.8, revenue: 420000 },
@@ -163,6 +155,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       totals: { requests: runs.length, cost: Math.round(cost * 100) / 100, successRate, activeAgents: agents.filter((a) => a.isActive).length },
+      activeModel: STARSHOP_CREW_MODEL,
       byDay,
       table,
       byModel,

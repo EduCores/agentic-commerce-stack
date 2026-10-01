@@ -6,6 +6,7 @@ import { Badge } from "@/components/tailgrids/core/badge";
 import { formatCLP } from "./home-types";
 import { HomeCardLink } from "./home-card-link";
 import { sharePct } from "@/utils/period-stats";
+import { displayModelName } from "@/utils/model-display";
 import { HomeActivityCard } from "./home-activity-card";
 
 type AiTotals = { requests: number; cost: number; successRate: number; activeAgents: number };
@@ -16,12 +17,12 @@ type MarketingTotals = { impressions: number; revenue: number };
 function useAiSummary() {
   return useQuery({
     queryKey: ["home-ai"],
-    queryFn: async (): Promise<{ totals: AiTotals | null; byDay: AiDay[] }> => {
+    queryFn: async (): Promise<{ totals: AiTotals | null; byDay: AiDay[]; activeModel?: string }> => {
       try {
         const r = await fetch("/api/ai/stats?days=14");
         if (!r.ok) return { totals: null, byDay: [] };
         const j = await r.json();
-        return { totals: j.totals ?? null, byDay: j.byDay ?? [] };
+        return { totals: j.totals ?? null, byDay: j.byDay ?? [], activeModel: j.activeModel };
       } catch {
         return { totals: null, byDay: [] };
       }
@@ -139,6 +140,9 @@ export function SiteSummaries() {
             <div className="mt-2">
               <Sparkline values={aiDays} id="home-ai-spark" />
             </div>
+            <p className="mt-2 truncate text-xs text-text-tertiary" title={ai.data?.activeModel ?? ""}>
+              Modelo en uso: <strong className="text-text-primary">{displayModelName(ai.data?.activeModel)}</strong>
+            </p>
             <div className="mt-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-emerald-600">{aiTotals.successRate.toLocaleString("es-CL")}% éxito</span>
