@@ -1,7 +1,7 @@
 import { streamStarShopFlow, streamAgent } from "@/../agent";
 import { cookies } from "next/headers";
 import { verifySessionToken, AUTH_COOKIE } from "@/lib/auth";
-import { guardChatRequest, corsHeaders, isOriginAllowed } from "@/lib/api/chat-guard";
+import { guardChatRequest, corsHeaders, isOriginAllowed, resolveTenantStore } from "@/lib/api/chat-guard";
 
 export async function OPTIONS(req: Request) {
   const origin = req.headers.get("origin");
@@ -39,6 +39,11 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { "Content-Type": "application/json", ...guard.headers } });
   }
 
+  // Tenant autoritativo por Origin (igual que /api/chat; el proxy interno
+  // llega sin Origin y respeta el storeId ya resuelto que reenvía route.ts).
+  const tenant = await resolveTenantStore(req.headers.get("origin"), storeId);
+  const effStoreId = tenant.storeId;
+
   const shouldUseFlow = useFlow !== false;
 
   const encoder = new TextEncoder();
@@ -49,8 +54,8 @@ export async function POST(req: Request) {
       };
       try {
         const gen = shouldUseFlow
-          ? streamStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin })
-          : streamAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
+          ? streamStarShopFlow({ input: message, history: history ?? [], storeId: effStoreId, isAdmin })
+          : streamAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId: effStoreId });
 
         for await (const chunk of gen) {
           send(chunk);

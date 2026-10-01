@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import { verifySessionToken, AUTH_COOKIE } from "@/lib/auth";
 import { runAgent, runStarShopFlow, refreshCrewOverrides } from "@/../agent";
-import { guardChatRequest, corsHeaders, isOriginAllowed, getClientIp, internalProxyHeaders } from "@/lib/api/chat-guard";
+import { guardChatRequest, corsHeaders, isOriginAllowed, getClientIp, internalProxyHeaders, resolveTenantStore } from "@/lib/api/chat-guard";
 import { prisma } from "@/lib/adapters/prisma";
 import { ROUTER_SLUG } from "@/../agent/lib/crew-graph";
 import { AGENT_MAX_STEPS } from "@/shared/agent-limits";
@@ -80,6 +80,10 @@ export async function POST(req: Request) {
   // isAdmin NUNCA viene del cliente: se deriva de la sesión (evita escalada a flujos admin + gasto de la key del dueño)
   const token = (await cookies()).get(AUTH_COOKIE.name)?.value;
   const isAdmin = token ? !!(await verifySessionToken(token)) : false;
+  // Tenant autoritativo por Origin: el storeId del body no es confiable.
+  const tenant = await resolveTenantStore(req.headers.get("origin"), storeId);
+  const effStoreId = tenant.storeId;
+  if (tenant.overridden && !QUIET) console.log(`[ACS-TENANT] storeId ${storeId} → ${effStoreId} (Origin ${req.headers.get("origin")})`);
   if (!message) return NextResponse.json({ error: "message required" }, { status: 400, headers: guard.headers });
   // Si el frontend pide stream:true, redirige a lógica SSE sin romper compatibilidad JSON
   if (stream) {
@@ -88,7 +92,7 @@ export async function POST(req: Request) {
     // El stream deriva isAdmin de la cookie de sesión: hay que reenviarla en el
     // fetch interno (si no, todo admin vía stream:true llegaba como no-admin).
     const cookie = req.headers.get("cookie");
-    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json", ...(cookie ? { cookie } : {}), ...internalProxyHeaders(getClientIp(req)) }, body: JSON.stringify({ message, history, agentSlug, storeId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
+    const r = await fetch(url.toString(), { method: "POST", headers: { "Content-Type": "application/json", ...(cookie ? { cookie } : {}), ...internalProxyHeaders(getClientIp(req)) }, body: JSON.stringify({ message, history, agentSlug, storeId: effStoreId, useFlow, isAdmin }), signal: (req as unknown as { signal?: AbortSignal }).signal });
     // Proxy streaming response tal cual
     return new Response(r.body, { status: r.status, headers: { "Content-Type": "text/event-stream", ...guard.headers } });
   }
@@ -104,7 +108,7 @@ export async function POST(req: Request) {
             if (shouldUseFlow) {
       // Refrescar overrides del grafo (cached 60s) antes de ejecutar el flow
       await refreshCrewOverrides();
-      result = await runStarShopFlow({ input: message, history: history ?? [], storeId, isAdmin });
+      result = await runStarShopFlow({ input: message, history: history ?? [], storeId: effStoreId, isAdmin });
       const r = result as unknown as { detectedIntent?: string; crew?: string; intentConfidence?: number; intentSource?: string; toolCalls?: Array<Record<string, unknown>>; text?: string };
       detectedIntent = r.detectedIntent;
       crew = r.crew;
@@ -113,7 +117,7 @@ export async function POST(req: Request) {
       rawCalls = r.toolCalls ?? [];
       text = (r.text ?? "").trim();
     } else {
-      result = await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId });
+      result = await runAgent({ agentSlug: agentSlug ?? "sales-assistant", input: message, history: history ?? [], storeId: effStoreId });
       detectedIntent = undefined;
       crew = undefined;
       intentConfidence = null;

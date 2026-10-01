@@ -19,6 +19,11 @@
  *      la IP del cliente en `x-acs-proxy-ip` + firma HMAC-SHA256 (`x-acs-proxy-sig`,
  *      sellada con getJwtSecret()). Sin firma válida esas cabeceras se ignoran y la
  *      petición se cuenta con la IP de quien llama: nadie puede inventarse un bypass.
+ *   4. Binding tenant por Origin (`resolveTenantStore`): el `storeId` lo manda el
+ *      cliente y no es confiable. Si el Origin coincide con el `domain` de una
+ *      StoreConnection, se impone ese storeId (el solicitado se ignora y se
+ *      loguea). Sin Origin mapeado (dashboard propio, proxy interno, dev) se
+ *      respeta el solicitado. Así un tenant nunca vitrina el catálogo de otro.
  *
  * Configuración vía env:
  *   ALLOWED_ORIGINS          — orígenes extra separados por coma
@@ -199,4 +204,39 @@ export async function guardChatRequest(req: Request, scope: string, opts?: Guard
     }
   }
   return { allowed: true, headers: corsHeaders(origin) };
+}
+
+export type TenantResolution = {
+  storeId: string;
+  overridden: boolean;
+  tenantId: string | null;
+};
+
+/**
+ * Resuelve el tenant autoritativo por Origin (Fase multi-tenant).
+ *
+ * POR QUÉ: el `storeId` del body lo elige el cliente (navegador) y un curioso
+ * podría pedir el de otro tenant. Si el Origin coincide con el `domain` de una
+ * StoreConnection, ese es el tenant dueño de la petición y se impone su id.
+ * Sin Origin mapeado (dashboard ACS, proxy interno sin Origin, curl, dev) se
+ * respeta el solicitado con default "seed-store". Nunca lanza (sin DB = fallback).
+ */
+export async function resolveTenantStore(
+  origin: string | null | undefined,
+  requestedStoreId?: string,
+): Promise<TenantResolution> {
+  const fallback = (requestedStoreId ?? "").trim() || "seed-store";
+  const o = (origin ?? "").trim().replace(/\/+$/, "");
+  if (!o) return { storeId: fallback, overridden: false, tenantId: null };
+  try {
+    const { prisma } = await import("@/lib/adapters/prisma");
+    const match = await prisma.storeConnection.findFirst({
+      where: { OR: [{ domain: o }, { domain: `${o}/` }] },
+      select: { id: true },
+    });
+    if (!match) return { storeId: fallback, overridden: false, tenantId: null };
+    return { storeId: match.id, overridden: match.id !== fallback, tenantId: match.id };
+  } catch {
+    return { storeId: fallback, overridden: false, tenantId: null };
+  }
 }
