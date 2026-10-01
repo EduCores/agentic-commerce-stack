@@ -18,6 +18,7 @@ import {
 } from "@/components/tailgrids/core/dropdown";
 import { AltArrowDownIcon } from "@/utils/icon";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface UserProfileMenuItem {
   href: string;
@@ -107,8 +108,19 @@ export function UserProfileButton() {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem
-          onAction={() => {
-            // logout handler
+          onAction={async () => {
+            // Cierra la sesión en el servidor (borra la cookie) y recarga
+            // completa al login para limpiar el estado del cliente.
+            // Solo redirige si el servidor confirmó: redirigir en `finally`
+            // mostraba el login con la sesión aún viva si el POST fallaba.
+            try {
+              const r = await fetch("/api/auth/logout", { method: "POST" });
+              if (!r.ok) throw new Error(`logout ${r.status}`);
+            } catch {
+              toast.error("No se pudo cerrar la sesión. Inténtalo de nuevo.");
+              return;
+            }
+            window.location.href = "/auth/sign-in";
           }}
           className="m-1.5 w-auto cursor-pointer px-3 py-2.5"
         >

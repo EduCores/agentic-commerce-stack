@@ -19,6 +19,10 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      # El cliente Prisma generado (src/generated) está gitignorado: sin este
+      # paso, test:types falla con TS2307 y los evals que importan Prisma
+      # revientan en ModuleNotFound. Generate es offline (293ms) y sin DB.
+      - run: npx prisma generate
       - run: npm run test:harness
 
   llm-weekly:
