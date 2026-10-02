@@ -31,15 +31,39 @@ export async function middleware(req: NextRequest) {
   }
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    // Rol member = solo lectura (demo/clientes): puede navegar (GET) y usar
-    // endpoints públicos ya autorizados arriba (auth, chat), pero ningún otro
-    // /api/* con escritura. Sin Server Actions en el proyecto, esto cubre
-    // todas las mutaciones (POST/PATCH/PUT/DELETE).
-    if ((payload.role as string) === "member" && pathname.startsWith("/api/")) {
-      if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") {
-        return NextResponse.next();
+    // Rol member = demo/clientes externos: lectura acotada + cero escritura.
+    // 1) Escrituras: ningún /api/* no-GET salvo auth/chat ya autorizados arriba.
+    //    Sin Server Actions en el proyecto, esto cubre todas las mutaciones.
+    // 2) Lecturas sensibles denegadas aunque sean GET (secretos, prompts,
+    //    PII de emails/clientes): agentes, workflows, emails, chat admin,
+    //    meta, crm y store. La demo sigue viva en /, productos, pedidos,
+    //    marketing, analítica, AI, equipo y chat de tienda.
+    // 3) Páginas con datos sensibles renderizados en servidor (prompts en
+    //    /agents, grafos en /workflows, PII en /admin/emails y /crm, chat de
+    //    dueño en /admin) redirigen a /.
+    if ((payload.role as string) === "member") {
+      const MEMBER_DENY_API = [
+        "/api/agents",
+        "/api/workflows",
+        "/api/admin/emails",
+        "/api/admin/chat",
+        "/api/meta",
+        "/api/crm",
+        "/api/store",
+      ];
+      const MEMBER_DENY_PAGES = ["/agents", "/workflows", "/admin/emails", "/admin", "/crm"];
+      if (pathname.startsWith("/api/")) {
+        if (MEMBER_DENY_API.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+          return NextResponse.json({ error: "Solo lectura: área no disponible para tu rol" }, { status: 403 });
+        }
+        if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") {
+          return NextResponse.next();
+        }
+        return NextResponse.json({ error: "Solo lectura: tu rol no permite modificar" }, { status: 403 });
       }
-      return NextResponse.json({ error: "Solo lectura: tu rol no permite modificar" }, { status: 403 });
+      if (MEMBER_DENY_PAGES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
     }
     return NextResponse.next();
   } catch {
