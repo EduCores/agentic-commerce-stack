@@ -22,6 +22,8 @@ export default async function StorePage() {
     prisma.product.count().catch(() => 0),
   ]);
   const catalogTotal = totalProducts > 0 ? totalProducts : products.length;
+  // La primera fila (más recientemente actualizada) se muestra al último.
+  const orderedProducts = products.length > 1 ? [...products.slice(1), products[0]] : products;
   const primary = stores[0];
   const primaryHealth = ((primary?.config as unknown as StoreConfig | null)?.lastHealthCheck) ?? null;
 
@@ -121,7 +123,7 @@ export default async function StorePage() {
               <p className="text-sm text-text-tertiary">Sin productos. Ejecuta <code>prisma/seed.ts</code> o conecta tu tienda y sincroniza.</p>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {products.map((p) => {
+                {orderedProducts.map((p) => {
                   const stockState =
                     p.stock <= 0
                       ? { dot: "bg-red-500", badge: "Agotado" as const, color: "error" as const }
