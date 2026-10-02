@@ -12,16 +12,22 @@ function isPublic(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
+/**
+ * APIs públicas SIN sesión (fail-closed: todo otro /api/* exige JWT válido).
+ * - /api/store/orders-ingest y /api/cart/abandoned: ingesta best-effort desde storefronts.
+ * - /api/cron: Vercel Cron sin cookie; se defiende solo con CRON_SECRET en la ruta.
+ * (auth, chat, stream y tts ya van en PUBLIC_PATHS.)
+ */
+const PUBLIC_API_NO_AUTH = ["/api/store/orders-ingest", "/api/cart/abandoned", "/api/cron"];
+
+function isPublicApiNoAuth(pathname: string) {
+  return PUBLIC_API_NO_AUTH.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  // Puente público del frontend StarShop (sin sesión admin): ingiere órdenes best-effort.
-  if (pathname === "/api/store/orders-ingest" || pathname.startsWith("/api/store/orders-ingest/")) {
+  if (isPublic(pathname) || isPublicApiNoAuth(pathname)) {
     return NextResponse.next();
-  }
-  if (isPublic(pathname) || pathname.startsWith("/api/")) {
-    // /api/chat es público para el widget de tienda. /api/admin/* siempre protegido.
-    const isAdminApi = pathname.startsWith("/api/admin") || pathname.startsWith("/api/store") || pathname.startsWith("/api/slider") || pathname.startsWith("/api/orders") || pathname.startsWith("/api/products") || pathname.startsWith("/api/dashboard") || pathname.startsWith("/api/agents") || pathname.startsWith("/api/workflows") || pathname.startsWith("/api/analytics") || pathname.startsWith("/api/marketing") || pathname.startsWith("/api/crm") || pathname.startsWith("/api/ai");
-    if (!isAdminApi) return NextResponse.next();
   }
 
   const token = req.cookies.get(COOKIE_NAME)?.value;
