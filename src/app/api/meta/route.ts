@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/adapters/prisma";
 import { requireAdmin } from "@/lib/emails/admin-guard";
+import { encryptSecret } from "@/lib/crypto";
 import { listMetaConnectionsSafe, normalizeAdAccountId, testMetaConnection } from "@/lib/adapters/meta";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `No se pudo validar con Meta: ${test.error}. Verifica token y Ad Account ID.` }, { status: 400 });
   }
 
+  // Secretos cifrados en reposo (el token ya se validó en claro contra Graph API).
+  const encToken = encryptSecret(accessToken);
+  const encSecret = appSecret ? encryptSecret(appSecret) : null;
   // Si ya existe una con mismo adAccountId, actualiza
   const existing = await prisma.metaConnection.findFirst({ where: { adAccountId: normalized } });
   if (existing) {
@@ -51,9 +55,9 @@ export async function POST(req: Request) {
       where: { id: existing.id },
       data: {
         name,
-        accessToken,
+        accessToken: encToken,
         appId,
-        appSecret,
+        appSecret: encSecret,
         pixelId,
         businessId,
         isActive: true,
@@ -69,9 +73,9 @@ export async function POST(req: Request) {
     data: {
       name,
       adAccountId: normalized,
-      accessToken,
+      accessToken: encToken,
       appId,
-      appSecret,
+      appSecret: encSecret,
       pixelId,
       businessId,
       isActive: true,

@@ -58,13 +58,14 @@ const mockAdapter: StoreAdapter = {
     };
   },
   async reserveStock(storeId, sku, qty) {
-    const p = await prisma.product.findFirst({ where: { storeId, sku } });
+    const p = await prisma.product.findFirst({ where: { storeId, sku }, select: { id: true } });
     if (!p) throw new Error(`Product not found: ${sku}`);
-    if (p.stock - p.reservedStock < qty) throw new Error(`Insufficient stock for ${sku}`);
-    const updated = await prisma.product.update({
-      where: { id: p.id },
-      data: { reservedStock: { increment: qty } },
-    });
+    // ATÓMICO: check + reserva en UNA sola sentencia. El TOCTOU anterior
+    // (leer, comparar en JS, incrementar) permitía oversell con dos compras
+    // simultáneas de las últimas unidades. 0 filas = sin stock suficiente.
+    const rows = await prisma.$executeRaw`UPDATE "Product" SET "reservedStock" = "reservedStock" + ${qty}, "updatedAt" = NOW() WHERE id = ${p.id} AND ("stock" - "reservedStock") >= ${qty}`;
+    if (Number(rows) === 0) throw new Error(`Insufficient stock for ${sku}`);
+    const updated = await prisma.product.findUniqueOrThrow({ where: { id: p.id } });
     return {
       sku,
       available: updated.stock - updated.reservedStock,
@@ -73,12 +74,11 @@ const mockAdapter: StoreAdapter = {
     };
   },
   async releaseStock(storeId, sku, qty) {
-    const p = await prisma.product.findFirst({ where: { storeId, sku } });
+    const p = await prisma.product.findFirst({ where: { storeId, sku }, select: { id: true } });
     if (!p) throw new Error(`Product not found: ${sku}`);
-    const updated = await prisma.product.update({
-      where: { id: p.id },
-      data: { reservedStock: { decrement: qty } },
-    });
+    // GREATEST evita reserva negativa si se libera más de lo apartado.
+    await prisma.$executeRaw`UPDATE "Product" SET "reservedStock" = GREATEST("reservedStock" - ${qty}, 0), "updatedAt" = NOW() WHERE id = ${p.id}`;
+    const updated = await prisma.product.findUniqueOrThrow({ where: { id: p.id } });
     return {
       sku,
       available: updated.stock - updated.reservedStock,

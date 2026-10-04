@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminByEmail, verifyPassword, createSessionToken, AUTH_COOKIE, ensureDefaultAdmin } from "@/lib/auth";
+import { getAdminByEmail, verifyPassword, createSessionToken, AUTH_COOKIE, cookieOptionsForRole, ensureDefaultAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/adapters/prisma";
 import { checkAuthRateLimit, rateLimitResponse } from "@/lib/api/rate-limit";
 
@@ -27,9 +27,11 @@ export async function POST(req: Request) {
   const ok = await verifyPassword(password, admin.password);
   if (!ok) return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
 
-  // 2FA activado en el perfil: exige código vigente antes de crear sesión
+  // 2FA activado en el perfil — y SIEMPRE obligatorio para owner (Fase
+  // seguridad): el código se pide por /api/auth/2fa/request y se verifica
+  // abajo, así que no hay lockout (no depende del flag del perfil).
   const profile = (admin.profileData ?? {}) as { twoFactorEnabled?: boolean };
-  if (profile.twoFactorEnabled === true) {
+  if (profile.twoFactorEnabled === true || admin.role === "owner") {
     if (!code) return NextResponse.json({ ok: false, require2fa: true, message: "Tu cuenta exige verificación en dos pasos." }, { status: 200 });
     const entry = await prisma.verificationCode.findFirst({
       where: { email: admin.email, purpose: "2fa", consumedAt: null },
@@ -42,6 +44,6 @@ export async function POST(req: Request) {
 
   const token = await createSessionToken(admin);
   const res = NextResponse.json({ ok: true, admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role } });
-  res.cookies.set(AUTH_COOKIE.name, token, AUTH_COOKIE.options);
+  res.cookies.set(AUTH_COOKIE.name, token, cookieOptionsForRole(admin.role));
   return res;
 }

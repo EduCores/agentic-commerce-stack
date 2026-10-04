@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySessionToken, AUTH_COOKIE } from "@/lib/auth";
 import { prisma } from "@/lib/adapters/prisma";
+import { encryptSecret } from "@/lib/crypto";
 
 export async function GET() {
   try {
@@ -30,7 +31,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, provider, domain } = body;
     if (!name || !provider) return NextResponse.json({ error: "name and provider required" }, { status: 400 });
-    const created = await prisma.storeConnection.create({ data: { name, provider, domain, apiKey: body.apiKey, apiSecret: body.apiSecret, config: body.config ?? {} } });
+    // Credenciales cifradas en reposo (ver src/lib/crypto.ts).
+    const apiKey = typeof body.apiKey === "string" && body.apiKey ? encryptSecret(body.apiKey) : body.apiKey ?? null;
+    const apiSecret = typeof body.apiSecret === "string" && body.apiSecret ? encryptSecret(body.apiSecret) : body.apiSecret ?? null;
+    const created = await prisma.storeConnection.create({ data: { name, provider, domain, apiKey, apiSecret, config: body.config ?? {} } });
     return NextResponse.json(created, { status: 201 });
   } catch (e) {
     console.error("[API-STORE] POST error:", e);

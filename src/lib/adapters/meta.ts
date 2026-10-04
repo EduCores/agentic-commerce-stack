@@ -7,6 +7,7 @@
 
 import crypto from "node:crypto";
 import { prisma } from "@/lib/adapters/prisma";
+import { decryptSecret } from "@/lib/crypto";
 
 export type MetaInsight = {
   spend: number;
@@ -45,9 +46,21 @@ function normalizeAdAccountId(raw: string): string {
   return v;
 }
 
-/** Obtiene la conexión activa principal (la primera). */
+/** Descifra los secretos de una conexión (lee cifrado, opera en claro en memoria). */
+function decryptConn<T extends { accessToken: string; appSecret: string | null }>(conn: T | null): T | null {
+  if (!conn) return conn;
+  try {
+    return { ...conn, accessToken: decryptSecret(conn.accessToken), appSecret: conn.appSecret ? decryptSecret(conn.appSecret) : null };
+  } catch (e) {
+    console.error("[meta] no se pudo descifrar la conexión (¿SECRETS_ENCRYPTION_KEY?)", e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+/** Obtiene la conexión activa principal (la primera), con secretos descifrados. */
 export async function getActiveMetaConnection() {
-  return prisma.metaConnection.findFirst({ where: { isActive: true }, orderBy: { createdAt: "desc" } });
+  const conn = await prisma.metaConnection.findFirst({ where: { isActive: true }, orderBy: { createdAt: "desc" } });
+  return decryptConn(conn);
 }
 
 export async function listMetaConnectionsSafe(): Promise<MetaConnectionSafe[]> {
@@ -126,7 +139,7 @@ export async function fetchMetaInsights(
 
 /** Sincroniza la conexión activa y guarda cache en config. */
 export async function syncMetaConnection(id: string): Promise<{ ok: boolean; insight?: MetaInsight; error?: string }> {
-  const conn = await prisma.metaConnection.findUnique({ where: { id } });
+  const conn = decryptConn(await prisma.metaConnection.findUnique({ where: { id } }));
   if (!conn) return { ok: false, error: "Conexión no encontrada" };
   try {
     const insight = await fetchMetaInsights(conn.accessToken, conn.adAccountId);

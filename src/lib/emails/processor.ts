@@ -271,9 +271,28 @@ export async function processDueEnrollments(now = new Date()) {
   return { sent, completed, checked: due.length };
 }
 
+/** Retención PII 90 días (Fase seguridad): borra emails, carros y códigos
+ *  2FA viejos. Solo datos muertos (logs viejos, carros sin actividad,
+ *  códigos consumidos o vencidos, inscripciones cerradas): nunca toca
+ *  activos en curso. */
+export const PII_RETENTION_DAYS = 90;
+
+export async function purgeExpiredPii(now = new Date()) {
+  const cutoff = new Date(now.getTime() - PII_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const { prisma } = await import("@/lib/adapters/prisma");
+  const [emails, carts, codes, enrollments] = await Promise.all([
+    prisma.emailLog.deleteMany({ where: { createdAt: { lt: cutoff } } }).catch(() => ({ count: 0 })),
+    prisma.cartAbandonment.deleteMany({ where: { lastActivityAt: { lt: cutoff } } }).catch(() => ({ count: 0 })),
+    prisma.verificationCode.deleteMany({ where: { OR: [{ consumedAt: { not: null } }, { expiresAt: { lt: now } }] } }).catch(() => ({ count: 0 })),
+    prisma.emailSequenceEnrollment.deleteMany({ where: { status: { in: ["COMPLETED", "CANCELLED"] }, updatedAt: { lt: cutoff } } }).catch(() => ({ count: 0 })),
+  ]);
+  return { emails: emails.count, carts: carts.count, codes: codes.count, enrollments: enrollments.count };
+}
+
 /** Orquesta todo: lo usa el cron y el botón "Procesar ahora". */
 export async function runEmailCron(now = new Date()) {
   const detection = await detectAbandonedCarts(now);
   const sending = await processDueEnrollments(now);
-  return { at: now.toISOString(), detection, sending };
+  const retention = await purgeExpiredPii(now);
+  return { at: now.toISOString(), detection, sending, retention };
 }

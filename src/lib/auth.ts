@@ -6,6 +6,12 @@ import { getJwtSecret } from "@/lib/jwt-secret";
 const JWT_SECRET = getJwtSecret();
 const COOKIE_NAME = "acs_admin_token";
 const SESSION_DAYS = 7;
+/** Sesiones cortas para demo/clientes externos (Fase seguridad). */
+const MEMBER_SESSION_DAYS = 1;
+
+export function sessionDaysForRole(role: string): number {
+  return role === "member" ? MEMBER_SESSION_DAYS : SESSION_DAYS;
+}
 
 export type AdminSession = { id: string; email: string; name: string | null; role: string };
 
@@ -22,7 +28,7 @@ export async function createSessionToken(admin: { id: string; email: string; nam
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(admin.id)
     .setIssuedAt()
-    .setExpirationTime(`${SESSION_DAYS}d`)
+    .setExpirationTime(`${sessionDaysForRole(admin.role)}d`)
     .sign(JWT_SECRET);
 }
 
@@ -45,6 +51,11 @@ export const AUTH_COOKIE = {
     maxAge: SESSION_DAYS * 24 * 60 * 60,
   },
 };
+
+/** Cookie alineada a la expiración del JWT según rol. */
+export function cookieOptionsForRole(role: string) {
+  return { ...AUTH_COOKIE.options, maxAge: sessionDaysForRole(role) * 24 * 60 * 60 };
+}
 
 export async function getAdminByEmail(email: string) {
   return prisma.adminUser.findUnique({ where: { email: email.toLowerCase().trim() } });
