@@ -15,6 +15,11 @@ export async function POST(req: Request) {
   const user = await prisma.adminUser.findUnique({ where: { email: normalized } }).catch(() => null);
   // Respuesta genérica para no enumerar cuentas (se envía correo solo si existe)
   if (!user) return NextResponse.json({ ok: true, message: "Si existe la cuenta, enviamos el código." });
+  // Fail-loud en prod: sin RESEND_API_KEY el envío es mock y el código jamás
+  // llegaría (con 2FA obligatoria para owner eso es un lockout silencioso).
+  if (!process.env.RESEND_API_KEY && process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Servicio de correo no configurado. Contacta al administrador." }, { status: 503 });
+  }
   const code = String(randomInt(100000, 1000000));
   // Invalida códigos previos y guarda el nuevo (5 min). Limpia expirados de paso.
   await prisma.verificationCode.updateMany({ where: { email: normalized, purpose: "2fa", consumedAt: null }, data: { consumedAt: new Date() } }).catch(() => {});

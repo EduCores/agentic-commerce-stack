@@ -17,7 +17,6 @@ import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type Gra
 import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
 import { sanitizeReplyText, createToolCallTextFilter } from "./lib/sanitize-reply";
-import * as Sentry from "@sentry/nextjs";
 import { alertOwner } from "@/lib/alerts";
 import { reportError } from "@/lib/error-events";
 import { verifyClaims, collectStepEvidence, buildVerifiedFacts, VERIFY_FALLBACK_TEXT } from "./lib/verify-claims";
@@ -590,12 +589,7 @@ export async function runAgent(params: { agentSlug: string; input: string; store
     claimViolations = check.violations;
     if (!check.ok) {
       console.log("[ACS-VERIFY] afirmaciones no verificadas, bloqueando", JSON.stringify(check.violations).slice(0, 400));
-      // Observabilidad Fase 5: sin SENTRY_DSN es no-op local.
-      Sentry.captureMessage("[ACS-VERIFY] afirmaciones bloqueadas", {
-        level: "warning",
-        extra: { agent: agent.slug, violations: check.violations.slice(0, 5) },
-      });
-      // Plan B sin Sentry: email al dueño (con cooldown anti-spam). Fire-and-forget
+      // Email al dueño (con cooldown anti-spam). Fire-and-forget
       // para no sumar latencia a la respuesta del chat.
       void alertOwner(
         "verify-block",

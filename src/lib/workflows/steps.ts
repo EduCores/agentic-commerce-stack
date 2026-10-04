@@ -4,6 +4,7 @@
 import { prisma } from "@/lib/adapters/prisma";
 import { getStoreAdapter } from "@/lib/adapters/store";
 import { logStep } from "@/lib/workflows/engine";
+import { reportError } from "@/lib/error-events";
 
 // Reserva stock durable + log para XYFlow
 export async function reserveStockStep(params: { orderId: string; workflowRunId?: string }) {
@@ -52,7 +53,18 @@ export async function cancelOrderStep(params: { orderId: string; reason: string;
     const adapter = getStoreAdapter(order.store.provider);
     for (const item of order.items) {
       const product = await prisma.product.findUnique({ where: { id: item.productId } });
-      if (product) await adapter.releaseStock(order.storeId, product.sku, item.quantity).catch(() => null);
+      // La liberación es best-effort (no debe tumbar la cancelación), pero un
+      // fallo silencioso deja stock reservado fantasma: se loguea y reporta.
+      if (product) {
+        await adapter.releaseStock(order.storeId, product.sku, item.quantity).catch((e) => {
+          console.error(`[cancel-order] no se liberó ${item.quantity}x ${product.sku} de ${params.orderId}:`, e instanceof Error ? e.message : e);
+          void reportError({
+            kind: "workflow",
+            message: `cancel-order: releaseStock falló para ${product.sku} x${item.quantity}`,
+            context: { orderId: params.orderId },
+          });
+        });
+      }
     }
   }
   await prisma.order.update({ where: { id: params.orderId }, data: { status: "CANCELLED" } });

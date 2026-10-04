@@ -18,6 +18,11 @@ export async function POST(req: Request) {
   const user = await prisma.adminUser.findUnique({ where: { email: normalized } }).catch(() => null);
   // Respuesta genérica para no filtrar emails existentes
   if (!user) return NextResponse.json({ ok: true, message: "Si existe la cuenta, enviamos instrucciones." });
+  // Fail-loud en prod: sin RESEND_API_KEY el correo es mock y el token jamás
+  // llegaría (quedaría un reset fantasma). En dev se expone debugToken abajo.
+  if (!process.env.RESEND_API_KEY && process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Servicio de correo no configurado. Contacta al administrador." }, { status: 503 });
+  }
   const token = await new SignJWT({ purpose: "reset", email: normalized })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
