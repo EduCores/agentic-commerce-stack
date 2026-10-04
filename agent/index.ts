@@ -17,6 +17,7 @@ import { getGraphCrewOverrides, clearCrewGraphCache as clearGraphCache, type Gra
 import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
 import { sanitizeReplyText, createToolCallTextFilter } from "./lib/sanitize-reply";
+import * as Sentry from "@sentry/nextjs";
 import { verifyClaims, collectStepEvidence, buildVerifiedFacts, VERIFY_FALLBACK_TEXT } from "./lib/verify-claims";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
@@ -587,6 +588,11 @@ export async function runAgent(params: { agentSlug: string; input: string; store
     claimViolations = check.violations;
     if (!check.ok) {
       console.log("[ACS-VERIFY] afirmaciones no verificadas, bloqueando", JSON.stringify(check.violations).slice(0, 400));
+      // Observabilidad Fase 5: sin SENTRY_DSN es no-op local.
+      Sentry.captureMessage("[ACS-VERIFY] afirmaciones bloqueadas", {
+        level: "warning",
+        extra: { agent: agent.slug, violations: check.violations.slice(0, 5) },
+      });
       const facts = buildVerifiedFacts(claimEvidence);
       const canRetry =
         facts.length > 0 &&
