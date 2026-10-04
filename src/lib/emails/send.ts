@@ -122,7 +122,10 @@ export async function sendTransactionalEmail(input: SendEmailInput): Promise<Sen
   const bodyText = input.text ?? fromDb?.text ?? fromCode?.text ?? "";
 
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM ?? "StarShop <noreply@starshop.cl>";
+  // Sin dominio propio verificado en Resend, el default usa su dominio de prueba
+  // (solo entrega al correo de la cuenta Resend). Define EMAIL_FROM con tu
+  // dominio verificado para correos a clientes.
+  const from = process.env.EMAIL_FROM ?? "StarShop <onboarding@resend.dev>";
 
   if (!apiKey) {
     console.log(`[Email MOCK] to=${input.to} subject="${subject}" template=${templateKey}`);

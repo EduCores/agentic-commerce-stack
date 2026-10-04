@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export function SignInForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@starshop.cl");
+  const [email, setEmail] = useState("eduardonavarrocores@gmail.com");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

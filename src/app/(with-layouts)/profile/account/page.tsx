@@ -120,9 +120,9 @@ export default function AccountPage() {
       } catch {
         const mock: FieldState = {
           fullName: "Juan Pérez",
-          email: "juan.perez@starshop.cl",
+          email: "juan.perez@ejemplo.cl",
           phone: "+56 9 1234 5678",
-          website: "www.starshop.cl",
+          website: "www.ejemplo.cl",
           address: "Av. Providencia 1208, Providencia, Santiago",
           country: "cl",
           bio: "Dueño de StarShop en Santiago. Venta mayorista de herramientas e iluminación LED a lo largo de Chile.",

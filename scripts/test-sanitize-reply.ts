@@ -8,8 +8,8 @@ import { createToolCallTextFilter, looksLikeReasoningDump, sanitizeReplyText, st
 
 const LOW = (s: string) => s.replace(/\s+/g, " ").trim();
 
-const JUNK = '{"tool": "scrapeWebsite", "args": {"url": "https://starshop.cl/politicas"}}';
-const JUNK2 = '{"name": "scrapeWebsite", "arguments": {"url": "https://starshop.cl"}}';
+const JUNK = '{"tool": "scrapeWebsite", "args": {"url": "https://ejemplo.cl/politicas"}}';
+const JUNK2 = '{"name": "scrapeWebsite", "arguments": {"url": "https://ejemplo.cl"}}';
 const JUNK_XML = '<tool_call>{"name": "checkStock", "arguments": {"sku": "TAL-36W"}}</tool_call>';
 const JUNK_FENCE = "```json\n" + JUNK + "\n```";
 const PROSE_A = "¡Hola! Reviso la política y te cuento.";
@@ -23,7 +23,7 @@ const cases: Case[] = [
   { name: "name+arguments solo -> vacío", input: JUNK2, expect: "" },
   { name: "xml tool_call solo -> vacío", input: JUNK_XML, expect: "" },
   { name: "fence json tool-call solo -> vacío", input: JUNK_FENCE, expect: "" },
-  { name: "json truncado sin cierre -> vacío", input: '{"tool": "scrapeWebsite", "args": {"url": "https://starshop.cl', expect: "" },
+  { name: "json truncado sin cierre -> vacío", input: '{"tool": "scrapeWebsite", "args": {"url": "https://ejemplo.cl', expect: "" },
   { name: "texto normal intacto", input: PROSE_A, expect: PROSE_A },
   { name: "prosa + junk -> prosa", input: PROSE_A + "\n" + JUNK, expect: PROSE_A },
   { name: "junk + prosa -> prosa", input: JUNK + "\n" + PROSE_A, expect: PROSE_A },

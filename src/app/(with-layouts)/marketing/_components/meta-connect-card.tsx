@@ -328,7 +328,7 @@ export function MetaConnectCard() {
             </label>
             <label className="flex flex-col gap-1 text-xs">
               Email aviso (opcional)
-              <input value={rule.notifyEmail} onChange={(e) => setRule({ ...rule, notifyEmail: e.target.value })} placeholder="dueno@starshop.cl" className={inputCls} />
+              <input value={rule.notifyEmail} onChange={(e) => setRule({ ...rule, notifyEmail: e.target.value })} placeholder="eduardonavarrocores@gmail.com" className={inputCls} />
             </label>
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">

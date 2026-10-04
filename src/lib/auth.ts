@@ -62,7 +62,7 @@ export async function getAdminByEmail(email: string) {
 }
 
 export async function ensureDefaultAdmin() {
-  const email = (process.env.ADMIN_EMAIL || "admin@starshop.cl").toLowerCase();
+  const email = (process.env.ADMIN_EMAIL || "eduardonavarrocores@gmail.com").toLowerCase();
   const plain = process.env.ADMIN_PASSWORD;
   if (!plain) {
     if (process.env.NODE_ENV === "production") {

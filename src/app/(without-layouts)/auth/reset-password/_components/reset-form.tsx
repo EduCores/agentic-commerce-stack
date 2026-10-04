@@ -41,7 +41,7 @@ export function ResetForm() {
     <div className="space-y-4">
       <div className="w-full space-y-1.5">
         <Label>Correo *</Label>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@starshop.cl" className="w-full" />
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="eduardonavarrocores@gmail.com" className="w-full" />
         <Button onClick={request} appearance="outline" className="w-full" isDisabled={loading || !email}>Enviar instrucciones</Button>
       </div>
       <div className="w-full space-y-1.5">

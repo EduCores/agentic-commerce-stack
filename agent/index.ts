@@ -351,7 +351,7 @@ function isLlmUnavailable(msg: string): boolean {
 }
 
 /** Respuesta al cliente cuando toda la cadena de modelos falla (nunca un error crudo). */
-const FALLBACK_TEXT = "Ahora mismo tengo mucha demanda en el servicio de IA y no pude generar la respuesta. Intenta de nuevo en unos minutos: te ayudo con catálogo, stock, precios y despacho. Si es urgente, escríbenos a ventas@starshop.cl.";
+const FALLBACK_TEXT = "Ahora mismo tengo mucha demanda en el servicio de IA y no pude generar la respuesta. Intenta de nuevo en unos minutos: te ayudo con catálogo, stock, precios y despacho. Si es urgente, escríbenos a eduardonavarrocores@gmail.com.";
 
 // Cache local de overrides del grafo (60s) compartido por getCrewConfig y el endpoint de chat
 const OVERRIDES_TTL_MS = 60_000;

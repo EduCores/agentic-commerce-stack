@@ -9,7 +9,7 @@ import OtpInput from "@/components/tailgrids/core/otp-input";
 
 export function TwoStepForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@starshop.cl");
+  const [email, setEmail] = useState("eduardonavarrocores@gmail.com");
   const [code, setCode] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);

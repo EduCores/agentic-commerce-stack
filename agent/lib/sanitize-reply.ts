@@ -5,7 +5,7 @@
  * vía OpenRouter) a veces intentan llamar una herramienta escribiendo su JSON
  * como TEXTO en vez de emitir una tool call nativa:
  *
- *   {"tool": "scrapeWebsite", "args": {"url": "https://starshop.cl/politicas"}}
+ *   {"tool": "scrapeWebsite", "args": {"url": "https://ejemplo.cl/politicas"}}
  *
  * Ese bloque no es una respuesta válida para el cliente. `stripToolCallText`
  * lo elimina del texto final y `createToolCallTextFilter` lo retiene durante

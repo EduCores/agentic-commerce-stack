@@ -35,7 +35,7 @@ export function emailShell(title: string, preheader: string, body: string): stri
     + `<p style="margin:4px 0 0;font-size:20px;font-weight:800;letter-spacing:-.3px">${title}</p></div>`
     + `<div style="display:none;max-height:0;overflow:hidden;opacity:0">${preheader}</div>`
     + `<div style="padding:28px 30px;color:#1a1a1a;font-size:15px;line-height:1.7" class="dark-invert-body">${body}</div>`
-    + `<div style="padding:18px 30px 22px;font-size:12.5px;color:${MUTED};border-top:1px solid #f0ede4;text-align:center" class="dark-invert-footer">StarShop · B2B Chile<br/><a href="mailto:ventas@starshop.cl" style="color:${MUTED};text-decoration:underline">ventas@starshop.cl</a></div>`
+    + `<div style="padding:18px 30px 22px;font-size:12.5px;color:${MUTED};border-top:1px solid #f0ede4;text-align:center" class="dark-invert-footer">StarShop · B2B Chile<br/><a href="mailto:eduardonavarrocores@gmail.com" style="color:${MUTED};text-decoration:underline">eduardonavarrocores@gmail.com</a></div>`
     + `</div>`
     + `<style>@media (prefers-color-scheme: dark){${darkCss("")}}</style>`;
 }

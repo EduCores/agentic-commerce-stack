@@ -2,7 +2,7 @@ import { z } from "zod";
 import { defineTool } from "@/lib/eve/defineTool";
 
 /** Buzones de la propia tienda: siempre permitidos como destinatario. */
-const STORE_ADDRESSES = ["ventas@starshop.cl", "soporte@starshop.cl", "contacto@starshop.cl"];
+const STORE_ADDRESSES = ["eduardonavarrocores@gmail.com"];
 
 /** Tope de envíos del AGENTE por minuto (ventana fija, best-effort por instancia). */
 const MAX_PER_MIN = 12;
@@ -19,7 +19,7 @@ function rateLimited(): boolean {
   return bucket.count > MAX_PER_MIN;
 }
 
-/** "StarShop <noreply@starshop.cl>" → "noreply@starshop.cl" */
+  /** "StarShop <onboarding@resend.dev>" → "onboarding@resend.dev" */
 function addressOf(value: string | undefined): string {
   if (!value) return "";
   const m = value.match(/<([^>]+)>/);
@@ -85,7 +85,7 @@ export default defineTool({
         subject,
         template,
         error: "Límite temporal de envíos alcanzado",
-        hint: "Demasiados correos en el último minuto. Indica al usuario que intente en un momento o que escriba a ventas@starshop.cl.",
+        hint: "Demasiados correos en el último minuto. Indica al usuario que intente en un momento o que escriba a eduardonavarrocores@gmail.com.",
       };
     }
     if (!(await recipientAllowed(to))) {
@@ -95,7 +95,7 @@ export default defineTool({
         subject,
         template,
         error: "Destinatario no permitido",
-        hint: "Solo se envía a la tienda (ventas@starshop.cl) o a clientes registrados en un pedido. Para terceros, invita a escribir a ventas@starshop.cl.",
+        hint: "Solo se envía a la tienda (eduardonavarrocores@gmail.com) o a clientes registrados en un pedido. Para terceros, invita a escribir a eduardonavarrocores@gmail.com.",
       };
     }
     const { sendTransactionalEmail } = await import("@/lib/emails/send");

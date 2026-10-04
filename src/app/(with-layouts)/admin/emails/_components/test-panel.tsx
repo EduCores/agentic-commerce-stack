@@ -25,7 +25,7 @@ const inputCls =
 
 export function TestPanel({ templates }: Props) {
   const active = templates.filter((t) => t.isActive);
-  const [to, setTo] = useState("dueno@starshop.cl");
+  const [to, setTo] = useState("eduardonavarrocores@gmail.com");
   const [templateKey, setTemplateKey] = useState("order_confirmation");
   const [nombre, setNombre] = useState("Dueño StarShop");
   const [orderId, setOrderId] = useState("DEMO-1001");

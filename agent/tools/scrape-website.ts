@@ -118,7 +118,7 @@ export default defineTool({
         ok: false,
         url,
         error: `URL rechazada: ${safe.reason}`,
-        hint: "Solo se pueden consultar URLs públicas http(s). No insistas con esa dirección: responde con la información que ya tengas o invita a ventas@starshop.cl.",
+        hint: "Solo se pueden consultar URLs públicas http(s). No insistas con esa dirección: responde con la información que ya tengas o invita a eduardonavarrocores@gmail.com.",
       };
     }
     const jinaKey = process.env.JINA_API_KEY;
