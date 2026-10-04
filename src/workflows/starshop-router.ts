@@ -6,6 +6,8 @@
  */
 import { createWorkflow, createStep, logStep } from "@/lib/workflows/engine";
 import { prisma } from "@/lib/adapters/prisma";
+import { reportError } from "@/lib/error-events";
+import { alertOwner } from "@/lib/alerts";
 import { STARSHOP_CREW_TOOLS, STARSHOP_CREWS, type StarShopIntent } from "../../prisma/starshop-prompts";
 
 // ── Steps ────────────────────────────────────────────────────────────────────
@@ -92,6 +94,16 @@ export const confirmOrderStep = createStep<{ orderId: string; workflowRunId?: st
   async ({ orderId, workflowRunId }) => {
     const fail = async (reason: string) => {
       await logStep({ stepName: "CONFIRM_ORDER", workflowRunId, orderId, status: "FAILED", input: { orderId }, error: reason });
+      // Mini-Sentry (fire-and-forget): agrupa y alerta solo si es nuevo/spike.
+      void reportError({ kind: "confirm-gate", message: `confirm-gate: ${reason}`, context: { orderId } }).then((r) => {
+        if (r && (r.isNew || r.spiked)) {
+          void alertOwner(
+            `error-${r.fingerprint}`,
+            r.isNew ? "Nuevo error: confirm-gate" : `Spike de errores: confirm-gate x${r.count}`,
+            `${reason}\nOrden: ${orderId}\nVer en /errores.`,
+          );
+        }
+      });
       throw new Error(`[CONFIRM-GATE] ${reason}`);
     };
     const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } }).catch(() => null);

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Bot } from "lucide-react";
+import { Bot, TriangleAlert } from "lucide-react";
 import {
   ChatIcon,
   HomeIcon,
@@ -100,6 +100,12 @@ export const NAV_DATA: NavSection[] = [
         title: "CRM",
         icon: <UserGroupIcon />,
         url: "/crm",
+        items: [],
+      },
+      {
+        title: "Errores",
+        icon: <TriangleAlert size={22} />,
+        url: "/errores",
         items: [],
       },
     ],

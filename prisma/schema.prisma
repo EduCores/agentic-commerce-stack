@@ -242,6 +242,25 @@ model AdminUser {
   updatedAt     DateTime @updatedAt
 }
 
+// Mini-Sentry propio: errores agrupados por fingerprint. El mismo error 500
+// veces = 1 fila con count 500 (ver src/lib/error-events.ts).
+model ErrorEvent {
+  id          String   @id @default(cuid())
+  fingerprint String   @unique
+  kind        String   // verify-block | confirm-gate | client | api | ...
+  message     String   @db.Text
+  stack       String?  @db.Text
+  context     Json?
+  count       Int      @default(1)
+  lastSeenAt  DateTime @default(now())
+  firstSeenAt DateTime @default(now())
+  resolved    Boolean  @default(false)
+  resolvedAt  DateTime?
+
+  @@index([resolved, lastSeenAt])
+  @@index([kind])
+}
+
 // Códigos de verificación (2FA login) — persistidos porque serverless no tiene memoria
 model VerificationCode {
   id        String   @id @default(cuid())

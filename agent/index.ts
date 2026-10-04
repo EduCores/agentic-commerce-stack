@@ -18,6 +18,8 @@ import { detectIntent } from "@/lib/eve/detect-intent";
 import { isSmallTalk } from "./lib/search/normalize";
 import { sanitizeReplyText, createToolCallTextFilter } from "./lib/sanitize-reply";
 import * as Sentry from "@sentry/nextjs";
+import { alertOwner } from "@/lib/alerts";
+import { reportError } from "@/lib/error-events";
 import { verifyClaims, collectStepEvidence, buildVerifiedFacts, VERIFY_FALLBACK_TEXT } from "./lib/verify-claims";
 import processPurchase from "./tools/process-purchase";
 import checkStock from "./tools/check-stock";
@@ -592,6 +594,27 @@ export async function runAgent(params: { agentSlug: string; input: string; store
       Sentry.captureMessage("[ACS-VERIFY] afirmaciones bloqueadas", {
         level: "warning",
         extra: { agent: agent.slug, violations: check.violations.slice(0, 5) },
+      });
+      // Plan B sin Sentry: email al dueño (con cooldown anti-spam). Fire-and-forget
+      // para no sumar latencia a la respuesta del chat.
+      void alertOwner(
+        "verify-block",
+        `Afirmaciones bloqueadas (${agent.slug})`,
+        `El validador bloqueó la respuesta y se usó el mensaje honesto.\nViolaciones: ${JSON.stringify(check.violations.slice(0, 5))}`,
+      );
+      // Mini-Sentry: agrupa el bloqueo; email solo si es nuevo o hay spike.
+      void reportError({
+        kind: "verify-block",
+        message: `verify-block ${agent.slug}: ${check.violations.map((v) => `${v.kind}:${v.claimed}`).join(", ")}`,
+        context: { agent: agent.slug, input: params.input.slice(0, 200) },
+      }).then((r) => {
+        if (r && (r.isNew || r.spiked)) {
+          void alertOwner(
+            `error-${r.fingerprint}`,
+            r.isNew ? `Nuevo error: verify-block (${agent.slug})` : `Spike de errores: verify-block x${r.count}`,
+            `Fingerprint: ${r.fingerprint}\nOcurrencias: ${r.count}\nVer en /errores.`,
+          );
+        }
       });
       const facts = buildVerifiedFacts(claimEvidence);
       const canRetry =

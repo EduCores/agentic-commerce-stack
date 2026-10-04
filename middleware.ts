@@ -56,8 +56,9 @@ export async function middleware(req: NextRequest) {
         "/api/meta",
         "/api/crm",
         "/api/store",
+        "/api/errors",
       ];
-      const MEMBER_DENY_PAGES = ["/agents", "/workflows", "/admin/emails", "/admin", "/crm"];
+      const MEMBER_DENY_PAGES = ["/agents", "/workflows", "/admin/emails", "/admin", "/crm", "/errores"];
       if (pathname.startsWith("/api/")) {
         if (MEMBER_DENY_API.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
           return NextResponse.json({ error: "Solo lectura: área no disponible para tu rol" }, { status: 403 });
